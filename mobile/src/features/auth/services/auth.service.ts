@@ -11,6 +11,43 @@ export async function sendMagicLink(email: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+export async function signUpWithPassword(email: string, password: string): Promise<void> {
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: authRedirectUri },
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function signInWithEmailPassword(email: string, password: string): Promise<void> {
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * Sign in with either an email address or a public handle ("@username").
+ * If the identifier doesn't contain "@", we resolve the handle to its
+ * email via the `lookup_email_by_handle` RPC, then call signInWithPassword.
+ */
+export async function signInWithIdentifier(identifier: string, password: string): Promise<void> {
+  const trimmed = identifier.trim();
+  if (!trimmed) throw new Error('Email or username is required');
+  if (!password) throw new Error('Password is required');
+
+  let email = trimmed;
+  if (!trimmed.includes('@')) {
+    const { data, error } = await supabase.rpc('lookup_email_by_handle', {
+      p_handle: trimmed.replace(/^@/, ''),
+    });
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error('No account found for that username');
+    email = data as string;
+  }
+
+  await signInWithEmailPassword(email, password);
+}
+
 function parseHashParams(url: string): Record<string, string> {
   const hashIndex = url.indexOf('#');
   if (hashIndex === -1) return {};

@@ -989,6 +989,7 @@ export type Database = {
           unread_count: number
         }[]
       }
+      lookup_email_by_handle: { Args: { p_handle: string }; Returns: string }
       mark_conversation_read: {
         Args: { p_conversation_id: string }
         Returns: undefined

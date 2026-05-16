@@ -4,33 +4,66 @@ import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
-import { sendMagicLink } from '~/features/auth/services/auth.service';
+import {
+  sendMagicLink,
+  signUpWithPassword,
+} from '~/features/auth/services/auth.service';
 import { Button } from '~/components/ui/Button';
 import { Input } from '~/components/ui/Input';
 import { SocialSignInButtons } from '~/features/auth/components/SocialSignInButtons';
 import { AuthShell } from '~/features/auth/components/AuthShell';
 
 const EmailSchema = z.string().email();
-type FormValues = { email: string };
+const PasswordSchema = z.string().min(8, 'Password must be at least 8 characters.');
+type FormValues = { email: string; password: string };
 
 /**
- * Create-account screen (mockup A2). Password auth is deferred — for now we
- * reuse the magic-link flow. The SSO ladder + email field + "Have an account?"
- * link match the gallery layout.
+ * Create-account screen (mockup A2). Supports either email + password sign-up
+ * or "send me a magic link" passwordless flow.
  */
 export function SignUpForm() {
   const { t } = useTranslation();
-  const [submitState, setSubmitState] = useState<'idle' | 'submitting' | 'sent' | 'error'>('idle');
+  const [submitState, setSubmitState] = useState<
+    'idle' | 'submitting' | 'sent' | 'signed-up' | 'error'
+  >('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const {
     control,
     handleSubmit,
+    getValues,
     formState: { errors },
-  } = useForm<FormValues>({ defaultValues: { email: '' } });
+  } = useForm<FormValues>({ defaultValues: { email: '', password: '' } });
 
-  const onSubmit = async ({ email }: FormValues) => {
+  const onCreateAccount = async ({ email, password }: FormValues) => {
     setSubmitState('submitting');
     setErrorMessage(null);
+    const emailParsed = EmailSchema.safeParse(email);
+    if (!emailParsed.success) {
+      setErrorMessage('Enter a valid email address.');
+      setSubmitState('error');
+      return;
+    }
+    const pwParsed = PasswordSchema.safeParse(password);
+    if (!pwParsed.success) {
+      setErrorMessage(pwParsed.error.issues[0]?.message ?? 'Invalid password.');
+      setSubmitState('error');
+      return;
+    }
+    try {
+      await signUpWithPassword(email, password);
+      setSubmitState('signed-up');
+      // Supabase auto-issues a session on signUp; the auth gate redirects
+      // the user to /(onboarding)/goal because profile.onboarded = false.
+    } catch (e) {
+      setErrorMessage(e instanceof Error ? e.message : 'Sign-up failed');
+      setSubmitState('error');
+    }
+  };
+
+  const onMagicLink = async () => {
+    setSubmitState('submitting');
+    setErrorMessage(null);
+    const email = getValues('email');
     const parsed = EmailSchema.safeParse(email);
     if (!parsed.success) {
       setErrorMessage('Enter a valid email address.');
@@ -84,14 +117,42 @@ export function SignUpForm() {
         <Text className="text-danger-text text-[11px] mb-2">Email is required.</Text>
       )}
 
+      <Controller
+        control={control}
+        name="password"
+        render={({ field: { onChange, value } }) => (
+          <Input
+            testID="sign-up-password"
+            label="Password (min 8 characters)"
+            value={value}
+            onChangeText={onChange}
+            placeholder="••••••••"
+            secureTextEntry
+            autoCapitalize="none"
+            autoComplete="new-password"
+          />
+        )}
+      />
+
       <Button
         testID="sign-up-submit"
         variant="primary"
-        onPress={handleSubmit(onSubmit)}
+        onPress={handleSubmit(onCreateAccount)}
         loading={submitState === 'submitting'}
       >
-        {t('signIn.submit')}
+        Create account
       </Button>
+
+      <View className="mt-2">
+        <Button
+          testID="sign-up-magic-link"
+          variant="outline"
+          onPress={onMagicLink}
+          loading={submitState === 'submitting'}
+        >
+          Or send me a magic link
+        </Button>
+      </View>
 
       <View className="flex-row items-center justify-center mt-3 gap-1">
         <Text className="font-body text-[11px] text-muted">Have an account?</Text>

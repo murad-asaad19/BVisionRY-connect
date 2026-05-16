@@ -12,10 +12,24 @@ type GoalType = Database['public']['Enums']['goal_type'];
 
 const EXAMPLES = ['Hiring a fractional designer', 'Raising pre-seed for a healthtech idea'];
 
-// We default the goal_type at submission time when the user only supplies the
-// free-form text — AI (B3) is deferred, so we pick a generic catch-all for the
-// initial value. The user can refine via profile edit later.
-const DEFAULT_GOAL_TYPE: GoalType = 'peer_connect';
+// Heuristic inference of goal_type from the free-form goal text.
+// Mockup B1 doesn't expose a goal_type picker — the spec says AI (B3) infers
+// the kind. Until B3 ships, this keyword-rule pass keeps the matching
+// algorithm useful (it relies on goal_type complementarity).
+function inferGoalType(text: string): GoalType {
+  const t = text.toLowerCase();
+  if (/\b(raising|raise|investment\b|funds?\b|pre[- ]?seed|series\s+[a-c]|seed\s+round)\b/.test(t))
+    return 'take_investment';
+  if (/\b(investing|invest in|investor\b|portfolio\b|deal\s+flow)\b/.test(t)) return 'invest';
+  if (/\b(hiring|hire (?:a|an|some)|looking to hire)\b/.test(t)) return 'hire';
+  if (/\b(looking for (?:work|a role|a job)|seeking (?:work|a role)|hire me|open to work)\b/.test(t))
+    return 'be_hired';
+  if (/\b(co[- ]?founder?|co[- ]?found(?:ing)?)\b/.test(t)) return 'co_found';
+  if (/\b(advising|advisor|advise\b)\b/.test(t)) {
+    return /\b(find|need|looking for) (?:an?\s+)?adviso?r/.test(t) ? 'find_advisor' : 'advise';
+  }
+  return 'peer_connect';
+}
 
 export function GoalStep() {
   const { draft, setField } = useOnboardingDraft();
@@ -28,9 +42,7 @@ export function GoalStep() {
       setError('Describe your goal in 10-280 characters.');
       return;
     }
-    if (!draft.goal_type) {
-      setField('goal_type', DEFAULT_GOAL_TYPE);
-    }
+    setField('goal_type', inferGoalType(parsed.data));
     setField('goal_text', parsed.data);
     router.push('/(onboarding)/identity');
   };

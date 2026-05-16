@@ -4,36 +4,67 @@ import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
-import { sendMagicLink } from '~/features/auth/services/auth.service';
+import {
+  sendMagicLink,
+  signInWithIdentifier,
+} from '~/features/auth/services/auth.service';
 import { Button } from '~/components/ui/Button';
 import { Input } from '~/components/ui/Input';
 import { SocialSignInButtons } from '~/features/auth/components/SocialSignInButtons';
 import { AuthShell } from '~/features/auth/components/AuthShell';
 
 const EmailSchema = z.string().email();
-type FormValues = { email: string };
+type FormValues = { identifier: string; password: string };
 
 export function SignInForm() {
   const { t } = useTranslation();
-  const [submitState, setSubmitState] = useState<'idle' | 'submitting' | 'sent' | 'error'>('idle');
+  const [submitState, setSubmitState] = useState<
+    'idle' | 'submitting' | 'sent' | 'signed-in' | 'error'
+  >('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const {
     control,
     handleSubmit,
+    getValues,
     formState: { errors },
-  } = useForm<FormValues>({ defaultValues: { email: '' } });
+  } = useForm<FormValues>({ defaultValues: { identifier: '', password: '' } });
 
-  const onSubmit = async ({ email }: FormValues) => {
+  const onPasswordSignIn = async ({ identifier, password }: FormValues) => {
     setSubmitState('submitting');
     setErrorMessage(null);
-    const parsed = EmailSchema.safeParse(email);
-    if (!parsed.success) {
-      setErrorMessage('Enter a valid email address.');
+    if (!identifier.trim()) {
+      setErrorMessage('Enter your email or username.');
+      setSubmitState('error');
+      return;
+    }
+    if (!password) {
+      setErrorMessage('Enter your password.');
       setSubmitState('error');
       return;
     }
     try {
-      await sendMagicLink(email);
+      await signInWithIdentifier(identifier, password);
+      setSubmitState('signed-in');
+      // Auth gate handles the redirect to /(app)/(tabs)/home or /(onboarding)/goal.
+    } catch (e) {
+      setErrorMessage(e instanceof Error ? e.message : 'Sign-in failed');
+      setSubmitState('error');
+    }
+  };
+
+  const onMagicLink = async () => {
+    setSubmitState('submitting');
+    setErrorMessage(null);
+    const identifier = getValues('identifier').trim();
+    const parsed = EmailSchema.safeParse(identifier);
+    if (!parsed.success) {
+      setErrorMessage('Magic link needs a full email address.');
+      setSubmitState('error');
+      return;
+    }
+    try {
+      await sendMagicLink(identifier);
       setSubmitState('sent');
     } catch (e) {
       setErrorMessage(e instanceof Error ? e.message : 'Sign-in failed');
@@ -57,33 +88,61 @@ export function SignInForm() {
 
       <Controller
         control={control}
-        name="email"
+        name="identifier"
         rules={{ required: true }}
         render={({ field: { onChange, value } }) => (
           <Input
             testID="sign-in-email"
-            label="Email"
+            label="Email or username"
             value={value}
             onChangeText={onChange}
-            placeholder={t('signIn.emailPlaceholder')}
+            placeholder="you@example.com or @handle"
             autoCapitalize="none"
             keyboardType="email-address"
-            autoComplete="email"
+            autoComplete="username"
           />
         )}
       />
-      {errors.email && (
-        <Text className="text-danger-text text-[11px] mb-2">Email is required.</Text>
+      {errors.identifier && (
+        <Text className="text-danger-text text-[11px] mb-2">Email or username is required.</Text>
       )}
+
+      <Controller
+        control={control}
+        name="password"
+        render={({ field: { onChange, value } }) => (
+          <Input
+            testID="sign-in-password"
+            label="Password"
+            value={value}
+            onChangeText={onChange}
+            placeholder="••••••••"
+            secureTextEntry
+            autoCapitalize="none"
+            autoComplete="current-password"
+          />
+        )}
+      />
 
       <Button
         testID="sign-in-submit"
         variant="primary"
-        onPress={handleSubmit(onSubmit)}
+        onPress={handleSubmit(onPasswordSignIn)}
         loading={submitState === 'submitting'}
       >
         {t('signIn.submit')}
       </Button>
+
+      <View className="mt-2">
+        <Button
+          testID="sign-in-magic-link"
+          variant="outline"
+          onPress={onMagicLink}
+          loading={submitState === 'submitting'}
+        >
+          Send magic link instead
+        </Button>
+      </View>
 
       <Pressable
         testID="sign-in-forgot"
@@ -91,7 +150,7 @@ export function SignInForm() {
         onPress={() =>
           Alert.alert(
             'Forgot password?',
-            "We use magic links — just enter your email and we'll send you a one-tap sign-in."
+            'Use "Send magic link" — enter your email and tap the one-time link we send.'
           )
         }
       >

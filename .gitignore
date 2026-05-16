@@ -5,7 +5,7 @@ node_modules/
 .env
 .env.local
 .env*.local
-
+.playwright-mcp
 # Supabase local state
 supabase/.temp/
 supabase/.branches/
