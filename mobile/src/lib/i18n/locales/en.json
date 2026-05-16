@@ -1,0 +1,108 @@
+{
+  "signIn": {
+    "welcome": "Welcome",
+    "tagline": "We'll email you a link to sign in.",
+    "brandTagline": "Find the people who move your work forward",
+    "emailPlaceholder": "you@example.com",
+    "submit": "Send magic link",
+    "sent": "Check your email for the magic link.",
+    "or": "or",
+    "apple": "Continue with Apple",
+    "google": "Continue with Google"
+  },
+  "home": {
+    "title": "Home",
+    "picks": "Today's picks",
+    "discover": "Discover"
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "accountDesc": "Language, telemetry, export, delete",
+    "privacy": "Privacy & visibility",
+    "privacyDesc": "Private mode, public page, read receipts",
+    "notifications": "Notifications",
+    "notificationsDesc": "Push, email, in-app",
+    "verification": "Verification",
+    "verificationDesc": "Add badges to your roles",
+    "blockedUsers": "Blocked users",
+    "blockedUsersDesc": "{{count}} blocked",
+    "help": "Help & support",
+    "helpDesc": "Reach trust & safety",
+    "contactTitle": "Need help?",
+    "contactBody": "Email support@bvisionry.example for trust & safety concerns or product questions.",
+    "signOut": "Sign out",
+    "profile": "Profile",
+    "profileDesc": "Edit name, handle, bio, photo",
+    "legal": "Legal",
+    "language": "Language",
+    "exportData": "Export my data (JSON)",
+    "deleteAccount": "Delete account",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "version": "Version",
+    "telemetry": "Telemetry",
+    "analytics": "Analytics",
+    "crashReports": "Crash reports"
+  },
+  "onboarding": {
+    "identity": "Who are you?",
+    "roles": "What are your roles?",
+    "goal": "What's your goal?",
+    "about": "Tell us about yourself"
+  },
+  "intros": {
+    "inboxTitle": "Inbox",
+    "sentTitle": "Sent"
+  },
+  "chat": {
+    "chatsTitle": "Chats",
+    "composerPlaceholder": "Message...",
+    "typing": "typing...",
+    "edited": "edited",
+    "deletedPlaceholder": "Message deleted",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "muted": "Muted",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "network": {
+    "title": "Network"
+  },
+  "profile": {
+    "share": "Share",
+    "shareCopiedTitle": "Link copied",
+    "shareCopiedBody": "Your profile link is on the clipboard.",
+    "shareA11y": "Share profile",
+    "completenessTitle": "Your profile is {{percent}}% complete",
+    "completenessMissing": "Missing: {{fields}}",
+    "completenessAction": "Complete",
+    "missingPhoto": "photo",
+    "missingHeadline": "headline",
+    "missingBio": "bio",
+    "photoNudgeTitle": "Add a profile photo",
+    "photoNudgeBody": "Profiles with photos get better matches.",
+    "photoNudgeAction": "Add photo",
+    "photoNudgeDismiss": "Dismiss"
+  },
+  "discovery": {
+    "mutual": "Mutual",
+    "searchPlaceholder": "Search by handle or name",
+    "filterAll": "All",
+    "filter": {
+      "role": "Role",
+      "goal": "Goal",
+      "country": "Country"
+    },
+    "thinPoolTitle": "Few matches today",
+    "thinPoolBody": "Refine your goal to surface more relevant people.",
+    "thinPoolAction": "Refine my goal"
+  },
+  "meetings": {
+    "yourTime": "your time",
+    "addToCalendar": "Add to calendar"
+  }
+}

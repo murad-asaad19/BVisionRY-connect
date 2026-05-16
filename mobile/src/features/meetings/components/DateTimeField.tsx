@@ -1,0 +1,115 @@
+import { Platform, TextInput, View, Text, Pressable } from 'react-native';
+import { useState } from 'react';
+import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
+
+type Props = {
+  value: string;
+  onChange: (iso: string) => void;
+  testID?: string;
+  label?: string;
+};
+
+export function DateTimeField(props: Props) {
+  if (Platform.OS === 'web') return <WebDateTimeField {...props} />;
+  return <NativeDateTimeField {...props} />;
+}
+
+function WebDateTimeField({ value, onChange, testID, label }: Props) {
+  const webProps = { type: 'datetime-local' } as unknown as object;
+  return (
+    <View className="mb-3">
+      {label && <Text className="text-muted mb-1 text-sm">{label}</Text>}
+      <TextInput
+        testID={testID}
+        value={isoToInputValue(value)}
+        onChangeText={(text) => onChange(inputValueToIso(text))}
+        placeholder="YYYY-MM-DDTHH:mm"
+        placeholderTextColor="#6B7280"
+        className="bg-white text-body px-4 py-3 rounded-lg border border-border"
+        {...webProps}
+      />
+    </View>
+  );
+}
+
+function NativeDateTimeField({ value, onChange, testID, label }: Props) {
+  const [showDate, setShowDate] = useState(false);
+  const [showTime, setShowTime] = useState(false);
+
+  const current = value ? new Date(value) : new Date();
+
+  const merge = (date: Date | undefined, time: Date | undefined) => {
+    const base = value ? new Date(value) : new Date();
+    if (date) {
+      base.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+    if (time) {
+      base.setHours(time.getHours(), time.getMinutes(), 0, 0);
+    }
+    onChange(base.toISOString());
+  };
+
+  const onDate = (_event: DateTimePickerEvent, selected?: Date) => {
+    setShowDate(false);
+    if (!selected) return;
+    merge(selected, undefined);
+    if (Platform.OS === 'android') setShowTime(true);
+  };
+
+  const onTime = (_event: DateTimePickerEvent, selected?: Date) => {
+    setShowTime(false);
+    if (!selected) return;
+    merge(undefined, selected);
+  };
+
+  return (
+    <View className="mb-3">
+      {label && <Text className="text-muted mb-1 text-sm">{label}</Text>}
+      <Pressable
+        testID={testID}
+        onPress={() => setShowDate(true)}
+        className="bg-white px-4 py-3 rounded-lg border border-border"
+      >
+        <Text className={value ? 'text-body' : 'text-muted'}>
+          {value ? formatHuman(current) : 'Pick date & time'}
+        </Text>
+      </Pressable>
+      {showDate && (
+        <DateTimePicker
+          testID={testID ? `${testID}-date-picker` : undefined}
+          value={current}
+          mode="date"
+          onChange={onDate}
+        />
+      )}
+      {showTime && (
+        <DateTimePicker
+          testID={testID ? `${testID}-time-picker` : undefined}
+          value={current}
+          mode="time"
+          onChange={onTime}
+        />
+      )}
+    </View>
+  );
+}
+
+function isoToInputValue(iso: string): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function inputValueToIso(input: string): string {
+  if (!input) return '';
+  const d = new Date(input);
+  if (isNaN(d.getTime())) return input;
+  return d.toISOString();
+}
+
+function formatHuman(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}

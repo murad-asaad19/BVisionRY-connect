@@ -1,0 +1,15 @@
+appId: com.bvisionry.connect
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "sign-in-email"
+- tapOn:
+    id: "sign-in-email"
+- inputText: "maestro-smoke@example.com"
+- tapOn:
+    id: "sign-in-submit"
+- assertVisible:
+    id: "sign-in-sent"

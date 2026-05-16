@@ -1,0 +1,41 @@
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css';
+@import 'nativewind/theme';
+
+@theme {
+  --color-navy: #0f3460;
+  --color-navy-light: #1a4a80;
+  --color-navy-dark: #0a2340;
+
+  --color-gold: #ffc107;
+  --color-gold-light: #ffe187;
+  --color-gold-pale: #fff8e1;
+
+  --color-surface: #f8f8f8;
+  --color-white: #ffffff;
+  --color-body: #212529;
+  --color-muted: #94a3b8;
+  --color-border: #e5e7eb;
+  --color-slate-100: #f1f5f9;
+  --color-slate-300: #cbd5e1;
+
+  --color-success-bg: #dcfce7;
+  --color-success-text: #15803d;
+  --color-success-border: #4ade80;
+
+  --color-warning-bg: #fef3c7;
+  --color-warning-text: #b45309;
+  --color-warning-border: #fbbf24;
+
+  --color-danger-bg: #fee2e2;
+  --color-danger-text: #b91c1c;
+  --color-danger-border: #ef4444;
+
+  --color-info-bg: #dbeafe;
+  --color-info-text: #1d4ed8;
+  --color-info-border: #93c5fd;
+
+  --font-display: 'Dosis_700Bold';
+  --font-body: 'Overlock_400Regular';
+}

@@ -1,0 +1,11 @@
+{
+  "name": "bvisionry-connect",
+  "private": true,
+  "description": "BVisionRY Connect — Supabase project (CLI + migrations + Edge Functions)",
+  "scripts": {
+    "supabase": "supabase"
+  },
+  "devDependencies": {
+    "supabase": "^2.98.2"
+  }
+}
