@@ -82,10 +82,13 @@ create table public.opportunities (
   closed_at         timestamptz,
   constraint opportunities_title_len check (char_length(title) between 5 and 120),
   constraint opportunities_body_len  check (char_length(body)  between 10 and 2000),
-  constraint opportunities_tag_count check (cardinality(tags) <= 8),
-  constraint opportunities_tag_format check (
-    (select bool_and(t = lower(t) and char_length(t) between 1 and 30) from unnest(tags) as t)
-  )
+  -- Per-element tag format (lowercase, 1-30 chars) is enforced inside the
+  -- create_opportunity / update_opportunity RPC validators. We can't express
+  -- it as a CHECK constraint here because Postgres forbids subqueries in
+  -- CHECK; an immutable per-element check via unnest() requires either a
+  -- trigger or a helper IMMUTABLE function. The RPC layer is the only write
+  -- path (writes are blocked by RLS), so the validator is the canonical gate.
+  constraint opportunities_tag_count check (cardinality(tags) <= 8)
 );
 
 -- Index predicate is status-only (expires_at filter is applied at query
