@@ -4,10 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '~/components/ui/Button';
 import { BioMarkdown } from '~/features/profile/components/BioMarkdown';
 import { ProfileHero } from '~/features/profile/components/ProfileHero';
+import { ProfileSignalsRow } from '~/features/profile/components/ProfileSignalsRow';
+import { useAuthSession } from '~/features/auth/SessionContext';
 import type { PublicProfile } from '~/features/profile/services/publicProfile.service';
 
 export function PublicProfileView({ profile }: { profile: PublicProfile }) {
   const { t } = useTranslation();
+  const { session } = useAuthSession();
   return (
     <ScrollView testID="public-profile-view" className="flex-1 bg-surface">
       <ProfileHero
@@ -20,6 +23,10 @@ export function PublicProfileView({ profile }: { profile: PublicProfile }) {
         country={profile.country}
         photoUrl={profile.photo_url}
       />
+      {/* Signals only render for authenticated viewers — the underlying RPC
+          raises 'unauthenticated' for anon callers, and signals are
+          relational (mutual count is meaningless to an anon visitor). */}
+      {session ? <ProfileSignalsRow targetUserId={profile.id} /> : null}
       <View className="p-4">
         {profile.bio ? (
           <View className="bg-white rounded-xl border border-border p-3 mb-4">

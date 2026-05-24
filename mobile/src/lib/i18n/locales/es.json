@@ -490,7 +490,16 @@
     "sendIntro": "Enviar intro",
     "introSent": "Intro enviada.",
     "noUserWithHandle": "Sin usuario con alias @{{handle}}.",
-    "notFoundTitle": "No encontrado"
+    "notFoundTitle": "No encontrado",
+    "signals": {
+      "mutual_one": "1 en común",
+      "mutual_other": "{{count}} en común",
+      "rating": "{{rating}}",
+      "reviews_one": "({{count}} reseña)",
+      "reviews_other": "({{count}} reseñas)",
+      "mutualModalTitle": "Conexiones en común",
+      "mutualModalEmpty": "Aún no hay conexiones en común."
+    }
   },
   "discovery": {
     "mutual": "Mutuo",

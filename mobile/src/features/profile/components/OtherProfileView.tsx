@@ -11,6 +11,7 @@ import { useIsMutualMatch } from '~/features/discovery/hooks/useIsMutualMatch';
 import { useDeclineCooldown } from '~/features/intros/hooks/useDeclineCooldown';
 import { BioMarkdown } from '~/features/profile/components/BioMarkdown';
 import { ProfileHero } from '~/features/profile/components/ProfileHero';
+import { ProfileSignalsRow } from '~/features/profile/components/ProfileSignalsRow';
 import { Button } from '~/components/ui/Button';
 import { Banner } from '~/components/ui/Banner';
 
@@ -115,6 +116,8 @@ function Body({ profile }: { profile: ProfileT }) {
           </View>
         </View>
       )}
+
+      {!isSelf ? <ProfileSignalsRow targetUserId={profile.id} /> : null}
 
       {profile.headline ? (
         <Section title={t('profile.section.headline')}>

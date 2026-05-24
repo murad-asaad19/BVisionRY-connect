@@ -490,7 +490,16 @@
     "sendIntro": "Send Intro",
     "introSent": "Intro sent.",
     "noUserWithHandle": "No user with handle @{{handle}}.",
-    "notFoundTitle": "Not found"
+    "notFoundTitle": "Not found",
+    "signals": {
+      "mutual_one": "1 mutual",
+      "mutual_other": "{{count}} mutual",
+      "rating": "{{rating}}",
+      "reviews_one": "({{count}} review)",
+      "reviews_other": "({{count}} reviews)",
+      "mutualModalTitle": "Mutual connections",
+      "mutualModalEmpty": "No mutual connections yet."
+    }
   },
   "discovery": {
     "mutual": "Mutual",
