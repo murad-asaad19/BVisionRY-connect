@@ -1,25 +1,80 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { handlePreflight, jsonResponse } from "../_shared/cors.ts";
+import {
+  optionalEnv,
+  requireEnv,
+  verifyWebhookSecret,
+} from "../_shared/env.ts";
 
-serve(async () => {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "http://kong:8000";
-  const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  const mailerKey = Deno.env.get("MAILER_KEY");
+const SUPABASE_URL = requireEnv("SUPABASE_URL");
+const SERVICE_ROLE = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+const WEBHOOK_SECRET = requireEnv("WEBHOOK_SHARED_SECRET");
+const MAILER_KEY = optionalEnv("MAILER_KEY");
 
-  const admin = createClient(supabaseUrl, serviceRole, { auth: { persistSession: false } });
+// Profiles whose goal_updated_at is older than this many days are "stale".
+const STALE_DAYS = 56;
 
-  const { data: stale } = await admin
-    .from("profiles")
-    .select("id, handle, name")
-    .lt("goal_updated_at", new Date(Date.now() - 56 * 24 * 60 * 60 * 1000).toISOString())
-    .eq("onboarded", true);
+const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
+  auth: { persistSession: false },
+});
 
-  if (!stale || stale.length === 0) return new Response("no stale", { status: 200 });
+// Exported for unit tests (see index.test.ts).
+export async function handler(req: Request): Promise<Response> {
+  const pre = handlePreflight(req);
+  if (pre) return pre;
 
-  if (!mailerKey) {
-    return new Response(`ok (stub) — would email ${stale.length} users`, { status: 200 });
+  // Cron sends X-Supabase-Webhook-Secret (see 20260606140000_scheduled_jobs.sql).
+  // Reject anything else — this endpoint is not for end-user clients.
+  if (!verifyWebhookSecret(req, WEBHOOK_SECRET)) {
+    console.error({
+      fn: "goal-staleness-reminder",
+      stage: "auth",
+      err: "bad secret",
+    });
+    return jsonResponse({ error: "unauthorized" }, 401);
   }
 
-  // Production: integrate with email provider here. Not shipped in Phase 3.
-  return new Response(`ok — emailed ${stale.length} users`, { status: 200 });
-});
+  try {
+    const cutoff = new Date(
+      Date.now() - STALE_DAYS * 24 * 60 * 60 * 1000,
+    ).toISOString();
+
+    const { data: stale, error } = await admin
+      .from("profiles")
+      .select("id, handle, name")
+      .lt("goal_updated_at", cutoff)
+      .eq("onboarded", true);
+
+    if (error) {
+      console.error({
+        fn: "goal-staleness-reminder",
+        stage: "query",
+        err: String(error.message ?? error),
+      });
+      return jsonResponse({ error: "query failed" }, 500);
+    }
+
+    const count = stale?.length ?? 0;
+    if (count === 0) return jsonResponse({ ok: true, candidates: 0 }, 200);
+
+    if (!MAILER_KEY) {
+      return jsonResponse({ ok: true, stub: true, would_email: count }, 200);
+    }
+
+    // TODO: integrate with email provider here. Mailer integration is
+    // pending — for now we only report the count of stale-goal candidates
+    // (NOT a count of sent mail). Field name reflects that: `candidates`,
+    // never `emailed`, until the dispatch path is actually implemented.
+    return jsonResponse({ ok: true, candidates: count }, 200);
+  } catch (err) {
+    console.error({
+      fn: "goal-staleness-reminder",
+      stage: "fatal",
+      err: String(err),
+    });
+    return jsonResponse({ error: "internal" }, 500);
+  }
+}
+
+serve(handler);

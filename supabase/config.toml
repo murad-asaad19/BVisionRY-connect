@@ -12,6 +12,11 @@ port = 54322
 shadow_port = 54320
 major_version = 15
 
+# Note: pg_cron / pg_net are enabled via `create extension if not exists`
+# inside 20260606140000_scheduled_jobs.sql (and other migrations).
+# Supabase CLI 2.98.x rejects the `[db.extensions]` allowlist block, so
+# extension management lives entirely in migrations.
+
 [studio]
 enabled = true
 port = 54323
@@ -41,3 +46,43 @@ enable_signup = true
 enable_signup = true
 double_confirm_changes = true
 enable_confirmations = false
+
+# ─────────────────────────────────────────────────────────────────────────
+# Edge Functions
+#
+# delete-account: invoked from the mobile app with the user's JWT —
+#   JWT verification stays ON. The function itself rechecks via getUser().
+#
+# send-push / transcribe-voice: invoked from Postgres triggers via
+#   pg_net (dispatch_push / dispatch_transcription). pg_net cannot carry
+#   a user JWT, so JWT verification is OFF and the functions enforce a
+#   shared secret in the X-Supabase-Webhook-Secret header (see
+#   WEBHOOK_SHARED_SECRET in supabase/functions/README.md).
+#
+# goal-staleness-reminder: invoked by an external cron (GitHub Action or
+#   Supabase scheduler). JWT verification OFF; the function is read-only
+#   plus mail-out. goal-staleness-reminder enforces WEBHOOK_SHARED_SECRET
+#   as of 2026-06-07.
+#
+# auth-handle-login: pre-login endpoint that resolves a public @handle to
+#   the user's email server-side (so anon clients can no longer query the
+#   handle → email mapping via RPC) and then calls signInWithPassword.
+#   JWT verification OFF by design — the caller is unauthenticated at
+#   sign-in time. The function validates its own credentials and returns
+#   a generic 401 on every failure mode to avoid leaking account state.
+# ─────────────────────────────────────────────────────────────────────────
+
+[functions.delete-account]
+verify_jwt = true
+
+[functions.send-push]
+verify_jwt = false
+
+[functions.transcribe-voice]
+verify_jwt = false
+
+[functions.goal-staleness-reminder]
+verify_jwt = false
+
+[functions.auth-handle-login]
+verify_jwt = false
