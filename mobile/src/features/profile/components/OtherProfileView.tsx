@@ -1,10 +1,15 @@
-import { useState } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { useMemo, useState } from 'react';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useProfileByHandle } from '~/features/profile/hooks/useProfileByHandle';
 import { QueryState } from '~/components/ui/QueryState';
 import { useAuthSession } from '~/features/auth/SessionContext';
 import { ComposeIntroSheet } from '~/features/intros/components/ComposeIntroSheet';
+import {
+  WarmIntroComposeSheet,
+  type WarmIntroComposeTarget,
+} from '~/features/intros/components/WarmIntroComposeSheet';
+import { useWarmIntroSuggestions } from '~/features/intros/hooks/useWarmIntroSuggestions';
 import { VerifiedBadge } from '~/features/verification/components/VerifiedBadge';
 import { ProfileActionsMenu } from '~/features/privacy/components/ProfileActionsMenu';
 import { useIsMutualMatch } from '~/features/discovery/hooks/useIsMutualMatch';
@@ -14,6 +19,14 @@ import { ProfileHero } from '~/features/profile/components/ProfileHero';
 import { ProfileSignalsRow } from '~/features/profile/components/ProfileSignalsRow';
 import { Button } from '~/components/ui/Button';
 import { Banner } from '~/components/ui/Banner';
+
+/** First name of a "First Last" string (falls back to the whole string). */
+function firstName(name: string | null | undefined): string {
+  if (!name) return '';
+  const trimmed = name.trim();
+  if (!trimmed) return '';
+  return trimmed.split(/\s+/)[0] ?? trimmed;
+}
 
 type Props = { handle: string };
 
@@ -70,11 +83,21 @@ type ProfileT = NonNullable<ReturnType<typeof useProfileByHandle>['data']>;
 function Body({ profile }: { profile: ProfileT }) {
   const { t } = useTranslation();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [warmComposeTarget, setWarmComposeTarget] = useState<WarmIntroComposeTarget | null>(null);
   const [sentBanner, setSentBanner] = useState(false);
   const { session } = useAuthSession();
   const isSelf = session?.user.id === profile.id;
   const mutual = useIsMutualMatch(isSelf ? undefined : profile.id);
   const cooldown = useDeclineCooldown(isSelf ? undefined : profile.id);
+  // Warm-intro suggestions already encode the rules we need for the banner:
+  // viewer has a mutual with the target AND no existing intros row with the
+  // target (the RPC excludes those). If this profile is in the list, the
+  // banner is safe to show.
+  const warmSuggestions = useWarmIntroSuggestions();
+  const warmSuggestion = useMemo(
+    () => (warmSuggestions.data ?? []).find((s) => s.targetId === profile.id) ?? null,
+    [warmSuggestions.data, profile.id]
+  );
 
   return (
     <ScrollView className="flex-1 bg-surface">
@@ -118,6 +141,36 @@ function Body({ profile }: { profile: ProfileT }) {
       )}
 
       {!isSelf ? <ProfileSignalsRow targetUserId={profile.id} /> : null}
+
+      {!isSelf && warmSuggestion ? (
+        <View testID="warm-intro-profile-banner" className="mx-3 mt-2.5">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('intros.warm.profileBannerCta', {
+              firstName: firstName(warmSuggestion.topMutualName),
+            })}
+            onPress={() =>
+              setWarmComposeTarget({
+                mutualId: warmSuggestion.topMutualId,
+                mutualName: warmSuggestion.topMutualName,
+                mutualHandle: warmSuggestion.topMutualHandle,
+                mutualPhotoUrl: null,
+                targetId: profile.id,
+                targetName: profile.name ?? '?',
+                targetHandle: profile.handle,
+              })
+            }
+          >
+            <Banner variant="info" title={t('intros.warm.profileBanner', { mutualName: warmSuggestion.topMutualName })}>
+              <Text className="font-display-bold text-[11px] text-info-text">
+                {t('intros.warm.profileBannerCta', {
+                  firstName: firstName(warmSuggestion.topMutualName),
+                })}
+              </Text>
+            </Banner>
+          </Pressable>
+        </View>
+      ) : null}
 
       {profile.headline ? (
         <Section title={t('profile.section.headline')}>
@@ -230,6 +283,13 @@ function Body({ profile }: { profile: ProfileT }) {
           setSheetOpen(false);
           setSentBanner(true);
         }}
+      />
+
+      <WarmIntroComposeSheet
+        visible={warmComposeTarget !== null}
+        context={warmComposeTarget}
+        onClose={() => setWarmComposeTarget(null)}
+        onSent={() => setWarmComposeTarget(null)}
       />
     </ScrollView>
   );

@@ -377,6 +377,24 @@
       "decline": "Decline",
       "acceptFailed": "Accept failed",
       "declineFailed": "Decline failed"
+    },
+    "warm": {
+      "stripTitle": "People your network can introduce you to",
+      "via_one": "Via {{name}}",
+      "via_other": "Via {{name}} +{{extra}}",
+      "askCta": "Ask {{firstName}}",
+      "composeTitle": "Ask {{mutualName}} to introduce you",
+      "composePlaceholder": "Tell {{mutualName}} why you'd like to meet {{targetName}}…",
+      "composeSubmit": "Send request",
+      "composeSuccess": "Request sent to {{mutualName}}",
+      "forwardTitle": "Forward to {{targetName}}",
+      "forwardPlaceholder": "Add a note (optional)…",
+      "forwardSubmit": "Forward intro",
+      "forwardSuccess": "Forwarded to {{targetName}}",
+      "kindWarmRequestBadge": "Warm intro request",
+      "kindWarmForwardVia": "Via {{name}}",
+      "profileBanner": "{{mutualName}} can introduce you",
+      "profileBannerCta": "Ask {{firstName}}"
     }
   },
   "chat": {

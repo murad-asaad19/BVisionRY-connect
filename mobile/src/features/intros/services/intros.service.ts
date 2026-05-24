@@ -2,9 +2,25 @@ import { supabase } from '~/lib/supabase/client';
 import type { Database } from '~/lib/supabase/types.gen';
 import type { PostgrestError } from '@supabase/supabase-js';
 
+/**
+ * Warm-intro kind values added in migration 20260608010000.
+ * `types.gen.ts` is regenerated at the end of the feature batch
+ * (Task 7); until then we declare the union locally so callers can
+ * branch on `intro.kind`.
+ */
+export type IntroKind = 'direct' | 'warm_request' | 'warm_forward';
+
 export type IntroRow = Database['public']['Tables']['intros']['Row'] & {
   /** Stamped by decline_intro RPC in migration 20260606080000. Generated types are stale. */
   declined_at?: string | null;
+  /** Added in migration 20260608010000_second_degree_intros.sql. */
+  kind?: IntroKind | null;
+  /**
+   * Added in migration 20260608010000_second_degree_intros.sql.
+   * For kind='warm_request': the third-party the asker wants to meet.
+   * For kind='warm_forward': back-pointer to the mutual who forwarded.
+   */
+  warm_target_id?: string | null;
 };
 export type IntroState = Database['public']['Enums']['intro_state'];
 

@@ -377,6 +377,24 @@
       "decline": "Rechazar",
       "acceptFailed": "No se pudo aceptar",
       "declineFailed": "No se pudo rechazar"
+    },
+    "warm": {
+      "stripTitle": "Personas que tu red puede presentarte",
+      "via_one": "Vía {{name}}",
+      "via_other": "Vía {{name}} +{{extra}}",
+      "askCta": "Preguntar a {{firstName}}",
+      "composeTitle": "Pedir a {{mutualName}} que te presente",
+      "composePlaceholder": "Cuéntale a {{mutualName}} por qué te gustaría conocer a {{targetName}}…",
+      "composeSubmit": "Enviar solicitud",
+      "composeSuccess": "Solicitud enviada a {{mutualName}}",
+      "forwardTitle": "Reenviar a {{targetName}}",
+      "forwardPlaceholder": "Agrega una nota (opcional)…",
+      "forwardSubmit": "Reenviar presentación",
+      "forwardSuccess": "Reenviado a {{targetName}}",
+      "kindWarmRequestBadge": "Solicitud de presentación",
+      "kindWarmForwardVia": "Vía {{name}}",
+      "profileBanner": "{{mutualName}} puede presentarte",
+      "profileBannerCta": "Preguntar a {{firstName}}"
     }
   },
   "chat": {

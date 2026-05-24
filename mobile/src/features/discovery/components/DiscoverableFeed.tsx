@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useDiscoverableFeed } from '~/features/discovery/hooks/useDiscoverableFeed';
 import { QueryState } from '~/components/ui/QueryState';
 import { UserCard } from '~/components/ui/UserCard';
+import { WarmIntroSuggestionsStrip } from '~/features/intros/components/WarmIntroSuggestionsStrip';
 
 type Props = {
   ListHeaderComponent?: ReactElement | null;
@@ -25,6 +26,18 @@ export function DiscoverableFeed({ ListHeaderComponent, refreshControl }: Props)
   const effectiveRefreshControl =
     refreshControl ??
     (<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} tintColor="#fff" />);
+
+  // Compose the warm-intro suggestions strip into the FlatList header so it
+  // sits above the feed cards and scrolls with them. The strip returns null
+  // when there are no suggestions, so we don't pay layout cost for new
+  // accounts. Parent-provided ListHeaderComponent (TopBar etc.) still
+  // renders above the strip.
+  const composedHeader = (
+    <View>
+      {ListHeaderComponent}
+      <WarmIntroSuggestionsStrip />
+    </View>
+  );
 
   return (
     <QueryState
@@ -57,7 +70,7 @@ export function DiscoverableFeed({ ListHeaderComponent, refreshControl }: Props)
               }
             }}
             onEndReachedThreshold={0.5}
-            ListHeaderComponent={ListHeaderComponent}
+            ListHeaderComponent={composedHeader}
             refreshControl={effectiveRefreshControl}
             contentContainerStyle={{ paddingHorizontal: 12, gap: 8 }}
             ListFooterComponent={
