@@ -159,7 +159,12 @@
         "Raising pre-seed for a healthtech idea"
       ],
       "next": "Next",
-      "errorRange": "Describe your goal in 10-280 characters."
+      "errorRange": "Describe your goal in 10-280 characters.",
+      "typeLabel": "Goal type",
+      "pickType": "Pick a goal type.",
+      "inferring": "Inferring your goal…",
+      "inferred": "We picked {{label}} based on your description — feel free to change.",
+      "inferFailed": "We couldn't infer your goal — please choose one."
     },
     "identity": {
       "title": "Who are you?",

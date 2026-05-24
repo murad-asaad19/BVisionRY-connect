@@ -70,6 +70,16 @@ enable_confirmations = false
 #   JWT verification OFF by design — the caller is unauthenticated at
 #   sign-in time. The function validates its own credentials and returns
 #   a generic 401 on every failure mode to avoid leaking account state.
+#
+# infer-goal-type: called from the onboarding goal step (and any future
+#   surface that needs a goal_type from free-form text). Wraps a Claude
+#   call. JWT verification ON — only signed-in users may spend our
+#   Anthropic credits, and we want auth.uid() for future per-user rate
+#   limiting.
+#
+# meeting-playbook: AI-generated meeting briefing for a confirmed meeting.
+#   JWT verification ON — playbooks are user-scoped and reveal both
+#   participants' profile data.
 # ─────────────────────────────────────────────────────────────────────────
 
 [functions.delete-account]
@@ -86,3 +96,9 @@ verify_jwt = false
 
 [functions.auth-handle-login]
 verify_jwt = false
+
+[functions.infer-goal-type]
+verify_jwt = true
+
+[functions.meeting-playbook]
+verify_jwt = true

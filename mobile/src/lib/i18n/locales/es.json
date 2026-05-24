@@ -159,7 +159,12 @@
         "Levantar pre-semilla para una idea de healthtech"
       ],
       "next": "Siguiente",
-      "errorRange": "Describe tu objetivo en 10-280 caracteres."
+      "errorRange": "Describe tu objetivo en 10-280 caracteres.",
+      "typeLabel": "Tipo de objetivo",
+      "pickType": "Elige un tipo de objetivo.",
+      "inferring": "Infiriendo tu objetivo…",
+      "inferred": "Elegimos {{label}} según tu descripción — puedes cambiarlo.",
+      "inferFailed": "No pudimos inferir tu objetivo — por favor elige uno."
     },
     "identity": {
       "title": "¿Quién eres?",

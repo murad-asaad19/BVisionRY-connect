@@ -1,128 +1,232 @@
-import { useState } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { StepperLayout } from './StepperLayout';
 import { useOnboardingDraft } from '~/features/onboarding/store/useOnboardingDraft';
 import { GoalTextSchema } from '~/features/profile/schemas';
+import { inferGoalType } from '~/features/onboarding/services/inferGoal.service';
 import { Input } from '~/components/ui/Input';
 import { Button } from '~/components/ui/Button';
+import { Pill } from '~/components/ui/Pill';
 import type { Database } from '~/lib/supabase/types.gen';
 
 type GoalType = Database['public']['Enums']['goal_type'];
 
 const EXAMPLES = ['Hiring a fractional designer', 'Raising pre-seed for a healthtech idea'];
 
-// Heuristic inference of goal_type from the free-form goal text.
-// Mockup B1 doesn't expose a goal_type picker — the spec says AI (B3) infers
-// the kind. Until B3 ships, this keyword-rule pass keeps the matching
-// algorithm useful (it relies on goal_type complementarity).
-//
-// Branch order matters: more-specific intents must precede related ones so
-// that a sentence like "Looking to invest in startups raising pre-seed"
-// resolves to `invest` (the speaker's role) rather than `take_investment`
-// (the target's role). Same for `find_advisor` before `advise`.
-//
-// Spanish synonyms use `(?:^|\W)…(?:\W|$)` rather than `\b` because `\b` is
-// defined as a transition between `\w` and `\W`, and accented chars / hyphens
-// are `\W`, so `\bmentoría\b` and `\bco-fundador\b` would never match.
-//
-// TODO(B3-AI): replace keyword heuristic with AI classifier
-export function inferGoalType(text: string): GoalType {
-  const t = text.toLowerCase();
+const GOAL_TYPES: readonly GoalType[] = [
+  'hire',
+  'be_hired',
+  'co_found',
+  'invest',
+  'take_investment',
+  'advise',
+  'find_advisor',
+  'peer_connect',
+];
 
-  // Investor intent (speaker invests) — must run before `take_investment`.
-  if (
-    /\b(investing|invest in|investor\b|portfolio\b|deal\s+flow)\b/.test(t) ||
-    /(?:^|\W)(?:invertir|inversor|inversora|invirtiendo)(?:\W|$)/.test(t)
-  )
-    return 'invest';
+// Below this length we don't bother calling the model — short fragments
+// produce noisy guesses and waste tokens. Spec: 20 chars.
+const INFER_MIN_CHARS = 20;
+// Debounce window: long enough that mid-word keystrokes don't fire, short
+// enough that the inference feels responsive after the user pauses.
+const INFER_DEBOUNCE_MS = 800;
 
-  // Fundraiser intent (speaker raises).
-  if (
-    /\b(raising|raise|investment\b|funds?\b|pre[- ]?seed|series\s+[a-c]|seed\s+round)\b/.test(t) ||
-    /(?:^|\W)(?:levantar\s+capital|recaudar\s+fondos|pre[- ]?semilla|pre[- ]?seed|ronda\s+semilla)(?:\W|$)/.test(
-      t
-    )
-  )
-    return 'take_investment';
-
-  if (
-    /\b(hiring|hire (?:a|an|some)|looking to hire)\b/.test(t) ||
-    /(?:^|\W)(?:contratar|contratando|reclutar|reclutando)(?:\W|$)/.test(t)
-  )
-    return 'hire';
-
-  if (
-    /\b(looking for (?:work|a role|a job)|seeking (?:work|a role)|hire me|open to work)\b/.test(
-      t
-    ) ||
-    /(?:^|\W)(?:buscar\s+trabajo|buscando\s+trabajo|busco\s+empleo|buscar\s+empleo|empleo)(?:\W|$)/.test(
-      t
-    )
-  )
-    return 'be_hired';
-
-  if (
-    /\b(co[- ]?founder?|co[- ]?found(?:ing)?)\b/.test(t) ||
-    /(?:^|\W)(?:co[- ]?fundador|co[- ]?fundadora|cofundador|cofundadora)(?:\W|$)/.test(t)
-  )
-    return 'co_found';
-
-  // Advisor-seeker intent — must run before `advise`.
-  if (
-    /\b(find|need|looking for) (?:an?\s+)?adviso?r/.test(t) ||
-    /(?:^|\W)(?:buscar\s+mentor|buscar\s+asesor|busco\s+mentor|busco\s+asesor|necesito\s+mentor|necesito\s+asesor)(?:\W|$)/.test(
-      t
-    )
-  )
-    return 'find_advisor';
-
-  // Advisor intent (speaker advises).
-  if (
-    /\b(advising|advisor|advise\b)\b/.test(t) ||
-    /(?:^|\W)(?:asesorar|asesorando|asesor|mentor|mentoría|mentoria)(?:\W|$)/.test(t)
-  )
-    return 'advise';
-
-  return 'peer_connect';
-}
+type InferenceState =
+  | { kind: 'idle' }
+  | { kind: 'inferring' }
+  | { kind: 'success'; goalType: GoalType }
+  | { kind: 'failed' };
 
 export function GoalStep() {
+  const { t } = useTranslation();
   const { draft, setField } = useOnboardingDraft();
   const [text, setText] = useState(draft.goal_text ?? '');
+  const [goalType, setGoalType] = useState<GoalType | null>(draft.goal_type ?? null);
+  // True the moment the user taps a radio — once set, suppresses the
+  // "we picked X" caption and never lets a subsequent inference overwrite
+  // their choice. Manual selection wins.
+  const [manuallyPicked, setManuallyPicked] = useState<boolean>(
+    draft.goal_type !== undefined
+  );
+  const [inference, setInference] = useState<InferenceState>({ kind: 'idle' });
   const [error, setError] = useState<string | null>(null);
+
+  // Track the latest debounce timer + in-flight AbortController so a new
+  // keystroke cancels both the pending call and any request already in
+  // flight. Refs (not state) because we don't want a re-render on change.
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  // Mirror manuallyPicked into a ref so the timeout closure reads the latest
+  // value without us having to re-trigger the effect (which would fire a
+  // wasteful re-inference every time the user taps a radio).
+  const manuallyPickedRef = useRef(manuallyPicked);
+  useEffect(() => {
+    manuallyPickedRef.current = manuallyPicked;
+  }, [manuallyPicked]);
+
+  useEffect(() => {
+    // Cancel anything pending — the input changed.
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+
+    const trimmed = text.trim();
+    if (trimmed.length < INFER_MIN_CHARS) {
+      // Too short to bother. Reset to idle (drops any stale caption from a
+      // previous longer draft) but never wipe the user's manual selection.
+      setInference({ kind: 'idle' });
+      return;
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      const controller = new AbortController();
+      abortRef.current = controller;
+      setInference({ kind: 'inferring' });
+      const result = await inferGoalType(
+        {
+          text: trimmed,
+          primaryRole: draft.primary_role ?? null,
+          roles: draft.roles ?? [],
+        },
+        controller.signal
+      );
+      // If a newer call took over, the AbortController on `abortRef` will
+      // have been swapped — bail without touching state.
+      if (abortRef.current !== controller) return;
+      abortRef.current = null;
+
+      if (result.goalType) {
+        setInference({ kind: 'success', goalType: result.goalType });
+        // Only auto-select if the user hasn't manually overridden. Read
+        // from the ref so the latest value wins even if the user tapped a
+        // radio while the request was in flight.
+        if (!manuallyPickedRef.current) {
+          setGoalType(result.goalType);
+        }
+      } else {
+        setInference({ kind: 'failed' });
+      }
+    }, INFER_DEBOUNCE_MS);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+        debounceRef.current = null;
+      }
+    };
+    // Only `text` re-triggers inference. primary_role / roles are read from
+    // `draft` inside the timeout (latest values). manuallyPicked is read
+    // through manuallyPickedRef. draft is stable from useOnboardingDraft.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text]);
+
+  // Tear down any pending work on unmount so an abort doesn't fire after
+  // React strips the component.
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (abortRef.current) abortRef.current.abort();
+    };
+  }, []);
+
+  const onSelectGoalType = (g: GoalType) => {
+    setGoalType(g);
+    setManuallyPicked(true);
+  };
 
   const onNext = () => {
     const parsed = GoalTextSchema.safeParse(text);
     if (!parsed.success) {
-      setError('Describe your goal in 10-280 characters.');
+      setError(t('onboarding.goal.errorRange'));
       return;
     }
-    setField('goal_type', draft.goal_type ?? inferGoalType(parsed.data));
+    if (!goalType) {
+      setError(t('onboarding.goal.pickType'));
+      return;
+    }
+    setField('goal_type', goalType);
     setField('goal_text', parsed.data);
     router.push('/(onboarding)/identity');
   };
 
   return (
-    <StepperLayout currentIndex={0} canGoBack={false} title="What's your goal?">
+    <StepperLayout currentIndex={0} canGoBack={false} title={t('onboarding.goal.title')}>
       <ScrollView>
         <Input
           testID="goal-text"
-          label="Goal"
+          label={t('onboarding.goal.label')}
           value={text}
-          onChangeText={(t) => {
-            setText(t);
+          onChangeText={(v) => {
+            setText(v);
             setError(null);
           }}
-          placeholder="I'm looking to..."
+          placeholder={t('onboarding.goal.placeholder')}
           multiline
           numberOfLines={4}
           maxLength={280}
         />
         <Text className="font-body text-[10px] text-muted mb-1">{text.length} / 280</Text>
-        <Text className="font-body text-[10px] text-muted leading-snug mb-4">
+        <Text className="font-body text-[10px] text-muted leading-snug mb-2">
           Examples: {EXAMPLES.map((e) => `"${e}"`).join(', ')}
         </Text>
+
+        {inference.kind === 'inferring' && (
+          <View className="mb-2" testID="goal-inferring">
+            <Pill variant="muted">{t('onboarding.goal.inferring')}</Pill>
+          </View>
+        )}
+
+        {inference.kind === 'success' && !manuallyPicked && (
+          <Text testID="goal-inferred" className="font-body text-[11px] text-muted mb-2">
+            {t('onboarding.goal.inferred', {
+              label: t(`discovery.goals.${inference.goalType}`),
+            })}
+          </Text>
+        )}
+
+        {inference.kind === 'failed' && (
+          <Text testID="goal-infer-failed" className="font-body text-[11px] text-muted mb-2">
+            {t('onboarding.goal.inferFailed')}
+          </Text>
+        )}
+
+        <View className="mt-2 mb-3">
+          <Text className="font-body text-[12px] text-muted mb-2">
+            {t('onboarding.goal.typeLabel')}
+          </Text>
+          <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+            {GOAL_TYPES.map((g) => {
+              const selected = goalType === g;
+              return (
+                <Pressable
+                  key={g}
+                  testID={`goal-type-${g}`}
+                  onPress={() => onSelectGoalType(g)}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  className={`rounded-full px-3 py-1.5 ${
+                    selected ? 'bg-navy' : 'bg-gold-pale'
+                  }`}
+                >
+                  <Text
+                    className={`font-display-bold text-[12px] ${
+                      selected ? 'text-white' : 'text-navy'
+                    }`}
+                  >
+                    {t(`discovery.goals.${g}`)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
 
         {error && (
           <Text testID="goal-error" className="text-danger-text mt-2 mb-2">
@@ -132,7 +236,7 @@ export function GoalStep() {
 
         <View className="mt-2">
           <Button testID="goal-next" variant="primary" onPress={onNext}>
-            Next
+            {t('onboarding.goal.next')}
           </Button>
         </View>
       </ScrollView>
