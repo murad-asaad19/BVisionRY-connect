@@ -147,11 +147,11 @@ export function GoalStep() {
       setError(t('onboarding.goal.errorRange'));
       return;
     }
-    if (!goalType) {
-      setError(t('onboarding.goal.pickType'));
-      return;
-    }
-    setField('goal_type', goalType);
+    // Fallback to peer_connect when inference produced nothing and the user
+    // didn't pick manually. Matches the deleted keyword-heuristic contract:
+    // Next must always produce a goal_type rather than dead-end the user.
+    const finalGoalType: GoalType = goalType ?? 'peer_connect';
+    setField('goal_type', finalGoalType);
     setField('goal_text', parsed.data);
     router.push('/(onboarding)/identity');
   };

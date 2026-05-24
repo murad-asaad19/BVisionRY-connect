@@ -26,7 +26,7 @@ const KIND_VARIANT: Record<OpportunityKind, PillVariant> = {
 type Props = {
   opportunity: OpportunityFeedItem;
   onPress?: (id: string) => void;
-  onAuthorPress?: (authorId: string) => void;
+  onAuthorPress?: (authorHandle: string) => void;
   testID?: string;
 };
 
@@ -98,7 +98,7 @@ export function OpportunityCard({ opportunity, onPress, onAuthorPress, testID }:
           handle={opportunity.authorHandle}
           primaryRole={opportunity.authorPrimaryRole ?? ''}
           photoUrl={opportunity.authorPhotoUrl}
-          onPress={onAuthorPress ? () => onAuthorPress(opportunity.authorId) : undefined}
+          onPress={onAuthorPress ? () => onAuthorPress(opportunity.authorHandle) : undefined}
           testID={`${cardTestID}-author`}
         />
       </View>

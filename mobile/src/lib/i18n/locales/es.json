@@ -761,7 +761,7 @@
       "bufferMinutes": "Espacio entre reuniones (minutos)",
       "maxBookingsPerWeek": "Máximo reservas por semana (por reservante)",
       "meetingLinkLabel": "Plantilla de enlace de reunión",
-      "meetingLinkHelp": "Usa {{slot_id}} para insertar el id del espacio.",
+      "meetingLinkHelp": "Usa {slot_id} para insertar el id del espacio.",
       "notesLabel": "Notas previas",
       "save": "Guardar",
       "saved": "Guardado"

@@ -761,7 +761,7 @@
       "bufferMinutes": "Buffer between slots (minutes)",
       "maxBookingsPerWeek": "Max bookings per week (per booker)",
       "meetingLinkLabel": "Meeting link template",
-      "meetingLinkHelp": "Use {{slot_id}} to insert the slot's id.",
+      "meetingLinkHelp": "Use {slot_id} to insert the slot's id.",
       "notesLabel": "Pre-meeting notes",
       "save": "Save",
       "saved": "Saved"

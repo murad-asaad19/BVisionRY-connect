@@ -66,8 +66,8 @@ export function OpportunityFeed() {
                 onPress={(id) =>
                   router.push({ pathname: '/(app)/opportunities/[id]', params: { id } })
                 }
-                onAuthorPress={(authorId) =>
-                  router.push({ pathname: '/(app)/p/[handle]', params: { handle: authorId } })
+                onAuthorPress={(authorHandle) =>
+                  router.push({ pathname: '/(app)/p/[handle]', params: { handle: authorHandle } })
                 }
               />
             )}
