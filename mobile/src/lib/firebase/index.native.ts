@@ -1,19 +1,37 @@
-import firebase from '@react-native-firebase/app';
-import analytics from '@react-native-firebase/analytics';
-import crashlytics from '@react-native-firebase/crashlytics';
-import messaging from '@react-native-firebase/messaging';
-import type { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { env } from '~/lib/env';
 import { useTelemetryStore } from '~/features/settings/store/telemetryStore';
+
+// IMPORTANT: top-level imports of `@react-native-firebase/*` would crash the
+// JS bundle on environments that lack the native modules — most notably
+// Expo Go, which has no way to ship arbitrary native code. Every Firebase
+// dependency below is therefore lazy-loaded via `require()` inside the
+// function that needs it, AND each function short-circuits before that
+// require when `env.FIREBASE_ENABLED` is false. That keeps Expo Go (where
+// FIREBASE_ENABLED is always false) from ever reaching the require.
+// Production EAS builds set FIREBASE_ENABLED=true and ship the native
+// modules, so the require resolves normally.
+
+type FirebaseMessagingTypes = typeof import('@react-native-firebase/messaging') extends {
+  FirebaseMessagingTypes: infer T;
+}
+  ? T
+  : never;
+type RemoteMessage = {
+  data?: Record<string, string>;
+  notification?: { title?: string; body?: string };
+  [k: string]: unknown;
+};
 
 let initialized = false;
 
 export async function initFirebase(): Promise<void> {
   if (initialized) return;
-  if (!env.FIREBASE_ENABLED) {
-    // Wiring is in place but disabled until real config files are dropped in.
-    return;
-  }
+  if (!env.FIREBASE_ENABLED) return;
+
+  const firebase = require('@react-native-firebase/app').default;
+  const analytics = require('@react-native-firebase/analytics').default;
+  const crashlytics = require('@react-native-firebase/crashlytics').default;
+
   // Best-effort opt-out: read persisted prefs synchronously. If the Zustand
   // store hasn't rehydrated from AsyncStorage yet, defaults to false
   // (opt-out for GDPR). Pref changes via Settings take effect on the NEXT
@@ -30,6 +48,7 @@ export async function initFirebase(): Promise<void> {
 export async function getFcmToken(): Promise<string | null> {
   if (!env.FIREBASE_ENABLED) return null;
   try {
+    const messaging = require('@react-native-firebase/messaging').default;
     const authStatus = await messaging().requestPermission();
     const enabled =
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
@@ -43,9 +62,10 @@ export async function getFcmToken(): Promise<string | null> {
 }
 
 export function onForegroundMessage(
-  handler: (message: FirebaseMessagingTypes.RemoteMessage) => void
+  handler: (message: RemoteMessage) => void
 ): () => void {
   if (!env.FIREBASE_ENABLED) return () => {};
+  const messaging = require('@react-native-firebase/messaging').default;
   return messaging().onMessage(handler);
 }
 
@@ -60,5 +80,8 @@ export function onForegroundMessage(
  */
 export function subscribeToTokenRefresh(cb: (token: string) => void): () => void {
   if (!env.FIREBASE_ENABLED) return () => {};
+  const messaging = require('@react-native-firebase/messaging').default;
   return messaging().onTokenRefresh(cb);
 }
+
+export type { RemoteMessage };
