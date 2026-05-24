@@ -42,12 +42,23 @@ export function ProfileView() {
     Alert.alert(t('profile.shareCopiedTitle'), t('profile.shareCopiedBody'));
   };
 
+  // If the completeness banner already lists "photo" as missing, suppress
+  // the dedicated photo nudge so the user doesn't see two prompts about the
+  // same thing. Computing this here keeps both banners in sync without the
+  // child component needing to know about the parent's banner stack.
+  const completenessMissing: string[] = [];
+  if (!profile.photo_url) completenessMissing.push('photo');
+  if (!profile.headline) completenessMissing.push('headline');
+  if (!profile.bio) completenessMissing.push('bio');
+  const showPhotoNudge =
+    completenessMissing.length === 0 || !completenessMissing.includes('photo');
+
   return (
     <ScrollView className="flex-1 bg-surface">
       {profile.private_mode ? (
         <View testID="private-mode-banner" className="mx-3 mt-3">
-          <Banner variant="muted" title="Private mode is on">
-            You&apos;re hidden from feed, Daily matches, and search.
+          <Banner variant="muted" title={t('profile.privateModeTitle')}>
+            {t('profile.privateModeBody')}
           </Banner>
         </View>
       ) : null}
@@ -85,17 +96,19 @@ export function ProfileView() {
           onPress={() => router.push('/(app)/profile/edit')}
           className="bg-white border border-border px-3 py-2 rounded-lg"
         >
-          <Text className="font-display-semibold text-[12px] text-navy">Edit</Text>
+          <Text className="font-display-semibold text-[12px] text-navy">
+            {t('profile.editAction')}
+          </Text>
         </Pressable>
       </View>
 
       <View className="mt-2">
         <ProfileCompletenessBanner profile={profile} />
-        <PhotoNudgeBanner photoUrl={profile.photo_url ?? null} />
+        <PhotoNudgeBanner photoUrl={profile.photo_url ?? null} visible={showPhotoNudge} />
       </View>
 
       {profile.headline ? (
-        <Section title="Headline">
+        <Section title={t('profile.section.headline')}>
           <Text testID="profile-headline" className="font-body text-[13px] text-body">
             {profile.headline}
           </Text>
@@ -103,19 +116,19 @@ export function ProfileView() {
       ) : null}
 
       {profile.bio ? (
-        <Section title="Bio">
+        <Section title={t('profile.section.bio')}>
           <View testID="profile-bio">
             <BioMarkdown>{profile.bio}</BioMarkdown>
           </View>
         </Section>
       ) : null}
 
-      <Section title="Goal">
+      <Section title={t('profile.section.goal')}>
         <Text
           testID="profile-goal-type"
           className="font-display-semibold text-[14px] text-navy capitalize"
         >
-          {profile.goal_type?.replace(/_/g, ' ')}
+          {profile.goal_type ? t(`discovery.goals.${profile.goal_type}`) : ''}
         </Text>
         {profile.goal_text ? (
           <Text testID="profile-goal-text" className="font-body text-[12px] text-muted mt-1">
@@ -125,7 +138,7 @@ export function ProfileView() {
       </Section>
 
       {profile.roles?.length ? (
-        <Section title="Roles">
+        <Section title={t('profile.section.roles')}>
           <View className="flex-row flex-wrap gap-2">
             {profile.roles.map((r) => (
               <View
@@ -140,7 +153,7 @@ export function ProfileView() {
                     r === profile.primary_role ? 'text-white' : 'text-navy'
                   }`}
                 >
-                  {r}
+                  {t(`discovery.roles.${r}`)}
                 </Text>
               </View>
             ))}
@@ -148,13 +161,13 @@ export function ProfileView() {
         </Section>
       ) : null}
 
-      <Section title="Location">
+      <Section title={t('profile.section.location')}>
         <Text testID="profile-location" className="font-body text-[12px] text-body">
           {[profile.city, profile.country].filter(Boolean).join(', ') || '—'}
         </Text>
       </Section>
 
-      <Section title="Verification">
+      <Section title={t('profile.section.verification')}>
         <VerifiedBadge username={profile.verified_github_username} />
       </Section>
 
@@ -164,7 +177,7 @@ export function ProfileView() {
           variant="outline"
           onPress={() => signOut().catch(console.warn)}
         >
-          Sign out
+          {t('settings.signOut')}
         </Button>
       </View>
     </ScrollView>

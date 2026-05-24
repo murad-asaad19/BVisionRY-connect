@@ -1,10 +1,13 @@
 import { View, Text, ScrollView } from 'react-native';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Button } from '~/components/ui/Button';
+import { BioMarkdown } from '~/features/profile/components/BioMarkdown';
 import { ProfileHero } from '~/features/profile/components/ProfileHero';
 import type { PublicProfile } from '~/features/profile/services/publicProfile.service';
 
 export function PublicProfileView({ profile }: { profile: PublicProfile }) {
+  const { t } = useTranslation();
   return (
     <ScrollView testID="public-profile-view" className="flex-1 bg-surface">
       <ProfileHero
@@ -21,9 +24,9 @@ export function PublicProfileView({ profile }: { profile: PublicProfile }) {
         {profile.bio ? (
           <View className="bg-white rounded-xl border border-border p-3 mb-4">
             <Text className="font-display-bold text-[11px] text-muted uppercase tracking-wide mb-1.5">
-              About
+              {t('profile.aboutSection')}
             </Text>
-            <Text className="font-body text-[12px] text-body leading-relaxed">{profile.bio}</Text>
+            <BioMarkdown>{profile.bio}</BioMarkdown>
           </View>
         ) : null}
         <Button
@@ -31,7 +34,7 @@ export function PublicProfileView({ profile }: { profile: PublicProfile }) {
           variant="primary"
           onPress={() => router.push('/(auth)/sign-in' as never)}
         >
-          Sign in to connect
+          {t('profile.signInToConnect')}
         </Button>
       </View>
     </ScrollView>

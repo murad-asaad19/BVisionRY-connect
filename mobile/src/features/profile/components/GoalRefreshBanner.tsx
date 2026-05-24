@@ -1,5 +1,12 @@
 import { View, Text } from 'react-native';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import {
+  useProfileNudgeStore,
+  isGoalNudgeDismissed,
+  GOAL_NUDGE_TTL_DAYS,
+} from '~/features/profile/store/profileNudgeStore';
+import { useAuthSession } from '~/features/auth/SessionContext';
 import { Banner } from '~/components/ui/Banner';
 import { Button } from '~/components/ui/Button';
 
@@ -13,23 +20,28 @@ function ageDays(iso: string | null): number {
 }
 
 export function GoalRefreshBanner({ goalUpdatedAt }: Props) {
+  const { t } = useTranslation();
+  const { session } = useAuthSession();
+  const userId = session?.user.id;
+  const dismissed = useProfileNudgeStore((s) => isGoalNudgeDismissed(s, userId));
+  const dismissGoalNudge = useProfileNudgeStore((s) => s.dismissGoalNudge);
+
   const age = ageDays(goalUpdatedAt);
 
-  if (age < 28) return null;
+  if (age < 28 || dismissed) return null;
 
   let variant: 'info' | 'warning' = 'info';
-  let title = "How's your goal? Worth a refresh?";
-  let body = 'People you match with rely on this. Keep it current.';
+  let title = t('profile.goalRefresh.titleInfo');
+  let body = t('profile.goalRefresh.bodyInfo');
 
   if (age >= 49 && age < 56) {
     variant = 'warning';
-    title = 'Your goal is starting to feel old';
-    body = 'A short refresh will keep your matches relevant.';
+    title = t('profile.goalRefresh.titleWarn');
+    body = t('profile.goalRefresh.bodyWarn');
   } else if (age >= 56) {
     variant = 'warning';
-    title = 'Your goal hasn’t changed in 8+ weeks';
-    body =
-      'A short refresh keeps your matches relevant. We’ll email a reminder if it stays this old.';
+    title = t('profile.goalRefresh.titleStale');
+    body = t('profile.goalRefresh.bodyStale');
   }
 
   return (
@@ -37,7 +49,7 @@ export function GoalRefreshBanner({ goalUpdatedAt }: Props) {
       <Banner variant={variant} title={title}>
         <View>
           <Text className="font-body text-[11px] mb-2">{body}</Text>
-          <View className="self-start">
+          <View className="flex-row gap-2">
             <Button
               testID="goal-refresh-edit"
               size="small"
@@ -45,8 +57,22 @@ export function GoalRefreshBanner({ goalUpdatedAt }: Props) {
               fullWidth={false}
               onPress={() => router.push('/(app)/profile/edit' as never)}
             >
-              Update
+              {t('profile.goalRefresh.update')}
             </Button>
+            {userId ? (
+              <Button
+                testID="goal-refresh-snooze"
+                size="small"
+                variant="outline"
+                fullWidth={false}
+                onPress={() => dismissGoalNudge(userId)}
+                accessibilityLabel={t('profile.goalRefresh.snoozeA11y', {
+                  days: GOAL_NUDGE_TTL_DAYS,
+                })}
+              >
+                {t('profile.goalRefresh.snooze', { days: GOAL_NUDGE_TTL_DAYS })}
+              </Button>
+            ) : null}
           </View>
         </View>
       </Banner>

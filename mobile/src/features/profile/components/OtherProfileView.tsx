@@ -41,6 +41,7 @@ function formatDate(iso: string): string {
 }
 
 export function OtherProfileView({ handle }: Props) {
+  const { t } = useTranslation();
   const query = useProfileByHandle(handle);
 
   return (
@@ -50,10 +51,10 @@ export function OtherProfileView({ handle }: Props) {
       emptyFallback={
         <View className="flex-1 items-center justify-center bg-surface px-6">
           <Text className="font-display-bold text-[18px] text-navy mb-2" testID="profile-not-found">
-            Not found
+            {t('profile.notFoundTitle')}
           </Text>
           <Text className="font-body text-[12px] text-muted text-center">
-            No user with handle @{handle}.
+            {t('profile.noUserWithHandle', { handle })}
           </Text>
         </View>
       }
@@ -116,7 +117,7 @@ function Body({ profile }: { profile: ProfileT }) {
       )}
 
       {profile.headline ? (
-        <Section title="Headline">
+        <Section title={t('profile.section.headline')}>
           <Text testID="other-profile-headline" className="font-body text-[13px] text-body">
             {profile.headline}
           </Text>
@@ -124,16 +125,16 @@ function Body({ profile }: { profile: ProfileT }) {
       ) : null}
 
       {profile.bio ? (
-        <Section title="Bio">
+        <Section title={t('profile.section.bio')}>
           <View testID="other-profile-bio">
             <BioMarkdown>{profile.bio}</BioMarkdown>
           </View>
         </Section>
       ) : null}
 
-      <Section title="Goal">
+      <Section title={t('profile.section.goal')}>
         <Text className="font-display-semibold text-[14px] text-navy capitalize">
-          {profile.goal_type?.replace(/_/g, ' ')}
+          {profile.goal_type ? t(`discovery.goals.${profile.goal_type}`) : ''}
         </Text>
         {profile.goal_text ? (
           <Text className="font-body text-[12px] text-muted mt-1">{profile.goal_text}</Text>
@@ -141,7 +142,7 @@ function Body({ profile }: { profile: ProfileT }) {
       </Section>
 
       {profile.roles?.length ? (
-        <Section title="Roles">
+        <Section title={t('profile.section.roles')}>
           <View className="flex-row flex-wrap gap-2">
             {profile.roles.map((r) => (
               <View
@@ -156,7 +157,7 @@ function Body({ profile }: { profile: ProfileT }) {
                     r === profile.primary_role ? 'text-white' : 'text-navy'
                   }`}
                 >
-                  {r}
+                  {t(`discovery.roles.${r}`)}
                 </Text>
               </View>
             ))}
@@ -165,34 +166,37 @@ function Body({ profile }: { profile: ProfileT }) {
       ) : null}
 
       {profile.city || profile.country ? (
-        <Section title="Location">
+        <Section title={t('profile.section.location')}>
           <Text className="font-body text-[12px] text-body">
             {[profile.city, profile.country].filter(Boolean).join(', ')}
           </Text>
         </Section>
       ) : null}
 
-      <Section title="Verification">
+      <Section title={t('profile.section.verification')}>
         <VerifiedBadge username={profile.verified_github_username} />
       </Section>
 
       {sentBanner ? (
         <View testID="intro-sent-banner" className="mx-3 mt-3">
-          <Banner variant="success">Intro sent.</Banner>
+          <Banner variant="success">{t('profile.introSent')}</Banner>
         </View>
       ) : null}
 
       {!isSelf ? (
         cooldown.data?.active && cooldown.data.availableAt ? (
           <View className="mx-3 mt-4">
-            <Banner variant="warning" title="Send intro on hold">
-              {`${profile.name ?? 'They'} declined a recent intro. You can send again after ${formatDate(
-                cooldown.data.availableAt
-              )}.`}
+            <Banner variant="warning" title={t('profile.introOnHoldTitle')}>
+              {t('profile.introOnHoldBody', {
+                name: profile.name ?? 'They',
+                date: formatDate(cooldown.data.availableAt),
+              })}
             </Banner>
             <View className="bg-navy mx-0 mt-2 mb-8 p-3.5 rounded-xl">
               <Button testID="other-profile-send-intro" variant="disabled" disabled>
-                {`Send intro · available ${formatDate(cooldown.data.availableAt)}`}
+                {t('profile.introOnHoldButton', {
+                  date: formatDate(cooldown.data.availableAt),
+                })}
               </Button>
             </View>
           </View>
@@ -203,7 +207,7 @@ function Body({ profile }: { profile: ProfileT }) {
               variant="gold"
               onPress={() => setSheetOpen(true)}
             >
-              Send Intro
+              {t('profile.sendIntro')}
             </Button>
           </View>
         )

@@ -1,5 +1,7 @@
+import { memo } from 'react';
 import { View, Text, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import { Pill } from '~/components/ui/Pill';
 
 const AVATAR_SIZE = 76;
@@ -15,7 +17,7 @@ type Props = {
   photoUrl: string | null;
 };
 
-export function ProfileHero({
+function ProfileHeroImpl({
   name,
   handle,
   headline,
@@ -25,6 +27,7 @@ export function ProfileHero({
   country,
   photoUrl,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <LinearGradient
       colors={['#0f3460', '#1a4a80']}
@@ -89,7 +92,7 @@ export function ProfileHero({
         <View className="flex-row gap-1.5 mt-2.5 flex-wrap justify-center">
           {roles.map((r) => (
             <Pill key={r} variant={r === primaryRole ? 'solid' : 'outline'}>
-              {r}
+              {t(`discovery.roles.${r}`)}
             </Pill>
           ))}
         </View>
@@ -105,3 +108,27 @@ export function ProfileHero({
     </LinearGradient>
   );
 }
+
+// Hero re-renders on every banner toggle; the rendered hierarchy here is
+// expensive (two LinearGradients + an Image). Compare the actual props rather
+// than the default shallow check so an unstable `roles` array reference
+// doesn't bust the memo when the array contents are identical.
+function arraysEqual<T>(a: readonly T[], b: readonly T[]): boolean {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  return true;
+}
+
+export const ProfileHero = memo(ProfileHeroImpl, (prev, next) => {
+  return (
+    prev.name === next.name &&
+    prev.handle === next.handle &&
+    prev.headline === next.headline &&
+    prev.primaryRole === next.primaryRole &&
+    prev.city === next.city &&
+    prev.country === next.country &&
+    prev.photoUrl === next.photoUrl &&
+    arraysEqual(prev.roles, next.roles)
+  );
+});

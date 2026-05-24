@@ -1,4 +1,17 @@
 import { render } from '@testing-library/react-native';
+
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+);
+
+// Mock SessionContext so the banner doesn't pull in supabase/env (which has no
+// values under jest). The banner reads `useAuthSession().session?.user.id` —
+// returning `null` keeps the snooze-button path inactive while letting the
+// age-based visibility logic remain under test.
+jest.mock('~/features/auth/SessionContext', () => ({
+  useAuthSession: () => ({ session: null, loading: false }),
+}));
+
 import { GoalRefreshBanner } from '~/features/profile/components/GoalRefreshBanner';
 
 describe('GoalRefreshBanner', () => {

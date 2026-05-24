@@ -1,18 +1,32 @@
 import { View, Text, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { useProfileNudgeStore } from '~/features/profile/store/profileNudgeStore';
+import {
+  useProfileNudgeStore,
+  isPhotoNudgeDismissed,
+} from '~/features/profile/store/profileNudgeStore';
+import { useAuthSession } from '~/features/auth/SessionContext';
 import { Banner } from '~/components/ui/Banner';
 import { Button } from '~/components/ui/Button';
 
-type Props = { photoUrl: string | null | undefined };
+type Props = {
+  photoUrl: string | null | undefined;
+  /**
+   * When false, the banner is suppressed regardless of dismiss state.
+   * Used by `ProfileView` to hide this nudge when the broader profile-
+   * completeness banner already lists "photo" as missing.
+   */
+  visible?: boolean;
+};
 
-export function PhotoNudgeBanner({ photoUrl }: Props) {
+export function PhotoNudgeBanner({ photoUrl, visible = true }: Props) {
   const { t } = useTranslation();
-  const dismissed = useProfileNudgeStore((s) => s.photoNudgeDismissed);
-  const dismiss = useProfileNudgeStore((s) => s.dismissPhotoNudge);
+  const { session } = useAuthSession();
+  const userId = session?.user.id;
+  const dismissed = useProfileNudgeStore((s) => isPhotoNudgeDismissed(s, userId));
+  const dismissPhotoNudge = useProfileNudgeStore((s) => s.dismissPhotoNudge);
 
-  if (photoUrl || dismissed) return null;
+  if (!visible || photoUrl || dismissed || !userId) return null;
 
   return (
     <View className="mx-4 mb-2">
@@ -33,7 +47,7 @@ export function PhotoNudgeBanner({ photoUrl }: Props) {
           </Button>
           <Pressable
             testID="photo-nudge-dismiss"
-            onPress={dismiss}
+            onPress={() => dismissPhotoNudge(userId)}
             className="px-2 py-2"
             accessibilityRole="button"
             accessibilityLabel={t('profile.photoNudgeDismiss')}

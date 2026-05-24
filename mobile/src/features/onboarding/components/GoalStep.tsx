@@ -16,18 +16,74 @@ const EXAMPLES = ['Hiring a fractional designer', 'Raising pre-seed for a health
 // Mockup B1 doesn't expose a goal_type picker — the spec says AI (B3) infers
 // the kind. Until B3 ships, this keyword-rule pass keeps the matching
 // algorithm useful (it relies on goal_type complementarity).
-function inferGoalType(text: string): GoalType {
+//
+// Branch order matters: more-specific intents must precede related ones so
+// that a sentence like "Looking to invest in startups raising pre-seed"
+// resolves to `invest` (the speaker's role) rather than `take_investment`
+// (the target's role). Same for `find_advisor` before `advise`.
+//
+// Spanish synonyms use `(?:^|\W)…(?:\W|$)` rather than `\b` because `\b` is
+// defined as a transition between `\w` and `\W`, and accented chars / hyphens
+// are `\W`, so `\bmentoría\b` and `\bco-fundador\b` would never match.
+//
+// TODO(B3-AI): replace keyword heuristic with AI classifier
+export function inferGoalType(text: string): GoalType {
   const t = text.toLowerCase();
-  if (/\b(raising|raise|investment\b|funds?\b|pre[- ]?seed|series\s+[a-c]|seed\s+round)\b/.test(t))
+
+  // Investor intent (speaker invests) — must run before `take_investment`.
+  if (
+    /\b(investing|invest in|investor\b|portfolio\b|deal\s+flow)\b/.test(t) ||
+    /(?:^|\W)(?:invertir|inversor|inversora|invirtiendo)(?:\W|$)/.test(t)
+  )
+    return 'invest';
+
+  // Fundraiser intent (speaker raises).
+  if (
+    /\b(raising|raise|investment\b|funds?\b|pre[- ]?seed|series\s+[a-c]|seed\s+round)\b/.test(t) ||
+    /(?:^|\W)(?:levantar\s+capital|recaudar\s+fondos|pre[- ]?semilla|pre[- ]?seed|ronda\s+semilla)(?:\W|$)/.test(
+      t
+    )
+  )
     return 'take_investment';
-  if (/\b(investing|invest in|investor\b|portfolio\b|deal\s+flow)\b/.test(t)) return 'invest';
-  if (/\b(hiring|hire (?:a|an|some)|looking to hire)\b/.test(t)) return 'hire';
-  if (/\b(looking for (?:work|a role|a job)|seeking (?:work|a role)|hire me|open to work)\b/.test(t))
+
+  if (
+    /\b(hiring|hire (?:a|an|some)|looking to hire)\b/.test(t) ||
+    /(?:^|\W)(?:contratar|contratando|reclutar|reclutando)(?:\W|$)/.test(t)
+  )
+    return 'hire';
+
+  if (
+    /\b(looking for (?:work|a role|a job)|seeking (?:work|a role)|hire me|open to work)\b/.test(
+      t
+    ) ||
+    /(?:^|\W)(?:buscar\s+trabajo|buscando\s+trabajo|busco\s+empleo|buscar\s+empleo|empleo)(?:\W|$)/.test(
+      t
+    )
+  )
     return 'be_hired';
-  if (/\b(co[- ]?founder?|co[- ]?found(?:ing)?)\b/.test(t)) return 'co_found';
-  if (/\b(advising|advisor|advise\b)\b/.test(t)) {
-    return /\b(find|need|looking for) (?:an?\s+)?adviso?r/.test(t) ? 'find_advisor' : 'advise';
-  }
+
+  if (
+    /\b(co[- ]?founder?|co[- ]?found(?:ing)?)\b/.test(t) ||
+    /(?:^|\W)(?:co[- ]?fundador|co[- ]?fundadora|cofundador|cofundadora)(?:\W|$)/.test(t)
+  )
+    return 'co_found';
+
+  // Advisor-seeker intent — must run before `advise`.
+  if (
+    /\b(find|need|looking for) (?:an?\s+)?adviso?r/.test(t) ||
+    /(?:^|\W)(?:buscar\s+mentor|buscar\s+asesor|busco\s+mentor|busco\s+asesor|necesito\s+mentor|necesito\s+asesor)(?:\W|$)/.test(
+      t
+    )
+  )
+    return 'find_advisor';
+
+  // Advisor intent (speaker advises).
+  if (
+    /\b(advising|advisor|advise\b)\b/.test(t) ||
+    /(?:^|\W)(?:asesorar|asesorando|asesor|mentor|mentoría|mentoria)(?:\W|$)/.test(t)
+  )
+    return 'advise';
+
   return 'peer_connect';
 }
 
@@ -42,7 +98,7 @@ export function GoalStep() {
       setError('Describe your goal in 10-280 characters.');
       return;
     }
-    setField('goal_type', inferGoalType(parsed.data));
+    setField('goal_type', draft.goal_type ?? inferGoalType(parsed.data));
     setField('goal_text', parsed.data);
     router.push('/(onboarding)/identity');
   };

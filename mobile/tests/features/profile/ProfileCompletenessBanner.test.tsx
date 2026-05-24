@@ -23,7 +23,6 @@ type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 function makeProfile(overrides: Partial<ProfileRow> = {}): ProfileRow {
   return {
     id: 'u1',
-    email: 'a@b.com',
     name: 'Alice',
     handle: 'alice',
     bio: null,

@@ -19,7 +19,7 @@ describe('ProfileHero', () => {
     expect(getByTestId('profile-hero-handle')).toBeTruthy();
     expect(getByText('Ada Lovelace')).toBeTruthy();
     expect(getByText('@ada')).toBeTruthy();
-    expect(getByText('builder')).toBeTruthy();
-    expect(getByText('founder')).toBeTruthy();
+    expect(getByText('discovery.roles.builder')).toBeTruthy();
+    expect(getByText('discovery.roles.founder')).toBeTruthy();
   });
 });
