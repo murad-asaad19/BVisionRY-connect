@@ -1,4 +1,5 @@
 {
+  "_comment": "EXAMPLE / TEMPLATE FILE. Copy this file to `google-services.json` (drop the `.example` suffix), then DELETE this `_comment` field and replace placeholder values with the real ones from Firebase Console > Project Settings > General > Your apps > Android app > google-services.json (download). The real file is gitignored. Do NOT commit real Firebase credentials. For EAS builds, upload the real file via `eas credentials` or place it in the build environment; never check it into source control.",
   "project_info": {
     "project_number": "000000000000",
     "project_id": "placeholder-bvisionry",

@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- EXAMPLE / TEMPLATE FILE.
+     Copy this file to `GoogleService-Info.plist` (drop the `.example`
+     suffix) and replace the placeholder values with the real ones from
+     the Firebase Console:
+       Firebase Console > Project Settings > General > Your apps > iOS app
+       > GoogleService-Info.plist (download).
+     The real file is gitignored. Do NOT commit real Firebase credentials.
+     For EAS builds, upload the real file via `eas credentials` or place
+     it in the build environment; never check it into source control. -->
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>

@@ -41,6 +41,14 @@ yarn-error.*
 .env
 .env.local
 
+# Real Firebase config — copy from .example and fill in.
+# The .example variants are committed; the real files are gitignored so
+# we never check API keys into source control.
+GoogleService-Info.plist
+google-services.json
+!GoogleService-Info.plist.example
+!google-services.json.example
+
 # typescript
 *.tsbuildinfo
 
