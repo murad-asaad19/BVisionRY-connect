@@ -63,7 +63,7 @@ export async function getMeetingPlaybook(
 
   if (error) throw new Error(error.message);
   if (!data || data.length === 0) return null;
-  return toClient(data[0]);
+  return toClient(data[0]!);
 }
 
 /**
