@@ -393,6 +393,7 @@
       "forwardSuccess": "Forwarded to {{targetName}}",
       "kindWarmRequestBadge": "Warm intro request",
       "kindWarmForwardVia": "Via {{name}}",
+      "viaForwarder": "Forwarded by {{name}}",
       "profileBanner": "{{mutualName}} can introduce you",
       "profileBannerCta": "Ask {{firstName}}"
     }

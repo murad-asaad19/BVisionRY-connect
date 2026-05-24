@@ -7,11 +7,19 @@ import { optionalEnv, requireEnv, verifyWebhookSecret } from "../_shared/env.ts"
 // Legacy localized payload composed by the SQL `dispatch_push` function. Kept
 // for backwards compat — the dev stub and any FCM clients that haven't
 // migrated to client-side localization still rely on `title/body/url`.
+//
+// Warm-forward intros also carry `via_user_id` and `via_user_name` inside the
+// payload (see notify_intro_inserted in 20260608060000_warm_intros_fixes.sql).
+// We surface them in FCM `data` so the mobile client can render a prominent
+// "Forwarded by {name}" caption above the note when it opens the intro from
+// a push.
 type LegacyPayload = {
   kind: string;
   title: string;
   body: string;
   url: string;
+  via_user_id?: string;
+  via_user_name?: string;
 };
 
 // Structured data forwarded into FCM `message.data` so clients can route and
@@ -59,6 +67,18 @@ function validateBody(b: unknown): { ok: true; body: RequestBody } | { ok: false
   if (typeof p.kind !== "string" || typeof p.title !== "string" ||
       typeof p.body !== "string" || typeof p.url !== "string") {
     return { ok: false, err: "payload must have kind/title/body/url strings" };
+  }
+  // Optional warm-forward fields. Validate type when present — null and
+  // undefined are both fine (jsonb_strip_nulls drops them at the SQL layer for
+  // non-warm_forward intros).
+  if (p.via_user_id !== undefined && p.via_user_id !== null && typeof p.via_user_id !== "string") {
+    return { ok: false, err: "payload.via_user_id must be a string" };
+  }
+  if (
+    p.via_user_name !== undefined && p.via_user_name !== null &&
+    typeof p.via_user_name !== "string"
+  ) {
+    return { ok: false, err: "payload.via_user_name must be a string" };
   }
   // data is optional — when present, every field must be a string.
   let data: StructuredData | null = null;
@@ -239,6 +259,11 @@ async function sendToToken(
     url:  body.payload.url,
     kind: body.payload.kind,
   };
+  // Warm-forward intros carry forwarder identity in the legacy payload — copy
+  // them into FCM data so the mobile client can render "Forwarded by {name}"
+  // without a separate fetch on push tap.
+  if (body.payload.via_user_id) fcmData.via_user_id = body.payload.via_user_id;
+  if (body.payload.via_user_name) fcmData.via_user_name = body.payload.via_user_name;
   if (body.data) {
     if (body.data.kind) fcmData.kind = body.data.kind;
     if (body.data.entity_id) fcmData.entity_id = body.data.entity_id;

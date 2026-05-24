@@ -177,6 +177,14 @@ function Body({
           </View>
         ) : null}
 
+        {isWarmForward && warmReferenceQuery.data?.name ? (
+          <View testID="intro-warm-forward-banner" className="mb-3">
+            <Banner variant="info">
+              {t('intros.warm.viaForwarder', { name: warmReferenceQuery.data.name })}
+            </Banner>
+          </View>
+        ) : null}
+
         <View className="flex-row items-center justify-between mb-6">
           <View className="flex-row items-center flex-1">
             <AvatarCircle

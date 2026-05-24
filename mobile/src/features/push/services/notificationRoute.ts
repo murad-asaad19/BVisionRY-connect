@@ -19,6 +19,12 @@ export type PushDataLike = {
   entity_id?: string;
   conversation_id?: string;
   url?: string;
+  // Set on warm_forward intros by notify_intro_inserted (see
+  // 20260608060000_warm_intros_fixes.sql). Lets the client surface
+  // "Forwarded by {via_user_name}" without a separate fetch when the
+  // intro is opened from a push.
+  via_user_id?: string;
+  via_user_name?: string;
   [key: string]: unknown;
 };
 
@@ -30,6 +36,10 @@ export function resolveNotificationRoute(data: PushDataLike | undefined | null):
   const conversationId =
     typeof data.conversation_id === 'string' ? data.conversation_id : undefined;
   const legacyUrl = typeof data.url === 'string' ? data.url : undefined;
+  // via_* fields are read by callers (IntroDetailView prefetch) — we simply
+  // pass them through as part of the typed PushDataLike. No routing change.
+  void data.via_user_id;
+  void data.via_user_name;
 
   if (kind) {
     switch (kind) {

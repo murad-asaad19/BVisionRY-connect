@@ -393,6 +393,7 @@
       "forwardSuccess": "Reenviado a {{targetName}}",
       "kindWarmRequestBadge": "Solicitud de presentación",
       "kindWarmForwardVia": "Vía {{name}}",
+      "viaForwarder": "Reenviado por {{name}}",
       "profileBanner": "{{mutualName}} puede presentarte",
       "profileBannerCta": "Preguntar a {{firstName}}"
     }
