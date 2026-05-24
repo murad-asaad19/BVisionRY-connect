@@ -10,18 +10,50 @@
       "channel": "development",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "SET_IN_EAS_SECRETS",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "SET_IN_EAS_SECRETS",
+        "EXPO_PUBLIC_SENTRY_DSN": "SET_IN_EAS_SECRETS",
+        "EXPO_PUBLIC_SENTRY_ENV": "development",
+        "EXPO_PUBLIC_FIREBASE_ENABLED": "false"
       }
     },
     "preview": {
       "distribution": "internal",
       "channel": "preview",
+      "autoIncrement": true,
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "SET_IN_EAS_SECRETS",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "SET_IN_EAS_SECRETS",
+        "EXPO_PUBLIC_SENTRY_DSN": "SET_IN_EAS_SECRETS",
+        "EXPO_PUBLIC_SENTRY_ENV": "preview",
+        "EXPO_PUBLIC_FIREBASE_ENABLED": "true",
+        "EXPO_PUBLIC_EAS_PROJECT_ID": "SET_IN_EAS_SECRETS",
+        "EXPO_PUBLIC_APP_LINKS_HOST": "SET_IN_EAS_SECRETS",
+        "SENTRY_AUTH_TOKEN": "SET_IN_EAS_SECRETS",
+        "SENTRY_ORG": "SET_IN_EAS_SECRETS",
+        "SENTRY_PROJECT": "SET_IN_EAS_SECRETS"
       }
     },
     "production": {
       "channel": "production",
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "SET_IN_EAS_SECRETS",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "SET_IN_EAS_SECRETS",
+        "EXPO_PUBLIC_SENTRY_DSN": "SET_IN_EAS_SECRETS",
+        "EXPO_PUBLIC_SENTRY_ENV": "production",
+        "EXPO_PUBLIC_FIREBASE_ENABLED": "true",
+        "EXPO_PUBLIC_EAS_PROJECT_ID": "SET_IN_EAS_SECRETS",
+        "EXPO_PUBLIC_APP_LINKS_HOST": "SET_IN_EAS_SECRETS",
+        "SENTRY_AUTH_TOKEN": "SET_IN_EAS_SECRETS",
+        "SENTRY_ORG": "SET_IN_EAS_SECRETS",
+        "SENTRY_PROJECT": "SET_IN_EAS_SECRETS"
+      }
     }
   },
   "submit": {

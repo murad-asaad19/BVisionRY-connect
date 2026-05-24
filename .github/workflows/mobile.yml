@@ -43,3 +43,87 @@ jobs:
 
       - name: Unit tests
         run: npm test -- --ci
+
+  e2e:
+    name: playwright e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install npm dependencies (root)
+        working-directory: .
+        run: npm ci
+
+      - name: Install npm dependencies (mobile)
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('mobile/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright (chromium + deps)
+        run: npx playwright install --with-deps chromium
+
+      - name: Cache Supabase CLI
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/supabase
+          key: ${{ runner.os }}-supabase-cli-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-supabase-cli-
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase local stack
+        working-directory: .
+        run: npx supabase start
+
+      - name: Capture Supabase status
+        id: supabase-status
+        working-directory: .
+        run: |
+          status=$(npx supabase status -o json)
+          api_url=$(echo "$status" | jq -r '.API_URL')
+          anon_key=$(echo "$status" | jq -r '.ANON_KEY')
+          echo "api_url=$api_url" >> "$GITHUB_OUTPUT"
+          echo "anon_key=$anon_key" >> "$GITHUB_OUTPUT"
+
+      - name: Run Playwright e2e
+        run: npm run test:e2e
+        env:
+          CI: "true"
+          EXPO_PUBLIC_SUPABASE_URL: ${{ steps.supabase-status.outputs.api_url }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ steps.supabase-status.outputs.anon_key }}
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: |
+            mobile/playwright-report/
+            mobile/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Stop Supabase
+        if: always()
+        working-directory: .
+        run: npx supabase stop --no-backup

@@ -7,6 +7,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: 1,
   reporter: 'list',
+  timeout: 30_000,
   use: {
     baseURL: 'http://localhost:8081',
     trace: 'on-first-retry',
@@ -21,7 +22,7 @@ export default defineConfig({
   webServer: {
     command: 'npx expo start --web --port 8081',
     url: 'http://localhost:8081',
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
     timeout: 180_000,
   },
 });

@@ -2,8 +2,20 @@
   "name": "bvisionry-connect",
   "private": true,
   "description": "BVisionRY Connect — Supabase project (CLI + migrations + Edge Functions)",
+  "workspaces": [
+    "mobile"
+  ],
+  "engines": {
+    "node": ">=20.0.0 <21"
+  },
   "scripts": {
-    "supabase": "supabase"
+    "supabase": "supabase",
+    "supabase:lint": "supabase db lint",
+    "supabase:test": "supabase test db",
+    "functions:test": "deno test --allow-net --allow-env --allow-read supabase/functions/",
+    "mobile:lint": "npm -w mobile run lint",
+    "mobile:typecheck": "npm -w mobile run typecheck",
+    "mobile:test": "npm -w mobile run test"
   },
   "devDependencies": {
     "supabase": "^2.98.2"
