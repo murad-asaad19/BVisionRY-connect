@@ -424,7 +424,83 @@
       "home": "Inicio",
       "chats": "Chats",
       "inbox": "Bandeja",
-      "network": "Red"
+      "network": "Red",
+      "opportunities": "Oportunidades"
+    }
+  },
+  "tabs": {
+    "opportunities": "Oportunidades"
+  },
+  "opportunities": {
+    "feed": {
+      "title": "Oportunidades",
+      "empty": "Ninguna oportunidad coincide con tus filtros.",
+      "newCta": "Publicar oportunidad"
+    },
+    "kind": {
+      "hiring": "Contratando",
+      "seeking_role": "Buscando trabajo",
+      "fundraising": "Recaudando",
+      "investing": "Invirtiendo",
+      "cofounder": "Cofundador",
+      "advising": "Asesorando",
+      "seeking_advisor": "Buscando asesor",
+      "collaboration": "Colaboración"
+    },
+    "filter": {
+      "remoteOnly": "Solo remoto",
+      "searchPlaceholder": "Buscar oportunidades…"
+    },
+    "composer": {
+      "stepKind": "¿Qué tipo de oportunidad?",
+      "stepContent": "Cuéntanos más",
+      "stepMeta": "Dónde y cuándo",
+      "stepCounter": "Paso {{current}} de {{total}}",
+      "titleLabel": "Título",
+      "titlePlaceholder": "Contratando un PM senior",
+      "bodyLabel": "Descripción",
+      "bodyPlaceholder": "Dile a la gente qué estás buscando…",
+      "tagsLabel": "Etiquetas",
+      "tagsPlaceholder": "separadas por comas, p. ej. pm, fintech",
+      "cityLabel": "Ciudad",
+      "countryLabel": "País",
+      "remoteLabel": "Abierto a remoto",
+      "expiresLabel": "Caduca",
+      "expiresHint": "Las publicaciones caducan después de 30 días por defecto.",
+      "next": "Siguiente",
+      "back": "Atrás",
+      "submit": "Publicar oportunidad",
+      "submitting": "Publicando…",
+      "submitSuccess": "Publicado",
+      "errorKindRequired": "Elige un tipo para continuar.",
+      "errorTitle": "El título debe tener entre 5 y 120 caracteres.",
+      "errorBody": "La descripción debe tener entre 10 y 2000 caracteres.",
+      "errorTags": "Hasta 8 etiquetas, minúsculas, de 1 a 30 caracteres cada una.",
+      "errorSubmit": "No se pudo publicar. Inténtalo de nuevo."
+    },
+    "detail": {
+      "title": "Oportunidad",
+      "expressInterestCta": "Mostrar interés",
+      "expressedAlready": "Mostraste interés",
+      "viewInterested_one": "{{count}} interesado",
+      "viewInterested_other": "{{count}} interesados",
+      "closeCta": "Cerrar oportunidad",
+      "closedBadge": "Cerrada"
+    },
+    "interest": {
+      "subtitle": "Agrega una nota breve para que sepan qué te llamó la atención.",
+      "notePlaceholder": "Agrega una nota (opcional)…",
+      "submit": "Enviar interés",
+      "success": "Enviado",
+      "errorNoteRange": "La nota debe tener al menos 10 caracteres.",
+      "errorGeneric": "No se pudo enviar. Inténtalo de nuevo."
+    },
+    "interested": {
+      "empty": "Nadie ha mostrado interés todavía."
+    },
+    "push": {
+      "interestTitle": "Nuevo interés en {{title}}",
+      "interestBody": "{{name}} está interesado."
     }
   },
   "notFound": {

@@ -424,7 +424,83 @@
       "home": "Home",
       "chats": "Chats",
       "inbox": "Inbox",
-      "network": "Network"
+      "network": "Network",
+      "opportunities": "Opportunities"
+    }
+  },
+  "tabs": {
+    "opportunities": "Opportunities"
+  },
+  "opportunities": {
+    "feed": {
+      "title": "Opportunities",
+      "empty": "No opportunities match your filters.",
+      "newCta": "Post opportunity"
+    },
+    "kind": {
+      "hiring": "Hiring",
+      "seeking_role": "Seeking role",
+      "fundraising": "Fundraising",
+      "investing": "Investing",
+      "cofounder": "Cofounder",
+      "advising": "Advising",
+      "seeking_advisor": "Seeking advisor",
+      "collaboration": "Collaboration"
+    },
+    "filter": {
+      "remoteOnly": "Remote only",
+      "searchPlaceholder": "Search opportunities…"
+    },
+    "composer": {
+      "stepKind": "What kind of opportunity?",
+      "stepContent": "Tell us more",
+      "stepMeta": "Where & when",
+      "stepCounter": "Step {{current}} of {{total}}",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Hiring a senior PM",
+      "bodyLabel": "Description",
+      "bodyPlaceholder": "Tell people what you're looking for…",
+      "tagsLabel": "Tags",
+      "tagsPlaceholder": "comma-separated, e.g. pm, fintech",
+      "cityLabel": "City",
+      "countryLabel": "Country",
+      "remoteLabel": "Open to remote",
+      "expiresLabel": "Expires",
+      "expiresHint": "Posts expire after 30 days by default.",
+      "next": "Next",
+      "back": "Back",
+      "submit": "Post opportunity",
+      "submitting": "Posting…",
+      "submitSuccess": "Posted",
+      "errorKindRequired": "Pick a kind to continue.",
+      "errorTitle": "Title must be 5-120 characters.",
+      "errorBody": "Description must be 10-2000 characters.",
+      "errorTags": "Up to 8 tags, lowercase, 1-30 characters each.",
+      "errorSubmit": "Could not post. Please try again."
+    },
+    "detail": {
+      "title": "Opportunity",
+      "expressInterestCta": "Express interest",
+      "expressedAlready": "You expressed interest",
+      "viewInterested_one": "{{count}} interested",
+      "viewInterested_other": "{{count}} interested",
+      "closeCta": "Close opportunity",
+      "closedBadge": "Closed"
+    },
+    "interest": {
+      "subtitle": "Add a short note so they know what caught your eye.",
+      "notePlaceholder": "Add a note (optional)…",
+      "submit": "Send interest",
+      "success": "Sent",
+      "errorNoteRange": "Note must be at least 10 characters.",
+      "errorGeneric": "Could not send. Please try again."
+    },
+    "interested": {
+      "empty": "No one has expressed interest yet."
+    },
+    "push": {
+      "interestTitle": "New interest in {{title}}",
+      "interestBody": "{{name}} is interested."
     }
   },
   "notFound": {

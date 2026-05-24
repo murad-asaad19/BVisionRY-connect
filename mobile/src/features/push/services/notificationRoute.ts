@@ -52,6 +52,12 @@ export function resolveNotificationRoute(data: PushDataLike | undefined | null):
           ? `/(app)/chats/${conversationId}`
           : '/(app)/(tabs)/inbox';
 
+      // Opportunity interest — entity_id is the opportunity_id; route to detail.
+      case 'opportunity_interest':
+        return entityId
+          ? `/(app)/opportunities/${entityId}`
+          : '/(app)/(tabs)/opportunities';
+
       // Unknown kind — fall through to legacy url if SQL also supplied one.
       default:
         break;

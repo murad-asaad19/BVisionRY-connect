@@ -10,6 +10,7 @@ const ICONS: Record<string, string> = {
   home: '🏠',
   inbox: '📬',
   network: '🤝',
+  opportunities: '💼',
   chats: '💬',
 };
 
@@ -94,6 +95,7 @@ export default function TabsLayout() {
       home: undefined,
       inbox: unreadIntros ?? 0,
       network: undefined,
+      opportunities: undefined,
       chats,
     };
   }, [unreadIntros, unreadConvs]);
@@ -106,6 +108,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="home" />
       <Tabs.Screen name="inbox" />
       <Tabs.Screen name="network" />
+      <Tabs.Screen name="opportunities" />
       <Tabs.Screen name="chats" />
     </Tabs>
   );
