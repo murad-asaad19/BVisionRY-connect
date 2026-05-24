@@ -88,8 +88,11 @@ create table public.opportunities (
   )
 );
 
+-- Index predicate is status-only (expires_at filter is applied at query
+-- time). now() is STABLE not IMMUTABLE and Postgres rejects it in index
+-- predicates; expiry is enforced inside list_opportunities / get_opportunity.
 create index opportunities_open_idx on public.opportunities (created_at desc)
-  where status = 'open' and (expires_at is null or expires_at > now());
+  where status = 'open';
 create index opportunities_author_idx on public.opportunities (author_id, status, created_at desc);
 create index opportunities_kind_idx on public.opportunities (kind, created_at desc)
   where status = 'open';
