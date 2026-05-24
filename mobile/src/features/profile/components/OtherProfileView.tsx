@@ -19,6 +19,10 @@ import { ProfileHero } from '~/features/profile/components/ProfileHero';
 import { ProfileSignalsRow } from '~/features/profile/components/ProfileSignalsRow';
 import { Button } from '~/components/ui/Button';
 import { Banner } from '~/components/ui/Banner';
+import { useUpcomingSlots } from '~/features/office-hours/hooks/useUpcomingSlots';
+import { UpcomingSlotsList } from '~/features/office-hours/components/UpcomingSlotsList';
+import { BookSlotSheet } from '~/features/office-hours/components/BookSlotSheet';
+import type { UpcomingSlot } from '~/features/office-hours/services/officeHours.service';
 
 /** First name of a "First Last" string (falls back to the whole string). */
 function firstName(name: string | null | undefined): string {
@@ -85,6 +89,7 @@ function Body({ profile }: { profile: ProfileT }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [warmComposeTarget, setWarmComposeTarget] = useState<WarmIntroComposeTarget | null>(null);
   const [sentBanner, setSentBanner] = useState(false);
+  const [bookSlotTarget, setBookSlotTarget] = useState<UpcomingSlot | null>(null);
   const { session } = useAuthSession();
   const isSelf = session?.user.id === profile.id;
   const mutual = useIsMutualMatch(isSelf ? undefined : profile.id);
@@ -98,6 +103,8 @@ function Body({ profile }: { profile: ProfileT }) {
     () => (warmSuggestions.data ?? []).find((s) => s.targetId === profile.id) ?? null,
     [warmSuggestions.data, profile.id]
   );
+  const upcomingSlots = useUpcomingSlots(isSelf ? undefined : profile.id);
+  const hasOpenSlots = (upcomingSlots.data?.length ?? 0) > 0;
 
   return (
     <ScrollView className="flex-1 bg-surface">
@@ -170,6 +177,12 @@ function Body({ profile }: { profile: ProfileT }) {
             </Banner>
           </Pressable>
         </View>
+      ) : null}
+
+      {!isSelf && hasOpenSlots ? (
+        <Section title={t('officeHours.profile.sectionTitle')} testID="office-hours-section">
+          <UpcomingSlotsList hostId={profile.id} onPickSlot={(s) => setBookSlotTarget(s)} />
+        </Section>
       ) : null}
 
       {profile.headline ? (
@@ -290,6 +303,15 @@ function Body({ profile }: { profile: ProfileT }) {
         context={warmComposeTarget}
         onClose={() => setWarmComposeTarget(null)}
         onSent={() => setWarmComposeTarget(null)}
+      />
+
+      <BookSlotSheet
+        visible={bookSlotTarget !== null}
+        hostId={profile.id}
+        hostName={profile.name ?? '?'}
+        slot={bookSlotTarget}
+        onClose={() => setBookSlotTarget(null)}
+        onBooked={() => setBookSlotTarget(null)}
       />
     </ScrollView>
   );

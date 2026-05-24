@@ -721,5 +721,50 @@
     "permissionDeniedBody": "Activa las notificaciones en Ajustes para recibir intros, mensajes y actualizaciones de reuniones.",
     "toastOpenA11y": "Abrir notificación",
     "toastDismissA11y": "Descartar notificación"
+  },
+  "officeHours": {
+    "settings": {
+      "title": "Horario de atención",
+      "enableLabel": "Habilitar horario",
+      "enableHelp": "Otros usuarios pueden reservar un espacio directamente desde tu perfil.",
+      "windowsTitle": "Disponibilidad semanal",
+      "addWindow": "Agregar bloque",
+      "weekday_0": "Domingo",
+      "weekday_1": "Lunes",
+      "weekday_2": "Martes",
+      "weekday_3": "Miércoles",
+      "weekday_4": "Jueves",
+      "weekday_5": "Viernes",
+      "weekday_6": "Sábado",
+      "slotDuration": "Duración de cada espacio",
+      "bufferMinutes": "Espacio entre reuniones (minutos)",
+      "maxBookingsPerWeek": "Máximo reservas por semana (por reservante)",
+      "meetingLinkLabel": "Plantilla de enlace de reunión",
+      "meetingLinkHelp": "Usa {{slot_id}} para insertar el id del espacio.",
+      "notesLabel": "Notas previas",
+      "save": "Guardar",
+      "saved": "Guardado"
+    },
+    "profile": {
+      "bookCta": "Reservar un espacio",
+      "sectionTitle": "Reservar horario",
+      "noSlots": "No hay espacios disponibles."
+    },
+    "book": {
+      "title": "Reservar con {{hostName}}",
+      "topicLabel": "¿De qué te gustaría hablar?",
+      "topicPlaceholder": "Tema (5-280 caracteres)",
+      "submit": "Confirmar reserva",
+      "success": "¡Reservado!"
+    },
+    "bookings": {
+      "title": "Mis reservas",
+      "cancel": "Cancelar",
+      "cancelConfirm": "¿Cancelar esta reserva?",
+      "empty": "No hay reservas próximas."
+    },
+    "badge": {
+      "label": "Horario disponible"
+    }
   }
 }

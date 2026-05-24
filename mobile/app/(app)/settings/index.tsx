@@ -45,6 +45,12 @@ export default function SettingsHomeScreen() {
       path: '/(app)/settings/verification',
     },
     {
+      key: 'office-hours',
+      labelKey: 'officeHours.settings.title',
+      descKey: 'officeHours.settings.enableHelp',
+      path: '/(app)/settings/office-hours',
+    },
+    {
       key: 'blocked-users',
       labelKey: 'settings.blockedUsers',
       descKey: 'settings.blockedUsersDesc',

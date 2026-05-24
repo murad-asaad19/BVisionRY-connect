@@ -2,6 +2,7 @@ import { View, Text } from 'react-native';
 import { Card } from '~/components/ui/Card';
 import { AvatarCircle } from '~/components/ui/AvatarCircle';
 import { Pill } from '~/components/ui/Pill';
+import { OfficeHoursBadge } from '~/features/office-hours/components/OfficeHoursBadge';
 
 type Props = {
   variant?: 'default' | 'featured';
@@ -16,6 +17,12 @@ type Props = {
   /** Optional activity slot (e.g. "★ Active this week"). */
   activity?: string | null;
   verified?: boolean;
+  /**
+   * When true, render the `OfficeHoursBadge` alongside the name. Callers
+   * pass this from data they already have — `UserCard` never queries
+   * for it (per-card fetches would 404-storm a feed).
+   */
+  hasOfficeHours?: boolean;
   onPress?: () => void;
   testID?: string;
 };
@@ -31,6 +38,7 @@ export function UserCard({
   location,
   activity,
   verified,
+  hasOfficeHours,
   onPress,
   testID,
 }: Props) {
@@ -39,7 +47,7 @@ export function UserCard({
       <View className="flex-row items-start gap-2.5">
         <AvatarCircle name={name} photoUrl={photoUrl} size={38} featured={variant === 'featured'} />
         <View className="flex-1 min-w-0">
-          <View className="flex-row items-center gap-1.5">
+          <View className="flex-row items-center gap-1.5 flex-wrap">
             <Text className="font-display-bold text-[13px] text-navy" numberOfLines={1}>
               {name}
             </Text>
@@ -48,6 +56,7 @@ export function UserCard({
                 ✓
               </Pill>
             ) : null}
+            {hasOfficeHours ? <OfficeHoursBadge /> : null}
           </View>
           <Text className="text-[11px] text-muted mt-0.5" numberOfLines={1}>
             @{handle} · {primaryRole}

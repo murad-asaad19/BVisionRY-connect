@@ -721,5 +721,50 @@
     "permissionDeniedBody": "Enable notifications in Settings to receive intros, messages, and meeting updates.",
     "toastOpenA11y": "Open notification",
     "toastDismissA11y": "Dismiss notification"
+  },
+  "officeHours": {
+    "settings": {
+      "title": "Office hours",
+      "enableLabel": "Enable office hours",
+      "enableHelp": "Other users can book a slot directly from your profile.",
+      "windowsTitle": "Weekly availability",
+      "addWindow": "Add window",
+      "weekday_0": "Sunday",
+      "weekday_1": "Monday",
+      "weekday_2": "Tuesday",
+      "weekday_3": "Wednesday",
+      "weekday_4": "Thursday",
+      "weekday_5": "Friday",
+      "weekday_6": "Saturday",
+      "slotDuration": "Slot duration",
+      "bufferMinutes": "Buffer between slots (minutes)",
+      "maxBookingsPerWeek": "Max bookings per week (per booker)",
+      "meetingLinkLabel": "Meeting link template",
+      "meetingLinkHelp": "Use {{slot_id}} to insert the slot's id.",
+      "notesLabel": "Pre-meeting notes",
+      "save": "Save",
+      "saved": "Saved"
+    },
+    "profile": {
+      "bookCta": "Book a slot",
+      "sectionTitle": "Book office hours",
+      "noSlots": "No upcoming slots."
+    },
+    "book": {
+      "title": "Book {{hostName}}",
+      "topicLabel": "What would you like to discuss?",
+      "topicPlaceholder": "Topic (5-280 chars)",
+      "submit": "Confirm booking",
+      "success": "Booked!"
+    },
+    "bookings": {
+      "title": "My office-hours bookings",
+      "cancel": "Cancel",
+      "cancelConfirm": "Cancel this booking?",
+      "empty": "No upcoming bookings."
+    },
+    "badge": {
+      "label": "Office hours"
+    }
   }
 }
