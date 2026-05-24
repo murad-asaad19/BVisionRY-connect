@@ -17,9 +17,10 @@ test('user signs in via magic link', async ({ page }) => {
   });
   expect(titleColor).toBe('rgb(255, 255, 255)');
 
-  // 2. Enter email and submit
+  // 2. Enter email and submit via MAGIC LINK button (the `*-submit` button
+  //    now drives the password path — Wave 3 password-auth split).
   await page.getByTestId('sign-in-email').fill(email);
-  await page.getByTestId('sign-in-submit').click();
+  await page.getByTestId('sign-in-magic-link').click();
   await expect(page.getByTestId('sign-in-sent')).toBeVisible({ timeout: 10_000 });
 
   // 3. Pull magic link from Mailpit
@@ -45,4 +46,43 @@ test('renders apple and google sign-in buttons', async ({ page }) => {
   await page.getByTestId('sign-in-email').waitFor({ state: 'visible', timeout: 10_000 });
   await expect(page.getByTestId('sign-in-apple')).toBeVisible();
   await expect(page.getByTestId('sign-in-google')).toBeVisible();
+});
+
+test.describe('Sign-in password path', () => {
+  test('renders both submit + magic-link buttons and the forgot link', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByTestId('sign-in-email')).toBeVisible();
+    await expect(page.getByTestId('sign-in-password')).toBeVisible();
+    await expect(page.getByTestId('sign-in-submit')).toBeVisible();
+    await expect(page.getByTestId('sign-in-magic-link')).toBeVisible();
+    await expect(page.getByTestId('sign-in-forgot')).toBeVisible();
+  });
+
+  test('empty submit surfaces inline required error', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('sign-in-submit').click();
+    // The Input component renders inline errors with `${testID}-error`.
+    await expect(page.getByTestId('sign-in-email-error')).toBeVisible({ timeout: 3_000 });
+  });
+
+  test('magic link with an @handle (not an email) shows the email-required hint', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await page.getByTestId('sign-in-email').fill('@someone');
+    await page.getByTestId('sign-in-magic-link').click();
+    await expect(page.getByTestId('sign-in-error')).toBeVisible({ timeout: 5_000 });
+  });
+
+  test('bad password yields the localized invalid-credentials banner', async ({ page }) => {
+    await page.goto('/');
+    await page.getByTestId('sign-in-email').fill(`nobody-${Date.now()}@example.com`);
+    await page.getByTestId('sign-in-password').fill('wrong-pass-1234');
+    await page.getByTestId('sign-in-submit').click();
+    // mapAuthError("Invalid login credentials") -> auth.errors.invalidCredentials.
+    await expect(page.getByTestId('sign-in-error')).toContainText(
+      /Incorrect username, email, or password/i,
+      { timeout: 10_000 }
+    );
+  });
 });

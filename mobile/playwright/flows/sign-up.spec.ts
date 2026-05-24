@@ -6,7 +6,9 @@ test.describe('Sign-up route', () => {
     await page.goto('/sign-up');
     await expect(page.getByTestId('sign-up-title')).toHaveText('Create your account');
     await expect(page.getByTestId('sign-up-email')).toBeVisible();
+    await expect(page.getByTestId('sign-up-password')).toBeVisible();
     await expect(page.getByTestId('sign-up-submit')).toBeVisible();
+    await expect(page.getByTestId('sign-up-magic-link')).toBeVisible();
     // SSO ladder (Google first, Apple second per gallery A2).
     await expect(page.getByTestId('sign-in-google')).toBeVisible();
     await expect(page.getByTestId('sign-in-apple')).toBeVisible();
@@ -20,17 +22,36 @@ test.describe('Sign-up route', () => {
     await expect(page.getByTestId('sign-in-title')).toBeVisible({ timeout: 10_000 });
   });
 
-  test('shows inline error for invalid email', async ({ page }) => {
+  test('shows inline error for invalid email on the password path', async ({ page }) => {
     await page.goto('/sign-up');
     await page.getByTestId('sign-up-email').fill('not-an-email');
+    await page.getByTestId('sign-up-password').fill('long-enough-pw');
     await page.getByTestId('sign-up-submit').click();
-    await expect(page.getByTestId('sign-up-error')).toContainText('valid email', {
-      ignoreCase: true,
+    // Input renders inline errors at `${testID}-error`.
+    await expect(page.getByTestId('sign-up-email-error')).toContainText(/valid email/i, {
       timeout: 5_000,
     });
   });
 
-  test('happy path: email → magic link → onboarding goal step', async ({ browser }) => {
+  test('shows inline error when password is shorter than 8 characters', async ({ page }) => {
+    await page.goto('/sign-up');
+    await page.getByTestId('sign-up-email').fill(`good-${Date.now()}@example.com`);
+    await page.getByTestId('sign-up-password').fill('short');
+    await page.getByTestId('sign-up-submit').click();
+    await expect(page.getByTestId('sign-up-password-error')).toContainText(/8 characters/i, {
+      timeout: 5_000,
+    });
+  });
+
+  test('password hint flips to success tone when length >= 8', async ({ page }) => {
+    await page.goto('/sign-up');
+    const hint = page.getByTestId('sign-up-password-hint');
+    await expect(hint).toContainText(/8\+ characters/i);
+    await page.getByTestId('sign-up-password').fill('longenough');
+    await expect(hint).toContainText(/Looks good/i);
+  });
+
+  test('happy path: email -> magic link -> onboarding goal step', async ({ browser }) => {
     // Use a fresh context so we have a clean localStorage / cookie state.
     // Reusing the default page context across earlier `sign-in` tests
     // contaminates Supabase's GoTrueClient and the magic-link verifier
@@ -44,7 +65,9 @@ test.describe('Sign-up route', () => {
 
     await page.goto('/sign-up');
     await page.getByTestId('sign-up-email').fill(email);
-    await page.getByTestId('sign-up-submit').click();
+    // The `sign-up-submit` button now requires a password too — use the
+    // magic-link button for the passwordless happy path.
+    await page.getByTestId('sign-up-magic-link').click();
     await expect(page.getByTestId('sign-up-sent')).toBeVisible({ timeout: 10_000 });
 
     const magicLink = await waitForMagicLink(email);

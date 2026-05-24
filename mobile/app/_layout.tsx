@@ -1,5 +1,5 @@
 import '../global.css';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Stack, SplashScreen } from 'expo-router';
 import { QueryClientProvider } from '@tanstack/react-query';
 import {
@@ -15,7 +15,7 @@ import {
   Overlock_400Regular,
   Overlock_700Bold,
 } from '@expo-google-fonts/overlock';
-import { Sentry, initSentry } from '~/lib/sentry';
+import { Sentry, initSentry, SentryErrorBoundary } from '~/lib/sentry';
 import { initFirebase } from '~/lib/firebase';
 import { initI18n } from '~/lib/i18n';
 import { SessionProvider } from '~/features/auth/SessionContext';
@@ -23,10 +23,7 @@ import { queryClient } from '~/lib/query-client';
 import { useRegisterFcmToken } from '~/features/push/hooks/useRegisterFcmToken';
 import { useNotificationTapHandler } from '~/features/push/hooks/useNotificationTapHandler';
 import { PushToast } from '~/features/push/components/PushToast';
-
-initSentry();
-initFirebase();
-initI18n();
+import { useTelemetryStore } from '~/features/settings/store/telemetryStore';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -49,7 +46,36 @@ function RootLayout() {
     Overlock_700Bold,
   });
 
-  const ready = dosisLoaded && overlockLoaded;
+  // GDPR opt-out gate: `initSentry()` and `initFirebase()` read
+  // `useTelemetryStore.getState()` synchronously and short-circuit when
+  // `crashReportsEnabled` / `analyticsEnabled` are false. The persist
+  // middleware rehydrates ASYNCHRONOUSLY from AsyncStorage — calling init at
+  // module-eval time means we read the in-memory defaults (`false`) instead
+  // of the user's saved preference, then either never honour their opt-IN
+  // or, worse, race the rehydrate and get inconsistent behaviour per launch.
+  // Await rehydrate first, THEN init telemetry SDKs.
+  const [telemetryReady, setTelemetryReady] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        await useTelemetryStore.persist.rehydrate();
+      } catch (e) {
+        // Rehydrate is best-effort — a corrupted store should not block boot.
+        console.warn('[boot] telemetry rehydrate failed', e);
+      }
+      if (cancelled) return;
+      initSentry();
+      initFirebase();
+      initI18n();
+      setTelemetryReady(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const ready = dosisLoaded && overlockLoaded && telemetryReady;
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync().catch(() => {});
@@ -58,13 +84,15 @@ function RootLayout() {
   if (!ready) return null;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <SessionProvider>
-        <PushBootstrap />
-        <PushToast />
-        <Stack screenOptions={{ headerShown: false }} />
-      </SessionProvider>
-    </QueryClientProvider>
+    <SentryErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider>
+          <PushBootstrap />
+          <PushToast />
+          <Stack screenOptions={{ headerShown: false }} />
+        </SessionProvider>
+      </QueryClientProvider>
+    </SentryErrorBoundary>
   );
 }
 

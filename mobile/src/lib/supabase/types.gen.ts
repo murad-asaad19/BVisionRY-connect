@@ -226,6 +226,7 @@ export type Database = {
           id: string
           last_seen_at: string
           platform: Database["public"]["Enums"]["device_platform"]
+          revoked_at: string | null
           token: string
           user_id: string
         }
@@ -234,6 +235,7 @@ export type Database = {
           id?: string
           last_seen_at?: string
           platform: Database["public"]["Enums"]["device_platform"]
+          revoked_at?: string | null
           token: string
           user_id: string
         }
@@ -242,6 +244,7 @@ export type Database = {
           id?: string
           last_seen_at?: string
           platform?: Database["public"]["Enums"]["device_platform"]
+          revoked_at?: string | null
           token?: string
           user_id?: string
         }
@@ -469,7 +472,9 @@ export type Database = {
           meeting_proposal_id: string | null
           sender_id: string | null
           transcript: string | null
-          transcript_status: string | null
+          transcript_status:
+            | Database["public"]["Enums"]["transcript_status"]
+            | null
         }
         Insert: {
           body?: string | null
@@ -485,7 +490,9 @@ export type Database = {
           meeting_proposal_id?: string | null
           sender_id?: string | null
           transcript?: string | null
-          transcript_status?: string | null
+          transcript_status?:
+            | Database["public"]["Enums"]["transcript_status"]
+            | null
         }
         Update: {
           body?: string | null
@@ -501,7 +508,9 @@ export type Database = {
           meeting_proposal_id?: string | null
           sender_id?: string | null
           transcript?: string | null
-          transcript_status?: string | null
+          transcript_status?:
+            | Database["public"]["Enums"]["transcript_status"]
+            | null
         }
         Relationships: [
           {
@@ -562,7 +571,6 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string
-          email: string
           goal_text: string | null
           goal_type: Database["public"]["Enums"]["goal_type"] | null
           goal_updated_at: string | null
@@ -591,7 +599,6 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
-          email: string
           goal_text?: string | null
           goal_type?: Database["public"]["Enums"]["goal_type"] | null
           goal_updated_at?: string | null
@@ -620,7 +627,6 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
-          email?: string
           goal_text?: string | null
           goal_type?: Database["public"]["Enums"]["goal_type"] | null
           goal_updated_at?: string | null
@@ -759,7 +765,6 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string
-          email: string
           goal_text: string | null
           goal_type: Database["public"]["Enums"]["goal_type"] | null
           goal_updated_at: string | null
@@ -870,7 +875,9 @@ export type Database = {
           meeting_proposal_id: string | null
           sender_id: string | null
           transcript: string | null
-          transcript_status: string | null
+          transcript_status:
+            | Database["public"]["Enums"]["transcript_status"]
+            | null
         }
         SetofOptions: {
           from: "*"
@@ -879,6 +886,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      delete_my_account: { Args: never; Returns: undefined }
       dispatch_push: {
         Args: {
           p_event_id: string
@@ -908,7 +916,9 @@ export type Database = {
           meeting_proposal_id: string | null
           sender_id: string | null
           transcript: string | null
-          transcript_status: string | null
+          transcript_status:
+            | Database["public"]["Enums"]["transcript_status"]
+            | null
         }
         SetofOptions: {
           from: "*"
@@ -921,20 +931,23 @@ export type Database = {
       get_daily_matches: {
         Args: { p_for_date?: string }
         Returns: {
+          bio: string
+          city: string
+          country: string
           created_at: string
           for_date_local: string
+          goal_type: Database["public"]["Enums"]["goal_type"]
+          handle: string
+          headline: string
           id: string
           match_reason: string
+          name: string
+          photo_url: string
           pick_user_id: string
-          user_id: string
-          viewed_at: string | null
+          primary_role: Database["public"]["Enums"]["role_kind"]
+          roles: Database["public"]["Enums"]["role_kind"][]
+          viewed_at: string
         }[]
-        SetofOptions: {
-          from: "*"
-          to: "daily_matches"
-          isOneToOne: false
-          isSetofReturn: true
-        }
       }
       get_public_profile: {
         Args: { p_handle: string }
@@ -1045,6 +1058,7 @@ export type Database = {
           id: string
           last_seen_at: string
           platform: Database["public"]["Enums"]["device_platform"]
+          revoked_at: string | null
           token: string
           user_id: string
         }
@@ -1089,6 +1103,38 @@ export type Database = {
           roles: Database["public"]["Enums"]["role_kind"][]
         }[]
       }
+      send_image_message: {
+        Args: {
+          p_conversation_id: string
+          p_media_mime: string
+          p_media_path: string
+          p_media_size_bytes: number
+        }
+        Returns: {
+          body: string | null
+          conversation_id: string
+          created_at: string
+          deleted_at: string | null
+          edited_at: string | null
+          id: string
+          kind: Database["public"]["Enums"]["message_kind"]
+          media_duration_ms: number | null
+          media_path: string | null
+          media_size_bytes: number | null
+          meeting_proposal_id: string | null
+          sender_id: string | null
+          transcript: string | null
+          transcript_status:
+            | Database["public"]["Enums"]["transcript_status"]
+            | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "messages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       send_intro: {
         Args: { p_note: string; p_recipient_id: string }
         Returns: {
@@ -1109,6 +1155,39 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      send_voice_message: {
+        Args: {
+          p_conversation_id: string
+          p_duration_ms: number
+          p_media_mime: string
+          p_media_path: string
+          p_media_size_bytes: number
+        }
+        Returns: {
+          body: string | null
+          conversation_id: string
+          created_at: string
+          deleted_at: string | null
+          edited_at: string | null
+          id: string
+          kind: Database["public"]["Enums"]["message_kind"]
+          media_duration_ms: number | null
+          media_path: string | null
+          media_size_bytes: number | null
+          meeting_proposal_id: string | null
+          sender_id: string | null
+          transcript: string | null
+          transcript_status:
+            | Database["public"]["Enums"]["transcript_status"]
+            | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "messages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       set_github_verification: {
         Args: { p_github_id: number; p_github_username: string }
         Returns: {
@@ -1116,7 +1195,6 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string
-          email: string
           goal_text: string | null
           goal_type: Database["public"]["Enums"]["goal_type"] | null
           goal_updated_at: string | null
@@ -1199,6 +1277,7 @@ export type Database = {
         Args: { p_conversation_id: string }
         Returns: undefined
       }
+      unregister_device_token: { Args: { p_token: string }; Returns: undefined }
     }
     Enums: {
       device_platform: "ios" | "android" | "web"
@@ -1229,6 +1308,8 @@ export type Database = {
         | "meeting_reminder"
         | "daily_matches_ready"
         | "goal_staleness"
+        | "meeting_proposal"
+        | "meeting_confirmed"
       report_reason:
         | "spam"
         | "harassment"
@@ -1237,6 +1318,7 @@ export type Database = {
         | "other"
       report_target_type: "profile" | "message" | "intro"
       role_kind: "founder" | "leader" | "builder" | "investor"
+      transcript_status: "pending" | "ready" | "failed" | "unsupported"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1397,6 +1479,8 @@ export const Constants = {
         "meeting_reminder",
         "daily_matches_ready",
         "goal_staleness",
+        "meeting_proposal",
+        "meeting_confirmed",
       ],
       report_reason: [
         "spam",
@@ -1407,6 +1491,7 @@ export const Constants = {
       ],
       report_target_type: ["profile", "message", "intro"],
       role_kind: ["founder", "leader", "builder", "investor"],
+      transcript_status: ["pending", "ready", "failed", "unsupported"],
     },
   },
 } as const

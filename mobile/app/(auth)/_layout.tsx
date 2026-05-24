@@ -1,21 +1,25 @@
 import { Redirect, Stack } from 'expo-router';
-import { useAuthSession } from '~/features/auth/SessionContext';
-import { useCurrentUserProfile } from '~/features/profile/hooks/useCurrentUserProfile';
+import { ActivityIndicator, View } from 'react-native';
+import { useNextRoute } from '~/features/auth/hooks/useNextRoute';
 
 export default function AuthLayout() {
-  const { session, loading: sessionLoading } = useAuthSession();
-  const { data: profile, isLoading: profileLoading } = useCurrentUserProfile();
+  const { state, href } = useNextRoute();
 
-  // If a session already exists when the user lands on an auth screen (e.g.
-  // they just completed password sign-up or sign-in), bounce them straight
-  // through the auth gate so they don't sit on /sign-up after the request
-  // succeeds. Wait until both session + profile have resolved to avoid a
-  // flash of /sign-in for unauthenticated users.
-  if (!sessionLoading && session && !profileLoading) {
-    if (profile && !profile.onboarded) {
-      return <Redirect href="/(onboarding)/goal" />;
-    }
-    return <Redirect href="/(app)/(tabs)/home" />;
+  // Render a spinner during loading to avoid a flash of the auth form for
+  // users who already have a session (e.g. just completed sign-up/sign-in).
+  if (state === 'loading') {
+    return (
+      <View className="flex-1 items-center justify-center bg-surface">
+        <ActivityIndicator color="#fff" />
+      </View>
+    );
+  }
+
+  // Anything other than `unauthed` means the user has a destination outside
+  // /(auth) — bounce them through the gate (suspended → /suspended,
+  // unfinished onboarding → /(onboarding)/goal, otherwise → /(app)).
+  if (state !== 'unauthed') {
+    return <Redirect href={href!} />;
   }
 
   return <Stack screenOptions={{ headerShown: false }} />;

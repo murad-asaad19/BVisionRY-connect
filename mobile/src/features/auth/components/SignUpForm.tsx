@@ -1,21 +1,24 @@
-import { useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { View, Text, Pressable, type TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
-import {
-  sendMagicLink,
-  signUpWithPassword,
-} from '~/features/auth/services/auth.service';
+import { signUpWithPassword } from '~/features/auth/services/auth.service';
+import { mapAuthError } from '~/features/auth/services/errorMap';
+import { useMagicLinkSubmit } from '~/features/auth/hooks/useMagicLinkSubmit';
 import { Button } from '~/components/ui/Button';
 import { Input } from '~/components/ui/Input';
 import { SocialSignInButtons } from '~/features/auth/components/SocialSignInButtons';
 import { AuthShell } from '~/features/auth/components/AuthShell';
 
-const EmailSchema = z.string().email();
-const PasswordSchema = z.string().min(8, 'Password must be at least 8 characters.');
-type FormValues = { email: string; password: string };
+const MIN_PASSWORD = 8;
+
+const FormSchema = z.object({
+  email: z.string().trim().min(1, 'auth.errors.emailRequired').email('auth.errors.invalidEmail'),
+  password: z.string().min(MIN_PASSWORD, 'auth.errors.passwordTooShort'),
+});
+type FormValues = z.infer<typeof FormSchema>;
 
 /**
  * Create-account screen (mockup A2). Supports either email + password sign-up
@@ -23,70 +26,72 @@ type FormValues = { email: string; password: string };
  */
 export function SignUpForm() {
   const { t } = useTranslation();
-  const [submitState, setSubmitState] = useState<
-    'idle' | 'submitting' | 'sent' | 'signed-up' | 'error'
-  >('idle');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const passwordRef = useRef<TextInput>(null);
+
+  const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+  const [passwordErrorKey, setPasswordErrorKey] = useState<string | null>(null);
+
   const {
     control,
     handleSubmit,
     getValues,
+    watch,
     formState: { errors },
-  } = useForm<FormValues>({ defaultValues: { email: '', password: '' } });
+  } = useForm<FormValues>({
+    defaultValues: { email: '', password: '' },
+    mode: 'onSubmit',
+  });
 
-  const onCreateAccount = async ({ email, password }: FormValues) => {
-    setSubmitState('submitting');
-    setErrorMessage(null);
-    const emailParsed = EmailSchema.safeParse(email);
-    if (!emailParsed.success) {
-      setErrorMessage('Enter a valid email address.');
-      setSubmitState('error');
+  const magic = useMagicLinkSubmit({
+    getEmail: () => getValues('email'),
+    mode: 'signUp',
+  });
+
+  const passwordValue = watch('password');
+  const passwordMet = passwordValue.length >= MIN_PASSWORD;
+
+  const onCreateAccount = useCallback(async (values: FormValues) => {
+    // Run zod through safeParse to surface the i18n-key issues.
+    const parsed = FormSchema.safeParse(values);
+    if (!parsed.success) {
+      setPasswordErrorKey(parsed.error.issues[0]?.message ?? 'auth.errors.signUpFailed');
       return;
     }
-    const pwParsed = PasswordSchema.safeParse(password);
-    if (!pwParsed.success) {
-      setErrorMessage(pwParsed.error.issues[0]?.message ?? 'Invalid password.');
-      setSubmitState('error');
-      return;
-    }
+    setPasswordSubmitting(true);
+    setPasswordErrorKey(null);
     try {
-      await signUpWithPassword(email, password);
-      setSubmitState('signed-up');
+      await signUpWithPassword(parsed.data.email, parsed.data.password);
       // Supabase auto-issues a session on signUp; the auth gate redirects
       // the user to /(onboarding)/goal because profile.onboarded = false.
     } catch (e) {
-      setErrorMessage(e instanceof Error ? e.message : 'Sign-up failed');
-      setSubmitState('error');
+      setPasswordErrorKey(mapAuthError(e, 'signUp'));
+    } finally {
+      setPasswordSubmitting(false);
     }
-  };
+  }, []);
 
-  const onMagicLink = async () => {
-    setSubmitState('submitting');
-    setErrorMessage(null);
-    const email = getValues('email');
-    const parsed = EmailSchema.safeParse(email);
-    if (!parsed.success) {
-      setErrorMessage('Enter a valid email address.');
-      setSubmitState('error');
-      return;
-    }
-    try {
-      await sendMagicLink(email);
-      setSubmitState('sent');
-    } catch (e) {
-      setErrorMessage(e instanceof Error ? e.message : 'Sign-up failed');
-      setSubmitState('error');
-    }
-  };
+  const anySubmitting = passwordSubmitting || magic.submitting;
+  const errorKey = passwordErrorKey ?? magic.errorKey;
+
+  // Email-field error: prefer the typed zod message (key) over a generic one.
+  const emailErrorKey = useMemo(() => {
+    if (!errors.email) return undefined;
+    const m = errors.email.message;
+    return m ?? 'auth.errors.emailRequired';
+  }, [errors.email]);
+
+  const passwordFieldErrorKey = useMemo(() => {
+    if (!errors.password) return undefined;
+    const m = errors.password.message;
+    return m ?? 'auth.errors.passwordRequired';
+  }, [errors.password]);
 
   return (
     <AuthShell brandTestID="sign-up-brand">
       <Text testID="sign-up-title" className="font-display-bold text-[18px] text-navy mb-1">
-        Create your account
+        {t('auth.signUpTitle')}
       </Text>
-      <Text className="font-body text-[12px] text-muted mb-3">
-        Discovery for founders & builders.
-      </Text>
+      <Text className="font-body text-[12px] text-muted mb-3">{t('auth.signUpTagline')}</Text>
 
       <SocialSignInButtons />
 
@@ -99,85 +104,125 @@ export function SignUpForm() {
       <Controller
         control={control}
         name="email"
-        rules={{ required: true }}
-        render={({ field: { onChange, value } }) => (
+        rules={{
+          required: 'auth.errors.emailRequired',
+          // Zod runs at submit, but light pattern guard keeps the inline error
+          // accurate when the user blurs from an obviously invalid value.
+          validate: (v) =>
+            z.string().email().safeParse(v.trim()).success || 'auth.errors.invalidEmail',
+        }}
+        render={({ field: { onChange, value, onBlur } }) => (
           <Input
             testID="sign-up-email"
-            label="Email"
+            label={t('auth.email')}
             value={value}
-            onChangeText={onChange}
-            placeholder={t('signIn.emailPlaceholder')}
+            onChangeText={(s) => {
+              onChange(s);
+              if (passwordErrorKey) setPasswordErrorKey(null);
+              magic.reset();
+            }}
+            onBlur={onBlur}
+            placeholder={t('auth.emailPlaceholder')}
             autoCapitalize="none"
+            autoCorrect={false}
             keyboardType="email-address"
+            textContentType="emailAddress"
             autoComplete="email"
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current?.focus()}
+            errorText={emailErrorKey ? t(emailErrorKey) : undefined}
           />
         )}
       />
-      {errors.email && (
-        <Text className="text-danger-text text-[11px] mb-2">Email is required.</Text>
-      )}
 
       <Controller
         control={control}
         name="password"
-        render={({ field: { onChange, value } }) => (
+        rules={{
+          required: 'auth.errors.passwordRequired',
+          minLength: { value: MIN_PASSWORD, message: 'auth.errors.passwordTooShort' },
+        }}
+        render={({ field: { onChange, value, onBlur } }) => (
           <Input
+            ref={passwordRef}
             testID="sign-up-password"
-            label="Password (min 8 characters)"
+            label={t('auth.password')}
             value={value}
-            onChangeText={onChange}
-            placeholder="••••••••"
+            onChangeText={(s) => {
+              onChange(s);
+              if (passwordErrorKey) setPasswordErrorKey(null);
+            }}
+            onBlur={onBlur}
+            placeholder={t('auth.passwordPlaceholder')}
             secureTextEntry
             autoCapitalize="none"
+            autoCorrect={false}
+            textContentType="newPassword"
             autoComplete="new-password"
+            returnKeyType="done"
+            onSubmitEditing={handleSubmit(onCreateAccount)}
+            errorText={passwordFieldErrorKey ? t(passwordFieldErrorKey) : undefined}
           />
         )}
       />
+
+      {/* Inline length hint — flips to success tone once the rule is met. */}
+      <Text
+        testID="sign-up-password-hint"
+        className={`font-body text-[10px] -mt-1 mb-2 ${
+          passwordMet ? 'text-success-text' : 'text-muted'
+        }`}
+      >
+        {passwordMet ? t('auth.passwordHint8Met') : t('auth.passwordHint8')}
+      </Text>
 
       <Button
         testID="sign-up-submit"
         variant="primary"
         onPress={handleSubmit(onCreateAccount)}
-        loading={submitState === 'submitting'}
+        loading={passwordSubmitting}
+        disabled={anySubmitting && !passwordSubmitting}
       >
-        Create account
+        {t('auth.submitSignUp')}
       </Button>
 
       <View className="mt-2">
         <Button
           testID="sign-up-magic-link"
           variant="outline"
-          onPress={onMagicLink}
-          loading={submitState === 'submitting'}
+          onPress={magic.send}
+          loading={magic.submitting}
+          disabled={anySubmitting && !magic.submitting}
         >
-          Or send me a magic link
+          {t('auth.magicLinkSubmitAlt')}
         </Button>
       </View>
 
       <View className="flex-row items-center justify-center mt-3 gap-1">
-        <Text className="font-body text-[11px] text-muted">Have an account?</Text>
+        <Text className="font-body text-[11px] text-muted">{t('auth.haveAccount')}</Text>
         <Pressable
           testID="sign-up-go-sign-in"
           onPress={() => router.replace('/(auth)/sign-in' as never)}
         >
-          <Text className="font-display-bold text-[11px] text-navy">Sign in</Text>
+          <Text className="font-display-bold text-[11px] text-navy">{t('auth.signInCta')}</Text>
         </Pressable>
       </View>
 
-      {submitState === 'sent' && (
+      {magic.sentTo && (
         <Text
           testID="sign-up-sent"
           className="text-success-text font-body text-[12px] mt-3 text-center"
         >
-          {t('signIn.sent')}
+          {t('auth.magicLinkSent')}
         </Text>
       )}
-      {submitState === 'error' && errorMessage && (
+      {errorKey && (
         <Text
           testID="sign-up-error"
+          accessibilityLiveRegion="polite"
           className="text-danger-text font-body text-[12px] mt-3 text-center"
         >
-          {errorMessage}
+          {t(errorKey)}
         </Text>
       )}
     </AuthShell>

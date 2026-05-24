@@ -3,7 +3,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { useAuthSession } from '~/features/auth/SessionContext';
 
 export default function AuthCallback() {
-  const { session, loading } = useAuthSession();
+  const { loading } = useAuthSession();
 
   if (loading) {
     return (
@@ -13,5 +13,8 @@ export default function AuthCallback() {
     );
   }
 
-  return <Redirect href={session ? '/(app)/(tabs)/home' : '/(auth)/sign-in'} />;
+  // Defer routing to the root (`app/index.tsx` + `useNextRoute`) which knows
+  // about onboarding/suspension state — we just bounce out of this callback
+  // screen once the deep-link has been consumed.
+  return <Redirect href="/" />;
 }

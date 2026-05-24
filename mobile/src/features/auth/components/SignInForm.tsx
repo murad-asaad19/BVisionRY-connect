@@ -1,82 +1,84 @@
-import { useState } from 'react';
-import { View, Text, Pressable, Alert } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { View, Text, Pressable, Alert, type TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
-import {
-  sendMagicLink,
-  signInWithIdentifier,
-} from '~/features/auth/services/auth.service';
+import { signInWithIdentifier } from '~/features/auth/services/auth.service';
+import { mapAuthError } from '~/features/auth/services/errorMap';
+import { useMagicLinkSubmit } from '~/features/auth/hooks/useMagicLinkSubmit';
 import { Button } from '~/components/ui/Button';
 import { Input } from '~/components/ui/Input';
 import { SocialSignInButtons } from '~/features/auth/components/SocialSignInButtons';
 import { AuthShell } from '~/features/auth/components/AuthShell';
 
-const EmailSchema = z.string().email();
-type FormValues = { identifier: string; password: string };
+const FormSchema = z.object({
+  identifier: z.string().trim().min(1, 'auth.errors.identifierRequired'),
+  password: z.string().min(1, 'auth.errors.passwordRequired'),
+});
+type FormValues = z.infer<typeof FormSchema>;
 
 export function SignInForm() {
   const { t } = useTranslation();
-  const [submitState, setSubmitState] = useState<
-    'idle' | 'submitting' | 'sent' | 'signed-in' | 'error'
-  >('idle');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const passwordRef = useRef<TextInput>(null);
+
+  const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+  const [passwordErrorKey, setPasswordErrorKey] = useState<string | null>(null);
 
   const {
     control,
     handleSubmit,
     getValues,
     formState: { errors },
-  } = useForm<FormValues>({ defaultValues: { identifier: '', password: '' } });
+  } = useForm<FormValues>({
+    defaultValues: { identifier: '', password: '' },
+    mode: 'onSubmit',
+  });
 
-  const onPasswordSignIn = async ({ identifier, password }: FormValues) => {
-    setSubmitState('submitting');
-    setErrorMessage(null);
-    if (!identifier.trim()) {
-      setErrorMessage('Enter your email or username.');
-      setSubmitState('error');
-      return;
-    }
-    if (!password) {
-      setErrorMessage('Enter your password.');
-      setSubmitState('error');
-      return;
-    }
-    try {
-      await signInWithIdentifier(identifier, password);
-      setSubmitState('signed-in');
-      // Auth gate handles the redirect to /(app)/(tabs)/home or /(onboarding)/goal.
-    } catch (e) {
-      setErrorMessage(e instanceof Error ? e.message : 'Sign-in failed');
-      setSubmitState('error');
-    }
-  };
+  const magic = useMagicLinkSubmit({
+    // Magic link works only for the email path — if the user typed a handle
+    // we surface the same "needs a full email" validation error.
+    getEmail: () => getValues('identifier'),
+    mode: 'signIn',
+  });
 
-  const onMagicLink = async () => {
-    setSubmitState('submitting');
-    setErrorMessage(null);
-    const identifier = getValues('identifier').trim();
-    const parsed = EmailSchema.safeParse(identifier);
-    if (!parsed.success) {
-      setErrorMessage('Magic link needs a full email address.');
-      setSubmitState('error');
-      return;
-    }
-    try {
-      await sendMagicLink(identifier);
-      setSubmitState('sent');
-    } catch (e) {
-      setErrorMessage(e instanceof Error ? e.message : 'Sign-in failed');
-      setSubmitState('error');
-    }
-  };
+  const onPasswordSignIn = useCallback(
+    async (values: FormValues) => {
+      const parsed = FormSchema.safeParse(values);
+      if (!parsed.success) {
+        // rhf's Controller `required` rules already block this; defensive only.
+        setPasswordErrorKey(parsed.error.issues[0]?.message ?? 'auth.errors.signInFailed');
+        return;
+      }
+      setPasswordSubmitting(true);
+      setPasswordErrorKey(null);
+      try {
+        await signInWithIdentifier(parsed.data.identifier, parsed.data.password);
+        // Auth gate handles the redirect to /(app)/(tabs)/home or /(onboarding)/goal.
+      } catch (e) {
+        setPasswordErrorKey(mapAuthError(e, 'signIn'));
+      } finally {
+        setPasswordSubmitting(false);
+      }
+    },
+    []
+  );
+
+  // Either path's spinner blocks the other to prevent double-submission.
+  const anySubmitting = passwordSubmitting || magic.submitting;
+  // Inline error band combines whichever surfaced last.
+  const errorKey = passwordErrorKey ?? magic.errorKey;
+
+  const onForgotPassword = useCallback(() => {
+    Alert.alert(t('auth.forgotPassword'), t('auth.forgotPasswordBody'));
+  }, [t]);
 
   return (
     <AuthShell brandTestID="sign-in-title">
-      <Text testID="sign-in-welcome" className="font-display-bold text-[18px] text-navy mb-3">
-        {t('signIn.welcome')}
+      <Text testID="sign-in-welcome" className="font-display-bold text-[18px] text-navy mb-1">
+        {t('auth.signInTitle')}
       </Text>
+      <Text className="font-body text-[12px] text-muted mb-3">{t('auth.signInTagline')}</Text>
 
       <SocialSignInButtons />
 
@@ -90,36 +92,57 @@ export function SignInForm() {
         control={control}
         name="identifier"
         rules={{ required: true }}
-        render={({ field: { onChange, value } }) => (
+        render={({ field: { onChange, value, onBlur } }) => (
           <Input
             testID="sign-in-email"
-            label="Email or username"
+            label={t('auth.emailOrUsername')}
             value={value}
-            onChangeText={onChange}
-            placeholder="you@example.com or @handle"
+            onChangeText={(s) => {
+              onChange(s);
+              // Reset any stale banner once the user starts editing again.
+              if (passwordErrorKey) setPasswordErrorKey(null);
+              magic.reset();
+            }}
+            onBlur={onBlur}
+            placeholder={t('auth.identifierPlaceholder')}
             autoCapitalize="none"
+            autoCorrect={false}
             keyboardType="email-address"
+            textContentType="username"
             autoComplete="username"
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current?.focus()}
+            errorText={
+              errors.identifier ? t('auth.errors.identifierRequired') : undefined
+            }
           />
         )}
       />
-      {errors.identifier && (
-        <Text className="text-danger-text text-[11px] mb-2">Email or username is required.</Text>
-      )}
 
       <Controller
         control={control}
         name="password"
-        render={({ field: { onChange, value } }) => (
+        rules={{ required: true }}
+        render={({ field: { onChange, value, onBlur } }) => (
           <Input
+            ref={passwordRef}
             testID="sign-in-password"
-            label="Password"
+            label={t('auth.password')}
             value={value}
-            onChangeText={onChange}
-            placeholder="••••••••"
+            onChangeText={(s) => {
+              onChange(s);
+              if (passwordErrorKey) setPasswordErrorKey(null);
+            }}
+            onBlur={onBlur}
+            placeholder={t('auth.passwordPlaceholder')}
             secureTextEntry
             autoCapitalize="none"
+            autoCorrect={false}
+            textContentType="password"
             autoComplete="current-password"
+            returnKeyType="done"
+            onSubmitEditing={handleSubmit(onPasswordSignIn)}
+            errorText={errors.password ? t('auth.errors.passwordRequired') : undefined}
           />
         )}
       />
@@ -128,59 +151,55 @@ export function SignInForm() {
         testID="sign-in-submit"
         variant="primary"
         onPress={handleSubmit(onPasswordSignIn)}
-        loading={submitState === 'submitting'}
+        loading={passwordSubmitting}
+        disabled={anySubmitting && !passwordSubmitting}
       >
-        {t('signIn.submit')}
+        {t('auth.submitSignIn')}
       </Button>
 
       <View className="mt-2">
         <Button
           testID="sign-in-magic-link"
           variant="outline"
-          onPress={onMagicLink}
-          loading={submitState === 'submitting'}
+          onPress={magic.send}
+          loading={magic.submitting}
+          disabled={anySubmitting && !magic.submitting}
         >
-          Send magic link instead
+          {t('auth.magicLinkSubmit')}
         </Button>
       </View>
 
-      <Pressable
-        testID="sign-in-forgot"
-        className="mt-3 self-center"
-        onPress={() =>
-          Alert.alert(
-            'Forgot password?',
-            'Use "Send magic link" — enter your email and tap the one-time link we send.'
-          )
-        }
-      >
-        <Text className="font-body text-[11px] text-muted underline">Forgot password?</Text>
+      <Pressable testID="sign-in-forgot" className="mt-3 self-center" onPress={onForgotPassword}>
+        <Text className="font-body text-[11px] text-muted underline">
+          {t('auth.forgotPassword')}
+        </Text>
       </Pressable>
 
       <View className="flex-row items-center justify-center mt-3 gap-1">
-        <Text className="font-body text-[11px] text-muted">Don&apos;t have an account?</Text>
+        <Text className="font-body text-[11px] text-muted">{t('auth.noAccount')}</Text>
         <Pressable
           testID="sign-in-go-sign-up"
           onPress={() => router.push('/(auth)/sign-up' as never)}
         >
-          <Text className="font-display-bold text-[11px] text-navy">Sign up</Text>
+          <Text className="font-display-bold text-[11px] text-navy">{t('auth.signUpCta')}</Text>
         </Pressable>
       </View>
 
-      {submitState === 'sent' && (
+      {magic.sentTo && (
         <Text
           testID="sign-in-sent"
           className="text-success-text font-body text-[12px] mt-3 text-center"
         >
-          {t('signIn.sent')}
+          {t('auth.magicLinkSent')}
         </Text>
       )}
-      {submitState === 'error' && errorMessage && (
+      {errorKey && (
         <Text
           testID="sign-in-error"
+          accessibilityLiveRegion="polite"
           className="text-danger-text font-body text-[12px] mt-3 text-center"
         >
-          {errorMessage}
+          {t(errorKey)}
         </Text>
       )}
     </AuthShell>
