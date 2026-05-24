@@ -66,7 +66,8 @@ test('two users complete a send-and-accept intro flow', async ({ browser }) => {
   const alice2Page = await alice2Ctx.newPage();
   await alice2Page.goto('/');
   await alice2Page.getByTestId('sign-in-email').fill(aliceEmail);
-  await alice2Page.getByTestId('sign-in-submit').click();
+  // Magic-link button (sign-in-submit is now the password flow).
+  await alice2Page.getByTestId('sign-in-magic-link').click();
   const link = await waitForMagicLink(aliceEmail);
   await alice2Page.goto(link);
 

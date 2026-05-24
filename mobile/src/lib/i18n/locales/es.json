@@ -1,7 +1,6 @@
 {
   "signIn": {
     "welcome": "Bienvenido",
-    "tagline": "Te enviaremos un enlace por correo para iniciar sesión.",
     "brandTagline": "Encuentra a quienes impulsan tu trabajo",
     "emailPlaceholder": "tu@ejemplo.com",
     "submit": "Iniciar sesión",
@@ -10,6 +9,55 @@
     "or": "o",
     "apple": "Continuar con Apple",
     "google": "Continuar con Google"
+  },
+  "auth": {
+    "signInTitle": "Bienvenido de nuevo",
+    "signInTagline": "Inicia sesión para seguir construyendo tu red.",
+    "signUpTitle": "Crea tu cuenta",
+    "signUpTagline": "Descubrimiento para fundadores y creadores.",
+    "email": "Correo",
+    "emailOrUsername": "Correo o usuario",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "identifierPlaceholder": "tu@ejemplo.com o @usuario",
+    "password": "Contraseña",
+    "passwordPlaceholder": "••••••••",
+    "passwordHint8": "8+ caracteres",
+    "passwordHint8Met": "Se ve bien",
+    "submitSignIn": "Iniciar sesión",
+    "submitSignUp": "Crear cuenta",
+    "magicLinkSubmit": "Enviar enlace mágico",
+    "magicLinkSubmitAlt": "O envíame un enlace mágico",
+    "magicLinkSent": "Revisa tu correo para encontrar el enlace mágico.",
+    "haveAccount": "¿Ya tienes una cuenta?",
+    "noAccount": "¿No tienes una cuenta?",
+    "signUpCta": "Regístrate",
+    "signInCta": "Inicia sesión",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "forgotPasswordBody": "Escribe tu correo y toca \"Enviar enlace mágico\" abajo.",
+    "errors": {
+      "socialSignInTitle": "No se pudo iniciar sesión",
+      "oauthCancelled": "Inicio de sesión cancelado",
+      "network": "Sin conexión",
+      "invalidCredentials": "Usuario, correo o contraseña incorrectos.",
+      "identifierRequired": "Escribe tu correo o usuario.",
+      "emailRequired": "Escribe tu correo.",
+      "invalidEmail": "Escribe un correo válido.",
+      "passwordRequired": "Escribe tu contraseña.",
+      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
+      "magicLinkNeedsEmail": "El enlace mágico necesita un correo completo.",
+      "signInFailed": "Error al iniciar sesión. Inténtalo de nuevo.",
+      "signUpFailed": "Error al crear la cuenta. Inténtalo de nuevo.",
+      "rateLimited": "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
+      "emailNotConfirmed": "Confirma tu correo antes de iniciar sesión.",
+      "generic": "Algo salió mal. Inténtalo de nuevo."
+    }
+  },
+  "suspended": {
+    "title": "Tu cuenta está en revisión",
+    "body": "Nuestro equipo está revisando tu cuenta. Te enviaremos un correo cuando se resuelva.",
+    "submitAppeal": "Enviar apelación",
+    "signOut": "Cerrar sesión",
+    "contactBody": "Para apelar, contacta a support@bvisionry.com."
   },
   "home": {
     "title": "Inicio",
@@ -31,7 +79,7 @@
     "help": "Ayuda y soporte",
     "helpDesc": "Contacta a confianza y seguridad",
     "contactTitle": "¿Necesitas ayuda?",
-    "contactBody": "Escribe a support@bvisionry.example para temas de confianza y seguridad o preguntas sobre el producto.",
+    "contactBody": "Contacta a nuestro equipo de confianza y seguridad para preguntas sobre el producto o para reportar abusos.",
     "signOut": "Cerrar sesión",
     "profile": "Perfil",
     "profileDesc": "Editar nombre, alias, biografía, foto",
@@ -44,17 +92,287 @@
     "version": "Versión",
     "telemetry": "Telemetría",
     "analytics": "Analítica",
-    "crashReports": "Informes de errores"
+    "crashReports": "Informes de errores",
+    "about": "Acerca de",
+    "deleteConfirm": {
+      "title": "¿Eliminar la cuenta?",
+      "body": "Esto eliminará permanentemente tu perfil y tus datos. Esta acción no se puede deshacer.",
+      "action": "Eliminar",
+      "cancel": "Cancelar"
+    },
+    "exportFailed": "Error al exportar",
+    "exportReady": "Exportación lista",
+    "exportReadyBody": "Tu exportación de datos está lista ({{chars}} caracteres).",
+    "exportShareTitle": "Exportar mis datos",
+    "deleteFailed": "Error al eliminar",
+    "accountDeletedTitle": "Cuenta eliminada",
+    "accountDeletedBody": "Tu cuenta y tus datos se han eliminado.",
+    "restartRequired": {
+      "title": "Reinicio necesario",
+      "body": "Vuelve a abrir la app para aplicar la nueva dirección de diseño."
+    },
+    "supportEmail": "support@bvisionry.com",
+    "signOutConfirm": {
+      "title": "¿Cerrar sesión?",
+      "body": "Tendrás que iniciar sesión de nuevo para usar la app."
+    },
+    "notif": {
+      "kind": {
+        "intro_received": "Intro entrante",
+        "intro_accepted": "Intro aceptada",
+        "message_received": "Nuevo mensaje de chat",
+        "voice_received": "Nota de voz",
+        "meeting_proposal": "Propuesta de reunión",
+        "meeting_confirmed": "Reunión confirmada",
+        "meeting_reminder": "Recordatorio de reunión",
+        "daily_matches_ready": "Coincidencias del día listas",
+        "goal_staleness": "Recordatorio de objetivo"
+      },
+      "channel": {
+        "push": "Push",
+        "email": "Correo",
+        "in_app": "En la app"
+      },
+      "header": "Notificación",
+      "decayBanner": "Los recordatorios por inactividad no están disponibles."
+    }
+  },
+  "legal": {
+    "privacy": {
+      "title": "Política de privacidad",
+      "body": "BVisionRY Connect recopila y procesa los datos que proporcionas al crear tu perfil (nombre, alias, rol, objetivo, ciudad, país, foto), los mensajes que envías, las intros que haces y las reuniones que propones. Usamos estos datos para ofrecer el producto principal: emparejarte con otros profesionales, entregar mensajes y notificarte sobre eventos.\n\nSolo compartimos datos con proveedores de infraestructura necesarios para operar el servicio (Supabase para almacenamiento, Firebase para notificaciones push, Sentry para informes de errores). No vendemos tus datos.\n\nPuedes exportar todos tus datos en cualquier momento desde Ajustes, y puedes solicitar la eliminación completa en cualquier momento. La eliminación es permanente e irreversible.\n\n¿Preguntas? Escribe a privacy@bvisionry.com."
+    },
+    "terms": {
+      "title": "Términos de servicio",
+      "body": "Al usar BVisionRY Connect, aceptas usar el servicio para fines de networking profesional lícitos. No acosarás, suplantarás, harás spam ni compartirás contenido inapropiado. Podemos suspender o eliminar cuentas que infrinjan estas reglas.\n\nEl servicio se proporciona tal cual, sin garantía. Podemos cambiar las funciones en cualquier momento. No somos responsables de daños derivados del uso del servicio.\n\n¿Preguntas? Escribe a legal@bvisionry.com."
+    }
   },
   "onboarding": {
-    "identity": "¿Quién eres?",
-    "roles": "¿Cuáles son tus roles?",
-    "goal": "¿Cuál es tu objetivo?",
-    "about": "Cuéntanos sobre ti"
+    "goal": {
+      "title": "¿Cuál es tu objetivo?",
+      "label": "Objetivo",
+      "placeholder": "Estoy buscando...",
+      "counter": "{{count}} / {{max}}",
+      "examplesPrefix": "Ejemplos",
+      "examples": [
+        "Contratar a una diseñadora fraccional",
+        "Levantar pre-semilla para una idea de healthtech"
+      ],
+      "next": "Siguiente",
+      "errorRange": "Describe tu objetivo en 10-280 caracteres."
+    },
+    "identity": {
+      "title": "¿Quién eres?",
+      "name": "Nombre",
+      "namePlaceholder": "Ahmad",
+      "handle": "Usuario (minúsculas, sin espacios)",
+      "handlePlaceholder": "ahmad",
+      "handleHint": "Cambiar tu usuario luego crea una redirección por 90 días, después 410 Gone.",
+      "next": "Siguiente",
+      "errorNameRequired": "Escribe tu nombre (1-80 caracteres).",
+      "errorHandleInvalid": "Usuario inválido",
+      "errorHandleTaken": "Ese usuario ya está en uso.",
+      "errorHandleCheck": "Error al verificar"
+    },
+    "roles": {
+      "title": "¿A qué te dedicas?",
+      "primaryQuestion": "¿Cuál es tu rol principal?",
+      "next": "Siguiente",
+      "errorPickOne": "Selecciona al menos un rol.",
+      "errorPickPrimary": "Elige cuál te describe mejor.",
+      "founder": "Fundador",
+      "leader": "Líder",
+      "builder": "Constructor",
+      "investor": "Inversor"
+    },
+    "about": {
+      "title": "Un poco sobre ti",
+      "city": "Ciudad",
+      "cityPlaceholder": "San Francisco",
+      "country": "País",
+      "countryPlaceholder": "España",
+      "headline": "Titular (opcional, 5-120 caracteres)",
+      "headlinePlaceholder": "Construyendo herramientas de IA para creadores",
+      "bio": "Biografía (opcional, 10-1000 caracteres)",
+      "bioPlaceholder": "Soy un...",
+      "finish": "Finalizar",
+      "errorLocation": "La ciudad y el país son obligatorios.",
+      "errorHeadlineBio": "El titular debe tener 5-120 caracteres; la biografía 10-1000 (o déjala en blanco).",
+      "errorMissing": "Faltan algunos campos obligatorios. Vuelve y completa los pasos anteriores.",
+      "errorSession": "Sin sesión activa. Inicia sesión de nuevo.",
+      "errorSubmit": "Error al enviar"
+    },
+    "back": "Atrás"
+  },
+  "privacy": {
+    "blockedListHint": "Las personas bloqueadas no pueden volver a solicitar conexión — incluso si las desbloqueas.",
+    "blockedListEmpty": "No has bloqueado a nadie.",
+    "blockedAt": "Bloqueado {{date}}",
+    "unblock": "Desbloquear",
+    "block": "Bloquear",
+    "blockUser": "Bloquear usuario",
+    "report": "Reportar",
+    "openActions": "Abrir acciones del perfil",
+    "blockConfirm": {
+      "title": "¿Bloquear a @{{handle}}?",
+      "body": "No verán tu perfil, ni tú el suyo. No podrán volver a solicitar conexión."
+    },
+    "togglesGroup": {
+      "discovery": "Descubrimiento",
+      "chat": "Chat",
+      "safety": "Seguridad"
+    },
+    "toggle": {
+      "privateModeLabel": "Modo privado",
+      "privateModeDesc": "Oculto del feed, las coincidencias diarias y la búsqueda. Los enlaces directos al perfil siguen funcionando.",
+      "readReceiptsLabel": "Confirmaciones de lectura",
+      "readReceiptsDesc": "Permite que otros vean cuándo has leído sus mensajes.",
+      "publicInvestorLabel": "Página pública de Inversor verificado",
+      "publicInvestorDesc": "Tu página pública en connect.bvisionry.com/u/{handle}. Los perfiles de Inversor verificado están desactivados por defecto."
+    },
+    "toggleFailed": {
+      "title": "No se pudo guardar",
+      "body": "Tu cambio no se aplicó. Inténtalo de nuevo."
+    },
+    "reportModal": {
+      "title": "Reportar",
+      "quoted": "Mensaje citado",
+      "noteLabel": "Detalles adicionales (opcional)",
+      "notePlaceholder": "¿Qué pasó?",
+      "cancel": "Cancelar",
+      "submit": "Enviar",
+      "pickReasonTitle": "Elige un motivo",
+      "pickReasonBody": "Selecciona qué reportar antes de enviar.",
+      "sentTitle": "Reportado",
+      "sentBody": "Gracias, el equipo lo revisará.",
+      "failedTitle": "Error al reportar",
+      "reasons": {
+        "spam": "Spam",
+        "harassment": "Acoso",
+        "impersonation": "Suplantación",
+        "inappropriate": "Contenido inapropiado",
+        "other": "Otro"
+      }
+    }
+  },
+  "verification": {
+    "rankingBoost": "Los roles verificados obtienen un +15% de impulso en el ranking que crece durante 14 días.",
+    "verifiedPill": "Verificado",
+    "comingSoon": "Próximamente",
+    "connect": "Conectar",
+    "disconnect": "Desconectar",
+    "disconnectConfirm": {
+      "title": "¿Desconectar GitHub?",
+      "body": "Tu insignia verificada será eliminada.",
+      "cancel": "Cancelar",
+      "confirm": "Desconectar"
+    },
+    "connectFailed": {
+      "title": "Error al verificar GitHub"
+    },
+    "unlinkFailed": {
+      "title": "Error al desvincular",
+      "body": "No pudimos desvincular GitHub de tu cuenta. La verificación fue eliminada, pero quizás debas revocar el acceso en los ajustes de GitHub."
+    },
+    "proofs": {
+      "founder": {
+        "domain": {
+          "label": "Correo del dominio",
+          "description": "Verifica con un correo de dominio propio."
+        },
+        "team_page": {
+          "label": "Página /team",
+          "description": "Aparece en la página de equipo de tu empresa."
+        }
+      },
+      "investor": {
+        "domain": {
+          "label": "Correo del dominio",
+          "description": "Verifica con un correo de dominio propio."
+        },
+        "crunchbase": {
+          "label": "Perfil de Crunchbase",
+          "description": "Vincula un perfil público de Crunchbase."
+        },
+        "portfolio": {
+          "label": "Listados de portfolio",
+          "description": "Portfolio público que te incluya."
+        }
+      },
+      "builder": {
+        "github": {
+          "label": "GitHub",
+          "description": "Verifica un commit público firmado con la cuenta conectada."
+        }
+      },
+      "leader": {
+        "domain": {
+          "label": "Correo del dominio",
+          "description": "Verifica con un correo de dominio propio."
+        }
+      }
+    }
+  },
+  "connections": {
+    "empty": "Aún no tienes conexiones. Acepta una intro para empezar."
+  },
+  "common": {
+    "cancel": "Cancelar"
   },
   "intros": {
     "inboxTitle": "Bandeja de entrada",
-    "sentTitle": "Enviados"
+    "sentTitle": "Enviados",
+    "tabs": {
+      "received": "Recibidos",
+      "sent": "Enviados"
+    },
+    "empty": {
+      "title": "Aún no hay intros",
+      "received": "Cuando alguien te envíe una intro, aparecerá aquí. Vuelve mañana a las 4 a. m. de tu hora para ver nuevas selecciones.",
+      "sent": "Aún no has enviado ninguna intro. Encuentra a alguien interesante en Descubrir.",
+      "browse": "Ver las coincidencias de hoy"
+    },
+    "banner": {
+      "dailyCapTitle": "Límite diario alcanzado",
+      "dailyCapBody": "Las intros entrantes superiores a {{cap}} quedan en cola para mañana."
+    },
+    "compose": {
+      "hint": "Cuenta por qué quieres conectar. Mínimo 80 caracteres. Tu mensaje pasa por una verificación rápida de seguridad antes de entregarse.",
+      "placeholder": "Te escribo porque...",
+      "counter": "{{count}} / {{max}} (mín. {{min}})",
+      "cancel": "Cancelar",
+      "send": "Enviar",
+      "errorRange": "La nota debe tener entre 80 y 400 caracteres.",
+      "errorDuplicate": "Ya tienes una intro pendiente con esta persona.",
+      "errorCooldown": "No puedes enviar otra intro a esta persona durante 30 días tras su rechazo.",
+      "errorRateLimit": "Has alcanzado el límite de envíos de hoy. Inténtalo de nuevo mañana.",
+      "errorExpired": "Esta intro ha caducado.",
+      "errorGeneric": "Error al enviar. Inténtalo de nuevo."
+    },
+    "badge": {
+      "delivered": "Pendiente",
+      "accepted": "Aceptada",
+      "declined": "Rechazada",
+      "expired": "Caducada",
+      "connected": "Conectado",
+      "awaitingResponse": "Entregada, esperando respuesta"
+    },
+    "detail": {
+      "notFound": "Intro no encontrada",
+      "back": "Atrás",
+      "accepted": "Intro aceptada.",
+      "declined": "Intro rechazada.",
+      "expiredHint": "Esta intro ha caducado y ya no puede gestionarse.",
+      "declineSilent": "Rechazar es silencioso — el remitente no será notificado.",
+      "to": "Para",
+      "from": "De",
+      "note": "NOTA",
+      "says": "{{name}} DICE",
+      "accept": "Aceptar",
+      "decline": "Rechazar",
+      "acceptFailed": "No se pudo aceptar",
+      "declineFailed": "No se pudo rechazar"
+    }
   },
   "chat": {
     "chatsTitle": "Chats",
@@ -68,10 +386,28 @@
     "edit": "Editar",
     "delete": "Eliminar",
     "save": "Guardar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "newMessages": "Nuevos mensajes",
+    "messageActionsTitle": "Acciones del mensaje",
+    "previewImage": "📷 Foto",
+    "previewVoice": "🎤 Mensaje de voz",
+    "previewMeeting": "📅 Propuesta de reunión"
   },
   "network": {
     "title": "Red"
+  },
+  "nav": {
+    "tabs": {
+      "home": "Inicio",
+      "chats": "Chats",
+      "inbox": "Bandeja",
+      "network": "Red"
+    }
+  },
+  "notFound": {
+    "title": "No encontrado",
+    "body": "Página no encontrada",
+    "goHome": "Ir al inicio"
   },
   "profile": {
     "share": "Compartir",
@@ -87,7 +423,69 @@
     "photoNudgeTitle": "Añade una foto de perfil",
     "photoNudgeBody": "Los perfiles con foto consiguen mejores coincidencias.",
     "photoNudgeAction": "Añadir foto",
-    "photoNudgeDismiss": "Descartar"
+    "photoNudgeDismiss": "Descartar",
+    "notFound": "Perfil no encontrado.",
+    "aboutSection": "Acerca de",
+    "signInToConnect": "Inicia sesión para conectar",
+    "handleTaken": "Ese alias ya está en uso.",
+    "edit": {
+      "title": "Editar perfil",
+      "tapPhoto": "Toca la foto para cambiarla",
+      "name": "Nombre",
+      "handle": "Alias",
+      "handleHint": "Cambiar tu alias más adelante crea una redirección por 90 días, luego 410 Gone.",
+      "headlineLabel": "Titular (opcional)",
+      "bioLabel": "Biografía (opcional)",
+      "goalTextLabel": "Descripción del objetivo",
+      "goalTypeLabel": "Tipo de objetivo",
+      "goalTypePick": "Elige un tipo de objetivo",
+      "city": "Ciudad",
+      "country": "País",
+      "roles": "Roles",
+      "primaryRole": "Rol principal",
+      "pickAtLeastOneRole": "Selecciona al menos un rol.",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "saveFailed": "Error al guardar",
+      "validationFailed": "Error de validación",
+      "checkingHandle": "Comprobando alias…"
+    },
+    "confirmDiscard": {
+      "title": "¿Descartar cambios?",
+      "body": "Tienes ediciones sin guardar. ¿Salir sin guardar?",
+      "keepEditing": "Seguir editando",
+      "discard": "Descartar"
+    },
+    "goalRefresh": {
+      "titleInfo": "¿Cómo va tu objetivo? ¿Lo actualizas?",
+      "bodyInfo": "Las personas con las que coincides dependen de esto. Manténlo al día.",
+      "titleWarn": "Tu objetivo empieza a quedarse anticuado",
+      "bodyWarn": "Una actualización breve mantendrá tus coincidencias relevantes.",
+      "titleStale": "Tu objetivo no ha cambiado en más de 8 semanas",
+      "bodyStale": "Una actualización breve mantiene relevantes tus coincidencias. Te enviaremos un correo si sigue así de antiguo.",
+      "update": "Actualizar",
+      "snooze": "Posponer {{days}} días",
+      "snoozeA11y": "Posponer este recordatorio {{days}} días"
+    },
+    "settingsA11y": "Abrir ajustes",
+    "editAction": "Editar",
+    "privateModeTitle": "Modo privado activado",
+    "privateModeBody": "Estás oculto del feed, las coincidencias diarias y la búsqueda.",
+    "section": {
+      "headline": "Titular",
+      "bio": "Biografía",
+      "goal": "Objetivo",
+      "roles": "Roles",
+      "location": "Ubicación",
+      "verification": "Verificación"
+    },
+    "introOnHoldTitle": "Envío de intro en pausa",
+    "introOnHoldBody": "{{name}} rechazó una intro reciente. Podrás volver a enviar después del {{date}}.",
+    "introOnHoldButton": "Enviar intro · disponible {{date}}",
+    "sendIntro": "Enviar intro",
+    "introSent": "Intro enviada.",
+    "noUserWithHandle": "Sin usuario con alias @{{handle}}.",
+    "notFoundTitle": "No encontrado"
   },
   "discovery": {
     "mutual": "Mutuo",
@@ -96,14 +494,124 @@
     "filter": {
       "role": "Rol",
       "goal": "Objetivo",
-      "country": "País"
+      "country": "País",
+      "clear": "Quitar filtros"
     },
     "thinPoolTitle": "Pocas coincidencias hoy",
     "thinPoolBody": "Refina tu objetivo para encontrar más personas relevantes.",
-    "thinPoolAction": "Refinar objetivo"
+    "thinPoolBanner_one": "Estamos siendo selectivos para ti. Solo {{count}} coincidencia fuerte hoy — tu objetivo es específico. Seguimos atentos.",
+    "thinPoolBanner_other": "Estamos siendo selectivos para ti. Solo {{count}} coincidencias fuertes hoy — tu objetivo es específico. Seguimos atentos.",
+    "thinPoolAction": "Refinar objetivo",
+    "emptyPicks": "Aún no hay selecciones — invita a tus amigos para llenar tus coincidencias.",
+    "emptyFeed": "Aún no hay nadie por descubrir.",
+    "roles": {
+      "founder": "Fundador",
+      "leader": "Líder",
+      "builder": "Constructor",
+      "investor": "Inversor"
+    },
+    "goals": {
+      "hire": "Contratar",
+      "be_hired": "Ser contratado",
+      "co_found": "Cofundar",
+      "invest": "Invertir",
+      "take_investment": "Recibir inversión",
+      "advise": "Asesorar",
+      "find_advisor": "Buscar asesor",
+      "peer_connect": "Conectar entre pares"
+    }
   },
   "meetings": {
     "yourTime": "tu hora",
-    "addToCalendar": "Añadir al calendario"
+    "addToCalendar": "Añadir al calendario",
+    "title": "Reunión",
+    "titleWith": "Reunión con @{{handle}}",
+    "statusConfirmed": "Reunión confirmada",
+    "statusProposed": "Reunión propuesta",
+    "statusDeclined": "Reunión rechazada",
+    "statusCancelled": "Reunión cancelada",
+    "durationLabel": "Duración: {{minutes}} min",
+    "durationHeader": "Reunión propuesta · {{minutes}} min",
+    "decline": "Rechazar",
+    "confirm": "Confirmar",
+    "cancelProposal": "Cancelar propuesta",
+    "proposeAnother": "Proponer otra",
+    "inputTimeZoneHint": "en {{tz}}",
+    "prompt": {
+      "title": "¿Se realizó esta reunión?",
+      "subtitle": "Cuéntanos para mejorar tus coincidencias.",
+      "yes": "Sí — se realizó",
+      "rescheduled": "Reprogramada para otro momento",
+      "noShow": "No — no se presentaron",
+      "fallback": "Si no recibimos respuesta en 48 horas, omitiremos este mensaje y preguntaremos más tarde."
+    },
+    "review": {
+      "title": "¿Cómo fue la reunión?",
+      "subtitle": "Tu respuesta nos ayuda a mejorar la calidad de las coincidencias. Nota opcional para tus registros.",
+      "useful": "👍 Útil",
+      "notUseful": "😐 No útil",
+      "noShow": "🚫 No se presentó",
+      "notePlaceholder": "Nota opcional…",
+      "pickOutcome": "Selecciona un resultado.",
+      "submitFailed": "Error al enviar",
+      "skip": "Omitir",
+      "submit": "Enviar"
+    },
+    "propose": {
+      "title": "Proponer una reunión",
+      "subtitle": "Elige 1-3 opciones de horario. La otra persona escoge una.",
+      "slot1Label": "Horario 1 (obligatorio)",
+      "slot2Label": "Horario 2 (opcional)",
+      "slot3Label": "Horario 3 (opcional)",
+      "durationLabel": "Duración",
+      "durationOption": "{{minutes}} min",
+      "urlLabel": "URL de la reunión (opcional)",
+      "urlPlaceholder": "https://meet.google.com/abc-defg-hij",
+      "cancel": "Cancelar",
+      "send": "Enviar",
+      "errors": {
+        "slotsRange": "Elige 1-3 fechas/horas futuras.",
+        "duration": "La duración debe ser de 15-240 minutos.",
+        "url": "La URL de la reunión debe empezar con https:// (o dejarla en blanco).",
+        "submitFailed": "Error al proponer"
+      }
+    }
+  },
+  "media": {
+    "recordVoice": "Grabar mensaje de voz",
+    "playVoice": "Reproducir mensaje de voz",
+    "pauseVoice": "Pausar mensaje de voz",
+    "sendPhoto": "Enviar foto",
+    "openImage": "Abrir imagen",
+    "closeImage": "Cerrar visor de imagen",
+    "addPhoto": "Añadir foto",
+    "uploadAvatar": "Subir foto de perfil",
+    "recorderHint": "Máx 2 minutos — los mensajes de voz se transcriben por accesibilidad y seguridad.",
+    "transcriptLabel": "Transcripción",
+    "transcriptPending": "Transcripción pendiente…",
+    "transcriptUnavailable": "Transcripción no disponible",
+    "transcriptUnsupported": "Transcripción no disponible en dev",
+    "showTranscript": "Mostrar transcripción",
+    "hideTranscript": "Ocultar transcripción",
+    "transcriptFooter": "Los mensajes de voz se transcriben por accesibilidad y seguridad.",
+    "send": "Enviar",
+    "cancel": "Cancelar",
+    "permissionMicTitle": "Se necesita acceso al micrófono",
+    "permissionMicBody": "Habilita el permiso de micrófono en Ajustes para grabar mensajes de voz.",
+    "permissionPhotoTitle": "Se necesita acceso a la fototeca",
+    "permissionPhotoBody": "Habilita el permiso de fotos en Ajustes para compartir imágenes.",
+    "openSettings": "Abrir Ajustes",
+    "imageTooLargeTitle": "Imagen demasiado grande",
+    "imageTooLargeBody": "Las imágenes deben ser menores a {{maxMb}}MB.",
+    "voiceTooLongTitle": "Grabación demasiado larga",
+    "voiceTooLongBody": "Los mensajes de voz deben durar menos de {{maxMinutes}} minutos.",
+    "voiceTooLargeTitle": "Grabación demasiado grande",
+    "voiceTooLargeBody": "Los mensajes de voz deben ser menores a {{maxMb}}MB."
+  },
+  "push": {
+    "permissionDeniedTitle": "Notificaciones desactivadas",
+    "permissionDeniedBody": "Activa las notificaciones en Ajustes para recibir intros, mensajes y actualizaciones de reuniones.",
+    "toastOpenA11y": "Abrir notificación",
+    "toastDismissA11y": "Descartar notificación"
   }
 }

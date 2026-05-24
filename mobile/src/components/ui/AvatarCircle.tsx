@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { View, Text, Image } from 'react-native';
+import { colors } from '~/theme/colors';
 
 export type AvatarSize = 32 | 38 | 48 | 64 | 76 | 96;
 
@@ -29,13 +31,17 @@ function initials(name: string): string {
 }
 
 export function AvatarCircle({ name, photoUrl, size = 48, featured = false, testID }: Props) {
+  const [imageFailed, setImageFailed] = useState(false);
   const dim = { width: size, height: size, borderRadius: size / 2 };
   // Double-ring halo: inner white ring (2px), outer gold ring (1px).
   // RN doesn't render multi-shadow box-shadow consistently — use a wrapping View with padding + a colored bg.
-  const haloOuter = featured ? '#ffc107' : '#fff8e1'; // gold or gold-pale
+  const haloOuter = featured ? colors.gold : colors.goldPale;
+  const showImage = photoUrl && !imageFailed;
   return (
     <View
       testID={testID ?? 'avatar-circle'}
+      accessibilityRole="image"
+      accessibilityLabel={name}
       style={{
         padding: 1,
         backgroundColor: haloOuter,
@@ -49,7 +55,7 @@ export function AvatarCircle({ name, photoUrl, size = 48, featured = false, test
       <View
         style={{
           padding: 2,
-          backgroundColor: '#ffffff',
+          backgroundColor: colors.white,
           borderRadius: (size + 4) / 2,
           width: size + 4,
           height: size + 4,
@@ -57,20 +63,25 @@ export function AvatarCircle({ name, photoUrl, size = 48, featured = false, test
           justifyContent: 'center',
         }}
       >
-        {photoUrl ? (
-          <Image source={{ uri: photoUrl }} style={dim} accessibilityIgnoresInvertColors />
+        {showImage ? (
+          <Image
+            source={{ uri: photoUrl! }}
+            style={dim}
+            accessibilityIgnoresInvertColors
+            onError={() => setImageFailed(true)}
+          />
         ) : (
           <View
             style={{
               ...dim,
-              backgroundColor: '#0f3460',
+              backgroundColor: colors.navy,
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
             <Text
               style={{
-                color: '#ffffff',
+                color: colors.white,
                 fontSize: TEXT_SIZE[size],
                 fontFamily: 'Dosis_700Bold',
               }}

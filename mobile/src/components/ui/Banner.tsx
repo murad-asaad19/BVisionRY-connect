@@ -1,5 +1,6 @@
 import { View, Text } from 'react-native';
 import type { ReactNode } from 'react';
+import { intentClasses, type Intent } from '~/components/ui/variants';
 
 type Variant = 'warning' | 'info' | 'success' | 'muted';
 
@@ -11,31 +12,16 @@ type Props = {
   testID?: string;
 };
 
-const STYLES: Record<Variant, { bg: string; text: string; border: string }> = {
-  warning: {
-    bg: 'bg-warning-bg',
-    text: 'text-warning-text',
-    border: 'border border-warning-border',
-  },
-  info: {
-    bg: 'bg-info-bg',
-    text: 'text-info-text',
-    border: 'border border-info-border',
-  },
-  success: {
-    bg: 'bg-success-bg',
-    text: 'text-success-text',
-    border: 'border border-success-border',
-  },
-  muted: {
-    bg: 'bg-slate-100',
-    text: 'text-body',
-    border: 'border border-border',
-  },
+// Banner kept its own `muted` alias for backward compat; map it to the shared `neutral` intent.
+const VARIANT_TO_INTENT: Record<Variant, Intent> = {
+  warning: 'warning',
+  info: 'info',
+  success: 'success',
+  muted: 'neutral',
 };
 
 export function Banner({ variant, title, children, leadingIcon, testID }: Props) {
-  const s = STYLES[variant];
+  const s = intentClasses(VARIANT_TO_INTENT[variant]);
   return (
     <View
       testID={testID}

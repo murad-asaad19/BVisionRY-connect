@@ -43,7 +43,11 @@ export function UserCard({
             <Text className="font-display-bold text-[13px] text-navy" numberOfLines={1}>
               {name}
             </Text>
-            {verified ? <Pill variant="success">✓</Pill> : null}
+            {verified ? (
+              <Pill variant="success" accessibilityLabel="Verified">
+                ✓
+              </Pill>
+            ) : null}
           </View>
           <Text className="text-[11px] text-muted mt-0.5" numberOfLines={1}>
             @{handle} · {primaryRole}

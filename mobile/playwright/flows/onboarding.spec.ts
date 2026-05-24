@@ -9,7 +9,8 @@ test('new user completes onboarding and lands on home', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByTestId('sign-in-title')).toBeVisible();
   await page.getByTestId('sign-in-email').fill(email);
-  await page.getByTestId('sign-in-submit').click();
+  // Magic-link button (sign-in-submit is now the password flow).
+  await page.getByTestId('sign-in-magic-link').click();
   await expect(page.getByTestId('sign-in-sent')).toBeVisible();
 
   const magicLink = await waitForMagicLink(email);

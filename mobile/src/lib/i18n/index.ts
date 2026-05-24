@@ -45,6 +45,21 @@ export function initI18n(): void {
     fallbackLng: 'en',
     interpolation: { escapeValue: false },
     compatibilityJSON: 'v4',
+    debug: __DEV__,
+    // Always render a string. The TS contract on `t()` is `string`, and
+    // i18next's default `returnNull: true` violates that — a missing key
+    // would yield `null` and propagate through to UI text props that don't
+    // accept null, surfacing as crashes ("RawText 'null'") or invisible
+    // labels. With `returnNull: false`, missing keys render the key path
+    // string itself — visible in QA, never crashes, never a silent gap.
+    returnNull: false,
+    saveMissing: __DEV__,
+    missingKeyHandler: (lngs, ns, key) => {
+      if (__DEV__) {
+        // eslint-disable-next-line no-console
+        console.warn('[i18n] missing key', { lngs, ns, key });
+      }
+    },
   });
   applyLayoutDirection(lng);
   initialized = true;

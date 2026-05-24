@@ -69,7 +69,8 @@ test.describe('Slice 13 — Chat media', () => {
     const alice2Page = await alice2Ctx.newPage();
     await alice2Page.goto('/');
     await alice2Page.getByTestId('sign-in-email').fill(aliceEmail);
-    await alice2Page.getByTestId('sign-in-submit').click();
+    // Magic-link button (sign-in-submit is now the password flow).
+    await alice2Page.getByTestId('sign-in-magic-link').click();
     const link = await waitForMagicLink(aliceEmail);
     await alice2Page.goto(link);
     await alice2Page.getByTestId('home-avatar').waitFor({ state: 'visible', timeout: 15_000 });

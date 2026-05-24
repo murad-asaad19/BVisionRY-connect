@@ -1,28 +1,30 @@
-// IMPORTANT: keep these values in sync with the `@theme` block in `global.css`.
+// Keep in sync with the `@theme` block in `global.css`.
 // global.css is the source for Tailwind utilities (Tailwind v4 is CSS-first);
-// this file is the source for direct TS/JSX usage (e.g., TextInput placeholderTextColor).
+// this file is the source for direct TS/JSX usage (e.g. TextInput placeholderTextColor).
 export const colors = {
-  bg: {
-    primary: '#0B1220',
-    secondary: '#111827',
-    elevated: '#1F2937',
-  },
-  text: {
-    primary: '#F9FAFB',
-    secondary: '#9CA3AF',
-    muted: '#6B7280',
-  },
-  accent: {
-    primary: '#6366F1',
-    hover: '#4F46E5',
-  },
-  border: {
-    subtle: '#1F2937',
-    strong: '#374151',
-  },
-  semantic: {
-    success: '#10B981',
-    warning: '#F59E0B',
-    danger: '#EF4444',
-  },
+  navy: '#0f3460',
+  navyLight: '#1a4a80',
+  navyDark: '#0a2340',
+  gold: '#ffc107',
+  goldLight: '#ffe187',
+  goldPale: '#fff8e1',
+  bg: '#f8f8f8',
+  white: '#ffffff',
+  text: '#212529',
+  muted: '#94a3b8',
+  border: '#e5e7eb',
+  slate100: '#f1f5f9',
+  slate300: '#cbd5e1',
+  successBg: '#dcfce7',
+  success: '#15803d',
+  successBorder: '#4ade80',
+  warningBg: '#fef3c7',
+  warning: '#b45309',
+  warningBorder: '#fbbf24',
+  dangerBg: '#fee2e2',
+  danger: '#b91c1c',
+  dangerBorder: '#ef4444',
+  infoBg: '#dbeafe',
+  info: '#1d4ed8',
+  infoBorder: '#93c5fd',
 } as const;

@@ -1,5 +1,7 @@
 import { ReactNode } from 'react';
 import { View, Text, Pressable, ActivityIndicator } from 'react-native';
+import { colors } from '~/theme/colors';
+import { Banner } from '~/components/ui/Banner';
 
 type Props<T> = {
   query: {
@@ -12,6 +14,8 @@ type Props<T> = {
   loadingFallback?: ReactNode;
   emptyFallback?: ReactNode;
   isEmpty?: (data: T) => boolean;
+  /** Copy shown when `isEmpty` returns true and no explicit `emptyFallback` is provided. */
+  emptyText?: string;
   children: (data: T) => ReactNode;
 };
 
@@ -20,6 +24,7 @@ export function QueryState<T>({
   loadingFallback,
   emptyFallback,
   isEmpty,
+  emptyText,
   children,
 }: Props<T>) {
   if (query.isLoading) {
@@ -27,7 +32,7 @@ export function QueryState<T>({
       <>
         {loadingFallback ?? (
           <View className="py-12 items-center" testID="query-state-loading">
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={colors.navy} />
           </View>
         )}
       </>
@@ -59,7 +64,12 @@ export function QueryState<T>({
   }
 
   if (isEmpty && isEmpty(query.data)) {
-    return <>{emptyFallback ?? null}</>;
+    if (emptyFallback) return <>{emptyFallback}</>;
+    return (
+      <View className="py-6 px-4" testID="query-state-empty">
+        <Banner variant="muted">{emptyText ?? 'Nothing here yet'}</Banner>
+      </View>
+    );
   }
 
   return <>{children(query.data)}</>;

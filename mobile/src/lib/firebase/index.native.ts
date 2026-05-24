@@ -15,13 +15,16 @@ export async function initFirebase(): Promise<void> {
     return;
   }
   // Best-effort opt-out: read persisted prefs synchronously. If the Zustand
-  // store hasn't rehydrated from AsyncStorage yet, defaults to enabled.
-  // Pref changes via Settings take effect on the NEXT app launch.
+  // store hasn't rehydrated from AsyncStorage yet, defaults to false
+  // (opt-out for GDPR). Pref changes via Settings take effect on the NEXT
+  // app launch.
   const prefs = useTelemetryStore.getState();
   await analytics().setAnalyticsCollectionEnabled(prefs.analyticsEnabled);
   await crashlytics().setCrashlyticsCollectionEnabled(prefs.crashReportsEnabled);
   initialized = true;
-  console.log('[firebase] initialized', firebase.app().name);
+  if (__DEV__) {
+    console.log('[firebase] initialized', firebase.app().name);
+  }
 }
 
 export async function getFcmToken(): Promise<string | null> {
@@ -44,4 +47,18 @@ export function onForegroundMessage(
 ): () => void {
   if (!env.FIREBASE_ENABLED) return () => {};
   return messaging().onMessage(handler);
+}
+
+/**
+ * Subscribe to FCM token rotation events. Returns an unsubscribe function.
+ * No-op when Firebase is disabled (returns an unsubscribe that does nothing).
+ *
+ * Note: cross-platform consumers should NOT import this from `~/lib/firebase`
+ * because the lib-agent-owned `index.ts` shim only re-exports the web no-ops.
+ * Prefer a dynamic `import('@react-native-firebase/messaging')` gated on
+ * `Platform.OS !== 'web'` in the consumer.
+ */
+export function subscribeToTokenRefresh(cb: (token: string) => void): () => void {
+  if (!env.FIREBASE_ENABLED) return () => {};
+  return messaging().onTokenRefresh(cb);
 }

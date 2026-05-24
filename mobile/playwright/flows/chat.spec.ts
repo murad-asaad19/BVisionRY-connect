@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { signUpAndOnboard } from '../helpers/onboard';
+import { readSupabaseEnv, signUpAndOnboard } from '../helpers/onboard';
 import { purgeAllMessages, waitForMagicLink } from '../helpers/mailpit';
 
 test('two users send and receive live messages', async ({ browser }) => {
@@ -62,7 +62,8 @@ test('two users send and receive live messages', async ({ browser }) => {
   const alice2Page = await alice2Ctx.newPage();
   await alice2Page.goto('/');
   await alice2Page.getByTestId('sign-in-email').fill(aliceEmail);
-  await alice2Page.getByTestId('sign-in-submit').click();
+  // Magic-link button (sign-in-submit is now the password flow).
+  await alice2Page.getByTestId('sign-in-magic-link').click();
   const aliceLink = await waitForMagicLink(aliceEmail);
   await alice2Page.goto(aliceLink);
   await alice2Page.getByTestId('home-avatar').waitFor({ state: 'visible', timeout: 15_000 });
@@ -94,7 +95,8 @@ test('two users send and receive live messages', async ({ browser }) => {
   const bob2Page = await bob2Ctx.newPage();
   await bob2Page.goto('/');
   await bob2Page.getByTestId('sign-in-email').fill(bobEmail);
-  await bob2Page.getByTestId('sign-in-submit').click();
+  // Magic-link button (sign-in-submit is now the password flow).
+  await bob2Page.getByTestId('sign-in-magic-link').click();
   const bobLink = await waitForMagicLink(bobEmail);
   await bob2Page.goto(bobLink);
   await bob2Page.getByTestId('home-avatar').waitFor({ state: 'visible', timeout: 15_000 });
@@ -191,7 +193,8 @@ test('two users propose and confirm a meeting', async ({ browser }) => {
   const alice2Page = await alice2Ctx.newPage();
   await alice2Page.goto('/');
   await alice2Page.getByTestId('sign-in-email').fill(aliceEmail);
-  await alice2Page.getByTestId('sign-in-submit').click();
+  // Magic-link button (sign-in-submit is now the password flow).
+  await alice2Page.getByTestId('sign-in-magic-link').click();
   const aliceLink = await waitForMagicLink(aliceEmail);
   await alice2Page.goto(aliceLink);
   await alice2Page.getByTestId('home-avatar').waitFor({ state: 'visible', timeout: 15_000 });
@@ -230,7 +233,8 @@ test('two users propose and confirm a meeting', async ({ browser }) => {
   const bob2Page = await bob2Ctx.newPage();
   await bob2Page.goto('/');
   await bob2Page.getByTestId('sign-in-email').fill(bobEmail);
-  await bob2Page.getByTestId('sign-in-submit').click();
+  // Magic-link button (sign-in-submit is now the password flow).
+  await bob2Page.getByTestId('sign-in-magic-link').click();
   const bobLink = await waitForMagicLink(bobEmail);
   await bob2Page.goto(bobLink);
   await bob2Page.getByTestId('home-avatar').waitFor({ state: 'visible', timeout: 15_000 });
@@ -317,7 +321,8 @@ test('server pipeline writes push_log on new message', async ({ browser }) => {
   const alice2Page = await alice2Ctx.newPage();
   await alice2Page.goto('/');
   await alice2Page.getByTestId('sign-in-email').fill(aliceEmail);
-  await alice2Page.getByTestId('sign-in-submit').click();
+  // Magic-link button (sign-in-submit is now the password flow).
+  await alice2Page.getByTestId('sign-in-magic-link').click();
   const aliceLink = await waitForMagicLink(aliceEmail);
   await alice2Page.goto(aliceLink);
   await alice2Page.getByTestId('home-avatar').waitFor({ state: 'visible', timeout: 15_000 });
@@ -346,8 +351,7 @@ test('server pipeline writes push_log on new message', async ({ browser }) => {
   // The test runs in a Node context so we can hit supabase directly with
   // the same credentials the app uses.
   const { createClient } = await import('@supabase/supabase-js');
-  const supabaseUrl = 'http://127.0.0.1:54321';
-  const supabaseAnon = 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
+  const { url: supabaseUrl, anonKey: supabaseAnon } = readSupabaseEnv();
   const supabase = createClient(supabaseUrl, supabaseAnon, {
     auth: { persistSession: false },
   });

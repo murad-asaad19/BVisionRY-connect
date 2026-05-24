@@ -1,15 +1,39 @@
+import { Children, isValidElement, cloneElement, type ReactElement } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import type { ReactNode } from 'react';
 
-type Props = {
+type RowProps = {
   label: string;
   description?: string;
   onPress?: () => void;
   rightSlot?: ReactNode;
+  /** @deprecated Use `SettingsGroup` instead — derived automatically. */
   isFirst?: boolean;
+  /** @deprecated Use `SettingsGroup` instead — derived automatically. */
   isLast?: boolean;
   testID?: string;
 };
+
+/**
+ * Groups SettingsRow children into a rounded card, owning corner rounding and dividers
+ * so each row can stay presentation-dumb. Backward-compatible: rows still accept
+ * `isFirst`/`isLast` directly when used standalone.
+ */
+export function SettingsGroup({ children }: { children: ReactNode }) {
+  const rows = Children.toArray(children).filter(isValidElement) as ReactElement<RowProps>[];
+  const last = rows.length - 1;
+  return (
+    <View>
+      {rows.map((row, i) =>
+        cloneElement(row, {
+          isFirst: i === 0,
+          isLast: i === last,
+          key: row.key ?? i,
+        })
+      )}
+    </View>
+  );
+}
 
 export function SettingsRow({
   label,
@@ -19,7 +43,7 @@ export function SettingsRow({
   isFirst,
   isLast,
   testID,
-}: Props) {
+}: RowProps) {
   const radius =
     isFirst && isLast
       ? 'rounded-[10px]'

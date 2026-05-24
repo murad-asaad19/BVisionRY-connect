@@ -1,7 +1,6 @@
 {
   "signIn": {
     "welcome": "Welcome",
-    "tagline": "We'll email you a link to sign in.",
     "brandTagline": "Find the people who move your work forward",
     "emailPlaceholder": "you@example.com",
     "submit": "Sign in",
@@ -10,6 +9,55 @@
     "or": "or",
     "apple": "Continue with Apple",
     "google": "Continue with Google"
+  },
+  "auth": {
+    "signInTitle": "Welcome back",
+    "signInTagline": "Sign in to keep building your network.",
+    "signUpTitle": "Create your account",
+    "signUpTagline": "Discovery for founders & builders.",
+    "email": "Email",
+    "emailOrUsername": "Email or username",
+    "emailPlaceholder": "you@example.com",
+    "identifierPlaceholder": "you@example.com or @handle",
+    "password": "Password",
+    "passwordPlaceholder": "••••••••",
+    "passwordHint8": "8+ characters",
+    "passwordHint8Met": "Looks good",
+    "submitSignIn": "Sign in",
+    "submitSignUp": "Create account",
+    "magicLinkSubmit": "Send magic link",
+    "magicLinkSubmitAlt": "Or send me a magic link",
+    "magicLinkSent": "Check your email for the magic link.",
+    "haveAccount": "Have an account?",
+    "noAccount": "Don't have an account?",
+    "signUpCta": "Sign up",
+    "signInCta": "Sign in",
+    "forgotPassword": "Forgot password?",
+    "forgotPasswordBody": "Enter your email and tap \"Send magic link\" below.",
+    "errors": {
+      "socialSignInTitle": "Couldn't sign in",
+      "oauthCancelled": "Sign-in cancelled",
+      "network": "No connection",
+      "invalidCredentials": "Incorrect username, email, or password.",
+      "identifierRequired": "Enter your email or username.",
+      "emailRequired": "Enter your email.",
+      "invalidEmail": "Enter a valid email address.",
+      "passwordRequired": "Enter your password.",
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "magicLinkNeedsEmail": "Magic link needs a full email address.",
+      "signInFailed": "Sign-in failed. Please try again.",
+      "signUpFailed": "Sign-up failed. Please try again.",
+      "rateLimited": "Too many attempts. Please wait a moment and try again.",
+      "emailNotConfirmed": "Confirm your email before signing in.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "suspended": {
+    "title": "Your account is under review",
+    "body": "Our team is reviewing your account. We'll email you when this is resolved.",
+    "submitAppeal": "Submit appeal",
+    "signOut": "Sign out",
+    "contactBody": "To appeal, please contact support@bvisionry.com."
   },
   "home": {
     "title": "Home",
@@ -31,7 +79,7 @@
     "help": "Help & support",
     "helpDesc": "Reach trust & safety",
     "contactTitle": "Need help?",
-    "contactBody": "Email support@bvisionry.example for trust & safety concerns or product questions.",
+    "contactBody": "Reach our trust & safety team for product questions or to report abuse.",
     "signOut": "Sign out",
     "profile": "Profile",
     "profileDesc": "Edit name, handle, bio, photo",
@@ -44,17 +92,287 @@
     "version": "Version",
     "telemetry": "Telemetry",
     "analytics": "Analytics",
-    "crashReports": "Crash reports"
+    "crashReports": "Crash reports",
+    "about": "About",
+    "deleteConfirm": {
+      "title": "Delete account?",
+      "body": "This permanently removes your profile and data. This action cannot be undone.",
+      "action": "Delete",
+      "cancel": "Cancel"
+    },
+    "exportFailed": "Export failed",
+    "exportReady": "Export ready",
+    "exportReadyBody": "Your data export is ready ({{chars}} chars).",
+    "exportShareTitle": "Export my data",
+    "deleteFailed": "Delete failed",
+    "accountDeletedTitle": "Account deleted",
+    "accountDeletedBody": "Your account and data have been removed.",
+    "restartRequired": {
+      "title": "Restart required",
+      "body": "Please reopen the app to apply the new layout direction."
+    },
+    "supportEmail": "support@bvisionry.com",
+    "signOutConfirm": {
+      "title": "Sign out?",
+      "body": "You'll need to sign in again to use the app."
+    },
+    "notif": {
+      "kind": {
+        "intro_received": "Incoming intro",
+        "intro_accepted": "Accepted intro",
+        "message_received": "New chat message",
+        "voice_received": "Voice note",
+        "meeting_proposal": "Meeting proposal",
+        "meeting_confirmed": "Meeting confirmed",
+        "meeting_reminder": "Meeting reminder",
+        "daily_matches_ready": "Daily matches ready",
+        "goal_staleness": "Goal-staleness nudge"
+      },
+      "channel": {
+        "push": "Push",
+        "email": "Email",
+        "in_app": "In-app"
+      },
+      "header": "Notification",
+      "decayBanner": "Activity-decay guilt nudges are not available."
+    }
+  },
+  "legal": {
+    "privacy": {
+      "title": "Privacy Policy",
+      "body": "BVisionRY Connect collects and processes the data you provide when creating your profile (name, handle, role, goal, city, country, photo), the messages you send, intros you make, and meetings you propose. We use this data to deliver the core product: matching you with other professionals, delivering messages, and notifying you of events.\n\nWe share data only with infrastructure vendors required to operate the service (Supabase for storage, Firebase for push notifications, Sentry for crash reports). We do not sell your data.\n\nYou can export all your data at any time from Settings, and you can request full deletion at any time. Deletion is permanent and irreversible.\n\nQuestions? Email privacy@bvisionry.com."
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "body": "By using BVisionRY Connect, you agree to use the service for lawful professional networking purposes. You will not harass, impersonate, spam, or share inappropriate content. We may suspend or remove accounts that violate these rules.\n\nThe service is provided as-is, without warranty. We may change features at any time. We are not liable for any damages arising from use of the service.\n\nQuestions? Email legal@bvisionry.com."
+    }
   },
   "onboarding": {
-    "identity": "Who are you?",
-    "roles": "What are your roles?",
-    "goal": "What's your goal?",
-    "about": "Tell us about yourself"
+    "goal": {
+      "title": "What's your goal?",
+      "label": "Goal",
+      "placeholder": "I'm looking to...",
+      "counter": "{{count}} / {{max}}",
+      "examplesPrefix": "Examples",
+      "examples": [
+        "Hiring a fractional designer",
+        "Raising pre-seed for a healthtech idea"
+      ],
+      "next": "Next",
+      "errorRange": "Describe your goal in 10-280 characters."
+    },
+    "identity": {
+      "title": "Who are you?",
+      "name": "Name",
+      "namePlaceholder": "Ahmad",
+      "handle": "Handle (lowercase, no spaces)",
+      "handlePlaceholder": "ahmad",
+      "handleHint": "Changing your handle later creates a redirect for 90 days, then 410 Gone.",
+      "next": "Next",
+      "errorNameRequired": "Enter your name (1-80 characters).",
+      "errorHandleInvalid": "Invalid handle",
+      "errorHandleTaken": "That handle is already taken.",
+      "errorHandleCheck": "Check failed"
+    },
+    "roles": {
+      "title": "What do you do?",
+      "primaryQuestion": "Which is your primary role?",
+      "next": "Next",
+      "errorPickOne": "Select at least one role.",
+      "errorPickPrimary": "Pick which role best describes you.",
+      "founder": "Founder",
+      "leader": "Leader",
+      "builder": "Builder",
+      "investor": "Investor"
+    },
+    "about": {
+      "title": "A bit about you",
+      "city": "City",
+      "cityPlaceholder": "San Francisco",
+      "country": "Country",
+      "countryPlaceholder": "USA",
+      "headline": "Headline (optional, 5-120 chars)",
+      "headlinePlaceholder": "Building AI tools for makers",
+      "bio": "Bio (optional, 10-1000 chars)",
+      "bioPlaceholder": "I'm a...",
+      "finish": "Finish",
+      "errorLocation": "City and country are required.",
+      "errorHeadlineBio": "Headline must be 5-120 chars; bio must be 10-1000 chars (or leave blank).",
+      "errorMissing": "Some required fields are missing. Go back and complete earlier steps.",
+      "errorSession": "No active session. Please sign in again.",
+      "errorSubmit": "Submission failed"
+    },
+    "back": "Back"
+  },
+  "privacy": {
+    "blockedListHint": "Blocked users can never re-request a connection — even if you unblock.",
+    "blockedListEmpty": "You haven't blocked anyone.",
+    "blockedAt": "Blocked {{date}}",
+    "unblock": "Unblock",
+    "block": "Block",
+    "blockUser": "Block User",
+    "report": "Report",
+    "openActions": "Open profile actions",
+    "blockConfirm": {
+      "title": "Block @{{handle}}?",
+      "body": "They won't see your profile, and you won't see theirs. They can never re-request a connection."
+    },
+    "togglesGroup": {
+      "discovery": "Discovery",
+      "chat": "Chat",
+      "safety": "Safety"
+    },
+    "toggle": {
+      "privateModeLabel": "Private mode",
+      "privateModeDesc": "Hidden from feed, Daily matches, and search. Direct profile links still work.",
+      "readReceiptsLabel": "Read receipts",
+      "readReceiptsDesc": "Let others see when you've read their messages.",
+      "publicInvestorLabel": "Verified-Investor public page",
+      "publicInvestorDesc": "Your public web page at connect.bvisionry.com/u/{handle}. Verified Investor profiles default to OFF."
+    },
+    "toggleFailed": {
+      "title": "Couldn't save",
+      "body": "Your change didn't go through. Please try again."
+    },
+    "reportModal": {
+      "title": "Report",
+      "quoted": "Quoted message",
+      "noteLabel": "Additional details (optional)",
+      "notePlaceholder": "What happened?",
+      "cancel": "Cancel",
+      "submit": "Submit",
+      "pickReasonTitle": "Pick a reason",
+      "pickReasonBody": "Select what to report before submitting.",
+      "sentTitle": "Reported",
+      "sentBody": "Thank you, the team will review.",
+      "failedTitle": "Report failed",
+      "reasons": {
+        "spam": "Spam",
+        "harassment": "Harassment",
+        "impersonation": "Impersonation",
+        "inappropriate": "Inappropriate content",
+        "other": "Other"
+      }
+    }
+  },
+  "verification": {
+    "rankingBoost": "Verified roles earn a +15% ranking boost that ramps over 14 days.",
+    "verifiedPill": "Verified",
+    "comingSoon": "Coming soon",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "disconnectConfirm": {
+      "title": "Disconnect GitHub?",
+      "body": "Your verified badge will be removed.",
+      "cancel": "Cancel",
+      "confirm": "Disconnect"
+    },
+    "connectFailed": {
+      "title": "GitHub verification failed"
+    },
+    "unlinkFailed": {
+      "title": "Unlink failed",
+      "body": "We couldn't unlink GitHub from your account. Verification was removed, but you may need to revoke access in GitHub settings."
+    },
+    "proofs": {
+      "founder": {
+        "domain": {
+          "label": "Domain email",
+          "description": "Verify with a custom-domain email."
+        },
+        "team_page": {
+          "label": "/team page",
+          "description": "Listed on your company team page."
+        }
+      },
+      "investor": {
+        "domain": {
+          "label": "Domain email",
+          "description": "Verify with a custom-domain email."
+        },
+        "crunchbase": {
+          "label": "Crunchbase profile",
+          "description": "Link a public Crunchbase profile."
+        },
+        "portfolio": {
+          "label": "Portfolio listings",
+          "description": "Public portfolio that lists you."
+        }
+      },
+      "builder": {
+        "github": {
+          "label": "GitHub",
+          "description": "Verify a public commit signed with the connected account."
+        }
+      },
+      "leader": {
+        "domain": {
+          "label": "Domain email",
+          "description": "Verify with a custom-domain email."
+        }
+      }
+    }
+  },
+  "connections": {
+    "empty": "No connections yet. Accept an intro to start."
+  },
+  "common": {
+    "cancel": "Cancel"
   },
   "intros": {
     "inboxTitle": "Inbox",
-    "sentTitle": "Sent"
+    "sentTitle": "Sent",
+    "tabs": {
+      "received": "Received",
+      "sent": "Sent"
+    },
+    "empty": {
+      "title": "No intros yet",
+      "received": "When someone sends you an intro, it shows up here. Check back tomorrow at 4 AM your time for new picks.",
+      "sent": "You haven't sent any intros yet. Find someone interesting in Discover.",
+      "browse": "Browse today's matches"
+    },
+    "banner": {
+      "dailyCapTitle": "Daily limit reached",
+      "dailyCapBody": "Incoming intros above {{cap}} are queued for tomorrow."
+    },
+    "compose": {
+      "hint": "Say why you want to connect. Min 80 characters. Your message goes through a quick safety check before delivery.",
+      "placeholder": "I'm reaching out because...",
+      "counter": "{{count}} / {{max}} (min {{min}})",
+      "cancel": "Cancel",
+      "send": "Send",
+      "errorRange": "Note must be 80-400 characters.",
+      "errorDuplicate": "You already have a pending intro to this user.",
+      "errorCooldown": "You can't send another intro to this person for 30 days after they declined.",
+      "errorRateLimit": "You've reached today's send limit. Try again tomorrow.",
+      "errorExpired": "This intro has expired.",
+      "errorGeneric": "Send failed. Please try again."
+    },
+    "badge": {
+      "delivered": "Pending",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "expired": "Expired",
+      "connected": "Connected",
+      "awaitingResponse": "Delivered, awaiting response"
+    },
+    "detail": {
+      "notFound": "Intro not found",
+      "back": "Back",
+      "accepted": "Intro accepted.",
+      "declined": "Intro declined.",
+      "expiredHint": "This intro has expired and can no longer be acted on.",
+      "declineSilent": "Decline is silent — the sender won't be notified.",
+      "to": "To",
+      "from": "From",
+      "note": "NOTE",
+      "says": "{{name}} SAYS",
+      "accept": "Accept",
+      "decline": "Decline",
+      "acceptFailed": "Accept failed",
+      "declineFailed": "Decline failed"
+    }
   },
   "chat": {
     "chatsTitle": "Chats",
@@ -68,10 +386,28 @@
     "edit": "Edit",
     "delete": "Delete",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "newMessages": "New messages",
+    "messageActionsTitle": "Message actions",
+    "previewImage": "📷 Photo",
+    "previewVoice": "🎤 Voice message",
+    "previewMeeting": "📅 Meeting proposal"
   },
   "network": {
     "title": "Network"
+  },
+  "nav": {
+    "tabs": {
+      "home": "Home",
+      "chats": "Chats",
+      "inbox": "Inbox",
+      "network": "Network"
+    }
+  },
+  "notFound": {
+    "title": "Not found",
+    "body": "Page not found",
+    "goHome": "Go home"
   },
   "profile": {
     "share": "Share",
@@ -87,7 +423,69 @@
     "photoNudgeTitle": "Add a profile photo",
     "photoNudgeBody": "Profiles with photos get better matches.",
     "photoNudgeAction": "Add photo",
-    "photoNudgeDismiss": "Dismiss"
+    "photoNudgeDismiss": "Dismiss",
+    "notFound": "Profile not found.",
+    "aboutSection": "About",
+    "signInToConnect": "Sign in to connect",
+    "handleTaken": "That handle is already taken.",
+    "edit": {
+      "title": "Edit profile",
+      "tapPhoto": "Tap photo to change",
+      "name": "Name",
+      "handle": "Handle",
+      "handleHint": "Changing your handle later creates a redirect for 90 days, then 410 Gone.",
+      "headlineLabel": "Headline (optional)",
+      "bioLabel": "Bio (optional)",
+      "goalTextLabel": "Goal description",
+      "goalTypeLabel": "Goal type",
+      "goalTypePick": "Pick a goal type",
+      "city": "City",
+      "country": "Country",
+      "roles": "Roles",
+      "primaryRole": "Primary role",
+      "pickAtLeastOneRole": "Pick at least one role.",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saveFailed": "Save failed",
+      "validationFailed": "Validation failed",
+      "checkingHandle": "Checking handle…"
+    },
+    "confirmDiscard": {
+      "title": "Discard changes?",
+      "body": "You have unsaved edits. Leave without saving?",
+      "keepEditing": "Keep editing",
+      "discard": "Discard"
+    },
+    "goalRefresh": {
+      "titleInfo": "How's your goal? Worth a refresh?",
+      "bodyInfo": "People you match with rely on this. Keep it current.",
+      "titleWarn": "Your goal is starting to feel old",
+      "bodyWarn": "A short refresh will keep your matches relevant.",
+      "titleStale": "Your goal hasn't changed in 8+ weeks",
+      "bodyStale": "A short refresh keeps your matches relevant. We'll email a reminder if it stays this old.",
+      "update": "Update",
+      "snooze": "Snooze {{days}} days",
+      "snoozeA11y": "Snooze this reminder for {{days}} days"
+    },
+    "settingsA11y": "Open settings",
+    "editAction": "Edit",
+    "privateModeTitle": "Private mode is on",
+    "privateModeBody": "You're hidden from feed, Daily matches, and search.",
+    "section": {
+      "headline": "Headline",
+      "bio": "Bio",
+      "goal": "Goal",
+      "roles": "Roles",
+      "location": "Location",
+      "verification": "Verification"
+    },
+    "introOnHoldTitle": "Send intro on hold",
+    "introOnHoldBody": "{{name}} declined a recent intro. You can send again after {{date}}.",
+    "introOnHoldButton": "Send intro · available {{date}}",
+    "sendIntro": "Send Intro",
+    "introSent": "Intro sent.",
+    "noUserWithHandle": "No user with handle @{{handle}}.",
+    "notFoundTitle": "Not found"
   },
   "discovery": {
     "mutual": "Mutual",
@@ -96,14 +494,124 @@
     "filter": {
       "role": "Role",
       "goal": "Goal",
-      "country": "Country"
+      "country": "Country",
+      "clear": "Clear filters"
     },
     "thinPoolTitle": "Few matches today",
     "thinPoolBody": "Refine your goal to surface more relevant people.",
-    "thinPoolAction": "Refine my goal"
+    "thinPoolBanner_one": "We're being picky for you. Only {{count}} strong match today — your goal is specific. We'll keep watching.",
+    "thinPoolBanner_other": "We're being picky for you. Only {{count}} strong matches today — your goal is specific. We'll keep watching.",
+    "thinPoolAction": "Refine my goal",
+    "emptyPicks": "No picks yet — invite friends to populate your matches.",
+    "emptyFeed": "No one to discover yet.",
+    "roles": {
+      "founder": "Founder",
+      "leader": "Leader",
+      "builder": "Builder",
+      "investor": "Investor"
+    },
+    "goals": {
+      "hire": "Hire",
+      "be_hired": "Be hired",
+      "co_found": "Co-found",
+      "invest": "Invest",
+      "take_investment": "Take investment",
+      "advise": "Advise",
+      "find_advisor": "Find advisor",
+      "peer_connect": "Peer connect"
+    }
   },
   "meetings": {
     "yourTime": "your time",
-    "addToCalendar": "Add to calendar"
+    "addToCalendar": "Add to calendar",
+    "title": "Meeting",
+    "titleWith": "Meeting with @{{handle}}",
+    "statusConfirmed": "Meeting confirmed",
+    "statusProposed": "Meeting proposed",
+    "statusDeclined": "Meeting declined",
+    "statusCancelled": "Meeting cancelled",
+    "durationLabel": "Duration: {{minutes}} min",
+    "durationHeader": "Meeting proposed · {{minutes}} min",
+    "decline": "Decline",
+    "confirm": "Confirm",
+    "cancelProposal": "Cancel proposal",
+    "proposeAnother": "Propose another",
+    "inputTimeZoneHint": "in {{tz}}",
+    "prompt": {
+      "title": "Did this meeting happen?",
+      "subtitle": "Tell us so we can improve your matches.",
+      "yes": "Yes — it happened",
+      "rescheduled": "Rescheduled to a new time",
+      "noShow": "No — they didn't show",
+      "fallback": "If we don't hear back within 48 hours, we'll skip this prompt and ask later."
+    },
+    "review": {
+      "title": "How was the meeting?",
+      "subtitle": "Your answer helps us improve match quality. Optional note for your records.",
+      "useful": "👍 Useful",
+      "notUseful": "😐 Not useful",
+      "noShow": "🚫 No-show",
+      "notePlaceholder": "Optional note…",
+      "pickOutcome": "Pick an outcome.",
+      "submitFailed": "Submit failed",
+      "skip": "Skip",
+      "submit": "Submit"
+    },
+    "propose": {
+      "title": "Propose a meeting",
+      "subtitle": "Pick 1-3 time options. The other person picks one.",
+      "slot1Label": "Slot 1 (required)",
+      "slot2Label": "Slot 2 (optional)",
+      "slot3Label": "Slot 3 (optional)",
+      "durationLabel": "Duration",
+      "durationOption": "{{minutes}} min",
+      "urlLabel": "Meeting URL (optional)",
+      "urlPlaceholder": "https://meet.google.com/abc-defg-hij",
+      "cancel": "Cancel",
+      "send": "Send",
+      "errors": {
+        "slotsRange": "Pick 1-3 future date/times.",
+        "duration": "Duration must be 15-240 minutes.",
+        "url": "Meeting URL must start with https:// (or leave blank).",
+        "submitFailed": "Propose failed"
+      }
+    }
+  },
+  "media": {
+    "recordVoice": "Record voice message",
+    "playVoice": "Play voice message",
+    "pauseVoice": "Pause voice message",
+    "sendPhoto": "Send photo",
+    "openImage": "Open image",
+    "closeImage": "Close image viewer",
+    "addPhoto": "Add photo",
+    "uploadAvatar": "Upload avatar",
+    "recorderHint": "Max 2 minutes — voice notes are transcribed for accessibility & safety.",
+    "transcriptLabel": "Transcript",
+    "transcriptPending": "Transcript pending…",
+    "transcriptUnavailable": "Transcript unavailable",
+    "transcriptUnsupported": "Transcript not available in dev",
+    "showTranscript": "Show transcript",
+    "hideTranscript": "Hide transcript",
+    "transcriptFooter": "Voice notes are transcribed for accessibility and safety.",
+    "send": "Send",
+    "cancel": "Cancel",
+    "permissionMicTitle": "Microphone access needed",
+    "permissionMicBody": "Enable microphone permission in Settings to record voice messages.",
+    "permissionPhotoTitle": "Photo library access needed",
+    "permissionPhotoBody": "Enable photo permission in Settings to share images.",
+    "openSettings": "Open Settings",
+    "imageTooLargeTitle": "Image too large",
+    "imageTooLargeBody": "Images must be smaller than {{maxMb}}MB.",
+    "voiceTooLongTitle": "Recording too long",
+    "voiceTooLongBody": "Voice messages must be under {{maxMinutes}} minutes.",
+    "voiceTooLargeTitle": "Recording too large",
+    "voiceTooLargeBody": "Voice messages must be smaller than {{maxMb}}MB."
+  },
+  "push": {
+    "permissionDeniedTitle": "Notifications disabled",
+    "permissionDeniedBody": "Enable notifications in Settings to receive intros, messages, and meeting updates.",
+    "toastOpenA11y": "Open notification",
+    "toastDismissA11y": "Dismiss notification"
   }
 }

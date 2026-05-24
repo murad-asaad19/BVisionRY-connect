@@ -8,7 +8,8 @@ test('signed-in onboarded user edits profile', async ({ page }) => {
   // Sign in + onboard quickly
   await page.goto('/');
   await page.getByTestId('sign-in-email').fill(email);
-  await page.getByTestId('sign-in-submit').click();
+  // Magic-link button (sign-in-submit is now the password flow).
+  await page.getByTestId('sign-in-magic-link').click();
   const link = await waitForMagicLink(email);
   await page.goto(link);
 
