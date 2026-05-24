@@ -683,6 +683,27 @@
         "url": "La URL de la reunión debe empezar con https:// (o dejarla en blanco).",
         "submitFailed": "Error al proponer"
       }
+    },
+    "playbook": {
+      "title": "Guía de reunión",
+      "regenerate": "Regenerar",
+      "regenerateRateLimited": "Disponible nuevamente en una hora",
+      "generating": "Generando tu preparación de reunión…",
+      "errorBanner": "No se pudo generar la preparación",
+      "retry": "Toca para reintentar",
+      "generatedAt": "Generado {{ago}}",
+      "justNow": "hace un momento",
+      "minutesShort": "m",
+      "hoursShort": "h",
+      "daysShort": "d",
+      "section": {
+        "summary": "Sobre {{name}}",
+        "summaryNoName": "Sobre ellos",
+        "sharedInterests": "Intereses en común",
+        "conversationStarters": "Temas para iniciar",
+        "do": "Sí",
+        "dont": "No"
+      }
     }
   },
   "media": {

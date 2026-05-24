@@ -683,6 +683,27 @@
         "url": "Meeting URL must start with https:// (or leave blank).",
         "submitFailed": "Propose failed"
       }
+    },
+    "playbook": {
+      "title": "Meeting playbook",
+      "regenerate": "Regenerate",
+      "regenerateRateLimited": "Available again in an hour",
+      "generating": "Generating your meeting prep…",
+      "errorBanner": "Couldn't generate prep",
+      "retry": "Tap to retry",
+      "generatedAt": "Generated {{ago}}",
+      "justNow": "just now",
+      "minutesShort": "m ago",
+      "hoursShort": "h ago",
+      "daysShort": "d ago",
+      "section": {
+        "summary": "About {{name}}",
+        "summaryNoName": "About them",
+        "sharedInterests": "Shared interests",
+        "conversationStarters": "Conversation starters",
+        "do": "Do",
+        "dont": "Don't"
+      }
     }
   },
   "media": {

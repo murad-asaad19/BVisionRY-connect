@@ -6,7 +6,23 @@ import { useDeclineMeeting } from '~/features/meetings/hooks/useDeclineMeeting';
 import { useCancelMeeting } from '~/features/meetings/hooks/useCancelMeeting';
 import type { MeetingState } from '~/features/meetings/services/meetings.service';
 import { ICSDownloadButton } from './ICSDownloadButton';
+import { MeetingPlaybookCard } from './MeetingPlaybookCard';
 import { ProposeMeetingSheet } from './ProposeMeetingSheet';
+
+// Window in which the AI playbook surface appears. Confirmed meetings get
+// the prep card from 24h before the start through 1h after — the late
+// boundary lets attendees pull up notes during the meeting itself but
+// hides the card once the meeting has elapsed.
+const PLAYBOOK_LEAD_MS = 24 * 60 * 60 * 1000;
+const PLAYBOOK_TRAILING_MS = 60 * 60 * 1000;
+
+function shouldShowPlaybook(state: MeetingState, confirmedSlot: string | null): boolean {
+  if (state !== 'confirmed' || !confirmedSlot) return false;
+  const start = new Date(confirmedSlot).getTime();
+  if (Number.isNaN(start)) return false;
+  const now = Date.now();
+  return start <= now + PLAYBOOK_LEAD_MS && start >= now - PLAYBOOK_TRAILING_MS;
+}
 
 type Props = {
   conversationId: string;
@@ -94,32 +110,37 @@ export function MeetingCard({
 
   if (state === 'confirmed' && confirmedSlot) {
     return (
-      <View testID="meeting-card-confirmed" className={baseCardClass}>
-        <Text className="font-display-bold text-[10px] text-muted uppercase tracking-wide mb-1">
-          {t('meetings.statusConfirmed')}
-        </Text>
-        <Text
-          testID="meeting-confirmed-slot"
-          className="font-display-bold text-[14px] text-navy mb-1"
-        >
-          {formatSlotWithTZ(confirmedSlot, timezone, yourTimeLabel)}
-        </Text>
-        <Text className="font-body text-[11px] text-muted">
-          {t('meetings.durationLabel', { minutes: durationMinutes })}
-        </Text>
-        {meetingUrl && (
-          <Text className="font-body text-[11px] text-navy mt-1" selectable>
-            {meetingUrl}
+      <>
+        <View testID="meeting-card-confirmed" className={baseCardClass}>
+          <Text className="font-display-bold text-[10px] text-muted uppercase tracking-wide mb-1">
+            {t('meetings.statusConfirmed')}
           </Text>
+          <Text
+            testID="meeting-confirmed-slot"
+            className="font-display-bold text-[14px] text-navy mb-1"
+          >
+            {formatSlotWithTZ(confirmedSlot, timezone, yourTimeLabel)}
+          </Text>
+          <Text className="font-body text-[11px] text-muted">
+            {t('meetings.durationLabel', { minutes: durationMinutes })}
+          </Text>
+          {meetingUrl && (
+            <Text className="font-body text-[11px] text-navy mt-1" selectable>
+              {meetingUrl}
+            </Text>
+          )}
+          <ICSDownloadButton
+            meetingId={meetingId}
+            startIso={confirmedSlot}
+            durationMinutes={durationMinutes}
+            meetingUrl={meetingUrl}
+            summary={icsSummary}
+          />
+        </View>
+        {shouldShowPlaybook(state, confirmedSlot) && (
+          <MeetingPlaybookCard meetingId={meetingId} targetName={otherHandle ?? null} />
         )}
-        <ICSDownloadButton
-          meetingId={meetingId}
-          startIso={confirmedSlot}
-          durationMinutes={durationMinutes}
-          meetingUrl={meetingUrl}
-          summary={icsSummary}
-        />
-      </View>
+      </>
     );
   }
 
