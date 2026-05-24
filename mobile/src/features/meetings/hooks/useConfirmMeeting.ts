@@ -12,6 +12,8 @@ export function useConfirmMeeting(conversationId: string) {
         if (!prev) return [updated];
         return prev.map((p) => (p.id === updated.id ? updated : p));
       });
+      qc.invalidateQueries({ queryKey: ['messages', conversationId] });
+      qc.invalidateQueries({ queryKey: ['pending-meeting-reviews'] });
     },
   });
 }

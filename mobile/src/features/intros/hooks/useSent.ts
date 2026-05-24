@@ -3,7 +3,6 @@ import { useAuthSession } from '~/features/auth/SessionContext';
 import { fetchSentPage } from '~/features/intros/services/intros.service';
 
 const PAGE_SIZE = 20;
-const INITIAL_CURSOR = '9999-12-31T00:00:00Z';
 
 export function useSent() {
   const { session } = useAuthSession();
@@ -11,10 +10,10 @@ export function useSent() {
   return useInfiniteQuery({
     queryKey: ['intros', 'sent', userId],
     enabled: !!userId,
-    initialPageParam: INITIAL_CURSOR,
+    initialPageParam: null as string | null,
     queryFn: ({ pageParam }) =>
-      fetchSentPage({ userId: userId!, cursor: pageParam as string, pageSize: PAGE_SIZE }),
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+      fetchSentPage({ userId: userId!, cursor: pageParam, pageSize: PAGE_SIZE }),
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
     staleTime: 30_000,
   });
 }

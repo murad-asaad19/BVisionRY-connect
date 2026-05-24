@@ -12,7 +12,7 @@ import { uploadAvatar, uploadChatMedia } from '~/features/media/services/storage
 describe('storage.service', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('uploadAvatar puts to {userId}/avatar-{ts}.jpg and returns public URL', async () => {
+  it('uploadAvatar puts to {userId}/avatar.{ext} with upsert and returns cache-busted URL', async () => {
     const blob = new Blob(['x'], { type: 'image/jpeg' });
     const bucket = {
       upload: jest.fn().mockResolvedValue({ data: { path: 'p' }, error: null }),
@@ -22,14 +22,16 @@ describe('storage.service', () => {
     const url = await uploadAvatar('user-123', blob, 'jpg');
     expect(supabase.storage.from).toHaveBeenCalledWith('avatars');
     expect(bucket.upload).toHaveBeenCalledWith(
-      expect.stringMatching(/^user-123\/avatar-\d+\.jpg$/),
+      'user-123/avatar.jpg',
       blob,
       expect.objectContaining({ contentType: 'image/jpeg', upsert: true })
     );
-    expect(url).toBe('https://example/p.jpg');
+    // The service appends `?v=<now>` so the device-level image cache busts
+    // when the avatar is re-uploaded with the same stable filename.
+    expect(url).toMatch(/^https:\/\/example\/p\.jpg\?v=\d+$/);
   });
 
-  it('uploadChatMedia puts to {convId}/{msgId}/{file} and returns path', async () => {
+  it('uploadChatMedia puts to {convId}/{msgId}/media.{ext} and returns path', async () => {
     const blob = new Blob(['x'], { type: 'image/jpeg' });
     const bucket = {
       upload: jest.fn().mockResolvedValue({ data: { path: 'p' }, error: null }),
@@ -38,11 +40,11 @@ describe('storage.service', () => {
     const path = await uploadChatMedia('conv-1', 'msg-1', blob, 'jpg', 'image/jpeg');
     expect(supabase.storage.from).toHaveBeenCalledWith('chat-media');
     expect(bucket.upload).toHaveBeenCalledWith(
-      expect.stringMatching(/^conv-1\/msg-1\/[a-z0-9-]+\.jpg$/),
+      'conv-1/msg-1/media.jpg',
       blob,
       expect.objectContaining({ contentType: 'image/jpeg' })
     );
-    expect(path).toMatch(/^conv-1\/msg-1\//);
+    expect(path).toBe('conv-1/msg-1/media.jpg');
   });
 
   it('throws on upload error', async () => {

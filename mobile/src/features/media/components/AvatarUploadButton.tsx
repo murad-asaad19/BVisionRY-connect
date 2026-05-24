@@ -1,5 +1,6 @@
 import { View, Text, Pressable, Image, ActivityIndicator } from 'react-native';
 import { useUploadAvatar } from '~/features/media/hooks/useUploadAvatar';
+import { colors } from '~/theme/colors';
 
 type Props = { currentPhotoUrl: string | null };
 
@@ -16,7 +17,7 @@ export function AvatarUploadButton({ currentPhotoUrl }: Props) {
     >
       <View className="w-24 h-24 rounded-full bg-white border border-border items-center justify-center overflow-hidden">
         {upload.isPending ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={colors.navy} />
         ) : currentPhotoUrl ? (
           <Image source={{ uri: currentPhotoUrl }} className="w-24 h-24" />
         ) : (

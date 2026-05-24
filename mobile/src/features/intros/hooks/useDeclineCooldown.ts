@@ -13,8 +13,12 @@ export type DeclineCooldown = {
 
 /**
  * §12 / I4: after a recipient declines, the sender sees a 30-day cooldown
- * before they can send another intro to the same person. We look for the
- * most recent declined intro between this user (as sender) and the target.
+ * before they can send another intro to the same person. Prefer the explicit
+ * `declined_at` stamp (added in 20260606080000); fall back to `updated_at`
+ * for legacy declined rows where the column is NULL.
+ *
+ * The server enforces the same window in send_intro (P0001 / hint='cooldown'),
+ * so this hook is purely an affordance to grey out the Send button up-front.
  */
 export function useDeclineCooldown(targetUserId: string | undefined) {
   const { session } = useAuthSession();
@@ -24,18 +28,22 @@ export function useDeclineCooldown(targetUserId: string | undefined) {
     enabled: !!myId && !!targetUserId,
     staleTime: 60_000,
     queryFn: async (): Promise<DeclineCooldown> => {
+      // declined_at is not yet in generated types; select * and read it dynamically.
       const { data, error } = await supabase
         .from('intros')
-        .select('updated_at')
+        .select('*')
         .eq('sender_id', myId!)
         .eq('recipient_id', targetUserId!)
         .eq('state', 'declined')
         .order('updated_at', { ascending: false })
         .limit(1);
       if (error) throw new Error(error.message);
-      const row = data?.[0];
+      const row = data?.[0] as
+        | (Record<string, unknown> & { updated_at: string; declined_at?: string | null })
+        | undefined;
       if (!row) return { active: false, availableAt: null };
-      const declinedAt = new Date(row.updated_at).getTime();
+      const baseIso = (row.declined_at ?? row.updated_at) as string;
+      const declinedAt = new Date(baseIso).getTime();
       const availableAtMs = declinedAt + COOLDOWN_DAYS * DAY_MS;
       const active = Date.now() < availableAtMs;
       return {

@@ -1,24 +1,22 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthSession } from '~/features/auth/SessionContext';
-import { fetchConversationsPage } from '~/features/chat/services/chat.service';
+import {
+  fetchConversationsOverview,
+  type ConversationOverviewRow,
+} from '~/features/chat/services/chat.service';
 
-const PAGE_SIZE = 20;
-const INITIAL_CURSOR = '9999-12-31T00:00:00Z';
-
+/**
+ * Returns the full chats overview (peer profile, last message preview,
+ * unread + mute status) in a single RPC, removing the per-row N+1 the
+ * previous implementation issued (3 queries × N conversations).
+ */
 export function useConversations() {
   const { session } = useAuthSession();
   const userId = session?.user.id;
-  return useInfiniteQuery({
+  return useQuery<ConversationOverviewRow[]>({
     queryKey: ['conversations', userId],
     enabled: !!userId,
-    initialPageParam: INITIAL_CURSOR,
-    queryFn: ({ pageParam }) =>
-      fetchConversationsPage({
-        userId: userId!,
-        cursor: pageParam as string,
-        pageSize: PAGE_SIZE,
-      }),
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    queryFn: () => fetchConversationsOverview(userId!),
     staleTime: 15_000,
   });
 }

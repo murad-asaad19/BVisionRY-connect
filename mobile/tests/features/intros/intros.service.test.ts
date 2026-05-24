@@ -74,7 +74,7 @@ describe('intros.service', () => {
 
       expect(supabase.from).toHaveBeenCalledWith('intros');
       expect(eq).toHaveBeenCalledWith('recipient_id', 'me');
-      expect(in_).toHaveBeenCalledWith('state', ['delivered', 'accepted']);
+      expect(in_).toHaveBeenCalledWith('state', ['delivered', 'accepted', 'connected']);
       expect(gt).toHaveBeenCalledWith('expires_at', expect.any(String));
       expect(lt).toHaveBeenCalledWith('created_at', '2026-05-15T00:00:00Z');
       expect(order).toHaveBeenCalledWith('created_at', { ascending: false });

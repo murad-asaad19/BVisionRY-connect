@@ -1,13 +1,8 @@
-import { useEffect } from 'react';
 import { Alert, ScrollView, View, Text } from 'react-native';
 import { Stack } from 'expo-router';
-import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useCurrentUserProfile } from '~/features/profile/hooks/useCurrentUserProfile';
-import {
-  useConnectGithub,
-  finishGithubConnect,
-} from '~/features/verification/hooks/useConnectGithub';
+import { useConnectGithub } from '~/features/verification/hooks/useConnectGithub';
 import { useDisconnectGithub } from '~/features/verification/hooks/useDisconnectGithub';
 import { QueryState } from '~/components/ui/QueryState';
 import { Button } from '~/components/ui/Button';
@@ -18,41 +13,15 @@ import type { Database } from '~/lib/supabase/types.gen';
 
 type RoleKind = Database['public']['Enums']['role_kind'];
 
-type ProofConfig = {
-  key: string;
-  label: string;
-  description: string;
-};
-
-const PROOFS_BY_ROLE: Partial<Record<RoleKind, ProofConfig[]>> = {
-  founder: [
-    { key: 'domain', label: 'Domain email', description: 'Verify with a custom-domain email.' },
-    { key: 'team_page', label: '/team page', description: 'Listed on your company team page.' },
-  ],
-  investor: [
-    { key: 'domain', label: 'Domain email', description: 'Verify with a custom-domain email.' },
-    {
-      key: 'crunchbase',
-      label: 'Crunchbase profile',
-      description: 'Link a public Crunchbase profile.',
-    },
-    {
-      key: 'portfolio',
-      label: 'Portfolio listings',
-      description: 'Public portfolio that lists you.',
-    },
-  ],
-  builder: [
-    // GitHub is the wired-up proof; placeholder description, the Connect button lives in the row below.
-    {
-      key: 'github',
-      label: 'GitHub',
-      description: 'Verify a public commit signed with the connected account.',
-    },
-  ],
-  leader: [
-    { key: 'domain', label: 'Domain email', description: 'Verify with a custom-domain email.' },
-  ],
+// Proof configurations are role-scoped so labels/descriptions can diverge per
+// role over time. Strings are resolved at render-time via i18n keys
+// `verification.proofs.{role}.{key}.{label,description}`.
+const PROOFS_BY_ROLE: Partial<Record<RoleKind, ReadonlyArray<string>>> = {
+  founder: ['domain', 'team_page'],
+  investor: ['domain', 'crunchbase', 'portfolio'],
+  // GitHub is the wired-up proof; the Connect button lives in the row below.
+  builder: ['github'],
+  leader: ['domain'],
 };
 
 export default function VerificationSubScreen() {
@@ -60,20 +29,6 @@ export default function VerificationSubScreen() {
   const profileQ = useCurrentUserProfile();
   const connect = useConnectGithub();
   const disconnect = useDisconnectGithub();
-  const qc = useQueryClient();
-
-  useEffect(() => {
-    if (connect.isSuccess) {
-      (async () => {
-        try {
-          await finishGithubConnect();
-          await qc.invalidateQueries({ queryKey: ['profile'] });
-        } catch (e) {
-          Alert.alert('GitHub verification failed', (e as Error).message);
-        }
-      })();
-    }
-  }, [connect.isSuccess, qc]);
 
   return (
     <View testID="settings-screen" className="flex-1 bg-surface">
@@ -84,9 +39,7 @@ export default function VerificationSubScreen() {
             <ScrollView className="flex-1">
               <View className="w-full max-w-2xl mx-auto p-4">
                 <View className="mb-3">
-                  <Banner variant="muted">
-                    Verified roles earn a +15% ranking boost that ramps over 14 days.
-                  </Banner>
+                  <Banner variant="muted">{t('verification.rankingBoost')}</Banner>
                 </View>
 
                 {(profile.roles ?? []).map((role) => {
@@ -95,35 +48,39 @@ export default function VerificationSubScreen() {
                   return (
                     <View key={role} className="mb-4">
                       <Text className="font-display-bold text-[10px] uppercase tracking-wide text-muted mb-1.5 px-1">
-                        {role}
+                        {t(`discovery.roles.${role}`)}
                       </Text>
                       <View className="rounded-[10px] overflow-hidden border border-border">
-                        {proofs.map((proof, i) => {
+                        {proofs.map((proofKey, i) => {
                           const isFirst = i === 0;
                           const isLast = i === proofs.length - 1;
-                          const isGithub = proof.key === 'github';
+                          const isGithub = proofKey === 'github';
                           const ghConnected = !!profile.verified_github_username;
+                          const label = t(`verification.proofs.${role}.${proofKey}.label`);
+                          const description = t(
+                            `verification.proofs.${role}.${proofKey}.description`
+                          );
                           if (isGithub) {
                             return (
                               <SettingsRow
-                                key={proof.key}
+                                key={proofKey}
                                 testID={
                                   ghConnected
                                     ? 'settings-github-connected'
-                                    : `verify-${role}-${proof.key}`
+                                    : `verify-${role}-${proofKey}`
                                 }
-                                label={proof.label}
+                                label={label}
                                 description={
                                   ghConnected
                                     ? `@${profile.verified_github_username}`
-                                    : proof.description
+                                    : description
                                 }
                                 isFirst={isFirst}
                                 isLast={isLast}
                                 rightSlot={
                                   ghConnected ? (
                                     <View className="flex-row items-center gap-2">
-                                      <Pill variant="success">Verified</Pill>
+                                      <Pill variant="success">{t('verification.verifiedPill')}</Pill>
                                       <Button
                                         testID="settings-github-disconnect"
                                         variant="outline"
@@ -131,12 +88,15 @@ export default function VerificationSubScreen() {
                                         fullWidth={false}
                                         onPress={() =>
                                           Alert.alert(
-                                            'Disconnect GitHub?',
-                                            'Your verified badge will be removed.',
+                                            t('verification.disconnectConfirm.title'),
+                                            t('verification.disconnectConfirm.body'),
                                             [
-                                              { text: 'Cancel', style: 'cancel' },
                                               {
-                                                text: 'Disconnect',
+                                                text: t('verification.disconnectConfirm.cancel'),
+                                                style: 'cancel',
+                                              },
+                                              {
+                                                text: t('verification.disconnectConfirm.confirm'),
                                                 style: 'destructive',
                                                 onPress: () => disconnect.mutate(),
                                               },
@@ -144,7 +104,7 @@ export default function VerificationSubScreen() {
                                           )
                                         }
                                       >
-                                        Disconnect
+                                        {t('verification.disconnect')}
                                       </Button>
                                     </View>
                                   ) : (
@@ -156,7 +116,7 @@ export default function VerificationSubScreen() {
                                       onPress={() => connect.mutate()}
                                       loading={connect.isPending}
                                     >
-                                      Connect
+                                      {t('verification.connect')}
                                     </Button>
                                   )
                                 }
@@ -165,13 +125,13 @@ export default function VerificationSubScreen() {
                           }
                           return (
                             <SettingsRow
-                              key={proof.key}
-                              testID={`verify-${role}-${proof.key}`}
-                              label={proof.label}
-                              description={proof.description}
+                              key={proofKey}
+                              testID={`verify-${role}-${proofKey}`}
+                              label={label}
+                              description={description}
                               isFirst={isFirst}
                               isLast={isLast}
-                              rightSlot={<Pill variant="muted">Coming soon</Pill>}
+                              rightSlot={<Pill variant="muted">{t('verification.comingSoon')}</Pill>}
                             />
                           );
                         })}

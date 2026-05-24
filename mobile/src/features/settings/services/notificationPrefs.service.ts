@@ -6,14 +6,26 @@ export type NotificationChannel = Database['public']['Enums']['notification_chan
 
 export type NotificationPrefRow = Database['public']['Tables']['notification_preferences']['Row'];
 
-export const NOTIFICATION_KINDS: { value: NotificationKind; label: string }[] = [
-  { value: 'intro_received', label: 'Incoming intro' },
-  { value: 'intro_accepted', label: 'Accepted intro' },
-  { value: 'message_received', label: 'New chat message' },
-  { value: 'voice_received', label: 'Voice note' },
-  { value: 'meeting_reminder', label: 'Meeting reminder' },
-  { value: 'daily_matches_ready', label: 'Daily matches ready' },
-  { value: 'goal_staleness', label: 'Goal-staleness nudge' },
+/**
+ * Notification kinds surfaced in the settings UI.
+ *
+ * `goal_staleness` is intentionally omitted — the corresponding trigger isn't
+ * shipped yet, so showing a toggle the user can flip without effect would be
+ * misleading. The Banner inside `NotificationPrefsSection` calls this out
+ * explicitly. Re-add `goal_staleness` once the trigger lands.
+ *
+ * Labels live in i18n (`settings.notif.kind.*`) — consumers should map by
+ * `value`, not by any string in this module.
+ */
+export const NOTIFICATION_KINDS: { value: NotificationKind }[] = [
+  { value: 'intro_received' },
+  { value: 'intro_accepted' },
+  { value: 'message_received' },
+  { value: 'voice_received' },
+  { value: 'meeting_proposal' },
+  { value: 'meeting_confirmed' },
+  { value: 'meeting_reminder' },
+  { value: 'daily_matches_ready' },
 ];
 
 export const NOTIFICATION_CHANNELS: NotificationChannel[] = ['push', 'email', 'in_app'];

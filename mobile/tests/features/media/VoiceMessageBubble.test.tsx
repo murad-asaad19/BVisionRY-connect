@@ -7,12 +7,12 @@ jest.mock('expo-audio', () => ({
   useAudioPlayerStatus: jest.fn(() => ({ playing: false })),
 }));
 
-import { render } from '@testing-library/react-native';
 import { VoiceMessageBubble } from '~/features/media/components/VoiceMessageBubble';
+import { renderWithProviders } from '../../helpers/renderWithProviders';
 
 describe('VoiceMessageBubble', () => {
   it('renders duration label and toggle button', () => {
-    const { getByTestId, getByText } = render(
+    const { getByTestId, getByText } = renderWithProviders(
       <VoiceMessageBubble mediaPath="x" durationMs={62_000} isMine={false} />
     );
     expect(getByTestId('voice-bubble-theirs')).toBeTruthy();

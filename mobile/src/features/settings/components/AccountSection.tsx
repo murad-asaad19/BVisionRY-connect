@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Text, Alert, Platform } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 import { deleteMyAccount, exportMyData } from '~/features/settings/services/settings.service';
 import { Button } from '~/components/ui/Button';
 
@@ -14,20 +16,37 @@ export function AccountSection() {
     try {
       const data = await exportMyData();
       const json = JSON.stringify(data, null, 2);
-      // On web, trigger a file download; on native, surface size via alert
-      if (typeof window !== 'undefined' && 'Blob' in window && typeof document !== 'undefined') {
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'my-data.json';
-        a.click();
-        URL.revokeObjectURL(url);
+
+      if (Platform.OS === 'web') {
+        // Browser download flow — synthesize an <a> + Blob.
+        if (typeof window !== 'undefined' && 'Blob' in window && typeof document !== 'undefined') {
+          const blob = new Blob([json], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'my-data.json';
+          a.click();
+          URL.revokeObjectURL(url);
+          return;
+        }
+        Alert.alert(t('settings.exportReady'), t('settings.exportReadyBody', { chars: json.length }));
+        return;
+      }
+
+      // Native: write JSON to documents dir, then hand to system share sheet.
+      const uri = `${FileSystem.documentDirectory}user-data-export-${Date.now()}.json`;
+      await FileSystem.writeAsStringAsync(uri, json, { encoding: FileSystem.EncodingType.UTF8 });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, {
+          mimeType: 'application/json',
+          dialogTitle: t('settings.exportShareTitle'),
+          UTI: 'public.json',
+        });
       } else {
-        Alert.alert('Export ready', 'Your data is ready (length: ' + json.length + ' chars).');
+        Alert.alert(t('settings.exportReady'), t('settings.exportReadyBody', { chars: json.length }));
       }
     } catch (e) {
-      Alert.alert('Export failed', (e as Error).message);
+      Alert.alert(t('settings.exportFailed'), (e as Error).message);
     } finally {
       setExporting(false);
     }
@@ -35,7 +54,10 @@ export function AccountSection() {
 
   const del = useMutation({
     mutationFn: deleteMyAccount,
-    onError: (e) => Alert.alert('Delete failed', (e as Error).message),
+    onSuccess: () => {
+      Alert.alert(t('settings.accountDeletedTitle'), t('settings.accountDeletedBody'));
+    },
+    onError: (e) => Alert.alert(t('settings.deleteFailed'), (e as Error).message),
   });
 
   return (
@@ -52,9 +74,13 @@ export function AccountSection() {
         testID="account-delete"
         variant="danger"
         onPress={() =>
-          Alert.alert('Delete account?', 'This permanently removes your profile and data.', [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Delete', style: 'destructive', onPress: () => del.mutate() },
+          Alert.alert(t('settings.deleteConfirm.title'), t('settings.deleteConfirm.body'), [
+            { text: t('settings.deleteConfirm.cancel'), style: 'cancel' },
+            {
+              text: t('settings.deleteConfirm.action'),
+              style: 'destructive',
+              onPress: () => del.mutate(),
+            },
           ])
         }
       >

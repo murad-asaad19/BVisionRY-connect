@@ -1,4 +1,4 @@
-import { ScrollView, View, Text } from 'react-native';
+import { ScrollView, View, Text, Pressable, Linking } from 'react-native';
 import { Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { LegalSection } from '~/features/settings/components/LegalSection';
@@ -6,6 +6,12 @@ import { AppVersionSection } from '~/features/settings/components/AppVersionSect
 
 export default function HelpSubScreen() {
   const { t } = useTranslation();
+  const supportEmail = t('settings.supportEmail');
+  const openSupport = () => {
+    Linking.openURL(`mailto:${supportEmail}`).catch((e) =>
+      console.warn('[help] open mailto failed', e)
+    );
+  };
   return (
     <View testID="settings-screen" className="flex-1 bg-surface">
       <Stack.Screen options={{ title: t('settings.help') }} />
@@ -18,6 +24,17 @@ export default function HelpSubScreen() {
             <Text className="font-body text-[11px] text-muted leading-relaxed">
               {t('settings.contactBody')}
             </Text>
+            <Pressable
+              testID="help-support-email"
+              accessibilityRole="link"
+              accessibilityLabel={`mailto:${supportEmail}`}
+              onPress={openSupport}
+              className="mt-2"
+            >
+              <Text className="text-navy text-[12px] font-display-semibold underline">
+                {supportEmail}
+              </Text>
+            </Pressable>
           </View>
           <LegalSection />
           <AppVersionSection />

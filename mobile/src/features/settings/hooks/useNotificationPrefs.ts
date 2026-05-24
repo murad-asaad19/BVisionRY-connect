@@ -10,6 +10,10 @@ import {
 
 const KEY = ['notification-prefs'];
 
+function keyOf(kind: NotificationKind, channel: NotificationChannel): string {
+  return `${kind}:${channel}`;
+}
+
 export function useNotificationPrefs() {
   const { session } = useAuthSession();
   const userId = session?.user.id;
@@ -21,10 +25,16 @@ export function useNotificationPrefs() {
   });
 }
 
+/**
+ * Mutation for toggling a single notification preference, with optimistic
+ * UI update + automatic rollback on error so the Switch stays in sync with
+ * the user's tap even before the network round-trip completes.
+ */
 export function useSetNotificationPref() {
   const { session } = useAuthSession();
   const userId = session?.user.id;
   const qc = useQueryClient();
+  const queryKey = [...KEY, userId];
   return useMutation({
     mutationFn: async (p: {
       kind: NotificationKind;
@@ -34,6 +44,18 @@ export function useSetNotificationPref() {
       if (!userId) throw new Error('not signed in');
       await setNotificationPref({ userId, ...p });
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
+    onMutate: async (p) => {
+      await qc.cancelQueries({ queryKey });
+      const previous = qc.getQueryData<PrefMap>(queryKey);
+      qc.setQueryData<PrefMap>(queryKey, (curr) => ({
+        ...(curr ?? {}),
+        [keyOf(p.kind, p.channel)]: p.enabled,
+      }));
+      return { previous };
+    },
+    onError: (_e, _vars, ctx) => {
+      if (ctx?.previous) qc.setQueryData(queryKey, ctx.previous);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey }),
   });
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { View, Text, Pressable, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { MeetingCard } from '~/features/meetings/components/MeetingCard';
@@ -37,7 +37,7 @@ type Props = {
   peerHandle?: string | null;
 };
 
-export function MessageBubble({
+function MessageBubbleImpl({
   message,
   isMine,
   proposal,
@@ -112,7 +112,11 @@ export function MessageBubble({
     Date.now() - new Date(message.created_at).getTime() < EDIT_WINDOW_MS;
   const canDelete = isMine;
 
-  const openMenu = () => {
+  // Callbacks are memoized so any nested memoized child (or RN re-render
+  // bailout heuristics) sees stable identities across renders. Deps cover
+  // the closed-over values; the mutation hook objects themselves are
+  // stable across renders so they don't need to be in deps.
+  const openMenu = useCallback(() => {
     if (!isMine) return;
     const actions: {
       text: string;
@@ -138,10 +142,14 @@ export function MessageBubble({
       });
     }
     actions.push({ text: t('chat.cancel'), style: 'cancel' });
-    Alert.alert('', '', actions);
-  };
+    // RN requires a non-empty title for Alert.alert on Android; passing
+    // an empty string renders an awkward blank header. A future polish
+    // pass could replace this with ActionSheetIOS on iOS for a more
+    // native feel — kept as Alert for now to stay cross-platform.
+    Alert.alert(t('chat.messageActionsTitle'), '', actions);
+  }, [isMine, canEdit, canDelete, t, message.body, message.id, deleteMutation]);
 
-  const submitEdit = async () => {
+  const submitEdit = useCallback(async () => {
     const trimmed = draft.trim();
     if (!trimmed || trimmed === message.body) {
       setEditing(false);
@@ -153,7 +161,9 @@ export function MessageBubble({
     } catch {
       // surface in UI via mutation error if needed; keep editor open
     }
-  };
+  }, [draft, message.body, message.id, editMutation]);
+
+  const cancelEdit = useCallback(() => setEditing(false), []);
 
   if (editing) {
     return (
@@ -174,7 +184,7 @@ export function MessageBubble({
           className={`font-body text-[13px] ${isMine ? 'text-white' : 'text-body'}`}
         />
         <View className="flex-row justify-end mt-1 gap-3">
-          <Pressable testID="message-edit-cancel" onPress={() => setEditing(false)}>
+          <Pressable testID="message-edit-cancel" onPress={cancelEdit}>
             <Text className={`text-[11px] ${isMine ? 'text-gold-light' : 'text-muted'}`}>
               {t('chat.cancel')}
             </Text>
@@ -223,3 +233,31 @@ export function MessageBubble({
     </Pressable>
   );
 }
+
+/**
+ * Custom equality. Rebuild only when content the bubble renders changes.
+ * Identity-on-references is checked for `proposal` (kind='meeting') so a
+ * confirmed-slot update or state transition re-renders, but a parent
+ * recompute that yields the same proposal id+state does not.
+ */
+export const MessageBubble = memo(MessageBubbleImpl, (prev, next) => {
+  if (prev.message.id !== next.message.id) return false;
+  if (prev.message.body !== next.message.body) return false;
+  if (prev.message.edited_at !== next.message.edited_at) return false;
+  if (prev.message.deleted_at !== next.message.deleted_at) return false;
+  if (prev.message.transcript !== next.message.transcript) return false;
+  if (prev.message.transcript_status !== next.message.transcript_status) return false;
+  if (prev.proposal?.id !== next.proposal?.id) return false;
+  if (prev.proposal?.state !== next.proposal?.state) return false;
+  if (prev.proposal?.confirmed_slot !== next.proposal?.confirmed_slot) return false;
+  if (prev.proposal?.duration_minutes !== next.proposal?.duration_minutes) return false;
+  if (prev.proposal?.meeting_url !== next.proposal?.meeting_url) return false;
+  // `slots` is a JSONB array; reference equality is fine because the
+  // proposalsQuery returns new arrays on refetch, never mutates in place.
+  if (prev.proposal?.slots !== next.proposal?.slots) return false;
+  if (prev.isMine !== next.isMine) return false;
+  if (prev.peerHandle !== next.peerHandle) return false;
+  if (prev.myId !== next.myId) return false;
+  if (prev.conversationId !== next.conversationId) return false;
+  return true;
+});

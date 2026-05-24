@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, Modal } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Button } from '~/components/ui/Button';
 import { PostConnectionReview } from '~/features/meetings/components/PostConnectionReview';
 import { useAuthSession } from '~/features/auth/SessionContext';
@@ -16,6 +17,7 @@ type Props = { conversationId: string };
  * follow up async).
  */
 export function PostMeetingPrompt({ conversationId }: Props) {
+  const { t } = useTranslation();
   const { session } = useAuthSession();
   const userId = session?.user.id;
   const [showPrompt, setShowPrompt] = useState(true);
@@ -39,10 +41,10 @@ export function PostMeetingPrompt({ conversationId }: Props) {
       <Modal visible={visible} animationType="fade" transparent={false}>
         <View testID="post-meeting-prompt" className="flex-1 bg-surface px-6 pt-20 pb-6">
           <Text className="font-display-bold text-[20px] text-navy text-center mb-2">
-            Did this meeting happen?
+            {t('meetings.prompt.title')}
           </Text>
           <Text className="font-body text-[12px] text-muted text-center mb-6">
-            Tell us so we can improve your matches.
+            {t('meetings.prompt.subtitle')}
           </Text>
 
           <View className="gap-3">
@@ -54,26 +56,26 @@ export function PostMeetingPrompt({ conversationId }: Props) {
                 setReviewing(true);
               }}
             >
-              Yes — it happened
+              {t('meetings.prompt.yes')}
             </Button>
             <Button
               testID="post-meeting-reschedule"
               variant="outline"
               onPress={() => setShowPrompt(false)}
             >
-              Rescheduled to a new time
+              {t('meetings.prompt.rescheduled')}
             </Button>
             <Button
               testID="post-meeting-no-show"
               variant="outline"
               onPress={() => setShowPrompt(false)}
             >
-              No — they didn&apos;t show
+              {t('meetings.prompt.noShow')}
             </Button>
           </View>
 
           <Text className="font-body text-[10px] text-muted text-center mt-6 leading-snug">
-            If we don&apos;t hear back within 48 hours, we&apos;ll skip this prompt and ask later.
+            {t('meetings.prompt.fallback')}
           </Text>
         </View>
       </Modal>

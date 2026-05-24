@@ -1,4 +1,5 @@
 import { View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Banner } from '~/components/ui/Banner';
 
 type Props = {
@@ -7,12 +8,12 @@ type Props = {
 };
 
 export function ThinPoolBanner({ count }: Props) {
+  const { t } = useTranslation();
   const n = count ?? 0;
+  // i18next's `count` interpolation resolves to `_one` / `_other` automatically.
   return (
     <View testID="thin-pool-banner" className="mx-3 my-2">
-      <Banner variant="muted">
-        {`We're being picky for you. Only ${n} strong ${n === 1 ? 'match' : 'matches'} today — your goal is specific. We'll keep watching.`}
-      </Banner>
+      <Banner variant="muted">{t('discovery.thinPoolBanner', { count: n })}</Banner>
     </View>
   );
 }

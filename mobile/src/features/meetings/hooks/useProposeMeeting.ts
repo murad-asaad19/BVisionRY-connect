@@ -20,6 +20,12 @@ export function useProposeMeeting(conversationId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['messages', conversationId] });
       qc.invalidateQueries({ queryKey: ['meeting-proposals', conversationId] });
+      // The post-meeting prompt key (['pending-meeting-reviews', convId, userId])
+      // is prefix-matched by ['pending-meeting-reviews']. A new proposal doesn't
+      // change the pending-review set directly, but a previously confirmed
+      // meeting in the same thread might have been superseded — refetch to keep
+      // PostMeetingPrompt consistent.
+      qc.invalidateQueries({ queryKey: ['pending-meeting-reviews'] });
     },
   });
 }

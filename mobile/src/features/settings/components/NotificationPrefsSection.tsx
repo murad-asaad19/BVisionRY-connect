@@ -1,4 +1,5 @@
 import { View, Text, Switch } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import {
   useNotificationPrefs,
   useSetNotificationPref,
@@ -7,17 +8,11 @@ import {
   NOTIFICATION_KINDS,
   NOTIFICATION_CHANNELS,
   isPrefEnabled,
-  type NotificationChannel,
 } from '~/features/settings/services/notificationPrefs.service';
 import { Banner } from '~/components/ui/Banner';
 
-const CHANNEL_LABEL: Record<NotificationChannel, string> = {
-  push: 'Push',
-  email: 'Email',
-  in_app: 'In-app',
-};
-
 export function NotificationPrefsSection() {
+  const { t } = useTranslation();
   const prefsQ = useNotificationPrefs();
   const setPref = useSetNotificationPref();
   const prefs = prefsQ.data ?? {};
@@ -28,14 +23,14 @@ export function NotificationPrefsSection() {
         {/* Header row */}
         <View className="flex-row items-center px-3 py-2 border-b border-slate-100 bg-slate-50">
           <Text className="flex-1 font-display-bold text-[10px] uppercase tracking-wide text-muted">
-            Notification
+            {t('settings.notif.header')}
           </Text>
           {NOTIFICATION_CHANNELS.map((c) => (
             <Text
               key={c}
               className="w-16 text-center font-display-bold text-[10px] uppercase tracking-wide text-muted"
             >
-              {CHANNEL_LABEL[c]}
+              {t(`settings.notif.channel.${c}`)}
             </Text>
           ))}
         </View>
@@ -48,7 +43,7 @@ export function NotificationPrefsSection() {
             }`}
           >
             <Text className="flex-1 font-display-semibold text-[12px] text-body" numberOfLines={2}>
-              {kind.label}
+              {t(`settings.notif.kind.${kind.value}`)}
             </Text>
             {NOTIFICATION_CHANNELS.map((c) => {
               const enabled = isPrefEnabled(prefs, kind.value, c);
@@ -68,7 +63,7 @@ export function NotificationPrefsSection() {
         ))}
       </View>
       <View className="mt-3">
-        <Banner variant="muted">Activity-decay guilt nudges are not available.</Banner>
+        <Banner variant="muted">{t('settings.notif.decayBanner')}</Banner>
       </View>
     </View>
   );

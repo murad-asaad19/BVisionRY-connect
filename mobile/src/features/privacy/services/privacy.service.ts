@@ -28,14 +28,14 @@ export async function reportTarget(
   reason: ReportReason,
   note: string | null
 ): Promise<void> {
-  // Generated types require `p_note: string`, but our SQL function accepts
-  // `text` (nullable) so we pass null through via a cast.
-  const args = {
+  // The SQL function accepts `p_note text` (nullable, see slice9_privacy.sql)
+  // but types.gen.ts surfaces it as `string`. Narrow the cast to just that
+  // field so the surrounding args stay strictly typed.
+  const { error } = await supabase.rpc('report_target', {
     p_target_type: targetType,
     p_target_id: targetId,
     p_reason: reason,
-    p_note: note,
-  } as unknown as { p_target_type: string; p_target_id: string; p_reason: string; p_note: string };
-  const { error } = await supabase.rpc('report_target', args);
+    p_note: note as unknown as string,
+  });
   if (error) throw new Error(error.message);
 }

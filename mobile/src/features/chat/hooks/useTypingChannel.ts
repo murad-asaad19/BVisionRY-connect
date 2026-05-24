@@ -5,9 +5,15 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 /**
  * Realtime broadcast channel for typing indicators in a conversation.
  *
- * - Subscribes to `typing:{conversationId}` channel for broadcast events.
- * - Sets `isOtherTyping=true` when a peer broadcasts typing, clears after 3s of silence.
+ * - Subscribes to `chat:typing:{conversationId}` (namespaced under `chat:`
+ *   so future per-feature channels won't collide).
+ * - Sets `isOtherTyping=true` when a peer broadcasts typing; clears after
+ *   3s of silence locally, or immediately when the peer broadcasts
+ *   `stopped_typing` (which is sent on blur from the composer side).
  * - `sendTyping()` is throttled to once per 1s.
+ * - `sendStoppedTyping()` is meant to be called when the local user blurs
+ *   the conversation (component unmount, screen unfocus, app background)
+ *   so the peer's "typing..." indicator clears promptly.
  *
  * No DB writes — pure Supabase Realtime broadcast.
  */
@@ -20,7 +26,7 @@ export function useTypingChannel(conversationId: string, myUserId: string | unde
   useEffect(() => {
     if (!conversationId || !myUserId) return;
 
-    const channel = supabase.channel(`typing:${conversationId}`, {
+    const channel = supabase.channel(`chat:typing:${conversationId}`, {
       config: { broadcast: { self: false } },
     });
 
@@ -30,6 +36,17 @@ export function useTypingChannel(conversationId: string, myUserId: string | unde
         setIsOtherTyping(true);
         if (timerRef.current) clearTimeout(timerRef.current);
         timerRef.current = setTimeout(() => setIsOtherTyping(false), 3000);
+      }
+    });
+
+    channel.on('broadcast', { event: 'stopped_typing' }, (msg) => {
+      const payloadUserId = (msg as { payload?: { user_id?: string } }).payload?.user_id;
+      if (payloadUserId && payloadUserId !== myUserId) {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = undefined;
+        }
+        setIsOtherTyping(false);
       }
     });
 
@@ -56,5 +73,17 @@ export function useTypingChannel(conversationId: string, myUserId: string | unde
     });
   }, [myUserId]);
 
-  return { isOtherTyping, sendTyping };
+  const sendStoppedTyping = useCallback(() => {
+    const channel = channelRef.current;
+    if (!channel || !myUserId) return;
+    // Reset the throttle so any subsequent typing send fires immediately.
+    lastSentRef.current = 0;
+    channel.send({
+      type: 'broadcast',
+      event: 'stopped_typing',
+      payload: { user_id: myUserId },
+    });
+  }, [myUserId]);
+
+  return { isOtherTyping, sendTyping, sendStoppedTyping };
 }

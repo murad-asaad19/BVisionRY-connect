@@ -1,5 +1,6 @@
 import { Platform, TextInput, View, Text, Pressable } from 'react-native';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
 type Props = {
@@ -9,12 +10,23 @@ type Props = {
   label?: string;
 };
 
+/** Resolve the viewer's IANA timezone with a safe fallback for older runtimes. */
+function resolveLocalTz(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+}
+
 export function DateTimeField(props: Props) {
   if (Platform.OS === 'web') return <WebDateTimeField {...props} />;
   return <NativeDateTimeField {...props} />;
 }
 
 function WebDateTimeField({ value, onChange, testID, label }: Props) {
+  const { t } = useTranslation();
+  const tz = resolveLocalTz();
   const webProps = { type: 'datetime-local' } as unknown as object;
   return (
     <View className="mb-3">
@@ -28,11 +40,14 @@ function WebDateTimeField({ value, onChange, testID, label }: Props) {
         className="bg-white text-body px-4 py-3 rounded-lg border border-border"
         {...webProps}
       />
+      <Text className="text-muted text-[10px] mt-1">{t('meetings.inputTimeZoneHint', { tz })}</Text>
     </View>
   );
 }
 
 function NativeDateTimeField({ value, onChange, testID, label }: Props) {
+  const { t } = useTranslation();
+  const tz = resolveLocalTz();
   const [showDate, setShowDate] = useState(false);
   const [showTime, setShowTime] = useState(false);
 
@@ -90,6 +105,7 @@ function NativeDateTimeField({ value, onChange, testID, label }: Props) {
           onChange={onTime}
         />
       )}
+      <Text className="text-muted text-[10px] mt-1">{t('meetings.inputTimeZoneHint', { tz })}</Text>
     </View>
   );
 }

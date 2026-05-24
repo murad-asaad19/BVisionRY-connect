@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
-import { getChatMediaSignedUrl } from '~/features/media/services/storage.service';
+import { useSignedUrl } from '~/features/media/hooks/useSignedUrl';
+import { useVoicePlayerCoordinator } from '~/features/media/hooks/useVoicePlayerCoordinator';
 
 type Props = {
   mediaPath: string;
@@ -35,6 +36,10 @@ function statusText(status: string | null | undefined): string {
  * waveform strip, duration label. Transcript reveal renders as a side-anchored
  * card (max-w-80%) matching the bubble side, white-bordered with TRANSCRIPT
  * label — mockup F3.
+ *
+ * Coordinator: when this bubble starts, any other actively-playing bubble is
+ * paused via `useVoicePlayerCoordinator`. Refetches the signed URL on player
+ * error (URLs expire after ~1h).
  */
 export function VoiceMessageBubble({
   mediaPath,
@@ -43,30 +48,47 @@ export function VoiceMessageBubble({
   transcript,
   transcriptStatus,
 }: Props) {
-  const [url, setUrl] = useState<string | null>(null);
+  const { data: url, refetch } = useSignedUrl(mediaPath);
   const [showTranscript, setShowTranscript] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    getChatMediaSignedUrl(mediaPath)
-      .then((u) => {
-        if (!cancelled) setUrl(u);
-      })
-      .catch(() => {
-        // signed URL failed; toggle stays disabled
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [mediaPath]);
 
   const player = useAudioPlayer(url ?? undefined);
   const status = useAudioPlayerStatus(player);
 
+  const { notifyPlay, notifyPause } = useVoicePlayerCoordinator(mediaPath, () => {
+    try {
+      player.pause();
+    } catch {
+      // Player may have been released already; ignore.
+    }
+  });
+
+  // Re-fetch signed URL on playback error (likely a stale URL).
+  useEffect(() => {
+    if (status.playbackState === 'error') {
+      void refetch();
+    }
+  }, [status.playbackState, refetch]);
+
+  // Pause on unmount.
+  useEffect(() => {
+    return () => {
+      try {
+        player.pause();
+      } catch {
+        // ignore
+      }
+    };
+  }, [player]);
+
   const toggle = () => {
     if (!url) return;
-    if (status.playing) player.pause();
-    else player.play();
+    if (status.playing) {
+      player.pause();
+      notifyPause();
+    } else {
+      notifyPlay();
+      player.play();
+    }
   };
 
   const hasTranscriptInfo =
@@ -75,6 +97,13 @@ export function VoiceMessageBubble({
 
   const readyTranscript = transcriptStatus === 'ready' && transcript ? transcript : null;
   const transcriptBody = readyTranscript ?? statusText(transcriptStatus);
+
+  // Prefer live currentTime/duration when the player has loaded; fall back to
+  // the persisted durationMs for the static label.
+  const liveMs =
+    status.playing && status.currentTime > 0
+      ? Math.round(status.currentTime * 1000)
+      : durationMs;
 
   return (
     <View className={isMine ? 'self-end' : 'self-start'}>
@@ -101,7 +130,7 @@ export function VoiceMessageBubble({
           className={`flex-1 h-[18px] rounded ${isMine ? 'bg-navy-light' : 'bg-slate-100'} mr-2`}
         />
         <Text className={`font-body text-[10px] ${isMine ? 'text-gold-light' : 'text-muted'}`}>
-          {fmt(durationMs)}
+          {fmt(liveMs)}
         </Text>
       </View>
 

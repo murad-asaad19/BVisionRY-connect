@@ -11,6 +11,9 @@ export function useBlockUser() {
       qc.invalidateQueries({ queryKey: ['intros'] });
       qc.invalidateQueries({ queryKey: ['conversations'] });
       qc.invalidateQueries({ queryKey: ['profile'] });
+      qc.invalidateQueries({ queryKey: ['feed'] });
+      qc.invalidateQueries({ queryKey: ['connections'] });
+      qc.invalidateQueries({ queryKey: ['decline-cooldown'] });
     },
   });
 }

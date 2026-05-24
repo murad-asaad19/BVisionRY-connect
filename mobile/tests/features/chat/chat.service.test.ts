@@ -6,8 +6,8 @@ import { supabase } from '~/lib/supabase/client';
 import {
   deleteMessage,
   editMessage,
-  fetchConversationsPage,
-  fetchMessages,
+  fetchConversationsOverview,
+  fetchMessagesPage,
   isConversationMuted,
   listConversationUnread,
   markConversationRead,
@@ -19,76 +19,74 @@ import {
 describe('chat.service', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  describe('fetchConversationsPage', () => {
-    it('filters by participant a or b, paginated by updated_at cursor desc', async () => {
+  describe('fetchConversationsOverview', () => {
+    it('calls the list_conversation_overview RPC with the caller id', async () => {
       const rows = [
         {
-          id: 'c1',
-          participant_a_id: 'me',
-          participant_b_id: 'u2',
-          updated_at: '2026-05-14T00:00:00Z',
+          conversation_id: 'c1',
+          peer_id: 'u2',
+          peer_name: 'Bea',
+          peer_handle: 'bea',
+          peer_photo_url: null,
+          last_message_body: 'hi',
+          last_message_kind: 'text',
+          last_message_at: '2026-05-14T00:00:00Z',
+          unread_count: 0,
+          is_muted: false,
         },
       ];
-      const limit = jest.fn().mockResolvedValueOnce({ data: rows, error: null });
-      const order = jest.fn().mockReturnValue({ limit });
-      const lt = jest.fn().mockReturnValue({ order });
-      const or = jest.fn().mockReturnValue({ lt });
-      const select = jest.fn().mockReturnValue({ or });
-      (supabase.from as jest.Mock).mockReturnValue({ select });
-
-      const result = await fetchConversationsPage({
-        userId: 'me',
-        cursor: '2026-05-15T00:00:00Z',
-        pageSize: 20,
-      });
-      expect(supabase.from).toHaveBeenCalledWith('conversations');
-      expect(or).toHaveBeenCalledWith('participant_a_id.eq.me,participant_b_id.eq.me');
-      expect(lt).toHaveBeenCalledWith('updated_at', '2026-05-15T00:00:00Z');
-      expect(order).toHaveBeenCalledWith('updated_at', { ascending: false });
-      expect(limit).toHaveBeenCalledWith(20);
-      expect(result.rows).toEqual(rows);
-      expect(result.nextCursor).toBeNull();
+      (supabase.rpc as jest.Mock).mockResolvedValueOnce({ data: rows, error: null });
+      const result = await fetchConversationsOverview('me');
+      expect(supabase.rpc).toHaveBeenCalledWith('list_conversation_overview', { p_user_id: 'me' });
+      expect(result).toEqual(rows);
     });
 
-    it('returns nextCursor on full page', async () => {
-      const rows = Array.from({ length: 20 }).map((_, i) => ({
-        id: `c${i}`,
-        participant_a_id: 'me',
-        participant_b_id: `u${i}`,
-        updated_at: `2026-05-${String(10 + i).padStart(2, '0')}T00:00:00Z`,
-      }));
-      const limit = jest.fn().mockResolvedValueOnce({ data: rows, error: null });
-      const order = jest.fn().mockReturnValue({ limit });
-      const lt = jest.fn().mockReturnValue({ order });
-      const or = jest.fn().mockReturnValue({ lt });
-      const select = jest.fn().mockReturnValue({ or });
-      (supabase.from as jest.Mock).mockReturnValue({ select });
-
-      const result = await fetchConversationsPage({
-        userId: 'me',
-        cursor: '9999-12-31T00:00:00Z',
-        pageSize: 20,
+    it('throws on RPC error', async () => {
+      (supabase.rpc as jest.Mock).mockResolvedValueOnce({
+        data: null,
+        error: { message: 'forbidden' },
       });
-      expect(result.rows.length).toBe(20);
-      expect(result.nextCursor).toBe(rows[rows.length - 1]!.updated_at);
+      await expect(fetchConversationsOverview('me')).rejects.toThrow('forbidden');
     });
   });
 
-  describe('fetchMessages', () => {
-    it('selects latest 50 messages for a conversation ordered by created_at asc', async () => {
-      const rows = [{ id: 'm1', body: 'hi' }];
+  describe('fetchMessagesPage', () => {
+    it('selects the freshest page (DESC by created_at) without a cursor', async () => {
+      const rows = [{ id: 'm1', body: 'hi', created_at: '2026-05-16T00:00:00Z' }];
       const limit = jest.fn().mockResolvedValueOnce({ data: rows, error: null });
       const order = jest.fn().mockReturnValue({ limit });
       const eq = jest.fn().mockReturnValue({ order });
       const select = jest.fn().mockReturnValue({ eq });
       (supabase.from as jest.Mock).mockReturnValue({ select });
 
-      const result = await fetchMessages('c1');
+      const result = await fetchMessagesPage({ conversationId: 'c1', before: null });
       expect(supabase.from).toHaveBeenCalledWith('messages');
       expect(eq).toHaveBeenCalledWith('conversation_id', 'c1');
-      expect(order).toHaveBeenCalledWith('created_at', { ascending: true });
-      expect(limit).toHaveBeenCalledWith(50);
-      expect(result).toEqual(rows);
+      expect(order).toHaveBeenCalledWith('created_at', { ascending: false });
+      expect(result.rows).toEqual(rows);
+      expect(result.nextCursor).toBeNull();
+    });
+
+    it('appends an lt() cursor filter on subsequent pages and reports nextCursor on full page', async () => {
+      const rows = Array.from({ length: 30 }).map((_, i) => ({
+        id: `m${i}`,
+        body: `b${i}`,
+        created_at: `2026-05-${String(10 + i).padStart(2, '0')}T00:00:00Z`,
+      }));
+      const ltMock = jest.fn().mockResolvedValueOnce({ data: rows, error: null });
+      const limit = jest.fn().mockReturnValue({ lt: ltMock });
+      const order = jest.fn().mockReturnValue({ limit });
+      const eq = jest.fn().mockReturnValue({ order });
+      const select = jest.fn().mockReturnValue({ eq });
+      (supabase.from as jest.Mock).mockReturnValue({ select });
+
+      const result = await fetchMessagesPage({
+        conversationId: 'c1',
+        before: '2026-06-01T00:00:00Z',
+        pageSize: 30,
+      });
+      expect(ltMock).toHaveBeenCalledWith('created_at', '2026-06-01T00:00:00Z');
+      expect(result.nextCursor).toBe(rows[rows.length - 1]!.created_at);
     });
   });
 
@@ -106,8 +104,26 @@ describe('chat.service', () => {
         conversation_id: 'c1',
         sender_id: 'me',
         body: 'hi',
+        kind: 'text',
       });
       expect(result).toEqual(row);
+    });
+
+    it('forwards the client-supplied id when provided', async () => {
+      const row = { id: 'abc', body: 'hi', sender_id: 'me', conversation_id: 'c1' };
+      const single = jest.fn().mockResolvedValueOnce({ data: row, error: null });
+      const select = jest.fn().mockReturnValue({ single });
+      const insert = jest.fn().mockReturnValue({ select });
+      (supabase.from as jest.Mock).mockReturnValue({ insert });
+
+      await sendMessage({ id: 'abc', conversationId: 'c1', senderId: 'me', body: 'hi' });
+      expect(insert).toHaveBeenCalledWith({
+        id: 'abc',
+        conversation_id: 'c1',
+        sender_id: 'me',
+        body: 'hi',
+        kind: 'text',
+      });
     });
 
     it('throws on insert error', async () => {

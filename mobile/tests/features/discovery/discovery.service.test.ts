@@ -16,10 +16,13 @@ describe('discovery.service', () => {
   beforeEach(() => jest.clearAllMocks());
 
   describe('fetchDailyMatches', () => {
-    it('calls get_daily_matches RPC with no args', async () => {
+    it('calls get_daily_matches RPC with p_for_date arg (defaults to today)', async () => {
       (supabase.rpc as jest.Mock).mockResolvedValueOnce({ data: [], error: null });
       await fetchDailyMatches();
-      expect(supabase.rpc).toHaveBeenCalledWith('get_daily_matches');
+      expect(supabase.rpc).toHaveBeenCalledWith(
+        'get_daily_matches',
+        expect.objectContaining({ p_for_date: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) })
+      );
     });
 
     it('returns the row array', async () => {
@@ -54,11 +57,14 @@ describe('discovery.service', () => {
         pageSize: 20,
       });
 
+      // PostgREST coerces `undefined` inconsistently — the service passes
+      // explicit `null` so the SQL function sees NULL args and applies its
+      // default-NULL fallback behaviour.
       expect(supabase.rpc).toHaveBeenCalledWith('search_discoverable_profiles', {
-        p_query: undefined,
-        p_roles: undefined,
-        p_goal_types: undefined,
-        p_country: undefined,
+        p_query: null,
+        p_roles: null,
+        p_goal_types: null,
+        p_country: null,
         p_cursor: '2026-05-15T00:00:00Z',
         p_limit: 20,
       });
@@ -91,7 +97,7 @@ describe('discovery.service', () => {
       });
     });
 
-    it('omits empty filter values (empty string / empty arrays become undefined)', async () => {
+    it('coerces empty filter values to null (empty string / empty arrays)', async () => {
       (supabase.rpc as jest.Mock).mockResolvedValueOnce({ data: [], error: null });
 
       await fetchFeedPage({
@@ -102,10 +108,10 @@ describe('discovery.service', () => {
       });
 
       const callArgs = (supabase.rpc as jest.Mock).mock.calls[0]![1];
-      expect(callArgs.p_query).toBeUndefined();
-      expect(callArgs.p_roles).toBeUndefined();
-      expect(callArgs.p_goal_types).toBeUndefined();
-      expect(callArgs.p_country).toBeUndefined();
+      expect(callArgs.p_query).toBeNull();
+      expect(callArgs.p_roles).toBeNull();
+      expect(callArgs.p_goal_types).toBeNull();
+      expect(callArgs.p_country).toBeNull();
     });
 
     it('returns nextCursor when full page returned', async () => {

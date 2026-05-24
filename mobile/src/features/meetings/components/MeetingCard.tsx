@@ -3,8 +3,10 @@ import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useConfirmMeeting } from '~/features/meetings/hooks/useConfirmMeeting';
 import { useDeclineMeeting } from '~/features/meetings/hooks/useDeclineMeeting';
+import { useCancelMeeting } from '~/features/meetings/hooks/useCancelMeeting';
 import type { MeetingState } from '~/features/meetings/services/meetings.service';
 import { ICSDownloadButton } from './ICSDownloadButton';
+import { ProposeMeetingSheet } from './ProposeMeetingSheet';
 
 type Props = {
   conversationId: string;
@@ -18,7 +20,7 @@ type Props = {
   state: MeetingState;
   /** IANA timezone of the proposer, e.g. `America/Los_Angeles`. */
   timezone?: string | null;
-  /** Handle of the other participant (used for ICS summary). Falls back to "peer" when absent. */
+  /** Handle of the other participant (used for ICS summary). Falls back to a generic title when absent. */
   otherHandle?: string | null;
 };
 
@@ -82,16 +84,19 @@ export function MeetingCard({
   const isProposer = proposedById === myId;
   const isRecipient = !isProposer;
   const [picked, setPicked] = useState<string | null>(null);
+  const [proposeAnotherOpen, setProposeAnotherOpen] = useState(false);
   const confirm = useConfirmMeeting(conversationId);
   const decline = useDeclineMeeting(conversationId);
+  const cancel = useCancelMeeting(conversationId);
 
   const baseCardClass = 'bg-white border-[1.5px] border-gold rounded-xl p-4 my-2 mx-2';
+  const icsSummary = otherHandle ? t('meetings.titleWith', { handle: otherHandle }) : t('meetings.title');
 
   if (state === 'confirmed' && confirmedSlot) {
     return (
       <View testID="meeting-card-confirmed" className={baseCardClass}>
         <Text className="font-display-bold text-[10px] text-muted uppercase tracking-wide mb-1">
-          Meeting confirmed
+          {t('meetings.statusConfirmed')}
         </Text>
         <Text
           testID="meeting-confirmed-slot"
@@ -99,7 +104,9 @@ export function MeetingCard({
         >
           {formatSlotWithTZ(confirmedSlot, timezone, yourTimeLabel)}
         </Text>
-        <Text className="font-body text-[11px] text-muted">Duration: {durationMinutes} min</Text>
+        <Text className="font-body text-[11px] text-muted">
+          {t('meetings.durationLabel', { minutes: durationMinutes })}
+        </Text>
         {meetingUrl && (
           <Text className="font-body text-[11px] text-navy mt-1" selectable>
             {meetingUrl}
@@ -110,31 +117,37 @@ export function MeetingCard({
           startIso={confirmedSlot}
           durationMinutes={durationMinutes}
           meetingUrl={meetingUrl}
-          summary={otherHandle ? `Meeting with @${otherHandle}` : 'Meeting'}
+          summary={icsSummary}
         />
       </View>
     );
   }
 
-  if (state === 'declined') {
+  if (state === 'declined' || state === 'cancelled') {
+    const statusKey = state === 'declined' ? 'meetings.statusDeclined' : 'meetings.statusCancelled';
+    const testId = state === 'declined' ? 'meeting-card-declined' : 'meeting-card-cancelled';
     return (
-      <View
-        testID="meeting-card-declined"
-        className="bg-white border border-border rounded-xl p-4 my-2 mx-2"
-      >
-        <Text className="font-display-bold text-[11px] text-muted">Meeting declined</Text>
-      </View>
-    );
-  }
-
-  if (state === 'cancelled') {
-    return (
-      <View
-        testID="meeting-card-cancelled"
-        className="bg-white border border-border rounded-xl p-4 my-2 mx-2"
-      >
-        <Text className="font-display-bold text-[11px] text-muted">Meeting cancelled</Text>
-      </View>
+      <>
+        <View testID={testId} className="bg-white border border-border rounded-xl p-4 my-2 mx-2">
+          <Text className="font-display-bold text-[11px] text-muted mb-2">{t(statusKey)}</Text>
+          <Pressable
+            testID="meeting-propose-another"
+            onPress={() => setProposeAnotherOpen(true)}
+            accessibilityRole="button"
+            className="self-start bg-white border border-navy px-3 py-1.5 rounded-lg"
+          >
+            <Text className="font-display-semibold text-[11px] text-navy">
+              {t('meetings.proposeAnother')}
+            </Text>
+          </Pressable>
+        </View>
+        <ProposeMeetingSheet
+          visible={proposeAnotherOpen}
+          conversationId={conversationId}
+          onClose={() => setProposeAnotherOpen(false)}
+          onSent={() => setProposeAnotherOpen(false)}
+        />
+      </>
     );
   }
 
@@ -142,7 +155,7 @@ export function MeetingCard({
   return (
     <View testID="meeting-card-proposed" className={baseCardClass}>
       <Text className="font-display-bold text-[10px] text-muted uppercase tracking-wide mb-2">
-        Meeting proposed · {durationMinutes} min
+        {t('meetings.durationHeader', { minutes: durationMinutes })}
       </Text>
       {meetingUrl && (
         <Text className="font-body text-[11px] text-navy mb-2" selectable>
@@ -179,7 +192,9 @@ export function MeetingCard({
             {decline.isPending ? (
               <ActivityIndicator color="#0f3460" />
             ) : (
-              <Text className="font-display-semibold text-[12px] text-navy">Decline</Text>
+              <Text className="font-display-semibold text-[12px] text-navy">
+                {t('meetings.decline')}
+              </Text>
             )}
           </Pressable>
           <Pressable
@@ -193,7 +208,29 @@ export function MeetingCard({
             {confirm.isPending ? (
               <ActivityIndicator color="#ffffff" />
             ) : (
-              <Text className="font-display-bold text-[12px] text-white">Confirm</Text>
+              <Text className="font-display-bold text-[12px] text-white">
+                {t('meetings.confirm')}
+              </Text>
+            )}
+          </Pressable>
+        </View>
+      )}
+
+      {isProposer && (
+        <View className="mt-2">
+          <Pressable
+            testID="meeting-cancel-proposal"
+            onPress={() => cancel.mutate(meetingId)}
+            disabled={cancel.isPending}
+            accessibilityRole="button"
+            className="self-start bg-white border border-border px-3 py-1.5 rounded-lg"
+          >
+            {cancel.isPending ? (
+              <ActivityIndicator color="#0f3460" />
+            ) : (
+              <Text className="font-display-semibold text-[11px] text-navy">
+                {t('meetings.cancelProposal')}
+              </Text>
             )}
           </Pressable>
         </View>

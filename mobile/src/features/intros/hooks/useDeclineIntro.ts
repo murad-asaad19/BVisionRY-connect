@@ -11,6 +11,10 @@ export function useDeclineIntro() {
     onSuccess: (updated) => {
       qc.setQueryData(['intros', 'by-id', updated.id], updated);
       qc.invalidateQueries({ queryKey: ['intros', 'inbox', userId] });
+      // Decline opens the 30-day cooldown window for the sender; bust both
+      // the cooldown probe and any 'intros' superset queries.
+      qc.invalidateQueries({ queryKey: ['intros'] });
+      qc.invalidateQueries({ queryKey: ['decline-cooldown'] });
     },
   });
 }

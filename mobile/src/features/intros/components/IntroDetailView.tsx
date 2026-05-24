@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { AvatarCircle } from '~/components/ui/AvatarCircle';
 import { QueryState } from '~/components/ui/QueryState';
 import { Button } from '~/components/ui/Button';
@@ -11,6 +12,7 @@ import { useIntroById } from '~/features/intros/hooks/useIntroById';
 import { useAcceptIntro } from '~/features/intros/hooks/useAcceptIntro';
 import { useDeclineIntro } from '~/features/intros/hooks/useDeclineIntro';
 import { useAuthSession } from '~/features/auth/SessionContext';
+import { IntroExpiredError } from '~/features/intros/services/intros.service';
 import { supabase } from '~/lib/supabase/client';
 import type { Database } from '~/lib/supabase/types.gen';
 
@@ -42,6 +44,7 @@ function useProfileLite(id: string | null | undefined) {
 type Props = { id: string };
 
 export function IntroDetailView({ id }: Props) {
+  const { t } = useTranslation();
   const introQuery = useIntroById(id);
   const acceptMutation = useAcceptIntro();
   const declineMutation = useDeclineIntro();
@@ -54,12 +57,12 @@ export function IntroDetailView({ id }: Props) {
       isEmpty={(data) => data === null}
       emptyFallback={
         <View className="flex-1 items-center justify-center bg-surface px-6">
-          <Text className="text-body mb-2">Intro not found</Text>
+          <Text className="text-body mb-2">{t('intros.detail.notFound')}</Text>
           <Pressable
             onPress={() => router.back()}
             className="bg-white px-4 py-2 rounded-lg border border-border"
           >
-            <Text className="text-body">Back</Text>
+            <Text className="text-body">{t('intros.detail.back')}</Text>
           </Pressable>
         </View>
       }
@@ -73,17 +76,25 @@ export function IntroDetailView({ id }: Props) {
             onAccept={async () => {
               try {
                 await acceptMutation.mutateAsync(intro.id);
-                setBanner('Intro accepted.');
+                setBanner(t('intros.detail.accepted'));
               } catch (e) {
-                setBanner(e instanceof Error ? e.message : 'Accept failed');
+                if (e instanceof IntroExpiredError) {
+                  setBanner(t('intros.compose.errorExpired'));
+                } else {
+                  setBanner(t('intros.detail.acceptFailed'));
+                }
               }
             }}
             onDecline={async () => {
               try {
                 await declineMutation.mutateAsync(intro.id);
-                setBanner('Intro declined.');
+                setBanner(t('intros.detail.declined'));
               } catch (e) {
-                setBanner(e instanceof Error ? e.message : 'Decline failed');
+                if (e instanceof IntroExpiredError) {
+                  setBanner(t('intros.compose.errorExpired'));
+                } else {
+                  setBanner(t('intros.detail.declineFailed'));
+                }
               }
             }}
             working={acceptMutation.isPending || declineMutation.isPending}
@@ -111,13 +122,19 @@ function Body({
   onDecline: () => void;
   working: boolean;
 }) {
+  const { t } = useTranslation();
   const senderQuery = useProfileLite(intro.sender_id);
   const recipientQuery = useProfileLite(intro.recipient_id);
   const isSender = myId === intro.sender_id;
   const counterpart = isSender ? recipientQuery.data : senderQuery.data;
-  const counterpartLabel = isSender ? 'To' : 'From';
-  const canAct = myId === intro.recipient_id && intro.state === 'delivered';
-  const noteCaption = counterpart?.name ? `${counterpart.name.toUpperCase()} SAYS` : 'NOTE';
+  const counterpartLabel = isSender ? t('intros.detail.to') : t('intros.detail.from');
+  // Compute expiry against a stable timestamp captured per render so a long-lived
+  // mounted view doesn't flip mid-press; QueryState re-fetches will refresh it.
+  const isExpired = useMemo(() => new Date(intro.expires_at).getTime() < Date.now(), [intro.expires_at]);
+  const canAct = myId === intro.recipient_id && intro.state === 'delivered' && !isExpired;
+  const noteCaption = counterpart?.name
+    ? t('intros.detail.says', { name: counterpart.name.toUpperCase() })
+    : t('intros.detail.note');
 
   return (
     <ScrollView className="flex-1 bg-surface">
@@ -149,7 +166,11 @@ function Body({
               </Text>
             </View>
           </View>
-          <IntroStateBadge state={intro.state} audience={isSender ? 'sender' : 'recipient'} />
+          <IntroStateBadge
+            state={intro.state}
+            audience={isSender ? 'sender' : 'recipient'}
+            expiresAt={intro.expires_at}
+          />
         </View>
 
         <View className="mb-4">
@@ -160,9 +181,17 @@ function Body({
           </Banner>
         </View>
 
-        {!isSender && intro.state === 'delivered' ? (
+        {/* Expiry hint sits above the silent-decline hint so the recipient sees
+            the gating reason first if both apply. */}
+        {!isSender && intro.state === 'delivered' && isExpired ? (
+          <View testID="intro-expired-hint" className="mb-3">
+            <Banner variant="muted">{t('intros.detail.expiredHint')}</Banner>
+          </View>
+        ) : null}
+
+        {!isSender && intro.state === 'delivered' && !isExpired ? (
           <Text className="font-body text-[10px] text-muted leading-snug mb-3">
-            Decline is silent — the sender won&apos;t be notified.
+            {t('intros.detail.declineSilent')}
           </Text>
         ) : null}
 
@@ -175,7 +204,7 @@ function Body({
                 onPress={onDecline}
                 disabled={working}
               >
-                Decline
+                {t('intros.detail.decline')}
               </Button>
             </View>
             <View className="flex-1">
@@ -186,7 +215,7 @@ function Body({
                 disabled={working}
                 loading={working}
               >
-                Accept
+                {t('intros.detail.accept')}
               </Button>
             </View>
           </View>

@@ -7,9 +7,8 @@ import {
   proposeMeeting,
   confirmMeeting,
   declineMeeting,
-  submitFeedback,
   fetchMeetingProposals,
-  fetchMyFeedbackForMeeting,
+  fetchPendingMeetingReviews,
 } from '~/features/meetings/services/meetings.service';
 
 describe('meetings.service', () => {
@@ -54,16 +53,6 @@ describe('meetings.service', () => {
     expect(supabase.rpc).toHaveBeenCalledWith('decline_meeting', { p_meeting_id: 'mp1' });
   });
 
-  it('submitFeedback calls RPC with rating + note', async () => {
-    (supabase.rpc as jest.Mock).mockResolvedValueOnce({ data: { id: 'fb1' }, error: null });
-    await submitFeedback({ meetingId: 'mp1', rating: 'positive', note: 'great' });
-    expect(supabase.rpc).toHaveBeenCalledWith('submit_meeting_feedback', {
-      p_meeting_id: 'mp1',
-      p_rating: 'positive',
-      p_note: 'great',
-    });
-  });
-
   it('fetchMeetingProposals selects by conversation_id ordered by created_at desc', async () => {
     const rows = [{ id: 'mp1' }];
     const order = jest.fn().mockResolvedValueOnce({ data: rows, error: null });
@@ -77,21 +66,22 @@ describe('meetings.service', () => {
     expect(result).toEqual(rows);
   });
 
-  it('fetchMyFeedbackForMeeting returns row or null on PGRST116', async () => {
-    const single1 = jest.fn().mockResolvedValueOnce({ data: { id: 'fb1' }, error: null });
-    const eqB1 = jest.fn().mockReturnValue({ single: single1 });
-    const eqA1 = jest.fn().mockReturnValue({ eq: eqB1 });
-    const select1 = jest.fn().mockReturnValue({ eq: eqA1 });
-    (supabase.from as jest.Mock).mockReturnValueOnce({ select: select1 });
-    expect(await fetchMyFeedbackForMeeting('mp1', 'me')).toEqual({ id: 'fb1' });
+  describe('fetchPendingMeetingReviews', () => {
+    it('passes p_conversation_id when supplied', async () => {
+      (supabase.rpc as jest.Mock).mockResolvedValueOnce({ data: [{ id: 'mp1' }], error: null });
+      const rows = await fetchPendingMeetingReviews('me', 'c1');
+      expect(supabase.rpc).toHaveBeenCalledWith('pending_meeting_reviews', {
+        p_conversation_id: 'c1',
+      });
+      expect(rows).toEqual([{ id: 'mp1' }]);
+    });
 
-    const single2 = jest
-      .fn()
-      .mockResolvedValueOnce({ data: null, error: { code: 'PGRST116', message: '' } });
-    const eqB2 = jest.fn().mockReturnValue({ single: single2 });
-    const eqA2 = jest.fn().mockReturnValue({ eq: eqB2 });
-    const select2 = jest.fn().mockReturnValue({ eq: eqA2 });
-    (supabase.from as jest.Mock).mockReturnValueOnce({ select: select2 });
-    expect(await fetchMyFeedbackForMeeting('mp1', 'me')).toBeNull();
+    it('passes p_conversation_id: null when conversationId is omitted', async () => {
+      (supabase.rpc as jest.Mock).mockResolvedValueOnce({ data: [], error: null });
+      await fetchPendingMeetingReviews('me');
+      expect(supabase.rpc).toHaveBeenCalledWith('pending_meeting_reviews', {
+        p_conversation_id: null,
+      });
+    });
   });
 });

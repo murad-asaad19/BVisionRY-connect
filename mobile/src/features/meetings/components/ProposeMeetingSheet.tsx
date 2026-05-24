@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useProposeMeeting } from '~/features/meetings/hooks/useProposeMeeting';
 import { SlotsSchema, DurationSchema, MeetingUrlSchema } from '~/features/meetings/schemas';
 import { DateTimeField } from './DateTimeField';
@@ -18,6 +19,7 @@ type Props = {
 const DURATIONS = [15, 30, 45, 60, 90, 120];
 
 export function ProposeMeetingSheet({ visible, conversationId, onClose, onSent }: Props) {
+  const { t } = useTranslation();
   const [slot1, setSlot1] = useState('');
   const [slot2, setSlot2] = useState('');
   const [slot3, setSlot3] = useState('');
@@ -37,20 +39,31 @@ export function ProposeMeetingSheet({ visible, conversationId, onClose, onSent }
 
   const onSubmit = async () => {
     setError(null);
-    const slots = [slot1, slot2, slot3].filter((s) => s.length > 0);
+    // Dedupe by normalised ISO instant so two slot fields holding the same
+    // moment-of-time don't produce a duplicate entry server-side.
+    const slotsRaw = [slot1, slot2, slot3].filter((s) => s.length > 0);
+    const seen = new Set<string>();
+    const slots: string[] = [];
+    for (const s of slotsRaw) {
+      const t = Date.parse(s);
+      const key = Number.isNaN(t) ? s : new Date(t).toISOString();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      slots.push(s);
+    }
     const slotsParsed = SlotsSchema.safeParse(slots);
     if (!slotsParsed.success) {
-      setError('Pick 1-3 future date/times.');
+      setError(t('meetings.propose.errors.slotsRange'));
       return;
     }
     const durationParsed = DurationSchema.safeParse(duration);
     if (!durationParsed.success) {
-      setError('Duration must be 15-240 minutes.');
+      setError(t('meetings.propose.errors.duration'));
       return;
     }
     const urlParsed = MeetingUrlSchema.safeParse(url);
     if (!urlParsed.success) {
-      setError('Meeting URL must start with https:// (or leave blank).');
+      setError(t('meetings.propose.errors.url'));
       return;
     }
 
@@ -72,39 +85,41 @@ export function ProposeMeetingSheet({ visible, conversationId, onClose, onSent }
       reset();
       onSent();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Propose failed');
+      setError(e instanceof Error ? e.message : t('meetings.propose.errors.submitFailed'));
     }
   };
 
   return (
     <BottomSheet visible={visible} onClose={onClose} testID="propose-meeting-sheet">
       <ScrollView>
-        <Text className="font-display-bold text-[16px] text-navy mb-1">Propose a meeting</Text>
+        <Text className="font-display-bold text-[16px] text-navy mb-1">
+          {t('meetings.propose.title')}
+        </Text>
         <Text className="font-body text-[12px] text-muted mb-3">
-          Pick 1-3 time options. The other person picks one.
+          {t('meetings.propose.subtitle')}
         </Text>
 
         <DateTimeField
           value={slot1}
           onChange={setSlot1}
           testID="propose-slot-1"
-          label="Slot 1 (required)"
+          label={t('meetings.propose.slot1Label')}
         />
         <DateTimeField
           value={slot2}
           onChange={setSlot2}
           testID="propose-slot-2"
-          label="Slot 2 (optional)"
+          label={t('meetings.propose.slot2Label')}
         />
         <DateTimeField
           value={slot3}
           onChange={setSlot3}
           testID="propose-slot-3"
-          label="Slot 3 (optional)"
+          label={t('meetings.propose.slot3Label')}
         />
 
         <Text className="font-display-semibold text-[10px] text-muted uppercase tracking-wide mb-1.5 mt-1">
-          Duration
+          {t('meetings.propose.durationLabel')}
         </Text>
         <View className="flex-row flex-wrap gap-2 mb-3">
           {DURATIONS.map((d) => (
@@ -115,17 +130,19 @@ export function ProposeMeetingSheet({ visible, conversationId, onClose, onSent }
               accessibilityRole="button"
               accessibilityState={{ selected: duration === d }}
             >
-              <Pill variant={duration === d ? 'solid' : 'outline'}>{`${d} min`}</Pill>
+              <Pill variant={duration === d ? 'solid' : 'outline'}>
+                {t('meetings.propose.durationOption', { minutes: d })}
+              </Pill>
             </Pressable>
           ))}
         </View>
 
         <Input
           testID="propose-url"
-          label="Meeting URL (optional)"
+          label={t('meetings.propose.urlLabel')}
           value={url}
           onChangeText={setUrl}
-          placeholder="https://meet.google.com/abc-defg-hij"
+          placeholder={t('meetings.propose.urlPlaceholder')}
           autoCapitalize="none"
           keyboardType="url"
         />
@@ -144,7 +161,7 @@ export function ProposeMeetingSheet({ visible, conversationId, onClose, onSent }
               onPress={onClose}
               disabled={propose.isPending}
             >
-              Cancel
+              {t('meetings.propose.cancel')}
             </Button>
           </View>
           <View className="flex-1">
@@ -154,7 +171,7 @@ export function ProposeMeetingSheet({ visible, conversationId, onClose, onSent }
               onPress={onSubmit}
               loading={propose.isPending}
             >
-              Send
+              {t('meetings.propose.send')}
             </Button>
           </View>
         </View>

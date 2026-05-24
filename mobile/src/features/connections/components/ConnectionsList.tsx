@@ -1,10 +1,12 @@
 import { View, Text, Pressable, FlatList } from 'react-native';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useConnections } from '~/features/connections/hooks/useConnections';
 import { AvatarCircle } from '~/components/ui/AvatarCircle';
 import { QueryState } from '~/components/ui/QueryState';
 
 export function ConnectionsList() {
+  const { t } = useTranslation();
   const q = useConnections();
   return (
     <QueryState
@@ -12,9 +14,7 @@ export function ConnectionsList() {
       isEmpty={(rows) => rows.length === 0}
       emptyFallback={
         <View className="py-12 px-6 items-center" testID="connections-empty">
-          <Text className="text-muted text-center">
-            No connections yet. Accept an intro to start.
-          </Text>
+          <Text className="text-muted text-center">{t('connections.empty')}</Text>
         </View>
       }
     >

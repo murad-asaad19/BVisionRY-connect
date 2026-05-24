@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import { BottomSheet } from '~/components/ui/Modal';
 import { Button } from '~/components/ui/Button';
+import { colors } from '~/theme/colors';
 import { useRecordAudio } from '~/features/media/hooks/useRecordAudio';
 import { useSendVoiceMessage } from '~/features/media/hooks/useSendVoiceMessage';
+import { MAX_VOICE_MS } from '~/features/media/services/media.constants';
 
 type Props = { conversationId: string };
-
-const MAX_MS = 2 * 60 * 1000;
 
 function fmtElapsed(ms: number) {
   const s = Math.floor(ms / 1000);
@@ -18,6 +18,9 @@ function fmtElapsed(ms: number) {
  * Phase 2 voice recorder. Replaces the inline VoiceRecorderControl button +
  * captures audio inside a BottomSheet with a pulse + timer + Cancel/Send row.
  * Keeps the `composer-voice` testID so playwright continues to find it.
+ *
+ * Auto-stops + sends when `elapsed >= MAX_VOICE_MS` so we never blow past the
+ * server-side 2-minute limit.
  */
 export function VoiceRecorderSheet({ conversationId }: Props) {
   const { start, stop, isRecording } = useRecordAudio();
@@ -27,20 +30,50 @@ export function VoiceRecorderSheet({ conversationId }: Props) {
   const [elapsed, setElapsed] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
+  // Avoid double-fire of auto-send when the interval ticks past MAX while a
+  // user-initiated send is already in flight.
+  const sendingRef = useRef(false);
+
+  const finalizeAndSend = async () => {
+    if (sendingRef.current) return;
+    sendingRef.current = true;
+    setSubmitting(true);
+    try {
+      const rec = await stop();
+      if (rec) await send.mutateAsync(rec);
+    } finally {
+      sendingRef.current = false;
+      setSubmitting(false);
+      setOpen(false);
+    }
+  };
+
   useEffect(() => {
     if (!open || !isRecording) return;
     const t0 = Date.now();
-    const id = setInterval(() => setElapsed(Date.now() - t0), 250);
+    const id = setInterval(() => {
+      const ms = Date.now() - t0;
+      setElapsed(ms);
+      if (ms >= MAX_VOICE_MS) {
+        clearInterval(id);
+        void finalizeAndSend();
+      }
+    }, 250);
     return () => clearInterval(id);
+    // We intentionally exclude `finalizeAndSend` from deps — it closes over
+    // mutate/stop refs that don't need to re-arm the interval.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, isRecording]);
 
   const onOpen = async () => {
     setElapsed(0);
+    const ok = await start();
+    if (!ok) return; // Permission denied — alert already surfaced.
     setOpen(true);
-    await start();
   };
 
   const onCancel = async () => {
+    if (sendingRef.current) return;
     if (isRecording) await stop();
     setOpen(false);
   };
@@ -50,14 +83,7 @@ export function VoiceRecorderSheet({ conversationId }: Props) {
       setOpen(false);
       return;
     }
-    setSubmitting(true);
-    try {
-      const rec = await stop();
-      if (rec) await send.mutateAsync(rec);
-    } finally {
-      setSubmitting(false);
-      setOpen(false);
-    }
+    await finalizeAndSend();
   };
 
   return (
@@ -79,7 +105,7 @@ export function VoiceRecorderSheet({ conversationId }: Props) {
             <View testID="voice-recorder-pulse" className="w-7 h-7 rounded-full bg-danger-text" />
           </View>
           <Text testID="voice-recorder-timer" className="font-display-bold text-[22px] text-navy">
-            {fmtElapsed(elapsed)} / {fmtElapsed(MAX_MS)}
+            {fmtElapsed(elapsed)} / {fmtElapsed(MAX_VOICE_MS)}
           </Text>
           <Text className="font-body text-[10px] text-muted mt-1 text-center px-6 leading-snug">
             Max 2 minutes — voice notes are transcribed for accessibility & safety.
@@ -118,7 +144,7 @@ export function VoiceRecorderSheet({ conversationId }: Props) {
         </View>
         {submitting ? (
           <View className="mt-2 items-center">
-            <ActivityIndicator color="#0f3460" />
+            <ActivityIndicator color={colors.navy} />
           </View>
         ) : null}
       </BottomSheet>

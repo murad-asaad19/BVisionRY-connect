@@ -1,6 +1,16 @@
-import { useEffect, useMemo, useRef } from 'react';
-import { View, Text, FlatList, Pressable } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  KeyboardAvoidingView,
+  Platform,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from 'react-native';
 import { router } from 'expo-router';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useAuthSession } from '~/features/auth/SessionContext';
@@ -8,6 +18,7 @@ import { useMessages } from '~/features/chat/hooks/useMessages';
 import { useMessagesRealtime } from '~/features/chat/hooks/useMessagesRealtime';
 import { useMarkConversationRead } from '~/features/chat/hooks/useMarkConversationRead';
 import { useTypingChannel } from '~/features/chat/hooks/useTypingChannel';
+import { useActiveConversationStore } from '~/features/chat/store/activeConversationStore';
 import {
   useIsConversationMuted,
   useMuteConversation,
@@ -21,6 +32,7 @@ import { PostMeetingPrompt } from '~/features/meetings/components/PostMeetingPro
 import { AvatarCircle } from '~/components/ui/AvatarCircle';
 import { supabase } from '~/lib/supabase/client';
 import type { Database } from '~/lib/supabase/types.gen';
+import type { MessageRow } from '~/features/chat/services/chat.service';
 
 type ConversationRow = Database['public']['Tables']['conversations']['Row'];
 type ProfileLite = Pick<
@@ -70,13 +82,47 @@ function usePeerProfile(id: string | null) {
 
 type Props = { id: string };
 
+/**
+ * Header height the keyboard offset matches. Tracks the inline header below:
+ * pt-3.5 + 32 (avatar) + pb-2.5 + border = ~52. iOS uses this so the keyboard
+ * doesn't cover the composer.
+ */
+const HEADER_HEIGHT = 56;
+
+/**
+ * Inverted FlatList: index 0 = newest = visual bottom. "At bottom" therefore
+ * means contentOffset.y is near zero (the user has not scrolled up into
+ * history). 50px tolerance feels right for momentum scroll overshoot.
+ */
+const AT_BOTTOM_THRESHOLD = 50;
+
 export function ConversationScreen({ id }: Props) {
   const { t } = useTranslation();
   const { session } = useAuthSession();
   const myId = session?.user.id ?? '';
+  const isFocused = useIsFocused();
 
   useMessagesRealtime(id);
   useMeetingProposalsRealtime(id);
+
+  // Mark this conversation as the one the user is actively viewing so the
+  // realtime handler can suppress the unread-count bump on inbound messages
+  // (mark-read debounce will zero it shortly anyway).
+  //
+  // Uses `useFocusEffect` rather than `useEffect([id])` because the native
+  // Stack keeps prior screens mounted underneath the top one — a plain mount
+  // effect would only run when this screen first appears, leaving `activeId`
+  // pointing at the wrong conversation after a back navigation (or any time
+  // the user moves between sibling chat screens without unmount). With
+  // `useFocusEffect`, `setActive(id)` fires every time this screen comes
+  // back into focus, and the cleanup fires when it blurs.
+  const setActiveConversation = useActiveConversationStore((s) => s.setActive);
+  useFocusEffect(
+    useCallback(() => {
+      setActiveConversation(id);
+      return () => setActiveConversation(null);
+    }, [id, setActiveConversation])
+  );
 
   const conversationQuery = useConversationById(id);
   const messagesQuery = useMessages(id);
@@ -85,7 +131,10 @@ export function ConversationScreen({ id }: Props) {
   const markReadMutation = useMarkConversationRead();
   const mutedQuery = useIsConversationMuted(id);
   const muteMutation = useMuteConversation(id);
-  const { isOtherTyping, sendTyping } = useTypingChannel(id, myId || undefined);
+  const { isOtherTyping, sendTyping, sendStoppedTyping } = useTypingChannel(
+    id,
+    myId || undefined
+  );
 
   const peerId = useMemo(() => {
     const conv = conversationQuery.data;
@@ -102,108 +151,203 @@ export function ConversationScreen({ id }: Props) {
     return map;
   }, [proposalsQuery.data]);
 
-  const listRef = useRef<FlatList>(null);
-  const messagesLength = messagesQuery.data?.length ?? 0;
-  useEffect(() => {
-    if (messagesLength > 0) {
-      requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
-    }
-  }, [messagesLength]);
+  // Flatten pages into a single array. Each page is already DESC by created_at,
+  // so concatenating pages 0..N yields the order an inverted FlatList wants
+  // (newest first, oldest last).
+  const messages = useMemo<MessageRow[]>(
+    () => messagesQuery.data?.pages.flatMap((p) => p.rows) ?? [],
+    [messagesQuery.data]
+  );
 
-  // Mark read on mount + every time messages arrive
+  // Track whether the user is parked at the most recent message. With an
+  // inverted list, "at bottom" == contentOffset.y near 0.
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const listRef = useRef<FlatList<MessageRow>>(null);
+
+  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const y = e.nativeEvent.contentOffset.y;
+    setIsAtBottom(y < AT_BOTTOM_THRESHOLD);
+  }, []);
+
+  // When a new message arrives:
+  //  - if the user is at the bottom, auto-scroll to keep them anchored;
+  //  - otherwise, leave them parked in history and show the "new messages"
+  //    pill so they can opt in.
+  const newestId = messages[0]?.id;
+  const newestIdRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!id || !myId) return;
-    markReadMutation.mutate(id);
+    if (!newestId) return;
+    if (newestIdRef.current === newestId) return;
+    const isFirstLoad = newestIdRef.current === null;
+    newestIdRef.current = newestId;
+    if (isFirstLoad || isAtBottom) {
+      requestAnimationFrame(() => listRef.current?.scrollToOffset({ offset: 0, animated: !isFirstLoad }));
+    }
+  }, [newestId, isAtBottom]);
+
+  // Mark-read debounce: fires once on screen focus + once 1.5s after the
+  // most recent message arrives while still focused. Gating on `isFocused`
+  // avoids burning the RPC quota on background screens.
+  useEffect(() => {
+    if (!id || !myId || !isFocused) return;
+    const handle = setTimeout(() => {
+      markReadMutation.mutate(id);
+    }, 1500);
+    // The dependency on `newestId` makes this re-trigger when a new message
+    // comes in; the dependency on `isFocused` makes it trigger on focus
+    // (after the initial mount).
+    return () => clearTimeout(handle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, myId, messagesLength]);
+  }, [id, myId, isFocused, newestId]);
+
+  // Clear the peer's "typing..." indicator when leaving the screen.
+  useEffect(() => {
+    if (!isFocused) sendStoppedTyping();
+  }, [isFocused, sendStoppedTyping]);
 
   const isMuted = mutedQuery.data === true;
 
+  // Destructure so the callback identity is stable across renders that
+  // produce a new `messagesQuery` object reference but the same paging
+  // state — otherwise the FlatList re-binds onEndReached on every render.
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = messagesQuery;
+  const onEndReached = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const renderItem = useCallback(
+    ({ item }: { item: MessageRow }) => {
+      const proposal = item.meeting_proposal_id
+        ? (proposalsById.get(item.meeting_proposal_id) ?? null)
+        : null;
+      return (
+        <MessageBubble
+          message={item}
+          isMine={item.sender_id === myId}
+          proposal={proposal}
+          conversationId={id}
+          myId={myId}
+          peerHandle={peer?.handle ?? null}
+        />
+      );
+    },
+    [proposalsById, myId, id, peer?.handle]
+  );
+
+  const scrollToBottom = useCallback(() => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: true });
+  }, []);
+
   return (
-    <View className="flex-1 bg-surface">
-      <View className="flex-1 w-full max-w-2xl mx-auto">
-        <View className="bg-white px-3 pt-3.5 pb-2.5 border-b border-border flex-row items-center gap-2">
-          <Pressable
-            testID="conversation-back"
-            onPress={() => router.back()}
-            accessibilityRole="button"
-            accessibilityLabel="Back"
-            className="px-2 py-1"
-          >
-            <Text className="text-navy text-base">←</Text>
-          </Pressable>
-          <AvatarCircle name={peer?.name ?? '?'} photoUrl={peer?.photo_url ?? null} size={32} />
-          <View className="flex-1 min-w-0 ml-1">
-            <Text
-              testID="conversation-peer-name"
-              numberOfLines={1}
-              className="font-display-bold text-[14px] text-navy"
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={HEADER_HEIGHT}
+    >
+      <View className="flex-1 bg-surface">
+        <View className="flex-1 w-full max-w-2xl mx-auto">
+          <View className="bg-white px-3 pt-3.5 pb-2.5 border-b border-border flex-row items-center gap-2">
+            <Pressable
+              testID="conversation-back"
+              onPress={() => router.back()}
+              accessibilityRole="button"
+              accessibilityLabel="Back"
+              className="px-2 py-1"
             >
-              {peer?.name ?? '...'}
-            </Text>
-            <Text numberOfLines={1} className="font-body text-[11px] text-muted">
-              @{peer?.handle ?? '?'}
-            </Text>
-          </View>
-          <Pressable
-            testID="conversation-mute-toggle"
-            accessibilityRole="button"
-            accessibilityLabel={isMuted ? t('chat.unmute') : t('chat.mute')}
-            onPress={() => muteMutation.mutate(!isMuted)}
-            disabled={muteMutation.isPending}
-            className="px-2 py-1"
-          >
-            <Text className="text-muted text-lg">{isMuted ? '🔇' : '🔔'}</Text>
-          </Pressable>
-        </View>
-
-        <QueryState
-          query={messagesQuery}
-          isEmpty={(data) => data.length === 0}
-          emptyFallback={
-            <View className="flex-1 items-center justify-center px-6">
-              <Text className="text-muted text-center">No messages yet. Say hi!</Text>
+              <Text className="text-navy text-base">←</Text>
+            </Pressable>
+            <AvatarCircle name={peer?.name ?? '?'} photoUrl={peer?.photo_url ?? null} size={32} />
+            <View className="flex-1 min-w-0 ml-1">
+              <Text
+                testID="conversation-peer-name"
+                numberOfLines={1}
+                className="font-display-bold text-[14px] text-navy"
+              >
+                {peer?.name ?? '...'}
+              </Text>
+              <Text numberOfLines={1} className="font-body text-[11px] text-muted">
+                @{peer?.handle ?? '?'}
+              </Text>
             </View>
-          }
-        >
-          {(rows) => (
-            <FlatList
-              ref={listRef}
-              testID="messages-list"
-              data={rows}
-              keyExtractor={(m) => m.id}
-              contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
-              renderItem={({ item }) => {
-                const proposal = item.meeting_proposal_id
-                  ? (proposalsById.get(item.meeting_proposal_id) ?? null)
-                  : null;
-                return (
-                  <MessageBubble
-                    message={item}
-                    isMine={item.sender_id === myId}
-                    proposal={proposal}
-                    conversationId={id}
-                    myId={myId}
-                    peerHandle={peer?.handle ?? null}
-                  />
-                );
-              }}
-              onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
-            />
-          )}
-        </QueryState>
-
-        {isOtherTyping && (
-          <View testID="conversation-typing-indicator" className="px-6 py-1">
-            <Text className="text-muted text-xs italic">
-              {peer?.name ?? '...'} {t('chat.typing')}
-            </Text>
+            <Pressable
+              testID="conversation-mute-toggle"
+              accessibilityRole="button"
+              accessibilityLabel={isMuted ? t('chat.unmute') : t('chat.mute')}
+              onPress={() => muteMutation.mutate(!isMuted)}
+              disabled={muteMutation.isPending}
+              className="px-2 py-1"
+            >
+              <Text className="text-muted text-lg">{isMuted ? '🔇' : '🔔'}</Text>
+            </Pressable>
           </View>
-        )}
 
-        <MessageComposer conversationId={id} onTyping={sendTyping} />
-        <PostMeetingPrompt conversationId={id} />
+          <QueryState
+            query={{
+              isLoading: messagesQuery.isLoading,
+              isError: messagesQuery.isError,
+              error: messagesQuery.error,
+              data: messagesQuery.isSuccess ? messages : undefined,
+              refetch: () => {
+                messagesQuery.refetch();
+              },
+            }}
+            isEmpty={(data) => data.length === 0}
+            emptyFallback={
+              <View className="flex-1 items-center justify-center px-6">
+                <Text className="text-muted text-center">No messages yet. Say hi!</Text>
+              </View>
+            }
+          >
+            {(rows) => (
+              <View className="flex-1">
+                <FlatList
+                  ref={listRef}
+                  testID="messages-list"
+                  data={rows}
+                  inverted
+                  keyExtractor={(m) => m.id}
+                  contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
+                  renderItem={renderItem}
+                  onScroll={onScroll}
+                  scrollEventThrottle={16}
+                  onEndReached={onEndReached}
+                  onEndReachedThreshold={0.5}
+                />
+                {!isAtBottom && (
+                  <Pressable
+                    testID="conversation-scroll-to-bottom"
+                    accessibilityRole="button"
+                    accessibilityLabel={t('chat.newMessages')}
+                    onPress={scrollToBottom}
+                    className="absolute bottom-2 self-center bg-navy rounded-full px-4 py-1.5"
+                  >
+                    <Text className="text-white text-[12px] font-display-bold">
+                      {t('chat.newMessages')} ↓
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+            )}
+          </QueryState>
+
+          {isOtherTyping && (
+            <View testID="conversation-typing-indicator" className="px-6 py-1">
+              <Text className="text-muted text-xs italic">
+                {peer?.name ?? '...'} {t('chat.typing')}
+              </Text>
+            </View>
+          )}
+
+          <MessageComposer
+            conversationId={id}
+            onTyping={sendTyping}
+            onStoppedTyping={sendStoppedTyping}
+          />
+          <PostMeetingPrompt conversationId={id} />
+        </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }

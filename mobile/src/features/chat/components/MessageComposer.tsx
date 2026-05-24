@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { View, TextInput, Pressable, Text, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useSendMessage } from '~/features/chat/hooks/useSendMessage';
+import { useSendMessage, newMessageId } from '~/features/chat/hooks/useSendMessage';
 import { ProposeMeetingSheet } from '~/features/meetings/components/ProposeMeetingSheet';
 import { useSendImageMessage } from '~/features/media/hooks/useSendImageMessage';
 import { VoiceRecorderSheet } from '~/features/media/components/VoiceRecorderSheet';
 
-type Props = { conversationId: string; onTyping?: () => void };
+type Props = {
+  conversationId: string;
+  onTyping?: () => void;
+  onStoppedTyping?: () => void;
+};
 
-export function MessageComposer({ conversationId, onTyping }: Props) {
+export function MessageComposer({ conversationId, onTyping, onStoppedTyping }: Props) {
   const { t } = useTranslation();
   const [body, setBody] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -19,16 +23,17 @@ export function MessageComposer({ conversationId, onTyping }: Props) {
   const onSend = async () => {
     const trimmed = body.trim();
     if (!trimmed) return;
-    if (trimmed.length > 4000) {
-      setError('Message too long (max 4000 characters).');
-      return;
-    }
     setError(null);
+    // Optimistic UI clears the input immediately; rollback on error
+    // restores the cache so the bubble disappears.
+    setBody('');
+    onStoppedTyping?.();
     try {
-      await send.mutateAsync(trimmed);
-      setBody('');
+      await send.mutateAsync({ body: trimmed, tempId: newMessageId() });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Send failed');
+      // Keep the trimmed text in the input so the user can retry.
+      setBody(trimmed);
     }
   };
 
@@ -72,8 +77,12 @@ export function MessageComposer({ conversationId, onTyping }: Props) {
           onChangeText={(nextBody) => {
             setBody(nextBody);
             setError(null);
+            // `TextInput.maxLength` and the DB constraint already enforce
+            // the 4000-char ceiling; no JS length check needed here.
             if (nextBody.length > 0) onTyping?.();
+            else onStoppedTyping?.();
           }}
+          onBlur={() => onStoppedTyping?.()}
           placeholder={t('chat.composerPlaceholder')}
           placeholderTextColor="#94a3b8"
           multiline

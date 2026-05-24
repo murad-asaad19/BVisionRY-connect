@@ -2,8 +2,7 @@ import {
   SlotsSchema,
   DurationSchema,
   MeetingUrlSchema,
-  FeedbackNoteSchema,
-  RatingSchema,
+  OutcomeSchema,
 } from '~/features/meetings/schemas';
 
 describe('meetings schemas', () => {
@@ -43,19 +42,15 @@ describe('meetings schemas', () => {
       expect(MeetingUrlSchema.safeParse('not a url').success).toBe(false);
     });
   });
-  describe('FeedbackNoteSchema', () => {
-    it('accepts empty or up to 1000 chars', () => {
-      expect(FeedbackNoteSchema.safeParse('').success).toBe(true);
-      expect(FeedbackNoteSchema.safeParse('x'.repeat(1000)).success).toBe(true);
-      expect(FeedbackNoteSchema.safeParse('x'.repeat(1001)).success).toBe(false);
+  describe('OutcomeSchema', () => {
+    it('accepts useful / not_useful / no_show', () => {
+      expect(OutcomeSchema.safeParse('useful').success).toBe(true);
+      expect(OutcomeSchema.safeParse('not_useful').success).toBe(true);
+      expect(OutcomeSchema.safeParse('no_show').success).toBe(true);
     });
-  });
-  describe('RatingSchema', () => {
-    it('accepts the three values', () => {
-      expect(RatingSchema.safeParse('positive').success).toBe(true);
-      expect(RatingSchema.safeParse('neutral').success).toBe(true);
-      expect(RatingSchema.safeParse('negative').success).toBe(true);
-      expect(RatingSchema.safeParse('great').success).toBe(false);
+    it('rejects unknown values', () => {
+      expect(OutcomeSchema.safeParse('positive').success).toBe(false);
+      expect(OutcomeSchema.safeParse('').success).toBe(false);
     });
   });
 });

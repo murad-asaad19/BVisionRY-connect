@@ -1,4 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 type Segment = 'received' | 'sent';
 
@@ -8,12 +9,14 @@ type Props = {
 };
 
 export function InboxTabs({ active, onChange }: Props) {
+  const { t } = useTranslation();
+  const tabs: { key: Segment; label: string; testID: string }[] = [
+    { key: 'received', label: t('intros.tabs.received'), testID: 'inbox-segment-received' },
+    { key: 'sent', label: t('intros.tabs.sent'), testID: 'inbox-segment-sent' },
+  ];
   return (
     <View testID="inbox-tabs" className="flex-row border-b border-border">
-      {[
-        { key: 'received' as const, label: 'Received', testID: 'inbox-segment-received' },
-        { key: 'sent' as const, label: 'Sent', testID: 'inbox-segment-sent' },
-      ].map((tab) => {
+      {tabs.map((tab) => {
         const isActive = active === tab.key;
         return (
           <Pressable

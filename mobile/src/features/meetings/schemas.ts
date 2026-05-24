@@ -1,10 +1,17 @@
 import { z } from 'zod';
 
+/** Future buffer enforced on every proposed slot: must be ≥5 minutes out. */
+const FUTURE_BUFFER_MS = 5 * 60 * 1000;
+
 export const SlotsSchema = z
   .array(
-    z.string().refine((iso) => !Number.isNaN(Date.parse(iso)) && Date.parse(iso) > Date.now(), {
-      message: 'Slot must be a future ISO timestamp',
-    })
+    z.string().refine(
+      (iso) => {
+        const t = Date.parse(iso);
+        return !Number.isNaN(t) && t >= Date.now() + FUTURE_BUFFER_MS;
+      },
+      { message: 'Slot must be at least 5 minutes in the future' }
+    )
   )
   .min(1)
   .max(3);
@@ -16,6 +23,5 @@ export const MeetingUrlSchema = z.preprocess(
   z.string().url().startsWith('https://').optional()
 );
 
-export const FeedbackNoteSchema = z.string().max(1000).optional().or(z.literal(''));
-
-export const RatingSchema = z.enum(['positive', 'neutral', 'negative']);
+/** Outcome enum for the post-meeting review surface (matches submit_meeting_review). */
+export const OutcomeSchema = z.enum(['useful', 'not_useful', 'no_show']);

@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { Modal, View, Text, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useReportTarget } from '~/features/privacy/hooks/useReportTarget';
 import { Button } from '~/components/ui/Button';
 import { Input } from '~/components/ui/Input';
 import type { ReportReason, ReportTargetType } from '~/features/privacy/services/privacy.service';
 
-const REASONS: { value: ReportReason; label: string }[] = [
-  { value: 'spam', label: 'Spam' },
-  { value: 'harassment', label: 'Harassment' },
-  { value: 'impersonation', label: 'Impersonation' },
-  { value: 'inappropriate', label: 'Inappropriate content' },
-  { value: 'other', label: 'Other' },
+const REASON_VALUES: ReportReason[] = [
+  'spam',
+  'harassment',
+  'impersonation',
+  'inappropriate',
+  'other',
 ];
 
 type Props = {
@@ -23,6 +24,7 @@ type Props = {
 };
 
 export function ReportModal({ visible, targetType, targetId, messageBody, onClose }: Props) {
+  const { t } = useTranslation();
   const [reason, setReason] = useState<ReportReason | null>(null);
   const [note, setNote] = useState('');
   const report = useReportTarget();
@@ -32,7 +34,9 @@ export function ReportModal({ visible, targetType, targetId, messageBody, onClos
       <View className="flex-1 justify-end bg-navy/50">
         <View testID="report-modal" className="bg-white rounded-t-3xl p-5">
           <View className="self-center w-9 h-1 bg-border rounded-full mb-3" />
-          <Text className="font-display-bold text-[16px] text-navy mb-3">Report</Text>
+          <Text className="font-display-bold text-[16px] text-navy mb-3">
+            {t('privacy.reportModal.title')}
+          </Text>
 
           {messageBody ? (
             <View
@@ -40,7 +44,7 @@ export function ReportModal({ visible, targetType, targetId, messageBody, onClos
               className="border-l-4 border-danger-text bg-slate-100 rounded-r-[10px] px-3 py-2 mb-3"
             >
               <Text className="font-display-bold text-[10px] uppercase tracking-wide text-muted mb-0.5">
-                Quoted message
+                {t('privacy.reportModal.quoted')}
               </Text>
               <Text className="font-body text-[12px] text-body leading-snug" numberOfLines={4}>
                 {messageBody}
@@ -49,24 +53,24 @@ export function ReportModal({ visible, targetType, targetId, messageBody, onClos
           ) : null}
 
           <View className="gap-2 mb-3">
-            {REASONS.map((r) => (
+            {REASON_VALUES.map((value) => (
               <Button
-                key={r.value}
-                testID={`report-reason-${r.value}`}
-                variant={reason === r.value ? 'primary' : 'outline'}
-                onPress={() => setReason(r.value)}
+                key={value}
+                testID={`report-reason-${value}`}
+                variant={reason === value ? 'primary' : 'outline'}
+                onPress={() => setReason(value)}
               >
-                {r.label}
+                {t(`privacy.reportModal.reasons.${value}`)}
               </Button>
             ))}
           </View>
 
           <Input
             testID="report-note"
-            label="Additional details (optional)"
+            label={t('privacy.reportModal.noteLabel')}
             value={note}
             onChangeText={setNote}
-            placeholder="What happened?"
+            placeholder={t('privacy.reportModal.notePlaceholder')}
             multiline
             numberOfLines={3}
             maxLength={1000}
@@ -75,7 +79,7 @@ export function ReportModal({ visible, targetType, targetId, messageBody, onClos
           <View className="flex-row gap-2 mt-2">
             <View className="flex-1">
               <Button testID="report-cancel" variant="outline" onPress={onClose}>
-                Cancel
+                {t('privacy.reportModal.cancel')}
               </Button>
             </View>
             <View className="flex-1">
@@ -85,24 +89,31 @@ export function ReportModal({ visible, targetType, targetId, messageBody, onClos
                 loading={report.isPending}
                 onPress={() => {
                   if (!reason) {
-                    Alert.alert('Pick a reason', 'Select what to report before submitting.');
+                    Alert.alert(
+                      t('privacy.reportModal.pickReasonTitle'),
+                      t('privacy.reportModal.pickReasonBody')
+                    );
                     return;
                   }
                   report.mutate(
                     { targetType, targetId, reason, note: note.trim() || null },
                     {
                       onSuccess: () => {
-                        Alert.alert('Reported', 'Thank you, the team will review.');
+                        Alert.alert(
+                          t('privacy.reportModal.sentTitle'),
+                          t('privacy.reportModal.sentBody')
+                        );
                         setNote('');
                         setReason(null);
                         onClose();
                       },
-                      onError: (e) => Alert.alert('Report failed', (e as Error).message),
+                      onError: (e) =>
+                        Alert.alert(t('privacy.reportModal.failedTitle'), (e as Error).message),
                     }
                   );
                 }}
               >
-                Submit
+                {t('privacy.reportModal.submit')}
               </Button>
             </View>
           </View>

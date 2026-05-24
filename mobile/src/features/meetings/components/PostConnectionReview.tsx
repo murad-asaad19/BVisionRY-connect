@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { View, Text } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { BottomSheet } from '~/components/ui/Modal';
 import { Button } from '~/components/ui/Button';
 import { Input } from '~/components/ui/Input';
+import { OutcomeSchema } from '~/features/meetings/schemas';
 import {
   submitMeetingReview,
   type MeetingOutcome,
@@ -16,6 +18,7 @@ type Props = {
 };
 
 export function PostConnectionReview({ visible, onClose, meetingId }: Props) {
+  const { t } = useTranslation();
   const [outcome, setOutcome] = useState<MeetingOutcome | null>(null);
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +33,8 @@ export function PostConnectionReview({ visible, onClose, meetingId }: Props) {
       setNote('');
       onClose();
     },
-    onError: (e) => setError(e instanceof Error ? e.message : 'Submit failed'),
+    onError: (e) =>
+      setError(e instanceof Error ? e.message : t('meetings.review.submitFailed')),
   });
 
   const pick = (next: MeetingOutcome) => {
@@ -40,8 +44,9 @@ export function PostConnectionReview({ visible, onClose, meetingId }: Props) {
 
   const onSubmit = () => {
     setError(null);
-    if (!outcome) {
-      setError('Pick an outcome.');
+    const parsed = OutcomeSchema.safeParse(outcome);
+    if (!parsed.success) {
+      setError(t('meetings.review.pickOutcome'));
       return;
     }
     submit.mutate();
@@ -49,9 +54,11 @@ export function PostConnectionReview({ visible, onClose, meetingId }: Props) {
 
   return (
     <BottomSheet visible={visible} onClose={onClose} testID="post-connection-review">
-      <Text className="font-display-bold text-[16px] text-navy mb-1">How was the meeting?</Text>
+      <Text className="font-display-bold text-[16px] text-navy mb-1">
+        {t('meetings.review.title')}
+      </Text>
       <Text className="font-body text-[12px] text-muted mb-3">
-        Your answer helps us improve match quality. Optional note for your records.
+        {t('meetings.review.subtitle')}
       </Text>
 
       <View className="gap-2 mb-3">
@@ -60,21 +67,21 @@ export function PostConnectionReview({ visible, onClose, meetingId }: Props) {
           variant={outcome === 'useful' ? 'primary' : 'outline'}
           onPress={() => pick('useful')}
         >
-          👍 Useful
+          {t('meetings.review.useful')}
         </Button>
         <Button
           testID="review-outcome-not_useful"
           variant={outcome === 'not_useful' ? 'primary' : 'outline'}
           onPress={() => pick('not_useful')}
         >
-          😐 Not useful
+          {t('meetings.review.notUseful')}
         </Button>
         <Button
           testID="review-outcome-no_show"
           variant={outcome === 'no_show' ? 'danger' : 'outline'}
           onPress={() => pick('no_show')}
         >
-          🚫 No-show
+          {t('meetings.review.noShow')}
         </Button>
       </View>
 
@@ -82,7 +89,7 @@ export function PostConnectionReview({ visible, onClose, meetingId }: Props) {
         testID="review-note"
         value={note}
         onChangeText={setNote}
-        placeholder="Optional note…"
+        placeholder={t('meetings.review.notePlaceholder')}
         multiline
         numberOfLines={4}
         maxLength={1000}
@@ -100,7 +107,7 @@ export function PostConnectionReview({ visible, onClose, meetingId }: Props) {
             onPress={onClose}
             disabled={submit.isPending}
           >
-            Skip
+            {t('meetings.review.skip')}
           </Button>
         </View>
         <View className="flex-1">
@@ -110,7 +117,7 @@ export function PostConnectionReview({ visible, onClose, meetingId }: Props) {
             onPress={onSubmit}
             loading={submit.isPending}
           >
-            Submit
+            {t('meetings.review.submit')}
           </Button>
         </View>
       </View>

@@ -18,7 +18,6 @@ type Props = {
 };
 
 export function IntroListRow({ intro, counterpart, onPress, audience = 'recipient' }: Props) {
-  const previewNote = intro.note.length > 60 ? intro.note.slice(0, 57) + '…' : intro.note;
   return (
     <Pressable
       testID={`intro-row-${intro.id}`}
@@ -35,13 +34,19 @@ export function IntroListRow({ intro, counterpart, onPress, audience = 'recipien
           <Text className="text-body font-semibold" numberOfLines={1}>
             {counterpart?.name ?? 'Unknown'}
           </Text>
-          <IntroStateBadge state={intro.state} audience={audience} />
+          <IntroStateBadge
+            state={intro.state}
+            audience={audience}
+            expiresAt={intro.expires_at}
+          />
         </View>
         <Text className="text-muted text-xs" numberOfLines={1}>
           @{counterpart?.handle ?? '?'}
         </Text>
-        <Text className="text-muted text-sm mt-1" numberOfLines={2}>
-          {previewNote}
+        {/* Two-line note preview — let RN do the ellipsis instead of slicing
+            characters (which mishandles multi-byte/emoji and trims at code units). */}
+        <Text className="text-muted text-sm mt-1" numberOfLines={2} ellipsizeMode="tail">
+          {intro.note}
         </Text>
       </View>
     </Pressable>

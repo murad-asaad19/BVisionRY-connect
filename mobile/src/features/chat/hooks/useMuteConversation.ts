@@ -5,6 +5,7 @@ import {
   muteConversation,
   unmuteConversation,
 } from '~/features/chat/services/chat.service';
+import type { ConversationOverviewRow } from '~/features/chat/services/chat.service';
 
 export function useIsConversationMuted(conversationId: string) {
   const { session } = useAuthSession();
@@ -21,11 +22,20 @@ export function useMuteConversation(conversationId: string) {
   const qc = useQueryClient();
   const { session } = useAuthSession();
   const userId = session?.user.id;
-  return useMutation({
+  return useMutation<void, Error, boolean>({
     mutationFn: (next: boolean) =>
       next ? muteConversation(conversationId) : unmuteConversation(conversationId),
-    onSuccess: () => {
+    onSuccess: (_data, next) => {
+      // Per-conversation muted query (still used by ConversationScreen header).
       qc.invalidateQueries({ queryKey: ['conversation-muted', userId, conversationId] });
+      // After the overview-RPC fold, `is_muted` lives in the chats list cache;
+      // patch it in-place so the row badge updates immediately.
+      qc.setQueryData<ConversationOverviewRow[]>(['conversations', userId], (prev) => {
+        if (!prev) return prev;
+        return prev.map((r) =>
+          r.conversation_id === conversationId ? { ...r, is_muted: next } : r
+        );
+      });
     },
   });
 }

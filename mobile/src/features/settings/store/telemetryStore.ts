@@ -12,15 +12,31 @@ type State = {
 /**
  * Telemetry opt-out preferences.
  *
- * NOTE: These prefs are read at app launch in `initSentry()` / `initFirebase()`.
- * Toggling at runtime persists immediately but the SDK changes only take effect
- * on next launch — this is acceptable for v1.
+ * Defaults are intentionally `false` (opt-OUT) for GDPR safety. The persist
+ * middleware rehydrates from AsyncStorage asynchronously, so any consumer
+ * reading `getState()` before rehydration completes sees `false` and skips
+ * data collection — failing closed is the correct behaviour for telemetry.
+ *
+ * Init paths that read these prefs (`initSentry()`, `initFirebase()`) MUST
+ * await rehydration before reading state to honour the user's saved choice:
+ *
+ *   await useTelemetryStore.persist.rehydrate();
+ *   const { analyticsEnabled, crashReportsEnabled } = useTelemetryStore.getState();
+ *
+ * Once rehydration completes the user's saved preference overrides the
+ * defaults. Toggling at runtime persists immediately but SDK changes only
+ * take effect on next launch — acceptable for v1.
+ *
+ * Note: `signOut()` in auth.service.ts resets these back to `{false, false}`
+ * so the next user on the device starts opted-out and must explicitly opt in
+ * via Settings. Persisting the prior user's telemetry preference across a
+ * sign-out would be a GDPR violation.
  */
 export const useTelemetryStore = create<State>()(
   persist(
     (set) => ({
-      analyticsEnabled: true,
-      crashReportsEnabled: true,
+      analyticsEnabled: false,
+      crashReportsEnabled: false,
       setAnalytics: (v) => set({ analyticsEnabled: v }),
       setCrashReports: (v) => set({ crashReportsEnabled: v }),
     }),

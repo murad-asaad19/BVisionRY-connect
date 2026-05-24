@@ -1,3 +1,19 @@
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        'intros.badge.delivered': 'Pending',
+        'intros.badge.accepted': 'Accepted',
+        'intros.badge.declined': 'Declined',
+        'intros.badge.expired': 'Expired',
+        'intros.badge.connected': 'Connected',
+        'intros.badge.awaitingResponse': 'Delivered, awaiting response',
+      };
+      return map[key] ?? key;
+    },
+  }),
+}));
+
 import { render } from '@testing-library/react-native';
 import { IntroStateBadge } from '~/features/intros/components/IntroStateBadge';
 

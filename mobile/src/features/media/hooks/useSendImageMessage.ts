@@ -1,9 +1,23 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { File } from 'expo-file-system';
 import { supabase } from '~/lib/supabase/client';
 import { useAuthSession } from '~/features/auth/SessionContext';
 import { pickImage } from '~/features/media/hooks/usePickImage';
 import { uploadChatMedia } from '~/features/media/services/storage.service';
+import { IMAGE_MIME, generateUuid } from '~/features/media/services/media.constants';
 
+/**
+ * Image send flow (post-RLS-hardening):
+ *   1) Pick + downscale + validate size (handled in pickImage).
+ *   2) Generate messageId client-side.
+ *   3) Upload to `chat-media/{conversationId}/{messageId}/image.jpg`.
+ *   4) Call `send_image_message` SECURITY DEFINER RPC — it extracts the
+ *      messageId from the path and inserts the row atomically.
+ *   5) Best-effort delete the local temp file.
+ *
+ * A failed RPC leaves the storage object behind (no orphan message row) —
+ * that's intentional. A future cleanup cron can sweep these.
+ */
 export function useSendImageMessage(conversationId: string) {
   const qc = useQueryClient();
   const { session } = useAuthSession();
@@ -11,36 +25,46 @@ export function useSendImageMessage(conversationId: string) {
     mutationFn: async () => {
       const userId = session?.user.id;
       if (!userId) throw new Error('not signed in');
+
       const picked = await pickImage();
       if (!picked) return null;
 
-      // 1. Insert message row with kind=image, media_path=PLACEHOLDER
-      // We need messageId before uploading. Insert then update.
-      const placeholderPath = `pending/${Date.now()}.jpg`;
-      const { data: msg, error: insertErr } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: userId,
-          kind: 'image',
-          media_path: placeholderPath,
-          media_size_bytes: picked.blob.size,
-        })
-        .select()
-        .single();
-      if (insertErr) throw new Error(insertErr.message);
+      const messageId = generateUuid();
+      const ext: 'jpg' = picked.ext;
+      const path = await uploadChatMedia(
+        conversationId,
+        messageId,
+        picked.blob,
+        ext,
+        IMAGE_MIME.jpg,
+        `${messageId}.${ext}`
+      );
 
-      // 2. Upload to chat-media bucket using the real message id
-      const path = await uploadChatMedia(conversationId, msg.id, picked.blob, 'jpg', 'image/jpeg');
-
-      // 3. Patch message row with real path
-      const { error: updErr } = await supabase
-        .from('messages')
-        .update({ media_path: path })
-        .eq('id', msg.id);
-      if (updErr) throw new Error(updErr.message);
-
-      return msg.id;
+      try {
+        // types.gen.ts hasn't been regenerated for this RPC yet — cast loose.
+        const { data, error } = await (supabase.rpc as unknown as (
+          fn: string,
+          args: Record<string, unknown>
+        ) => Promise<{ data: { id: string } | null; error: { message: string } | null }>)(
+          'send_image_message',
+          {
+            p_conversation_id: conversationId,
+            p_media_path: path,
+            p_media_mime: IMAGE_MIME.jpg,
+            p_media_size_bytes: picked.blob.size,
+          }
+        );
+        if (error) throw new Error(error.message);
+        return data?.id ?? messageId;
+      } finally {
+        // Clean up the local manipulated copy regardless of RPC outcome.
+        try {
+          const tmp = new File(picked.uri);
+          if (tmp.exists) tmp.delete();
+        } catch {
+          // Non-fatal: temp will be GC'd by the OS eventually.
+        }
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['messages', conversationId] });

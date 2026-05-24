@@ -1,7 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IntroNoteSchema } from '~/features/intros/schemas';
 import { useSendIntro } from '~/features/intros/hooks/useSendIntro';
+import {
+  IntroCooldownError,
+  IntroDuplicateError,
+  IntroExpiredError,
+  IntroRateLimitError,
+} from '~/features/intros/services/intros.service';
 import { BottomSheet } from '~/components/ui/Modal';
 import { Button } from '~/components/ui/Button';
 import { Input } from '~/components/ui/Input';
@@ -19,6 +27,10 @@ type Props = {
   onSent: () => void;
 };
 
+const NOTE_MIN = 80;
+const NOTE_MAX = 400;
+const DRAFT_KEY_PREFIX = 'intro-draft-v1:';
+
 export function ComposeIntroSheet({
   visible,
   recipientId,
@@ -29,36 +41,76 @@ export function ComposeIntroSheet({
   onClose,
   onSent,
 }: Props) {
+  const { t } = useTranslation();
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
   const send = useSendIntro();
 
+  // Per-recipient draft persistence (AsyncStorage). Hydrate on open, persist
+  // on every change, clear on successful send. Cancel keeps the draft so the
+  // user can resume; explicit clear-on-send avoids re-sending stale text.
+  const draftKey = `${DRAFT_KEY_PREFIX}${recipientId}`;
+  const hydratedRef = useRef(false);
+
+  useEffect(() => {
+    if (!visible) {
+      hydratedRef.current = false;
+      return;
+    }
+    let cancelled = false;
+    void AsyncStorage.getItem(draftKey).then((stored) => {
+      if (!cancelled) {
+        setNote(stored ?? '');
+        hydratedRef.current = true;
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [visible, draftKey]);
+
+  useEffect(() => {
+    if (!visible || !hydratedRef.current) return;
+    if (note.length === 0) void AsyncStorage.removeItem(draftKey);
+    else void AsyncStorage.setItem(draftKey, note);
+  }, [note, visible, draftKey]);
+
   const charCount = note.trim().length;
-  const inRange = charCount >= 80 && charCount <= 400;
+  const inRange = charCount >= NOTE_MIN && charCount <= NOTE_MAX;
 
   const onSubmit = async () => {
+    // Double-submit guard — a fast double-tap (or async-induced re-render)
+    // must never fire two RPCs. The DB unique index catches the second one
+    // but the UX is cleaner if we never attempt it.
+    if (send.isPending) return;
+
     setError(null);
     const parsed = IntroNoteSchema.safeParse(note);
     if (!parsed.success) {
-      setError('Note must be 80-400 characters.');
+      setError(t('intros.compose.errorRange'));
       return;
     }
     try {
       await send.mutateAsync({ recipientId, note: parsed.data });
+      await AsyncStorage.removeItem(draftKey);
       setNote('');
       onSent();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'Send failed';
-      if (/duplicate key|intros_active_pair_uq/i.test(msg)) {
-        setError('You already have a pending intro to this user.');
-      } else {
-        setError(msg);
-      }
+      if (e instanceof IntroDuplicateError) setError(t('intros.compose.errorDuplicate'));
+      else if (e instanceof IntroCooldownError) setError(t('intros.compose.errorCooldown'));
+      else if (e instanceof IntroRateLimitError) setError(t('intros.compose.errorRateLimit'));
+      else if (e instanceof IntroExpiredError) setError(t('intros.compose.errorExpired'));
+      else setError(t('intros.compose.errorGeneric'));
     }
   };
 
   return (
-    <BottomSheet visible={visible} onClose={onClose} testID="compose-intro-sheet">
+    <BottomSheet
+      visible={visible}
+      onClose={onClose}
+      testID="compose-intro-sheet"
+      dismissible={!send.isPending}
+    >
       {/* Recipient preview card (mockup E1) */}
       <View
         testID="compose-intro-recipient"
@@ -82,34 +134,26 @@ export function ComposeIntroSheet({
         </View>
       </View>
 
-      <Text className="font-body text-[12px] text-muted mb-3">
-        Say why you want to connect. Min 80 characters. Your message goes through a quick safety
-        check before delivery.
-      </Text>
+      <Text className="font-body text-[12px] text-muted mb-3">{t('intros.compose.hint')}</Text>
 
       <Input
         testID="compose-intro-note"
         value={note}
-        onChangeText={(t) => {
-          setNote(t);
+        onChangeText={(s) => {
+          setNote(s);
           setError(null);
         }}
         multiline
         numberOfLines={6}
-        maxLength={400}
-        placeholder="I'm reaching out because..."
+        maxLength={NOTE_MAX}
+        placeholder={t('intros.compose.placeholder')}
+        errorText={error ?? undefined}
       />
       <Text
         className={`font-body text-[11px] ${inRange ? 'text-success-text' : 'text-muted'} mb-2`}
       >
-        {charCount} / 400 (min 80)
+        {t('intros.compose.counter', { count: charCount, max: NOTE_MAX, min: NOTE_MIN })}
       </Text>
-
-      {error && (
-        <Text testID="compose-intro-error" className="text-danger-text font-body text-[12px] mb-2">
-          {error}
-        </Text>
-      )}
 
       <View className="flex-row gap-3 mt-1">
         <View className="flex-1">
@@ -119,7 +163,7 @@ export function ComposeIntroSheet({
             onPress={onClose}
             disabled={send.isPending}
           >
-            Cancel
+            {t('intros.compose.cancel')}
           </Button>
         </View>
         <View className="flex-1">
@@ -129,7 +173,7 @@ export function ComposeIntroSheet({
             onPress={onSubmit}
             loading={send.isPending}
           >
-            Send
+            {t('intros.compose.send')}
           </Button>
         </View>
       </View>

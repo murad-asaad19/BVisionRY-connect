@@ -1,17 +1,30 @@
 import { ReactElement } from 'react';
-import { View, Text, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useDiscoverableFeed } from '~/features/discovery/hooks/useDiscoverableFeed';
 import { QueryState } from '~/components/ui/QueryState';
 import { UserCard } from '~/components/ui/UserCard';
 
 type Props = {
   ListHeaderComponent?: ReactElement | null;
+  /**
+   * Optional pre-built RefreshControl. Pass when the parent screen needs to
+   * orchestrate pull-to-refresh across multiple queries (e.g. HomeScreen
+   * refreshing both daily matches and the feed). When omitted, the feed
+   * manages its own refresh wired to `feed.refetch`.
+   */
+  refreshControl?: ReactElement;
 };
 
-export function DiscoverableFeed({ ListHeaderComponent }: Props) {
+export function DiscoverableFeed({ ListHeaderComponent, refreshControl }: Props) {
+  const { t } = useTranslation();
   const feed = useDiscoverableFeed();
-  const { fetchNextPage, hasNextPage, isFetchingNextPage } = feed;
+  const { fetchNextPage, hasNextPage, isFetchingNextPage, isRefetching, refetch } = feed;
+
+  const effectiveRefreshControl =
+    refreshControl ??
+    (<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} tintColor="#fff" />);
 
   return (
     <QueryState
@@ -22,9 +35,10 @@ export function DiscoverableFeed({ ListHeaderComponent }: Props) {
           data={[]}
           renderItem={() => null}
           ListHeaderComponent={ListHeaderComponent}
+          refreshControl={effectiveRefreshControl}
           ListEmptyComponent={
             <View className="py-12 px-6 items-center">
-              <Text className="text-muted text-center">No one to discover yet.</Text>
+              <Text className="text-muted text-center">{t('discovery.emptyFeed')}</Text>
             </View>
           }
         />
@@ -44,6 +58,7 @@ export function DiscoverableFeed({ ListHeaderComponent }: Props) {
             }}
             onEndReachedThreshold={0.5}
             ListHeaderComponent={ListHeaderComponent}
+            refreshControl={effectiveRefreshControl}
             contentContainerStyle={{ paddingHorizontal: 12, gap: 8 }}
             ListFooterComponent={
               isFetchingNextPage ? (

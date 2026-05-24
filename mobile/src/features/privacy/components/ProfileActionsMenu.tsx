@@ -1,15 +1,35 @@
 import { useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, Alert } from 'react-native';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useBlockUser } from '~/features/privacy/hooks/useBlockUser';
 import { ReportModal } from '~/features/privacy/components/ReportModal';
 
 type Props = { targetUserId: string; targetHandle: string };
 
-export function ProfileActionsMenu({ targetUserId, targetHandle: _targetHandle }: Props) {
+export function ProfileActionsMenu({ targetUserId, targetHandle }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [showReport, setShowReport] = useState(false);
   const block = useBlockUser();
+
+  const handleBlock = () => {
+    block.mutate(targetUserId, {
+      onSuccess: () => router.back(),
+    });
+  };
+
+  const confirmBlock = () => {
+    setOpen(false);
+    Alert.alert(
+      t('privacy.blockConfirm.title', { handle: targetHandle }),
+      t('privacy.blockConfirm.body'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('privacy.block'), style: 'destructive', onPress: handleBlock },
+      ]
+    );
+  };
 
   return (
     <>
@@ -17,7 +37,7 @@ export function ProfileActionsMenu({ targetUserId, targetHandle: _targetHandle }
         testID="profile-actions-trigger"
         onPress={() => setOpen((v) => !v)}
         accessibilityRole="button"
-        accessibilityLabel="Open profile actions"
+        accessibilityLabel={t('privacy.openActions')}
         className="self-end px-3 py-2"
       >
         <Text className="text-body text-lg">⋯</Text>
@@ -30,15 +50,10 @@ export function ProfileActionsMenu({ targetUserId, targetHandle: _targetHandle }
           <Pressable
             testID="profile-actions-block"
             disabled={block.isPending}
-            onPress={() => {
-              setOpen(false);
-              block.mutate(targetUserId, {
-                onSuccess: () => router.back(),
-              });
-            }}
+            onPress={confirmBlock}
             className="px-4 py-2"
           >
-            <Text className="text-body">Block User</Text>
+            <Text className="text-body">{t('privacy.blockUser')}</Text>
           </Pressable>
           <Pressable
             testID="profile-actions-report"
@@ -48,7 +63,7 @@ export function ProfileActionsMenu({ targetUserId, targetHandle: _targetHandle }
             }}
             className="px-4 py-2"
           >
-            <Text className="text-body">Report</Text>
+            <Text className="text-body">{t('privacy.report')}</Text>
           </Pressable>
         </View>
       )}

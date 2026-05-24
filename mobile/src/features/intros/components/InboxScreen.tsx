@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { View, FlatList, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
-import { useQueries } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useInbox } from '~/features/intros/hooks/useInbox';
 import { useSent } from '~/features/intros/hooks/useSent';
@@ -13,6 +13,7 @@ import { QueryState } from '~/components/ui/QueryState';
 import { TopBar } from '~/components/ui/TopBar';
 import { Banner } from '~/components/ui/Banner';
 import { supabase } from '~/lib/supabase/client';
+import { fetchIntrosTodayCount } from '~/features/intros/services/intros.service';
 import type { Database } from '~/lib/supabase/types.gen';
 import type { IntroRow } from '~/features/intros/services/intros.service';
 
@@ -25,13 +26,6 @@ type Segment = 'received' | 'sent';
 
 const DAILY_INBOUND_CAP = 20;
 
-function countToday(rows: IntroRow[]): number {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const cutoff = today.getTime();
-  return rows.filter((r) => new Date(r.created_at).getTime() >= cutoff).length;
-}
-
 export function InboxScreen() {
   const { t } = useTranslation();
   const { session } = useAuthSession();
@@ -42,42 +36,44 @@ export function InboxScreen() {
   const active = segment === 'received' ? inboxQuery : sentQuery;
   const intros: IntroRow[] = active.data?.pages.flatMap((p) => p.rows) ?? [];
 
+  // Stable, sorted key so two queries with the same membership share a cache entry
+  // regardless of pagination ordering.
   const counterpartIds = useMemo(() => {
-    return intros
-      .map((i) => (segment === 'received' ? i.sender_id : i.recipient_id))
-      .filter((x): x is string => !!x);
+    const set = new Set<string>();
+    for (const i of intros) {
+      const id = segment === 'received' ? i.sender_id : i.recipient_id;
+      if (id) set.add(id);
+    }
+    return Array.from(set).sort();
   }, [intros, segment]);
 
-  const counterpartQueries = useQueries({
-    queries: counterpartIds.map((id) => ({
-      queryKey: ['profile-by-id', id],
-      queryFn: async (): Promise<ProfileLite | null> => {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, name, handle, photo_url')
-          .eq('id', id)
-          .single();
-        if (error) {
-          if (error.code === 'PGRST116') return null;
-          throw new Error(error.message);
-        }
-        return data;
-      },
-      staleTime: 60_000,
-    })),
+  // Single batched lookup — replaces N+1 useQueries fan-out.
+  const counterpartsQuery = useQuery({
+    queryKey: ['profiles', 'lite-batch', counterpartIds],
+    enabled: counterpartIds.length > 0,
+    staleTime: 60_000,
+    queryFn: async (): Promise<Map<string, ProfileLite>> => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, name, handle, photo_url')
+        .in('id', counterpartIds);
+      if (error) throw new Error(error.message);
+      const map = new Map<string, ProfileLite>();
+      for (const row of data ?? []) map.set(row.id, row as ProfileLite);
+      return map;
+    },
   });
+  const counterpartById = counterpartsQuery.data ?? new Map<string, ProfileLite>();
 
-  const counterpartById = new Map<string, ProfileLite>();
-  counterpartQueries.forEach((q, i) => {
-    const id = counterpartIds[i];
-    if (id && q.data) counterpartById.set(id, q.data);
+  // Server-truth daily-cap probe; only meaningful for the received tab.
+  const todayCountQuery = useQuery({
+    queryKey: ['intros', 'today-count', session?.user.id],
+    enabled: !!session?.user.id && segment === 'received',
+    staleTime: 60_000,
+    queryFn: fetchIntrosTodayCount,
   });
-
-  void session;
-
-  const receivedToday =
-    segment === 'received' ? countToday(inboxQuery.data?.pages.flatMap((p) => p.rows) ?? []) : 0;
-  const overCap = segment === 'received' && receivedToday >= DAILY_INBOUND_CAP;
+  const overCap =
+    segment === 'received' && (todayCountQuery.data ?? 0) >= DAILY_INBOUND_CAP;
 
   return (
     <View className="flex-1 bg-surface">
@@ -85,8 +81,8 @@ export function InboxScreen() {
         <TopBar title={t('intros.inboxTitle')} />
         {overCap ? (
           <View testID="inbox-cap-banner" className="mx-3 mt-2">
-            <Banner variant="warning" title="Daily limit reached">
-              Incoming intros above {DAILY_INBOUND_CAP} are queued for tomorrow.
+            <Banner variant="warning" title={t('intros.banner.dailyCapTitle')}>
+              {t('intros.banner.dailyCapBody', { cap: DAILY_INBOUND_CAP })}
             </Banner>
           </View>
         ) : null}

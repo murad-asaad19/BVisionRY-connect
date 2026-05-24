@@ -17,7 +17,7 @@ describe('push.service', () => {
     });
   });
 
-  it('throws on RPC error', async () => {
+  it('rejects with an Error wrapping the RPC error message on failure', async () => {
     (supabase.rpc as jest.Mock).mockResolvedValueOnce({ data: null, error: { message: 'oops' } });
     await expect(registerDeviceToken('a'.repeat(32), 'android')).rejects.toThrow('oops');
   });

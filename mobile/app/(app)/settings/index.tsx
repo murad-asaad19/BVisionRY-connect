@@ -1,4 +1,4 @@
-import { ScrollView, View } from 'react-native';
+import { Alert, ScrollView, View } from 'react-native';
 import { router, Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SettingsRow } from '~/components/ui/SettingsRow';
@@ -83,7 +83,22 @@ export default function SettingsHomeScreen() {
               testID="settings-sign-out"
               variant="outline-danger"
               onPress={() => {
-                signOut().catch((e) => console.warn('[settings] sign-out failed', e));
+                Alert.alert(
+                  t('settings.signOutConfirm.title'),
+                  t('settings.signOutConfirm.body'),
+                  [
+                    { text: t('common.cancel'), style: 'cancel' },
+                    {
+                      text: t('settings.signOut'),
+                      style: 'destructive',
+                      onPress: () => {
+                        signOut().catch((e) =>
+                          console.warn('[settings] sign-out failed', e)
+                        );
+                      },
+                    },
+                  ]
+                );
               }}
             >
               {t('settings.signOut')}
