@@ -3,6 +3,7 @@ import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Pill } from '~/components/ui/Pill';
 import { Banner } from '~/components/ui/Banner';
+import { colors } from '~/theme/colors';
 import { useMeetingPlaybook } from '~/features/meetings/hooks/useMeetingPlaybook';
 
 type Props = {
@@ -29,7 +30,7 @@ function formatAgo(iso: string, justNowLabel: string, minLabel: string, hrLabel:
 
 function SectionHeader({ children }: { children: string }) {
   return (
-    <Text className="font-display-bold text-[11px] text-muted uppercase tracking-wide mt-3 mb-1.5">
+    <Text className="font-display-bold text-display-xs text-muted uppercase tracking-wide mt-3 mb-1.5">
       {children}
     </Text>
   );
@@ -40,8 +41,8 @@ function BulletList({ items, testID }: { items: string[]; testID?: string }) {
     <View className="gap-1.5" testID={testID}>
       {items.map((item, i) => (
         <View key={i} className="flex-row gap-2">
-          <Text className="font-body text-[12px] text-muted">•</Text>
-          <Text className="font-body text-[12px] text-body flex-1">{item}</Text>
+          <Text className="font-body text-body-md text-muted">•</Text>
+          <Text className="font-body text-body-md text-body flex-1">{item}</Text>
         </View>
       ))}
     </View>
@@ -83,12 +84,12 @@ export function MeetingPlaybookCard({ meetingId, targetName }: Props) {
         testID="meeting-playbook-card-loading"
         className="bg-white border border-border rounded-xl p-4 my-2 mx-2"
       >
-        <Text className="font-display-bold text-[11px] text-muted uppercase tracking-wide mb-2">
+        <Text className="font-display-bold text-display-xs text-muted uppercase tracking-wide mb-2">
           {t('meetings.playbook.title')}
         </Text>
         <View className="flex-row items-center gap-2">
-          <ActivityIndicator color="#0f3460" />
-          <Text className="font-body text-[12px] text-muted">
+          <ActivityIndicator color={colors.navy} />
+          <Text className="font-body text-body-md text-muted">
             {t('meetings.playbook.generating')}
           </Text>
         </View>
@@ -144,7 +145,7 @@ export function MeetingPlaybookCard({ meetingId, targetName }: Props) {
       className="bg-white border border-gold rounded-xl p-4 my-2 mx-2"
     >
       <View className="flex-row items-center justify-between mb-1">
-        <Text className="font-display-bold text-[12px] text-navy">
+        <Text className="font-display-bold text-body-md text-navy">
           {t('meetings.playbook.title')}
         </Text>
         <Pressable
@@ -158,10 +159,10 @@ export function MeetingPlaybookCard({ meetingId, targetName }: Props) {
           }`}
         >
           {isGenerating ? (
-            <ActivityIndicator color="#0f3460" />
+            <ActivityIndicator color={colors.navy} />
           ) : (
             <Text
-              className={`font-display-semibold text-[10px] ${
+              className={`font-display-semibold text-body-xs ${
                 isRateLimited ? 'text-muted' : 'text-navy'
               }`}
             >
@@ -171,13 +172,13 @@ export function MeetingPlaybookCard({ meetingId, targetName }: Props) {
         </Pressable>
       </View>
       <Text
-        className="font-body text-[10px] text-muted mb-1"
+        className="font-body text-body-xs text-muted mb-1"
         testID="meeting-playbook-generated-at"
       >
         {t('meetings.playbook.generatedAt', { ago })}
       </Text>
       {isRateLimited && (
-        <Text className="font-body text-[10px] text-muted mb-1">
+        <Text className="font-body text-body-xs text-muted mb-1">
           {t('meetings.playbook.regenerateRateLimited')}
         </Text>
       )}
@@ -192,7 +193,7 @@ export function MeetingPlaybookCard({ meetingId, targetName }: Props) {
       {!collapsed.summary && (
         <Text
           testID="meeting-playbook-summary"
-          className="font-body text-[12px] text-body"
+          className="font-body text-body-md text-body"
         >
           {playbook.summary}
         </Text>

@@ -1,45 +1,46 @@
-import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
+import { Edit, Settings, Share2 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useCurrentUserProfile } from '~/features/profile/hooks/useCurrentUserProfile';
-import { signOut } from '~/features/auth/services/auth.service';
 import { VerifiedBadge } from '~/features/verification/components/VerifiedBadge';
 import { ProfileCompletenessBanner } from '~/features/profile/components/ProfileCompletenessBanner';
 import { PhotoNudgeBanner } from '~/features/profile/components/PhotoNudgeBanner';
 import { BioMarkdown } from '~/features/profile/components/BioMarkdown';
 import { ProfileHero } from '~/features/profile/components/ProfileHero';
-import { Button } from '~/components/ui/Button';
 import { Banner } from '~/components/ui/Banner';
+import { SectionCard } from '~/components/ui/SectionCard';
+import { SkeletonProfile } from '~/components/ui/Skeleton';
+import { TopBar } from '~/components/ui/TopBar';
+import { useToast } from '~/components/ui/Toast';
+import { colors } from '~/theme/colors';
+import { env } from '~/lib/env';
 
-type SectionProps = { title: string; children: React.ReactNode; testID?: string };
-
-function Section({ title, children, testID }: SectionProps) {
-  return (
-    <View testID={testID} className="bg-white mx-3 mt-2.5 rounded-xl border border-border p-3.5">
-      <Text className="font-display-bold text-[10px] text-muted uppercase tracking-wide mb-1.5">
-        {title}
-      </Text>
-      {children}
-    </View>
-  );
-}
+// Universal/app-links host for shareable web URLs. Falls back to the public
+// production host when EXPO_PUBLIC_APP_LINKS_HOST is unset (dev shells).
+const SHARE_HOST = env.APP_LINKS_HOST ?? 'connect.bvisionry.com';
 
 export function ProfileView() {
   const { t } = useTranslation();
+  const toast = useToast();
   const { data: profile, isLoading } = useCurrentUserProfile();
 
   if (isLoading || !profile) {
     return (
-      <View className="flex-1 items-center justify-center bg-surface">
-        <ActivityIndicator color="#0f3460" />
+      <View className="flex-1 bg-surface">
+        <TopBar title={t('settings.profile')} />
+        <SkeletonProfile />
       </View>
     );
   }
 
   const onShare = async () => {
-    await Clipboard.setStringAsync(`bvisionryconnect://p/${profile.handle}`);
-    Alert.alert(t('profile.shareCopiedTitle'), t('profile.shareCopiedBody'));
+    // P1-13: copy a web URL (deep-links to the app via universal/app links when
+    // installed, opens the public profile in a browser otherwise). The legacy
+    // `bvisionryconnect://` scheme was useless when pasted into LinkedIn/email.
+    await Clipboard.setStringAsync(`https://${SHARE_HOST}/p/${profile.handle}`);
+    toast.success(t('profile.shareCopiedTitle'));
   };
 
   // If the completeness banner already lists "photo" as missing, suppress
@@ -54,132 +55,134 @@ export function ProfileView() {
     completenessMissing.length === 0 || !completenessMissing.includes('photo');
 
   return (
-    <ScrollView className="flex-1 bg-surface">
-      {profile.private_mode ? (
-        <View testID="private-mode-banner" className="mx-3 mt-3">
-          <Banner variant="muted" title={t('profile.privateModeTitle')}>
-            {t('profile.privateModeBody')}
-          </Banner>
-        </View>
-      ) : null}
-      <ProfileHero
-        name={profile.name ?? '?'}
-        handle={profile.handle ?? '?'}
-        headline={profile.headline}
-        primaryRole={profile.primary_role ?? ''}
-        roles={profile.roles ?? []}
-        city={profile.city}
-        country={profile.country}
-        photoUrl={profile.photo_url ?? null}
+    <View className="flex-1 bg-surface">
+      {/* P2-9: Edit + Share live in the TopBar — body space is reclaimed for content. */}
+      <TopBar
+        title={t('settings.profile')}
+        actions={[
+          {
+            icon: <Share2 size={18} color={colors.navy} />,
+            onPress: onShare,
+            accessibilityLabel: t('profile.shareA11y'),
+            testID: 'profile-share',
+          },
+          {
+            icon: <Edit size={18} color={colors.navy} />,
+            onPress: () => router.push('/(app)/profile/edit'),
+            accessibilityLabel: t('profile.editAction'),
+            testID: 'profile-edit',
+          },
+          {
+            icon: <Settings size={18} color={colors.navy} />,
+            onPress: () => router.push('/(app)/settings'),
+            accessibilityLabel: t('profile.settingsA11y'),
+            testID: 'profile-settings',
+          },
+        ]}
       />
-
-      {/* Hidden anchors for legacy e2e helpers. */}
-      <Text testID="profile-name" className="absolute opacity-0" pointerEvents="none">
-        {profile.name ?? ''}
-      </Text>
-      <Text testID="profile-handle" className="absolute opacity-0" pointerEvents="none">
-        @{profile.handle ?? ''}
-      </Text>
-
-      <View className="flex-row justify-end mx-3 mt-3 gap-2">
-        <Pressable
-          testID="profile-share"
-          onPress={onShare}
-          accessibilityRole="button"
-          accessibilityLabel={t('profile.shareA11y')}
-          className="bg-white border border-border px-3 py-2 rounded-lg"
-        >
-          <Text className="font-display-semibold text-[12px] text-navy">{t('profile.share')}</Text>
-        </Pressable>
-        <Pressable
-          testID="profile-edit"
-          onPress={() => router.push('/(app)/profile/edit')}
-          className="bg-white border border-border px-3 py-2 rounded-lg"
-        >
-          <Text className="font-display-semibold text-[12px] text-navy">
-            {t('profile.editAction')}
-          </Text>
-        </Pressable>
-      </View>
-
-      <View className="mt-2">
-        <ProfileCompletenessBanner profile={profile} />
-        <PhotoNudgeBanner photoUrl={profile.photo_url ?? null} visible={showPhotoNudge} />
-      </View>
-
-      {profile.headline ? (
-        <Section title={t('profile.section.headline')}>
-          <Text testID="profile-headline" className="font-body text-[13px] text-body">
-            {profile.headline}
-          </Text>
-        </Section>
-      ) : null}
-
-      {profile.bio ? (
-        <Section title={t('profile.section.bio')}>
-          <View testID="profile-bio">
-            <BioMarkdown>{profile.bio}</BioMarkdown>
+      <ScrollView className="flex-1">
+        {profile.private_mode ? (
+          <View testID="private-mode-banner" className="mx-gutter mt-3">
+            <Banner variant="muted" title={t('profile.privateModeTitle')}>
+              {t('profile.privateModeBody')}
+            </Banner>
           </View>
-        </Section>
-      ) : null}
-
-      <Section title={t('profile.section.goal')}>
-        <Text
-          testID="profile-goal-type"
-          className="font-display-semibold text-[14px] text-navy capitalize"
-        >
-          {profile.goal_type ? t(`discovery.goals.${profile.goal_type}`) : ''}
-        </Text>
-        {profile.goal_text ? (
-          <Text testID="profile-goal-text" className="font-body text-[12px] text-muted mt-1">
-            {profile.goal_text}
-          </Text>
         ) : null}
-      </Section>
+        <ProfileHero
+          name={profile.name ?? '?'}
+          handle={profile.handle ?? '?'}
+          headline={profile.headline}
+          primaryRole={profile.primary_role ?? ''}
+          roles={profile.roles ?? []}
+          city={profile.city}
+          country={profile.country}
+          photoUrl={profile.photo_url ?? null}
+        />
 
-      {profile.roles?.length ? (
-        <Section title={t('profile.section.roles')}>
-          <View className="flex-row flex-wrap gap-2">
-            {profile.roles.map((r) => (
-              <View
-                key={r}
-                testID={`profile-role-${r}`}
-                className={`px-2.5 py-1 rounded-full border ${
-                  r === profile.primary_role ? 'bg-navy border-navy' : 'bg-white border-navy'
-                }`}
-              >
-                <Text
-                  className={`font-display-bold text-[11px] ${
-                    r === profile.primary_role ? 'text-white' : 'text-navy'
+        {/* Hidden anchors for legacy e2e helpers. */}
+        <Text testID="profile-name" className="absolute opacity-0" pointerEvents="none">
+          {profile.name ?? ''}
+        </Text>
+        <Text testID="profile-handle" className="absolute opacity-0" pointerEvents="none">
+          @{profile.handle ?? ''}
+        </Text>
+
+        <View className="mt-3 mx-gutter">
+          <ProfileCompletenessBanner profile={profile} />
+        </View>
+        <PhotoNudgeBanner photoUrl={profile.photo_url ?? null} visible={showPhotoNudge} />
+
+        {profile.headline ? (
+          <SectionCard title={t('profile.section.headline')}>
+            {/* P3-9: render the headline as a display-md tagline rather than a body sentence. */}
+            <Text
+              testID="profile-headline"
+              className="font-display-bold text-display-md text-navy"
+            >
+              {profile.headline}
+            </Text>
+          </SectionCard>
+        ) : null}
+
+        {profile.bio ? (
+          <SectionCard title={t('profile.section.bio')}>
+            <View testID="profile-bio">
+              <BioMarkdown>{profile.bio}</BioMarkdown>
+            </View>
+          </SectionCard>
+        ) : null}
+
+        <SectionCard title={t('profile.section.goal')}>
+          <Text
+            testID="profile-goal-type"
+            className="font-display-semibold text-body-lg text-navy capitalize"
+          >
+            {profile.goal_type ? t(`discovery.goals.${profile.goal_type}`) : ''}
+          </Text>
+          {profile.goal_text ? (
+            <Text testID="profile-goal-text" className="font-body text-body-md text-muted mt-1">
+              {profile.goal_text}
+            </Text>
+          ) : null}
+        </SectionCard>
+
+        {profile.roles?.length ? (
+          <SectionCard title={t('profile.section.roles')}>
+            <View className="flex-row flex-wrap gap-2">
+              {profile.roles.map((r) => (
+                <View
+                  key={r}
+                  testID={`profile-role-${r}`}
+                  className={`px-2.5 py-1 rounded-full border ${
+                    r === profile.primary_role ? 'bg-navy border-navy' : 'bg-white border-navy'
                   }`}
                 >
-                  {t(`discovery.roles.${r}`)}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </Section>
-      ) : null}
+                  <Text
+                    className={`font-display-bold text-display-xs ${
+                      r === profile.primary_role ? 'text-white' : 'text-navy'
+                    }`}
+                  >
+                    {t(`discovery.roles.${r}`)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </SectionCard>
+        ) : null}
 
-      <Section title={t('profile.section.location')}>
-        <Text testID="profile-location" className="font-body text-[12px] text-body">
-          {[profile.city, profile.country].filter(Boolean).join(', ') || '—'}
-        </Text>
-      </Section>
+        <SectionCard title={t('profile.section.location')}>
+          <Text testID="profile-location" className="font-body text-body-md text-body">
+            {[profile.city, profile.country].filter(Boolean).join(', ') || '—'}
+          </Text>
+        </SectionCard>
 
-      <Section title={t('profile.section.verification')}>
-        <VerifiedBadge username={profile.verified_github_username} />
-      </Section>
+        <SectionCard title={t('profile.section.verification')}>
+          <VerifiedBadge username={profile.verified_github_username} />
+        </SectionCard>
 
-      <View className="mx-3 mt-4 mb-8">
-        <Button
-          testID="profile-sign-out"
-          variant="outline"
-          onPress={() => signOut().catch(console.warn)}
-        >
-          {t('settings.signOut')}
-        </Button>
-      </View>
-    </ScrollView>
+        {/* P1-7: sign-out lives only in Settings (domain D). Removed the duplicate button. */}
+        <View className="mb-8" />
+      </ScrollView>
+    </View>
   );
 }

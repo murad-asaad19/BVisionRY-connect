@@ -39,11 +39,11 @@ export function PostMeetingPrompt({ conversationId }: Props) {
   return (
     <>
       <Modal visible={visible} animationType="fade" transparent={false}>
-        <View testID="post-meeting-prompt" className="flex-1 bg-surface px-6 pt-20 pb-6">
-          <Text className="font-display-bold text-[20px] text-navy text-center mb-2">
+        <View testID="post-meeting-prompt" className="flex-1 bg-surface px-gutter pt-20 pb-6">
+          <Text className="font-display-bold text-display-lg text-navy text-center mb-2">
             {t('meetings.prompt.title')}
           </Text>
-          <Text className="font-body text-[12px] text-muted text-center mb-6">
+          <Text className="font-body text-body-md text-muted text-center mb-6">
             {t('meetings.prompt.subtitle')}
           </Text>
 
@@ -74,7 +74,7 @@ export function PostMeetingPrompt({ conversationId }: Props) {
             </Button>
           </View>
 
-          <Text className="font-body text-[10px] text-muted text-center mt-6 leading-snug">
+          <Text className="font-body text-body-xs text-muted text-center mt-6 leading-snug">
             {t('meetings.prompt.fallback')}
           </Text>
         </View>

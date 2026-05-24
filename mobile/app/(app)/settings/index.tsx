@@ -1,8 +1,9 @@
-import { Alert, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router, Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { SettingsRow } from '~/components/ui/SettingsRow';
+import { SettingsRow, SettingsGroup } from '~/components/ui/SettingsRow';
 import { Button } from '~/components/ui/Button';
+import { useConfirm } from '~/components/ui/ConfirmDialog';
 import { useBlockedUsers } from '~/features/privacy/hooks/useBlockedUsers';
 import { signOut } from '~/features/auth/services/auth.service';
 
@@ -16,6 +17,7 @@ type RowDef = {
 
 export default function SettingsHomeScreen() {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const blocked = useBlockedUsers();
   const blockedCount = blocked.data?.length ?? 0;
 
@@ -65,48 +67,41 @@ export default function SettingsHomeScreen() {
     },
   ];
 
+  const onSignOut = () => {
+    confirm({
+      title: t('settings.signOutConfirm.title'),
+      body: t('settings.signOutConfirm.body'),
+      confirmLabel: t('settings.signOut'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+      onConfirm: () =>
+        signOut().catch((e) => {
+          console.warn('[settings] sign-out failed', e);
+        }),
+    });
+  };
+
   return (
     <View testID="settings-screen" className="flex-1 bg-surface">
       <Stack.Screen options={{ title: t('settings.title') }} />
       <ScrollView className="flex-1">
         <View className="w-full max-w-2xl mx-auto py-2">
-          <View className="mx-3 my-2 rounded-[10px] overflow-hidden border border-border bg-white">
-            {rows.map((r, i) => (
-              <SettingsRow
-                key={r.key}
-                testID={`settings-row-${r.key}`}
-                label={t(r.labelKey)}
-                description={t(r.descKey, r.descParams)}
-                onPress={() => router.push(r.path as never)}
-                isFirst={i === 0}
-                isLast={i === rows.length - 1}
-              />
-            ))}
+          <View className="mx-gutter my-2 rounded-[10px] overflow-hidden border border-border bg-white">
+            <SettingsGroup>
+              {rows.map((r) => (
+                <SettingsRow
+                  key={r.key}
+                  testID={`settings-row-${r.key}`}
+                  label={t(r.labelKey)}
+                  description={t(r.descKey, r.descParams)}
+                  onPress={() => router.push(r.path as never)}
+                />
+              ))}
+            </SettingsGroup>
           </View>
 
-          <View className="px-3.5 py-4">
-            <Button
-              testID="settings-sign-out"
-              variant="outline-danger"
-              onPress={() => {
-                Alert.alert(
-                  t('settings.signOutConfirm.title'),
-                  t('settings.signOutConfirm.body'),
-                  [
-                    { text: t('common.cancel'), style: 'cancel' },
-                    {
-                      text: t('settings.signOut'),
-                      style: 'destructive',
-                      onPress: () => {
-                        signOut().catch((e) =>
-                          console.warn('[settings] sign-out failed', e)
-                        );
-                      },
-                    },
-                  ]
-                );
-              }}
-            >
+          <View className="mx-gutter py-card-lg">
+            <Button testID="settings-sign-out" variant="outline" onPress={onSignOut}>
               {t('settings.signOut')}
             </Button>
           </View>

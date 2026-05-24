@@ -89,7 +89,7 @@ export function WarmIntroComposeSheet({ visible, context, onClose, onSent }: Pro
     return (
       <BottomSheet visible={visible} onClose={onCloseInternal} testID="warm-intro-compose-sheet">
         <View className="py-6 items-center">
-          <Text className="font-body text-[13px] text-muted">…</Text>
+          <Text className="font-body text-display-sm text-muted">…</Text>
         </View>
       </BottomSheet>
     );
@@ -102,22 +102,22 @@ export function WarmIntroComposeSheet({ visible, context, onClose, onSent }: Pro
       testID="warm-intro-compose-sheet"
       dismissible={!send.isPending}
     >
-      <Text className="font-display-bold text-[16px] text-navy mb-2">
+      <Text className="font-display-bold text-display-md text-navy mb-2">
         {t('intros.warm.composeTitle', { mutualName: context.mutualName })}
       </Text>
 
       {/* Mutual preview card so it's obvious whose inbox this lands in. */}
       <View
         testID="warm-intro-compose-mutual"
-        className="bg-gold-pale border border-gold rounded-xl p-3 mb-3 flex-row items-center gap-2.5"
+        className="bg-gold-pale border border-gold rounded-xl p-card mb-3 flex-row items-center gap-2.5"
       >
         <AvatarCircle name={context.mutualName} photoUrl={context.mutualPhotoUrl ?? null} size={48} />
         <View className="flex-1 min-w-0">
-          <Text className="font-display-bold text-[13px] text-navy" numberOfLines={1}>
+          <Text className="font-display-bold text-display-sm text-navy" numberOfLines={1}>
             {context.mutualName}
           </Text>
           {context.mutualHandle ? (
-            <Text className="font-body text-[11px] text-muted" numberOfLines={1}>
+            <Text className="font-body text-body-sm text-muted" numberOfLines={1}>
               @{context.mutualHandle}
             </Text>
           ) : null}
@@ -147,7 +147,7 @@ export function WarmIntroComposeSheet({ visible, context, onClose, onSent }: Pro
         errorText={error ?? undefined}
       />
 
-      <Text className={`font-body text-[11px] ${inRange ? 'text-success-text' : 'text-muted'} mb-2`}>
+      <Text className={`font-body text-body-sm ${inRange ? 'text-success-text' : 'text-muted'} mb-2`}>
         {t('intros.compose.counter', { count: charCount, max: NOTE_MAX, min: NOTE_MIN })}
       </Text>
 

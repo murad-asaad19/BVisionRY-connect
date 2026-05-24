@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { View, Text, FlatList } from 'react-native';
+import { View, FlatList } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Briefcase } from 'lucide-react-native';
 import { useOpportunities } from '~/features/opportunities/hooks/useOpportunities';
 import { OpportunityCard } from './OpportunityCard';
 import {
@@ -10,6 +11,8 @@ import {
 } from './OpportunityFilterBar';
 import { QueryState } from '~/components/ui/QueryState';
 import { Button } from '~/components/ui/Button';
+import { EmptyState } from '~/components/ui/EmptyState';
+import { SkeletonOpportunityCard } from '~/components/ui/Skeleton';
 
 /**
  * Top-level Opportunities feed. Owns the filter bar state and pipes it
@@ -37,22 +40,22 @@ export function OpportunityFeed() {
       <QueryState
         query={query}
         isEmpty={(data) => data.length === 0}
-        emptyFallback={
-          <View className="flex-1 items-center justify-center px-6 py-10">
-            <Text className="font-body text-[13px] text-muted text-center mb-3">
-              {t('opportunities.feed.empty')}
-            </Text>
-            <View>
-              <Button
-                testID="opportunity-feed-new-cta-empty"
-                variant="primary"
-                fullWidth={false}
-                onPress={() => router.push('/(app)/opportunities/new')}
-              >
-                {t('opportunities.feed.newCta')}
-              </Button>
-            </View>
+        loadingFallback={
+          <View className="pt-3">
+            <SkeletonOpportunityCard count={4} />
           </View>
+        }
+        emptyFallback={
+          <EmptyState
+            testID="opportunity-feed-empty"
+            icon={Briefcase}
+            title={t('opportunities.feed.emptyTitle')}
+            body={t('opportunities.feed.empty')}
+            action={{
+              label: t('opportunities.feed.newCta'),
+              onPress: () => router.push('/(app)/opportunities/new'),
+            }}
+          />
         }
       >
         {(rows) => (
@@ -67,12 +70,12 @@ export function OpportunityFeed() {
                   router.push({ pathname: '/(app)/opportunities/[id]', params: { id } })
                 }
                 onAuthorPress={(authorHandle) =>
-                  router.push({ pathname: '/(app)/p/[handle]', params: { handle: authorHandle } })
+                  router.push({ pathname: '/p/[handle]', params: { handle: authorHandle } })
                 }
               />
             )}
             ListHeaderComponent={
-              <View className="px-3 py-3">
+              <View className="px-gutter py-3">
                 <Button
                   testID="opportunity-feed-new-cta"
                   variant="primary"

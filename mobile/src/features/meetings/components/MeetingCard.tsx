@@ -5,6 +5,7 @@ import { useConfirmMeeting } from '~/features/meetings/hooks/useConfirmMeeting';
 import { useDeclineMeeting } from '~/features/meetings/hooks/useDeclineMeeting';
 import { useCancelMeeting } from '~/features/meetings/hooks/useCancelMeeting';
 import type { MeetingState } from '~/features/meetings/services/meetings.service';
+import { colors } from '~/theme/colors';
 import { ICSDownloadButton } from './ICSDownloadButton';
 import { MeetingPlaybookCard } from './MeetingPlaybookCard';
 import { ProposeMeetingSheet } from './ProposeMeetingSheet';
@@ -68,18 +69,19 @@ function formatLocal(iso: string, timeZone?: string): string {
 
 /**
  * Render a slot with both the proposer's timezone AND the recipient's local time.
- * When the proposer's TZ matches viewer's TZ (or is missing) only the viewer's time is shown.
+ * When the proposer's TZ matches viewer's TZ (or is missing) only `primary`
+ * is filled and `secondary` is omitted.
  */
-function formatSlotWithTZ(
+function formatSlotLines(
   iso: string,
   proposerTZ: string | null | undefined,
   yourTimeLabel: string
-): string {
+): { primary: string; secondary: string | null } {
   const yourLocal = formatLocal(iso);
-  if (!proposerTZ) return yourLocal;
+  if (!proposerTZ) return { primary: yourLocal, secondary: null };
   const proposerLocal = formatLocal(iso, proposerTZ);
-  if (proposerLocal === yourLocal) return yourLocal;
-  return `${proposerLocal}\n(${yourTimeLabel}: ${yourLocal})`;
+  if (proposerLocal === yourLocal) return { primary: yourLocal, secondary: null };
+  return { primary: proposerLocal, secondary: `${yourTimeLabel}: ${yourLocal}` };
 }
 
 export function MeetingCard({
@@ -109,23 +111,29 @@ export function MeetingCard({
   const icsSummary = otherHandle ? t('meetings.titleWith', { handle: otherHandle }) : t('meetings.title');
 
   if (state === 'confirmed' && confirmedSlot) {
+    const lines = formatSlotLines(confirmedSlot, timezone, yourTimeLabel);
     return (
       <>
         <View testID="meeting-card-confirmed" className={baseCardClass}>
-          <Text className="font-display-bold text-[10px] text-muted uppercase tracking-wide mb-1">
+          <Text className="font-display-bold text-body-xs text-muted uppercase tracking-wide mb-1">
             {t('meetings.statusConfirmed')}
           </Text>
           <Text
             testID="meeting-confirmed-slot"
-            className="font-display-bold text-[14px] text-navy mb-1"
+            className="font-display-semibold text-display-sm text-navy"
           >
-            {formatSlotWithTZ(confirmedSlot, timezone, yourTimeLabel)}
+            {lines.primary}
           </Text>
-          <Text className="font-body text-[11px] text-muted">
+          {lines.secondary ? (
+            <Text className="font-body text-body-sm text-muted mb-1">{lines.secondary}</Text>
+          ) : (
+            <View className="mb-1" />
+          )}
+          <Text className="font-body text-body-sm text-muted">
             {t('meetings.durationLabel', { minutes: durationMinutes })}
           </Text>
           {meetingUrl && (
-            <Text className="font-body text-[11px] text-navy mt-1" selectable>
+            <Text className="font-body text-body-sm text-navy mt-1" selectable>
               {meetingUrl}
             </Text>
           )}
@@ -150,14 +158,14 @@ export function MeetingCard({
     return (
       <>
         <View testID={testId} className="bg-white border border-border rounded-xl p-4 my-2 mx-2">
-          <Text className="font-display-bold text-[11px] text-muted mb-2">{t(statusKey)}</Text>
+          <Text className="font-display-bold text-body-sm text-muted mb-2">{t(statusKey)}</Text>
           <Pressable
             testID="meeting-propose-another"
             onPress={() => setProposeAnotherOpen(true)}
             accessibilityRole="button"
             className="self-start bg-white border border-navy px-3 py-1.5 rounded-lg"
           >
-            <Text className="font-display-semibold text-[11px] text-navy">
+            <Text className="font-display-semibold text-body-sm text-navy">
               {t('meetings.proposeAnother')}
             </Text>
           </Pressable>
@@ -175,31 +183,48 @@ export function MeetingCard({
   // state === 'proposed'
   return (
     <View testID="meeting-card-proposed" className={baseCardClass}>
-      <Text className="font-display-bold text-[10px] text-muted uppercase tracking-wide mb-2">
+      <Text className="font-display-bold text-body-xs text-muted uppercase tracking-wide mb-2">
         {t('meetings.durationHeader', { minutes: durationMinutes })}
       </Text>
       {meetingUrl && (
-        <Text className="font-body text-[11px] text-navy mb-2" selectable>
+        <Text className="font-body text-body-sm text-navy mb-2" selectable>
           {meetingUrl}
         </Text>
       )}
 
       <View className="gap-2 mb-3">
-        {slots.map((s, i) => (
-          <Pressable
-            key={s + i}
-            testID={`meeting-slot-${i}`}
-            onPress={() => isRecipient && setPicked(s)}
-            disabled={!isRecipient}
-            className={`px-3 py-2 rounded-lg border ${
-              picked === s ? 'bg-navy border-navy' : 'bg-white border-border'
-            }`}
-          >
-            <Text className={`font-body text-[12px] ${picked === s ? 'text-white' : 'text-body'}`}>
-              {formatSlotWithTZ(s, timezone, yourTimeLabel)}
-            </Text>
-          </Pressable>
-        ))}
+        {slots.map((s, i) => {
+          const lines = formatSlotLines(s, timezone, yourTimeLabel);
+          const selected = picked === s;
+          return (
+            <Pressable
+              key={s + i}
+              testID={`meeting-slot-${i}`}
+              onPress={() => isRecipient && setPicked(s)}
+              disabled={!isRecipient}
+              className={`px-3 py-2 rounded-lg border ${
+                selected ? 'bg-navy border-navy' : 'bg-white border-border'
+              }`}
+            >
+              <Text
+                className={`font-display-semibold text-display-sm ${
+                  selected ? 'text-white' : 'text-body'
+                }`}
+              >
+                {lines.primary}
+              </Text>
+              {lines.secondary ? (
+                <Text
+                  className={`font-body text-body-sm ${
+                    selected ? 'text-gold-light' : 'text-muted'
+                  }`}
+                >
+                  {lines.secondary}
+                </Text>
+              ) : null}
+            </Pressable>
+          );
+        })}
       </View>
 
       {isRecipient && (
@@ -211,9 +236,9 @@ export function MeetingCard({
             className="flex-1 bg-white border border-border px-3 py-2 rounded-lg items-center"
           >
             {decline.isPending ? (
-              <ActivityIndicator color="#0f3460" />
+              <ActivityIndicator color={colors.navy} />
             ) : (
-              <Text className="font-display-semibold text-[12px] text-navy">
+              <Text className="font-display-semibold text-body-md text-navy">
                 {t('meetings.decline')}
               </Text>
             )}
@@ -227,9 +252,9 @@ export function MeetingCard({
             }`}
           >
             {confirm.isPending ? (
-              <ActivityIndicator color="#ffffff" />
+              <ActivityIndicator color={colors.white} />
             ) : (
-              <Text className="font-display-bold text-[12px] text-white">
+              <Text className="font-display-bold text-body-md text-white">
                 {t('meetings.confirm')}
               </Text>
             )}
@@ -247,9 +272,9 @@ export function MeetingCard({
             className="self-start bg-white border border-border px-3 py-1.5 rounded-lg"
           >
             {cancel.isPending ? (
-              <ActivityIndicator color="#0f3460" />
+              <ActivityIndicator color={colors.navy} />
             ) : (
-              <Text className="font-display-semibold text-[11px] text-navy">
+              <Text className="font-display-semibold text-body-sm text-navy">
                 {t('meetings.cancelProposal')}
               </Text>
             )}

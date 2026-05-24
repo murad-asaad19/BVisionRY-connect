@@ -1,7 +1,10 @@
-import { Pressable, Text, Platform, Alert } from 'react-native';
+import { Pressable, Text, View, Platform } from 'react-native';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { useTranslation } from 'react-i18next';
+import { Calendar } from 'lucide-react-native';
+import { useToast } from '~/components/ui/Toast';
+import { colors } from '~/theme/colors';
 import { generateICS } from '~/features/meetings/services/ics.service';
 
 type Props = {
@@ -20,7 +23,9 @@ export function ICSDownloadButton({
   summary,
 }: Props) {
   const { t } = useTranslation();
+  const toast = useToast();
   const label = t('meetings.addToCalendar');
+
   const onPress = async () => {
     const ics = generateICS({
       meetingId,
@@ -42,7 +47,7 @@ export function ICSDownloadButton({
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       } catch (e) {
-        Alert.alert('Download failed', (e as Error).message);
+        toast.error((e as Error).message || t('meetings.icsDownloadFailed'));
       }
       return;
     }
@@ -55,7 +60,7 @@ export function ICSDownloadButton({
 
       const available = await Sharing.isAvailableAsync();
       if (!available) {
-        Alert.alert('Saved', `ICS saved to ${file.uri}`);
+        toast.success(t('meetings.icsSavedTo', { path: file.uri }));
         return;
       }
       await Sharing.shareAsync(file.uri, {
@@ -64,7 +69,7 @@ export function ICSDownloadButton({
         dialogTitle: label,
       });
     } catch (e) {
-      Alert.alert('Save failed', (e as Error).message);
+      toast.error((e as Error).message || t('meetings.icsDownloadFailed'));
     }
   };
 
@@ -74,9 +79,12 @@ export function ICSDownloadButton({
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      className="bg-white border border-border rounded-lg px-3 py-2 mt-2 self-start"
+      className="bg-white border border-border rounded-lg px-card py-2 mt-2 self-start flex-row items-center gap-2"
     >
-      <Text className="text-body text-sm">{label}</Text>
+      <View>
+        <Calendar size={14} color={colors.navy} />
+      </View>
+      <Text className="font-display-semibold text-body-md text-body">{label}</Text>
     </Pressable>
   );
 }

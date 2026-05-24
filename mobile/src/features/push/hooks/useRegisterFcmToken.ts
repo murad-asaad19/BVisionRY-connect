@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Platform, PermissionsAndroid } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAuthSession } from '~/features/auth/SessionContext';
+import { env } from '~/lib/env';
 import { getFcmToken } from '~/lib/firebase';
 import { registerDeviceToken } from '~/features/push/services/push.service';
 import { setLast, clear as clearLast } from '~/features/push/services/lastTokenStorage';
@@ -101,8 +102,10 @@ export function useRegisterFcmToken() {
 
       // Subscribe to token rotation. Use a dynamic import so the web bundle
       // doesn't pull in @react-native-firebase/messaging (the lib shim only
-      // exposes the web no-ops).
-      if (Platform.OS === 'web' || cancelled) return;
+      // exposes the web no-ops). Also gate on FIREBASE_ENABLED so Expo Go
+      // (where the native modules aren't bundled) doesn't trip the native
+      // RNFBAppModule lookup.
+      if (Platform.OS === 'web' || cancelled || !env.FIREBASE_ENABLED) return;
       try {
         const messagingModule = await import('@react-native-firebase/messaging');
         if (cancelled) return;

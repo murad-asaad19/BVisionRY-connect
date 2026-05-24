@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { BottomSheet } from '~/components/ui/Modal';
 import { Input } from '~/components/ui/Input';
 import { Button } from '~/components/ui/Button';
+import { useToast } from '~/components/ui/Toast';
 import { useBookSlot } from '~/features/office-hours/hooks/useBookSlot';
 import { BookSlotInputSchema } from '~/features/office-hours/schemas';
 import type { UpcomingSlot } from '~/features/office-hours/services/officeHours.service';
@@ -21,6 +22,7 @@ const TOPIC_MAX = 280;
 
 export function BookSlotSheet({ visible, hostId, hostName, slot, onClose, onBooked }: Props) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [topic, setTopic] = useState('');
   const [error, setError] = useState<string | null>(null);
   const mutate = useBookSlot();
@@ -46,6 +48,7 @@ export function BookSlotSheet({ visible, hostId, hostName, slot, onClose, onBook
         slotId: parsed.data.slotId,
         topic: parsed.data.topic,
       });
+      toast.success(t('officeHours.book.success'));
       onBooked?.(proposalId);
       onClose();
     } catch (e) {
@@ -60,14 +63,14 @@ export function BookSlotSheet({ visible, hostId, hostName, slot, onClose, onBook
       testID="book-slot-sheet"
       dismissible={!mutate.isPending}
     >
-      <Text className="font-display-bold text-[14px] text-navy mb-1">
+      <Text className="font-display-bold text-display-md text-navy mb-1">
         {t('officeHours.book.title', { hostName })}
       </Text>
       {slot?.hostNotesTemplate ? (
-        <Text className="font-body text-[11px] text-muted mb-3">{slot.hostNotesTemplate}</Text>
+        <Text className="font-body text-body-sm text-muted mb-3">{slot.hostNotesTemplate}</Text>
       ) : null}
 
-      <Text className="font-display-semibold text-[11px] text-muted mb-1">
+      <Text className="font-display-semibold text-body-sm text-muted mb-1">
         {t('officeHours.book.topicLabel')}
       </Text>
       <Input

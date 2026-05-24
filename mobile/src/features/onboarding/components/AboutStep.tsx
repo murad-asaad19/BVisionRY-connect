@@ -96,7 +96,11 @@ export function AboutStep() {
   };
 
   return (
-    <StepperLayout currentIndex={3} title={t('onboarding.about.title')}>
+    <StepperLayout
+      currentIndex={3}
+      title={t('onboarding.about.title')}
+      stepName={t('onboarding.stepName.about')}
+    >
       <ScrollView>
         <AvatarUploadButton currentPhotoUrl={profileQ.data?.photo_url ?? null} />
 

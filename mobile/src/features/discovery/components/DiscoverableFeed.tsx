@@ -1,11 +1,15 @@
 import { ReactElement } from 'react';
-import { View, Text, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Users } from 'lucide-react-native';
 import { useDiscoverableFeed } from '~/features/discovery/hooks/useDiscoverableFeed';
 import { QueryState } from '~/components/ui/QueryState';
 import { UserCard } from '~/components/ui/UserCard';
+import { EmptyState } from '~/components/ui/EmptyState';
+import { SkeletonUserCard } from '~/components/ui/Skeleton';
 import { WarmIntroSuggestionsStrip } from '~/features/intros/components/WarmIntroSuggestionsStrip';
+import { colors } from '~/theme/colors';
 
 type Props = {
   ListHeaderComponent?: ReactElement | null;
@@ -25,7 +29,7 @@ export function DiscoverableFeed({ ListHeaderComponent, refreshControl }: Props)
 
   const effectiveRefreshControl =
     refreshControl ??
-    (<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} tintColor="#fff" />);
+    (<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} tintColor={colors.navy} />);
 
   // Compose the warm-intro suggestions strip into the FlatList header so it
   // sits above the feed cards and scrolls with them. The strip returns null
@@ -42,6 +46,14 @@ export function DiscoverableFeed({ ListHeaderComponent, refreshControl }: Props)
   return (
     <QueryState
       query={feed}
+      loadingFallback={
+        <View>
+          {ListHeaderComponent}
+          <View className="pt-3">
+            <SkeletonUserCard count={4} />
+          </View>
+        </View>
+      }
       isEmpty={(data) => data.pages.flatMap((p) => p.rows).length === 0}
       emptyFallback={
         <FlatList
@@ -50,9 +62,7 @@ export function DiscoverableFeed({ ListHeaderComponent, refreshControl }: Props)
           ListHeaderComponent={ListHeaderComponent}
           refreshControl={effectiveRefreshControl}
           ListEmptyComponent={
-            <View className="py-12 px-6 items-center">
-              <Text className="text-muted text-center">{t('discovery.emptyFeed')}</Text>
-            </View>
+            <EmptyState icon={Users} title={t('discovery.emptyTitle')} body={t('discovery.emptyFeed')} />
           }
         />
       }
@@ -76,7 +86,7 @@ export function DiscoverableFeed({ ListHeaderComponent, refreshControl }: Props)
             ListFooterComponent={
               isFetchingNextPage ? (
                 <View className="py-4 items-center">
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color={colors.navy} />
                 </View>
               ) : null
             }

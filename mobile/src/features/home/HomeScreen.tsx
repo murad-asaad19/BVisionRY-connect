@@ -73,14 +73,14 @@ export function HomeScreen() {
               <PhotoNudgeBanner photoUrl={profile?.photo_url ?? null} />
               {thinPool ? <ThinPoolBanner count={matchCount} /> : null}
               <Text
-                className="font-display-bold text-[12px] text-muted uppercase tracking-wide px-4 pt-3 pb-1"
+                className="font-display-bold text-body-md text-muted uppercase tracking-wide px-gutter pt-3 pb-1"
                 testID="home-section-picks"
               >
                 {t('home.picks')}
               </Text>
               <DailyMatchesStrip />
               <Text
-                className="font-display-bold text-[12px] text-muted uppercase tracking-wide px-4 pt-3 pb-1"
+                className="font-display-bold text-body-md text-muted uppercase tracking-wide px-gutter pt-3 pb-1"
                 testID="home-section-discover"
               >
                 {t('home.discover')}

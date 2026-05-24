@@ -9,7 +9,7 @@ export default function PrivacySubScreen() {
     <View testID="settings-screen" className="flex-1 bg-surface">
       <Stack.Screen options={{ title: t('settings.privacy') }} />
       <ScrollView className="flex-1">
-        <View className="w-full max-w-2xl mx-auto p-4">
+        <View className="w-full max-w-2xl mx-auto p-card-lg">
           <PrivacyTogglesSection />
         </View>
       </ScrollView>

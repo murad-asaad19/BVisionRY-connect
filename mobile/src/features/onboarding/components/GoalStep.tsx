@@ -157,7 +157,12 @@ export function GoalStep() {
   };
 
   return (
-    <StepperLayout currentIndex={0} canGoBack={false} title={t('onboarding.goal.title')}>
+    <StepperLayout
+      currentIndex={0}
+      canGoBack={false}
+      title={t('onboarding.goal.title')}
+      stepName={t('onboarding.stepName.goal')}
+    >
       <ScrollView>
         <Input
           testID="goal-text"
@@ -172,8 +177,8 @@ export function GoalStep() {
           numberOfLines={4}
           maxLength={280}
         />
-        <Text className="font-body text-[10px] text-muted mb-1">{text.length} / 280</Text>
-        <Text className="font-body text-[10px] text-muted leading-snug mb-2">
+        <Text className="font-body text-body-xs text-muted mb-1">{text.length} / 280</Text>
+        <Text className="font-body text-body-xs text-muted leading-snug mb-2">
           Examples: {EXAMPLES.map((e) => `"${e}"`).join(', ')}
         </Text>
 
@@ -184,7 +189,7 @@ export function GoalStep() {
         )}
 
         {inference.kind === 'success' && !manuallyPicked && (
-          <Text testID="goal-inferred" className="font-body text-[11px] text-muted mb-2">
+          <Text testID="goal-inferred" className="font-body text-display-xs text-muted mb-2">
             {t('onboarding.goal.inferred', {
               label: t(`discovery.goals.${inference.goalType}`),
             })}
@@ -192,13 +197,13 @@ export function GoalStep() {
         )}
 
         {inference.kind === 'failed' && (
-          <Text testID="goal-infer-failed" className="font-body text-[11px] text-muted mb-2">
+          <Text testID="goal-infer-failed" className="font-body text-display-xs text-muted mb-2">
             {t('onboarding.goal.inferFailed')}
           </Text>
         )}
 
         <View className="mt-2 mb-3">
-          <Text className="font-body text-[12px] text-muted mb-2">
+          <Text className="font-body text-body-md text-muted mb-2">
             {t('onboarding.goal.typeLabel')}
           </Text>
           <View className="flex-row flex-wrap" style={{ gap: 8 }}>
@@ -216,7 +221,7 @@ export function GoalStep() {
                   }`}
                 >
                   <Text
-                    className={`font-display-bold text-[12px] ${
+                    className={`font-display-bold text-body-md ${
                       selected ? 'text-white' : 'text-navy'
                     }`}
                   >

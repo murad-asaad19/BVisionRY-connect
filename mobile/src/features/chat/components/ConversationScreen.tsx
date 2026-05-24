@@ -9,10 +9,10 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
-import { router } from 'expo-router';
 import { useFocusEffect, useIsFocused } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { Bell, BellOff, ChevronDown, MoreHorizontal } from 'lucide-react-native';
 import { useAuthSession } from '~/features/auth/SessionContext';
 import { useMessages } from '~/features/chat/hooks/useMessages';
 import { useMessagesRealtime } from '~/features/chat/hooks/useMessagesRealtime';
@@ -26,10 +26,12 @@ import {
 import { useMeetingProposals } from '~/features/meetings/hooks/useMeetingProposals';
 import { useMeetingProposalsRealtime } from '~/features/meetings/hooks/useMeetingProposalsRealtime';
 import { QueryState } from '~/components/ui/QueryState';
+import { TopBar } from '~/components/ui/TopBar';
+import { Avatar } from '~/components/ui/Avatar';
+import { colors } from '~/theme/colors';
 import { MessageBubble } from './MessageBubble';
 import { MessageComposer } from './MessageComposer';
 import { PostMeetingPrompt } from '~/features/meetings/components/PostMeetingPrompt';
-import { AvatarCircle } from '~/components/ui/AvatarCircle';
 import { supabase } from '~/lib/supabase/client';
 import type { Database } from '~/lib/supabase/types.gen';
 import type { MessageRow } from '~/features/chat/services/chat.service';
@@ -248,40 +250,41 @@ export function ConversationScreen({ id }: Props) {
     >
       <View className="flex-1 bg-surface">
         <View className="flex-1 w-full max-w-2xl mx-auto">
-          <View className="bg-white px-3 pt-3.5 pb-2.5 border-b border-border flex-row items-center gap-2">
-            <Pressable
-              testID="conversation-back"
-              onPress={() => router.back()}
-              accessibilityRole="button"
-              accessibilityLabel="Back"
-              className="px-2 py-1"
-            >
-              <Text className="text-navy text-base">←</Text>
-            </Pressable>
-            <AvatarCircle name={peer?.name ?? '?'} photoUrl={peer?.photo_url ?? null} size={32} />
-            <View className="flex-1 min-w-0 ml-1">
-              <Text
-                testID="conversation-peer-name"
-                numberOfLines={1}
-                className="font-display-bold text-[14px] text-navy"
-              >
-                {peer?.name ?? '...'}
-              </Text>
-              <Text numberOfLines={1} className="font-body text-[11px] text-muted">
-                @{peer?.handle ?? '?'}
-              </Text>
-            </View>
-            <Pressable
-              testID="conversation-mute-toggle"
-              accessibilityRole="button"
-              accessibilityLabel={isMuted ? t('chat.unmute') : t('chat.mute')}
-              onPress={() => muteMutation.mutate(!isMuted)}
-              disabled={muteMutation.isPending}
-              className="px-2 py-1"
-            >
-              <Text className="text-muted text-lg">{isMuted ? '🔇' : '🔔'}</Text>
-            </Pressable>
-          </View>
+          <TopBar
+            back
+            leading={
+              <Avatar
+                name={peer?.name ?? '?'}
+                photoUrl={peer?.photo_url ?? null}
+                size={32}
+              />
+            }
+            title={peer?.name ?? '...'}
+            subtitle={peer?.handle ? `@${peer.handle}` : undefined}
+            titleTestID="conversation-peer-name"
+            actions={[
+              {
+                testID: 'conversation-mute-toggle',
+                icon: isMuted ? (
+                  <BellOff size={18} color={colors.navy} />
+                ) : (
+                  <Bell size={18} color={colors.navy} />
+                ),
+                onPress: () => muteMutation.mutate(!isMuted),
+                label: isMuted ? t('chat.unmute') : t('chat.mute'),
+              },
+              {
+                testID: 'conversation-more',
+                icon: <MoreHorizontal size={18} color={colors.navy} />,
+                onPress: () => {
+                  // Reserved for a future overflow menu (block, report, etc.).
+                  // The audit (P0-2) called for the affordance to exist; the
+                  // sheet contents are out of scope for this pass.
+                },
+                label: t('chat.messageActionsMore'),
+              },
+            ]}
+          />
 
           <QueryState
             query={{
@@ -296,7 +299,9 @@ export function ConversationScreen({ id }: Props) {
             isEmpty={(data) => data.length === 0}
             emptyFallback={
               <View className="flex-1 items-center justify-center px-6">
-                <Text className="text-muted text-center">No messages yet. Say hi!</Text>
+                <Text className="font-body text-body-md text-muted text-center">
+                  {t('chat.noMessages')}
+                </Text>
               </View>
             }
           >
@@ -321,11 +326,12 @@ export function ConversationScreen({ id }: Props) {
                     accessibilityRole="button"
                     accessibilityLabel={t('chat.newMessages')}
                     onPress={scrollToBottom}
-                    className="absolute bottom-2 self-center bg-navy rounded-full px-4 py-1.5"
+                    className="absolute bottom-2 self-center bg-navy rounded-full px-4 py-1.5 flex-row items-center gap-1"
                   >
-                    <Text className="text-white text-[12px] font-display-bold">
-                      {t('chat.newMessages')} ↓
+                    <Text className="font-display-bold text-body-md text-white">
+                      {t('chat.newMessages')}
                     </Text>
+                    <ChevronDown size={14} color={colors.white} />
                   </Pressable>
                 )}
               </View>
@@ -333,8 +339,8 @@ export function ConversationScreen({ id }: Props) {
           </QueryState>
 
           {isOtherTyping && (
-            <View testID="conversation-typing-indicator" className="px-6 py-1">
-              <Text className="text-muted text-xs italic">
+            <View testID="conversation-typing-indicator" className="px-gutter py-1">
+              <Text className="font-body text-body-sm text-muted italic">
                 {peer?.name ?? '...'} {t('chat.typing')}
               </Text>
             </View>

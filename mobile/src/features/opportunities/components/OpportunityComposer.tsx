@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Switch } from 'react-native';
+import { View, Text, ScrollView, Pressable, Switch, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Input } from '~/components/ui/Input';
 import { Button } from '~/components/ui/Button';
 import { Pill } from '~/components/ui/Pill';
 import { TopBar } from '~/components/ui/TopBar';
+import { useToast } from '~/components/ui/Toast';
 import {
   CreateOpportunityInputSchema,
   OpportunityTagsSchema,
@@ -68,6 +69,7 @@ type Props = {
 
 export function OpportunityComposer({ onSubmitted }: Props) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [step, setStep] = useState<Step>(1);
   const [draft, setDraft] = useState<DraftState>(EMPTY_DRAFT);
   const [errors, setErrors] = useState<Partial<Record<keyof DraftState | 'submit', string>>>({});
@@ -143,6 +145,7 @@ export function OpportunityComposer({ onSubmitted }: Props) {
 
     try {
       const id = await create.mutateAsync(parsed.data);
+      toast.success(t('opportunities.composer.submitSuccess'));
       onSubmitted?.(id);
       router.replace({ pathname: '/(app)/opportunities/[id]', params: { id } });
     } catch (e) {
@@ -154,174 +157,186 @@ export function OpportunityComposer({ onSubmitted }: Props) {
 
   return (
     <View testID="opportunity-composer" className="flex-1 bg-surface">
-      <TopBar title={t('opportunities.feed.newCta')} />
-      <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, paddingBottom: 64 }}>
-        {/* Step indicator */}
-        <Text className="font-display-bold text-[11px] text-muted uppercase tracking-wide mb-3">
-          {t('opportunities.composer.stepCounter', { current: step, total: 3 })}
-        </Text>
+      <TopBar back title={t('opportunities.feed.newCta')} />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ padding: 16, paddingBottom: 64 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Step indicator */}
+          <Text className="font-display-bold text-display-xs text-muted uppercase tracking-wide mb-3">
+            {t('opportunities.composer.stepCounter', { current: step, total: 3 })}
+          </Text>
 
-        {step === 1 ? (
-          <View>
-            <Text className="font-display-bold text-[16px] text-navy mb-3">
-              {t('opportunities.composer.stepKind')}
-            </Text>
-            <View className="gap-2">
-              {ALL_KINDS.map((k) => {
-                const active = draft.kind === k;
-                return (
-                  <Pressable
-                    key={k}
-                    testID={`opportunity-composer-kind-${k}`}
-                    onPress={() => set('kind', k)}
-                    accessibilityRole="radio"
-                    accessibilityState={{ selected: active }}
-                    className={`border-[1.5px] rounded-[10px] px-3 py-3 ${active ? 'border-navy bg-gold-pale' : 'border-border bg-white'}`}
-                  >
-                    <Text
-                      className={`font-display-bold text-[13px] ${active ? 'text-navy' : 'text-body'}`}
+          {step === 1 ? (
+            <View>
+              <Text className="font-display-bold text-display-md text-navy mb-3">
+                {t('opportunities.composer.stepKind')}
+              </Text>
+              <View className="gap-2">
+                {ALL_KINDS.map((k) => {
+                  const active = draft.kind === k;
+                  return (
+                    <Pressable
+                      key={k}
+                      testID={`opportunity-composer-kind-${k}`}
+                      onPress={() => set('kind', k)}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected: active }}
+                      className={`border-[1.5px] rounded-[10px] px-3 py-3 active:opacity-80 ${active ? 'border-navy bg-gold-pale' : 'border-border bg-white'}`}
                     >
-                      {t(`opportunities.kind.${k}`)}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-            {errors.kind ? (
-              <Text testID="opportunity-composer-kind-error" className="text-danger-text text-[11px] mt-2">
-                {errors.kind}
-              </Text>
-            ) : null}
-          </View>
-        ) : null}
-
-        {step === 2 ? (
-          <View>
-            <Text className="font-display-bold text-[16px] text-navy mb-3">
-              {t('opportunities.composer.stepContent')}
-            </Text>
-            <Input
-              testID="opportunity-composer-title"
-              label={t('opportunities.composer.titleLabel')}
-              value={draft.title}
-              onChangeText={(s) => set('title', s)}
-              placeholder={t('opportunities.composer.titlePlaceholder')}
-              maxLength={TITLE_MAX}
-              errorText={errors.title}
-            />
-            <Input
-              testID="opportunity-composer-body"
-              label={t('opportunities.composer.bodyLabel')}
-              value={draft.body}
-              onChangeText={(s) => set('body', s)}
-              placeholder={t('opportunities.composer.bodyPlaceholder')}
-              multiline
-              numberOfLines={6}
-              maxLength={BODY_MAX}
-              errorText={errors.body}
-            />
-          </View>
-        ) : null}
-
-        {step === 3 ? (
-          <View>
-            <Text className="font-display-bold text-[16px] text-navy mb-3">
-              {t('opportunities.composer.stepMeta')}
-            </Text>
-            <Input
-              testID="opportunity-composer-tags"
-              label={t('opportunities.composer.tagsLabel')}
-              value={draft.tagsInput}
-              onChangeText={(s) => set('tagsInput', s)}
-              placeholder={t('opportunities.composer.tagsPlaceholder')}
-              autoCapitalize="none"
-              autoCorrect={false}
-              errorText={errors.tagsInput}
-            />
-            {tags.length > 0 ? (
-              <View className="flex-row gap-1.5 mb-2 flex-wrap">
-                {tags.map((tag) => (
-                  <Pill key={tag} variant="muted">
-                    #{tag}
-                  </Pill>
-                ))}
+                      <Text
+                        className={`font-display-bold text-display-sm ${active ? 'text-navy' : 'text-body'}`}
+                      >
+                        {t(`opportunities.kind.${k}`)}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
-            ) : null}
-            <Input
-              testID="opportunity-composer-city"
-              label={t('opportunities.composer.cityLabel')}
-              value={draft.locationCity}
-              onChangeText={(s) => set('locationCity', s)}
-              placeholder={t('opportunities.composer.cityLabel')}
-              maxLength={80}
-            />
-            <Input
-              testID="opportunity-composer-country"
-              label={t('opportunities.composer.countryLabel')}
-              value={draft.locationCountry}
-              onChangeText={(s) => set('locationCountry', s)}
-              placeholder={t('opportunities.composer.countryLabel')}
-              maxLength={80}
-            />
-            <View className="flex-row items-center justify-between my-2">
-              <Text className="font-body text-[12px] text-body">
-                {t('opportunities.composer.remoteLabel')}
-              </Text>
-              <Switch
-                testID="opportunity-composer-remote"
-                value={draft.remoteOk}
-                onValueChange={(v) => set('remoteOk', v)}
-                accessibilityLabel={t('opportunities.composer.remoteLabel')}
-              />
-            </View>
-            <Text className="font-body text-[11px] text-muted mb-2">
-              {t('opportunities.composer.expiresHint')}
-            </Text>
-            {errors.submit ? (
-              <Text
-                testID="opportunity-composer-submit-error"
-                className="text-danger-text text-[11px] mb-2"
-              >
-                {errors.submit}
-              </Text>
-            ) : null}
-          </View>
-        ) : null}
-
-        {/* Nav buttons */}
-        <View className="flex-row gap-3 mt-6">
-          {step > 1 ? (
-            <View className="flex-1">
-              <Button
-                testID="opportunity-composer-back"
-                variant="outline"
-                onPress={onBack}
-                disabled={create.isPending}
-              >
-                {t('opportunities.composer.back')}
-              </Button>
+              {errors.kind ? (
+                <Text
+                  testID="opportunity-composer-kind-error"
+                  className="text-danger-text text-body-sm mt-2"
+                >
+                  {errors.kind}
+                </Text>
+              ) : null}
             </View>
           ) : null}
-          <View className="flex-1">
-            {step < 3 ? (
-              <Button testID="opportunity-composer-next" variant="primary" onPress={onNext}>
-                {t('opportunities.composer.next')}
-              </Button>
-            ) : (
-              <Button
-                testID="opportunity-composer-submit"
-                variant="primary"
-                onPress={onSubmit}
-                loading={create.isPending}
-              >
-                {create.isPending
-                  ? t('opportunities.composer.submitting')
-                  : t('opportunities.composer.submit')}
-              </Button>
-            )}
+
+          {step === 2 ? (
+            <View>
+              <Text className="font-display-bold text-display-md text-navy mb-3">
+                {t('opportunities.composer.stepContent')}
+              </Text>
+              <Input
+                testID="opportunity-composer-title"
+                label={t('opportunities.composer.titleLabel')}
+                value={draft.title}
+                onChangeText={(s) => set('title', s)}
+                placeholder={t('opportunities.composer.titlePlaceholder')}
+                maxLength={TITLE_MAX}
+                errorText={errors.title}
+              />
+              <Input
+                testID="opportunity-composer-body"
+                label={t('opportunities.composer.bodyLabel')}
+                value={draft.body}
+                onChangeText={(s) => set('body', s)}
+                placeholder={t('opportunities.composer.bodyPlaceholder')}
+                multiline
+                numberOfLines={6}
+                maxLength={BODY_MAX}
+                errorText={errors.body}
+              />
+            </View>
+          ) : null}
+
+          {step === 3 ? (
+            <View>
+              <Text className="font-display-bold text-display-md text-navy mb-3">
+                {t('opportunities.composer.stepMeta')}
+              </Text>
+              <Input
+                testID="opportunity-composer-tags"
+                label={t('opportunities.composer.tagsLabel')}
+                value={draft.tagsInput}
+                onChangeText={(s) => set('tagsInput', s)}
+                placeholder={t('opportunities.composer.tagsPlaceholder')}
+                autoCapitalize="none"
+                autoCorrect={false}
+                errorText={errors.tagsInput}
+              />
+              {tags.length > 0 ? (
+                <View className="flex-row gap-1.5 mb-2 flex-wrap">
+                  {tags.map((tag) => (
+                    <Pill key={tag} variant="muted">
+                      #{tag}
+                    </Pill>
+                  ))}
+                </View>
+              ) : null}
+              <Input
+                testID="opportunity-composer-city"
+                label={t('opportunities.composer.cityLabel')}
+                value={draft.locationCity}
+                onChangeText={(s) => set('locationCity', s)}
+                placeholder={t('opportunities.composer.cityLabel')}
+                maxLength={80}
+              />
+              <Input
+                testID="opportunity-composer-country"
+                label={t('opportunities.composer.countryLabel')}
+                value={draft.locationCountry}
+                onChangeText={(s) => set('locationCountry', s)}
+                placeholder={t('opportunities.composer.countryLabel')}
+                maxLength={80}
+              />
+              <View className="flex-row items-center justify-between my-2">
+                <Text className="font-body text-body-md text-body">
+                  {t('opportunities.composer.remoteLabel')}
+                </Text>
+                <Switch
+                  testID="opportunity-composer-remote"
+                  value={draft.remoteOk}
+                  onValueChange={(v) => set('remoteOk', v)}
+                  accessibilityLabel={t('opportunities.composer.remoteLabel')}
+                />
+              </View>
+              <Text className="font-body text-body-sm text-muted mb-2">
+                {t('opportunities.composer.expiresHint')}
+              </Text>
+              {errors.submit ? (
+                <Text
+                  testID="opportunity-composer-submit-error"
+                  className="text-danger-text text-body-sm mb-2"
+                >
+                  {errors.submit}
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
+
+          {/* Nav buttons */}
+          <View className="flex-row gap-3 mt-6">
+            {step > 1 ? (
+              <View className="flex-1">
+                <Button
+                  testID="opportunity-composer-back"
+                  variant="outline"
+                  onPress={onBack}
+                  disabled={create.isPending}
+                >
+                  {t('opportunities.composer.back')}
+                </Button>
+              </View>
+            ) : null}
+            <View className="flex-1">
+              {step < 3 ? (
+                <Button testID="opportunity-composer-next" variant="primary" onPress={onNext}>
+                  {t('opportunities.composer.next')}
+                </Button>
+              ) : (
+                <Button
+                  testID="opportunity-composer-submit"
+                  variant="primary"
+                  onPress={onSubmit}
+                  loading={create.isPending}
+                >
+                  {create.isPending
+                    ? t('opportunities.composer.submitting')
+                    : t('opportunities.composer.submit')}
+                </Button>
+              )}
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

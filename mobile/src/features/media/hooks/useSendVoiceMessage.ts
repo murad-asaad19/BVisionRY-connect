@@ -39,8 +39,8 @@ export function useSendVoiceMessage(conversationId: string) {
         return null;
       }
 
-      const blob = await fetch(recording.uri).then((r) => r.blob());
-      if (blob.size > MAX_VOICE_BYTES) {
+      const bytes = await new File(recording.uri).bytes();
+      if (bytes.byteLength > MAX_VOICE_BYTES) {
         Alert.alert(
           i18n.t('media.voiceTooLargeTitle'),
           i18n.t('media.voiceTooLargeBody', { maxMb: Math.round(MAX_VOICE_BYTES / (1024 * 1024)) })
@@ -53,7 +53,7 @@ export function useSendVoiceMessage(conversationId: string) {
       const path = await uploadChatMedia(
         conversationId,
         messageId,
-        blob,
+        bytes,
         ext,
         VOICE_MIME.m4a,
         `${messageId}.${ext}`
@@ -69,7 +69,7 @@ export function useSendVoiceMessage(conversationId: string) {
             p_conversation_id: conversationId,
             p_media_path: path,
             p_media_mime: VOICE_MIME.m4a,
-            p_media_size_bytes: blob.size,
+            p_media_size_bytes: bytes.byteLength,
             p_duration_ms: durationMs,
           }
         );

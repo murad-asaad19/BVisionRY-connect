@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
-import { View, Text, Pressable, Alert, I18nManager, Platform } from 'react-native';
+import { View, Text, I18nManager, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES, applyLayoutDirection, isRTLLocale } from '~/lib/i18n';
+import { SegmentedControl } from '~/components/ui/SegmentedControl';
+import { useToast } from '~/components/ui/Toast';
 
 /**
  * Storage key for the user's explicit language choice.
@@ -18,6 +20,7 @@ const LANG_STORAGE_KEY = 'app-language';
 
 export function LanguageSection() {
   const { t, i18n: ctx } = useTranslation();
+  const toast = useToast();
 
   // On mount, honour any previously-saved choice that differs from what
   // initI18n() seeded from the device locale.
@@ -48,37 +51,25 @@ export function LanguageSection() {
       console.warn('[settings] persist language failed', e)
     );
     if (directionChange) {
-      Alert.alert(t('settings.restartRequired.title'), t('settings.restartRequired.body'));
+      toast.info(t('settings.restartRequired.body'));
     }
   };
 
   return (
     <View className="mt-6">
-      <Text className="text-muted text-xs uppercase tracking-wide mb-2">
+      <Text className="font-display-semibold text-muted text-display-xs uppercase tracking-wide mb-2">
         {t('settings.language')}
       </Text>
-      <View className="flex-row gap-2">
-        {LANGUAGES.map((l) => (
-          <Pressable
-            key={l.code}
-            testID={`lang-${l.code}`}
-            onPress={() => onSelect(l.code)}
-            accessibilityRole="button"
-            accessibilityLabel={l.label}
-            className={`flex-1 px-3 py-2 rounded-xl border ${
-              ctx.language === l.code ? 'bg-navy border-transparent' : 'bg-white border-border'
-            }`}
-          >
-            <Text
-              className={`text-center font-semibold ${
-                ctx.language === l.code ? 'text-white' : 'text-body'
-              }`}
-            >
-              {l.label}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
+      <SegmentedControl
+        testID="language-segmented"
+        value={ctx.language}
+        onChange={onSelect}
+        options={LANGUAGES.map((l) => ({
+          value: l.code,
+          label: l.label,
+          testID: `lang-${l.code}`,
+        }))}
+      />
     </View>
   );
 }

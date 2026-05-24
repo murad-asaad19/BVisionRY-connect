@@ -26,7 +26,13 @@ export type IntroState = Database['public']['Enums']['intro_state'];
 
 const PAGE_SIZE = 20;
 // Far-future sentinel for cursor pagination — newer than any plausible created_at.
-export const MAX_CURSOR_ISO = new Date(8640000000000000).toISOString();
+// IMPORTANT: must stay within the standard 4-digit-year ISO range. JS's
+// `new Date(8640000000000000).toISOString()` returns the extended form
+// `+275760-09-13T00:00:00.000Z` (RFC 3339 expanded year), which PostgREST
+// URL-parses with the `+` decoded as a space, producing a malformed timestamp
+// and a 400. `9999-12-31T...` covers every plausible created_at without that
+// pitfall.
+export const MAX_CURSOR_ISO = '9999-12-31T23:59:59.999Z';
 
 // =============================================================================
 // Typed errors — UI can branch on `instanceof` and surface i18n'd copy without

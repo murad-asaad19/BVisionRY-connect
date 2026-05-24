@@ -1,6 +1,8 @@
 import { Children, isValidElement, cloneElement, type ReactElement } from 'react';
 import { View, Text, Pressable } from 'react-native';
+import { ChevronRight } from 'lucide-react-native';
 import type { ReactNode } from 'react';
+import { colors } from '~/theme/colors';
 
 type RowProps = {
   label: string;
@@ -60,17 +62,17 @@ export function SettingsRow({
       onPress={onPress}
       accessibilityRole={onPress ? 'button' : undefined}
       accessibilityLabel={onPress ? label : undefined}
-      className={`bg-white px-3.5 py-3 flex-row items-center justify-between ${radius} ${border}`}
+      className={`bg-white px-3.5 py-3 flex-row items-center justify-between ${radius} ${border} ${onPress ? 'active:bg-slate-100' : ''}`}
     >
       <View className="flex-1 mr-2">
-        <Text className="font-display-semibold text-[12px] text-body">{label}</Text>
+        <Text className="font-display-semibold text-body-md text-body">{label}</Text>
         {description ? (
-          <Text className="font-body text-[10px] text-muted mt-0.5 leading-snug">
+          <Text className="font-body text-body-xs text-muted mt-0.5 leading-snug">
             {description}
           </Text>
         ) : null}
       </View>
-      {rightSlot ?? (onPress ? <Text className="text-muted text-[14px]">›</Text> : null)}
+      {rightSlot ?? (onPress ? <ChevronRight size={16} color={colors.muted} /> : null)}
     </Comp>
   );
 }

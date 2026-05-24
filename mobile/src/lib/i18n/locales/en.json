@@ -34,6 +34,7 @@
     "signInCta": "Sign in",
     "forgotPassword": "Forgot password?",
     "forgotPasswordBody": "Enter your email and tap \"Send magic link\" below.",
+    "forgotPwdInstructions": "Enter your email above, then tap \"Send magic link\" — we'll email you a one-tap sign-in link.",
     "errors": {
       "socialSignInTitle": "Couldn't sign in",
       "oauthCancelled": "Sign-in cancelled",
@@ -94,6 +95,7 @@
     "analytics": "Analytics",
     "crashReports": "Crash reports",
     "about": "About",
+    "advanced": "Advanced",
     "deleteConfirm": {
       "title": "Delete account?",
       "body": "This permanently removes your profile and data. This action cannot be undone.",
@@ -148,6 +150,13 @@
     }
   },
   "onboarding": {
+    "stepLabel": "Step {{current}} of {{total}} · {{stepName}}",
+    "stepName": {
+      "goal": "Goal",
+      "identity": "Identity",
+      "roles": "Roles",
+      "about": "About"
+    },
     "goal": {
       "title": "What's your goal?",
       "label": "Goal",
@@ -322,7 +331,8 @@
     "empty": "No connections yet. Accept an intro to start."
   },
   "common": {
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "ok": "OK"
   },
   "intros": {
     "inboxTitle": "Inbox",
@@ -363,6 +373,7 @@
       "awaitingResponse": "Delivered, awaiting response"
     },
     "detail": {
+      "title": "Intro",
       "notFound": "Intro not found",
       "back": "Back",
       "accepted": "Intro accepted.",
@@ -413,12 +424,27 @@
     "cancel": "Cancel",
     "newMessages": "New messages",
     "messageActionsTitle": "Message actions",
+    "messageActionsMore": "More actions",
+    "noMessages": "No messages yet. Say hi!",
     "previewImage": "📷 Photo",
     "previewVoice": "🎤 Voice message",
-    "previewMeeting": "📅 Meeting proposal"
+    "previewMeeting": "📅 Meeting proposal",
+    "list": {
+      "title": "Chats",
+      "emptyTitle": "No conversations yet",
+      "emptyBody": "Accept an intro to start chatting."
+    },
+    "deleteConfirm": {
+      "title": "Delete message?",
+      "body": "This message will be removed from the conversation.",
+      "confirm": "Delete"
+    }
   },
   "network": {
-    "title": "Network"
+    "title": "Network",
+    "empty": {
+      "title": "No connections yet"
+    }
   },
   "nav": {
     "tabs": {
@@ -435,7 +461,8 @@
   "opportunities": {
     "feed": {
       "title": "Opportunities",
-      "empty": "No opportunities match your filters.",
+      "emptyTitle": "No opportunities yet",
+      "empty": "Be the first to post — share what you're hiring for, raising, or looking for.",
       "newCta": "Post opportunity"
     },
     "kind": {
@@ -486,7 +513,11 @@
       "viewInterested_one": "{{count}} interested",
       "viewInterested_other": "{{count}} interested",
       "closeCta": "Close opportunity",
-      "closedBadge": "Closed"
+      "closedBadge": "Closed",
+      "closeConfirmTitle": "Close this opportunity?",
+      "closeConfirmBody": "It will be hidden from the feed and no one new can express interest.",
+      "closeConfirmCta": "Close",
+      "closeSuccess": "Opportunity closed"
     },
     "interest": {
       "subtitle": "Add a short note so they know what caught your eye.",
@@ -613,6 +644,7 @@
     "thinPoolAction": "Refine my goal",
     "emptyPicks": "No picks yet — invite friends to populate your matches.",
     "emptyFeed": "No one to discover yet.",
+    "emptyTitle": "Nobody to discover",
     "roles": {
       "founder": "Founder",
       "leader": "Leader",
@@ -633,6 +665,8 @@
   "meetings": {
     "yourTime": "your time",
     "addToCalendar": "Add to calendar",
+    "icsDownloadFailed": "Couldn't download calendar file.",
+    "icsSavedTo": "Calendar file saved to {{path}}",
     "title": "Meeting",
     "titleWith": "Meeting with @{{handle}}",
     "statusConfirmed": "Meeting confirmed",
@@ -657,9 +691,9 @@
     "review": {
       "title": "How was the meeting?",
       "subtitle": "Your answer helps us improve match quality. Optional note for your records.",
-      "useful": "👍 Useful",
-      "notUseful": "😐 Not useful",
-      "noShow": "🚫 No-show",
+      "useful": "Useful",
+      "notUseful": "Not useful",
+      "noShow": "No-show",
       "notePlaceholder": "Optional note…",
       "pickOutcome": "Pick an outcome.",
       "submitFailed": "Submit failed",
@@ -751,6 +785,10 @@
       "enableHelp": "Other users can book a slot directly from your profile.",
       "windowsTitle": "Weekly availability",
       "addWindow": "Add window",
+      "removeWindow": "Remove window",
+      "copyHours": "Copy hours",
+      "copyToWeekdays": "Copy to weekdays",
+      "copyToAll": "Copy to all days",
       "weekday_0": "Sunday",
       "weekday_1": "Monday",
       "weekday_2": "Tuesday",
@@ -759,13 +797,16 @@
       "weekday_5": "Friday",
       "weekday_6": "Saturday",
       "slotDuration": "Slot duration",
+      "slotDurationOption": "{{minutes}}m",
       "bufferMinutes": "Buffer between slots (minutes)",
       "maxBookingsPerWeek": "Max bookings per week (per booker)",
       "meetingLinkLabel": "Meeting link template",
       "meetingLinkHelp": "Use {slot_id} to insert the slot's id.",
       "notesLabel": "Pre-meeting notes",
+      "windowEndAfterStart": "End time must be after start time.",
       "save": "Save",
-      "saved": "Saved"
+      "saved": "Saved",
+      "saveFailed": "Couldn't save your settings."
     },
     "profile": {
       "bookCta": "Book a slot",
@@ -777,13 +818,22 @@
       "topicLabel": "What would you like to discuss?",
       "topicPlaceholder": "Topic (5-280 chars)",
       "submit": "Confirm booking",
-      "success": "Booked!"
+      "success": "Booking confirmed"
     },
     "bookings": {
       "title": "My office-hours bookings",
       "cancel": "Cancel",
       "cancelConfirm": "Cancel this booking?",
-      "empty": "No upcoming bookings."
+      "cancelConfirmBody": "Your host will be notified. You can rebook another time.",
+      "cancelled": "Booking cancelled",
+      "cancelFailed": "Couldn't cancel this booking.",
+      "empty": "No upcoming bookings.",
+      "emptyTitle": "No bookings yet",
+      "emptyBody": "Open a host's profile to grab a slot from their office hours.",
+      "loading": "Loading bookings…",
+      "slotsLoading": "Loading slots…",
+      "slotsEmptyTitle": "No upcoming slots",
+      "slotsEmptyBody": "This host doesn't have any open windows in the next few weeks."
     },
     "badge": {
       "label": "Office hours"

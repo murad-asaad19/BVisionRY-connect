@@ -38,7 +38,7 @@ export function WarmIntroSuggestionCard({ suggestion, onAsk, testID }: Props) {
   return (
     <View
       testID={testID ?? `warm-intro-card-${suggestion.targetHandle}`}
-      className="bg-white border border-border rounded-xl p-3 w-[220px] mr-2"
+      className="bg-white border border-border rounded-xl p-card w-[220px] mr-2"
     >
       <View className="flex-row items-start gap-2">
         <AvatarCircle
@@ -47,10 +47,10 @@ export function WarmIntroSuggestionCard({ suggestion, onAsk, testID }: Props) {
           size={48}
         />
         <View className="flex-1 min-w-0">
-          <Text className="font-display-bold text-[13px] text-navy" numberOfLines={1}>
+          <Text className="font-display-bold text-display-sm text-navy" numberOfLines={1}>
             {suggestion.targetName}
           </Text>
-          <Text className="font-body text-[11px] text-muted" numberOfLines={1}>
+          <Text className="font-body text-body-sm text-muted" numberOfLines={1}>
             @{suggestion.targetHandle}
           </Text>
         </View>
@@ -63,7 +63,7 @@ export function WarmIntroSuggestionCard({ suggestion, onAsk, testID }: Props) {
       ) : null}
 
       <Text
-        className="font-body text-[11px] text-body mt-2"
+        className="font-body text-body-sm text-body mt-2"
         numberOfLines={1}
         testID={`warm-intro-card-via-${suggestion.targetHandle}`}
       >
@@ -75,9 +75,9 @@ export function WarmIntroSuggestionCard({ suggestion, onAsk, testID }: Props) {
         accessibilityRole="button"
         accessibilityLabel={askLabel}
         onPress={() => onAsk(suggestion)}
-        className="bg-navy rounded-lg px-3 py-2 mt-3 items-center"
+        className="bg-navy rounded-lg px-3 py-2 mt-3 items-center active:opacity-80"
       >
-        <Text className="font-display-bold text-[12px] text-white">{askLabel}</Text>
+        <Text className="font-display-bold text-body-md text-white">{askLabel}</Text>
       </Pressable>
     </View>
   );

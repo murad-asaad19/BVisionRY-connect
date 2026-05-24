@@ -1,7 +1,8 @@
-import { View, Text, ScrollView } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Button } from '~/components/ui/Button';
+import { SectionCard } from '~/components/ui/SectionCard';
 import { BioMarkdown } from '~/features/profile/components/BioMarkdown';
 import { ProfileHero } from '~/features/profile/components/ProfileHero';
 import { ProfileSignalsRow } from '~/features/profile/components/ProfileSignalsRow';
@@ -27,15 +28,12 @@ export function PublicProfileView({ profile }: { profile: PublicProfile }) {
           raises 'unauthenticated' for anon callers, and signals are
           relational (mutual count is meaningless to an anon visitor). */}
       {session ? <ProfileSignalsRow targetUserId={profile.id} /> : null}
-      <View className="p-4">
-        {profile.bio ? (
-          <View className="bg-white rounded-xl border border-border p-3 mb-4">
-            <Text className="font-display-bold text-[11px] text-muted uppercase tracking-wide mb-1.5">
-              {t('profile.aboutSection')}
-            </Text>
-            <BioMarkdown>{profile.bio}</BioMarkdown>
-          </View>
-        ) : null}
+      {profile.bio ? (
+        <SectionCard title={t('profile.aboutSection')}>
+          <BioMarkdown>{profile.bio}</BioMarkdown>
+        </SectionCard>
+      ) : null}
+      <View className="px-gutter mt-4 mb-8">
         <Button
           testID="public-profile-sign-in"
           variant="primary"

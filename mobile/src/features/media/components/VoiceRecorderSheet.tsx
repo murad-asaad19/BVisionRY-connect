@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
+import { Mic } from 'lucide-react-native';
 import { BottomSheet } from '~/components/ui/Modal';
 import { Button } from '~/components/ui/Button';
+import { IconButton } from '~/components/ui/IconButton';
 import { colors } from '~/theme/colors';
 import { useRecordAudio } from '~/features/media/hooks/useRecordAudio';
 import { useSendVoiceMessage } from '~/features/media/hooks/useSendVoiceMessage';
@@ -88,15 +90,14 @@ export function VoiceRecorderSheet({ conversationId }: Props) {
 
   return (
     <>
-      <Pressable
+      <IconButton
         testID="composer-voice"
+        icon={Mic}
+        size="sm"
+        variant="subtle"
+        label="Record voice message"
         onPress={onOpen}
-        accessibilityRole="button"
-        accessibilityLabel="Record voice message"
-        className="w-7 h-7 rounded-full bg-gold-pale items-center justify-center"
-      >
-        <Text className="text-navy text-[14px]">🎤</Text>
-      </Pressable>
+      />
 
       <BottomSheet visible={open} onClose={onCancel} testID="voice-recorder-sheet">
         <View className="items-center pt-2 pb-4">
@@ -104,10 +105,10 @@ export function VoiceRecorderSheet({ conversationId }: Props) {
             {/* Filled red dot — mockup F2 */}
             <View testID="voice-recorder-pulse" className="w-7 h-7 rounded-full bg-danger-text" />
           </View>
-          <Text testID="voice-recorder-timer" className="font-display-bold text-[22px] text-navy">
+          <Text testID="voice-recorder-timer" className="font-display-bold text-display-lg text-navy">
             {fmtElapsed(elapsed)} / {fmtElapsed(MAX_VOICE_MS)}
           </Text>
-          <Text className="font-body text-[10px] text-muted mt-1 text-center px-6 leading-snug">
+          <Text className="font-body text-body-xs text-muted mt-1 text-center px-6 leading-snug">
             Max 2 minutes — voice notes are transcribed for accessibility & safety.
           </Text>
           <View className="flex-row gap-1 mt-3 h-4 items-end">

@@ -1,9 +1,11 @@
 import { View, Text, Image, FlatList } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { ShieldOff } from 'lucide-react-native';
 import { useBlockedUsers } from '~/features/privacy/hooks/useBlockedUsers';
 import { useUnblockUser } from '~/features/privacy/hooks/useUnblockUser';
 import { QueryState } from '~/components/ui/QueryState';
 import { Button } from '~/components/ui/Button';
+import { EmptyState } from '~/components/ui/EmptyState';
 
 function fmtDate(iso: string): string {
   try {
@@ -17,10 +19,10 @@ function Header() {
   const { t } = useTranslation();
   return (
     <View>
-      <Text className="font-display-semibold text-muted text-xs uppercase tracking-wide mb-2">
+      <Text className="font-display-semibold text-muted text-display-xs uppercase tracking-wide mb-2">
         {t('settings.blockedUsers')}
       </Text>
-      <Text className="font-body text-[11px] text-muted mb-3 leading-snug">
+      <Text className="font-body text-body-sm text-muted mb-3 leading-snug">
         {t('privacy.blockedListHint')}
       </Text>
     </View>
@@ -43,12 +45,16 @@ export function BlockedUsersList() {
           contentContainerStyle={{ padding: 16, maxWidth: 672, width: '100%', alignSelf: 'center' }}
           ListHeaderComponent={Header}
           ListEmptyComponent={
-            <Text className="text-muted text-sm">{t('privacy.blockedListEmpty')}</Text>
+            <EmptyState
+              testID="blocked-users-empty"
+              icon={ShieldOff}
+              title={t('privacy.blockedListEmpty')}
+            />
           }
           renderItem={({ item: r }) => (
             <View
               testID={`blocked-row-${r.handle}`}
-              className="flex-row items-center bg-white border border-border rounded-xl p-3 mb-2"
+              className="flex-row items-center bg-white border border-border rounded-xl p-card mb-2"
             >
               {r.photo_url ? (
                 <Image source={{ uri: r.photo_url }} className="w-10 h-10 rounded-full mr-3" />
@@ -56,9 +62,9 @@ export function BlockedUsersList() {
                 <View className="w-10 h-10 rounded-full bg-surface mr-3" />
               )}
               <View className="flex-1">
-                <Text className="text-body font-semibold">{r.name}</Text>
-                <Text className="text-muted text-sm">@{r.handle}</Text>
-                <Text className="text-muted text-xs mt-0.5">
+                <Text className="font-display-semibold text-body-lg text-body">{r.name}</Text>
+                <Text className="font-body text-body-md text-muted">@{r.handle}</Text>
+                <Text className="font-body text-body-xs text-muted mt-0.5">
                   {t('privacy.blockedAt', { date: fmtDate(r.created_at) })}
                 </Text>
               </View>

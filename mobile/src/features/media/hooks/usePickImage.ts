@@ -1,6 +1,7 @@
 import { Alert, Linking, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
+import { File } from 'expo-file-system';
 import { MAX_IMAGE_BYTES } from '~/features/media/services/media.constants';
 import { i18n } from '~/lib/i18n';
 
@@ -8,7 +9,11 @@ export type PickedImage = {
   uri: string;
   width: number;
   height: number;
-  blob: Blob;
+  /** Raw bytes loaded into memory — safe to upload via supabase-js on both
+   *  web and native. The historic `fetch(uri).blob()` path returned a lazy
+   *  Blob on React Native that uploaded as 0 bytes through XHR. */
+  bytes: Uint8Array;
+  size: number;
   ext: 'jpg';
 };
 
@@ -52,9 +57,9 @@ export async function pickImage(opts?: { aspect?: [number, number] }): Promise<P
     [{ resize: { width: Math.min(1600, asset.width) } }],
     { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
   );
-  const blob = await fetch(manipulated.uri).then((r) => r.blob());
+  const bytes = await new File(manipulated.uri).bytes();
 
-  if (blob.size > MAX_IMAGE_BYTES) {
+  if (bytes.byteLength > MAX_IMAGE_BYTES) {
     Alert.alert(
       i18n.t('media.imageTooLargeTitle'),
       i18n.t('media.imageTooLargeBody', { maxMb: Math.round(MAX_IMAGE_BYTES / (1024 * 1024)) })
@@ -66,7 +71,8 @@ export async function pickImage(opts?: { aspect?: [number, number] }): Promise<P
     uri: manipulated.uri,
     width: manipulated.width,
     height: manipulated.height,
-    blob,
+    bytes,
+    size: bytes.byteLength,
     ext: 'jpg',
   };
 }

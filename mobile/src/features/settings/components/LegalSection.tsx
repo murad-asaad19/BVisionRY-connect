@@ -7,7 +7,7 @@ export function LegalSection() {
   const { t } = useTranslation();
   return (
     <View className="mt-6 mb-12">
-      <Text className="font-display-semibold text-muted text-xs uppercase tracking-wide mb-2">
+      <Text className="font-display-semibold text-muted text-display-xs uppercase tracking-wide mb-2">
         {t('settings.legal')}
       </Text>
       <View className="mb-2">

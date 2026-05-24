@@ -37,6 +37,7 @@ jest.mock('react-i18next', () => ({
 
 jest.mock('expo-router', () => ({
   router: { back: jest.fn(), push: jest.fn() },
+  useRouter: () => ({ back: jest.fn(), push: jest.fn() }),
 }));
 
 jest.mock('~/features/intros/hooks/useIntroById');

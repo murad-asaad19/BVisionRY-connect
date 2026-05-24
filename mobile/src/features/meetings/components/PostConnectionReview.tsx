@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { ThumbsUp, Meh, Ban } from 'lucide-react-native';
+import type { LucideIcon } from 'lucide-react-native';
 import { BottomSheet } from '~/components/ui/Modal';
 import { Button } from '~/components/ui/Button';
 import { Input } from '~/components/ui/Input';
+import { useToast } from '~/components/ui/Toast';
+import { colors } from '~/theme/colors';
 import { OutcomeSchema } from '~/features/meetings/schemas';
 import {
   submitMeetingReview,
@@ -17,8 +21,22 @@ type Props = {
   meetingId: string;
 };
 
+type OutcomeOption = {
+  value: MeetingOutcome;
+  labelKey: string;
+  icon: LucideIcon;
+  destructive?: boolean;
+};
+
+const OUTCOMES: OutcomeOption[] = [
+  { value: 'useful', labelKey: 'meetings.review.useful', icon: ThumbsUp },
+  { value: 'not_useful', labelKey: 'meetings.review.notUseful', icon: Meh },
+  { value: 'no_show', labelKey: 'meetings.review.noShow', icon: Ban, destructive: true },
+];
+
 export function PostConnectionReview({ visible, onClose, meetingId }: Props) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [outcome, setOutcome] = useState<MeetingOutcome | null>(null);
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +47,7 @@ export function PostConnectionReview({ visible, onClose, meetingId }: Props) {
       submitMeetingReview({ meetingId, outcome: outcome!, note: note.trim() || null }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['pending-meeting-reviews'] });
+      toast.success(t('meetings.review.submit'));
       setOutcome(null);
       setNote('');
       onClose();
@@ -54,35 +73,51 @@ export function PostConnectionReview({ visible, onClose, meetingId }: Props) {
 
   return (
     <BottomSheet visible={visible} onClose={onClose} testID="post-connection-review">
-      <Text className="font-display-bold text-[16px] text-navy mb-1">
+      <Text className="font-display-bold text-display-md text-navy mb-1">
         {t('meetings.review.title')}
       </Text>
-      <Text className="font-body text-[12px] text-muted mb-3">
+      <Text className="font-body text-body-md text-muted mb-3">
         {t('meetings.review.subtitle')}
       </Text>
 
       <View className="gap-2 mb-3">
-        <Button
-          testID="review-outcome-useful"
-          variant={outcome === 'useful' ? 'primary' : 'outline'}
-          onPress={() => pick('useful')}
-        >
-          {t('meetings.review.useful')}
-        </Button>
-        <Button
-          testID="review-outcome-not_useful"
-          variant={outcome === 'not_useful' ? 'primary' : 'outline'}
-          onPress={() => pick('not_useful')}
-        >
-          {t('meetings.review.notUseful')}
-        </Button>
-        <Button
-          testID="review-outcome-no_show"
-          variant={outcome === 'no_show' ? 'danger' : 'outline'}
-          onPress={() => pick('no_show')}
-        >
-          {t('meetings.review.noShow')}
-        </Button>
+        {OUTCOMES.map((opt) => {
+          const active = outcome === opt.value;
+          // Picked-state styling: destructive options use the danger palette
+          // when active so the user gets clear feedback that "no-show" carries
+          // weight; the others use the standard primary navy.
+          const containerCls = active
+            ? opt.destructive
+              ? 'bg-danger-bg border-danger-border'
+              : 'bg-navy border-navy'
+            : 'bg-white border-border';
+          const textCls = active
+            ? opt.destructive
+              ? 'text-danger-text'
+              : 'text-white'
+            : 'text-body';
+          const iconColor = active
+            ? opt.destructive
+              ? colors.danger
+              : colors.white
+            : colors.navy;
+          return (
+            <Pressable
+              key={opt.value}
+              testID={`review-outcome-${opt.value}`}
+              onPress={() => pick(opt.value)}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: active }}
+              accessibilityLabel={t(opt.labelKey)}
+              className={`flex-row items-center gap-2 border rounded-xl px-card-lg py-3 ${containerCls}`}
+            >
+              <opt.icon size={18} color={iconColor} />
+              <Text className={`font-display-semibold text-display-sm ${textCls}`}>
+                {t(opt.labelKey)}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       <Input
@@ -95,7 +130,10 @@ export function PostConnectionReview({ visible, onClose, meetingId }: Props) {
         maxLength={1000}
       />
       {error ? (
-        <Text testID="review-error" className="text-danger-text text-[11px] mb-2 font-body">
+        <Text
+          testID="review-error"
+          className="font-body text-body-sm text-danger-text mb-2 mt-1"
+        >
           {error}
         </Text>
       ) : null}

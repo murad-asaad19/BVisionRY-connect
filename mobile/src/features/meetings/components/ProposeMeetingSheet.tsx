@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, ScrollView, Pressable } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useProposeMeeting } from '~/features/meetings/hooks/useProposeMeeting';
 import { SlotsSchema, DurationSchema, MeetingUrlSchema } from '~/features/meetings/schemas';
@@ -7,7 +7,8 @@ import { DateTimeField } from './DateTimeField';
 import { BottomSheet } from '~/components/ui/Modal';
 import { Button } from '~/components/ui/Button';
 import { Input } from '~/components/ui/Input';
-import { Pill } from '~/components/ui/Pill';
+import { FilterChip } from '~/components/ui/FilterChip';
+import { useToast } from '~/components/ui/Toast';
 
 type Props = {
   visible: boolean;
@@ -20,6 +21,7 @@ const DURATIONS = [15, 30, 45, 60, 90, 120];
 
 export function ProposeMeetingSheet({ visible, conversationId, onClose, onSent }: Props) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [slot1, setSlot1] = useState('');
   const [slot2, setSlot2] = useState('');
   const [slot3, setSlot3] = useState('');
@@ -45,8 +47,8 @@ export function ProposeMeetingSheet({ visible, conversationId, onClose, onSent }
     const seen = new Set<string>();
     const slots: string[] = [];
     for (const s of slotsRaw) {
-      const t = Date.parse(s);
-      const key = Number.isNaN(t) ? s : new Date(t).toISOString();
+      const ts = Date.parse(s);
+      const key = Number.isNaN(ts) ? s : new Date(ts).toISOString();
       if (seen.has(key)) continue;
       seen.add(key);
       slots.push(s);
@@ -82,6 +84,7 @@ export function ProposeMeetingSheet({ visible, conversationId, onClose, onSent }
         meetingUrl: urlParsed.data ?? null,
         timezone,
       });
+      toast.success(t('meetings.statusProposed'));
       reset();
       onSent();
     } catch (e) {
@@ -91,11 +94,11 @@ export function ProposeMeetingSheet({ visible, conversationId, onClose, onSent }
 
   return (
     <BottomSheet visible={visible} onClose={onClose} testID="propose-meeting-sheet">
-      <ScrollView>
-        <Text className="font-display-bold text-[16px] text-navy mb-1">
+      <ScrollView keyboardShouldPersistTaps="handled">
+        <Text className="font-display-bold text-display-md text-navy mb-1">
           {t('meetings.propose.title')}
         </Text>
-        <Text className="font-body text-[12px] text-muted mb-3">
+        <Text className="font-body text-body-md text-muted mb-3">
           {t('meetings.propose.subtitle')}
         </Text>
 
@@ -118,22 +121,18 @@ export function ProposeMeetingSheet({ visible, conversationId, onClose, onSent }
           label={t('meetings.propose.slot3Label')}
         />
 
-        <Text className="font-display-semibold text-[10px] text-muted uppercase tracking-wide mb-1.5 mt-1">
+        <Text className="font-display-semibold text-body-xs text-muted uppercase tracking-wide mb-1.5 mt-1">
           {t('meetings.propose.durationLabel')}
         </Text>
         <View className="flex-row flex-wrap gap-2 mb-3">
           {DURATIONS.map((d) => (
-            <Pressable
+            <FilterChip
               key={d}
               testID={`propose-duration-${d}`}
+              active={duration === d}
               onPress={() => setDuration(d)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: duration === d }}
-            >
-              <Pill variant={duration === d ? 'solid' : 'outline'}>
-                {t('meetings.propose.durationOption', { minutes: d })}
-              </Pill>
-            </Pressable>
+              label={t('meetings.propose.durationOption', { minutes: d })}
+            />
           ))}
         </View>
 
@@ -148,7 +147,10 @@ export function ProposeMeetingSheet({ visible, conversationId, onClose, onSent }
         />
 
         {error && (
-          <Text testID="propose-error" className="text-danger-text mb-3">
+          <Text
+            testID="propose-error"
+            className="font-body text-body-sm text-danger-text mb-3"
+          >
             {error}
           </Text>
         )}

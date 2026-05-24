@@ -1,15 +1,22 @@
 import { useState } from 'react';
-import { View, Text, Alert, Platform } from 'react-native';
+import { View, Text, Pressable, Platform } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { ChevronDown, ChevronRight } from 'lucide-react-native';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { deleteMyAccount, exportMyData } from '~/features/settings/services/settings.service';
 import { Button } from '~/components/ui/Button';
+import { useConfirm } from '~/components/ui/ConfirmDialog';
+import { useToast } from '~/components/ui/Toast';
+import { colors } from '~/theme/colors';
 
 export function AccountSection() {
   const { t } = useTranslation();
+  const confirm = useConfirm();
+  const toast = useToast();
   const [exporting, setExporting] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const onExport = async () => {
     setExporting(true);
@@ -27,9 +34,10 @@ export function AccountSection() {
           a.download = 'my-data.json';
           a.click();
           URL.revokeObjectURL(url);
+          toast.success(t('settings.exportReady'));
           return;
         }
-        Alert.alert(t('settings.exportReady'), t('settings.exportReadyBody', { chars: json.length }));
+        toast.info(t('settings.exportReadyBody', { chars: json.length }));
         return;
       }
 
@@ -43,10 +51,10 @@ export function AccountSection() {
           UTI: 'public.json',
         });
       } else {
-        Alert.alert(t('settings.exportReady'), t('settings.exportReadyBody', { chars: json.length }));
+        toast.info(t('settings.exportReadyBody', { chars: json.length }));
       }
     } catch (e) {
-      Alert.alert(t('settings.exportFailed'), (e as Error).message);
+      toast.error(`${t('settings.exportFailed')}: ${(e as Error).message}`);
     } finally {
       setExporting(false);
     }
@@ -55,14 +63,31 @@ export function AccountSection() {
   const del = useMutation({
     mutationFn: deleteMyAccount,
     onSuccess: () => {
-      Alert.alert(t('settings.accountDeletedTitle'), t('settings.accountDeletedBody'));
+      toast.success(t('settings.accountDeletedTitle'));
     },
-    onError: (e) => Alert.alert(t('settings.deleteFailed'), (e as Error).message),
+    onError: (e) => toast.error(`${t('settings.deleteFailed')}: ${(e as Error).message}`),
   });
+
+  const onDelete = () => {
+    confirm({
+      title: t('settings.deleteConfirm.title'),
+      body: t('settings.deleteConfirm.body'),
+      confirmLabel: t('settings.deleteConfirm.action'),
+      cancelLabel: t('settings.deleteConfirm.cancel'),
+      destructive: true,
+      onConfirm: () =>
+        new Promise<void>((resolve, reject) => {
+          del.mutate(undefined, {
+            onSuccess: () => resolve(),
+            onError: (e) => reject(e),
+          });
+        }),
+    });
+  };
 
   return (
     <View className="mt-6">
-      <Text className="font-display-semibold text-muted text-xs uppercase tracking-wide mb-2">
+      <Text className="font-display-semibold text-muted text-display-xs uppercase tracking-wide mb-2">
         {t('settings.account')}
       </Text>
       <View className="mb-3">
@@ -70,22 +95,39 @@ export function AccountSection() {
           {t('settings.exportData')}
         </Button>
       </View>
-      <Button
-        testID="account-delete"
-        variant="danger"
-        onPress={() =>
-          Alert.alert(t('settings.deleteConfirm.title'), t('settings.deleteConfirm.body'), [
-            { text: t('settings.deleteConfirm.cancel'), style: 'cancel' },
-            {
-              text: t('settings.deleteConfirm.action'),
-              style: 'destructive',
-              onPress: () => del.mutate(),
-            },
-          ])
-        }
+
+      {/* Advanced disclosure — keeps the destructive Delete account action out of */}
+      {/* casual eyesight per P2-10 / audit feedback. Tap chevron to reveal. */}
+      <Pressable
+        testID="account-advanced-toggle"
+        onPress={() => setAdvancedOpen((v) => !v)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: advancedOpen }}
+        accessibilityLabel={t('settings.advanced')}
+        className="flex-row items-center justify-between py-2 px-1 active:opacity-70"
       >
-        {t('settings.deleteAccount')}
-      </Button>
+        <Text className="font-display-semibold text-body-md text-muted uppercase tracking-wide">
+          {t('settings.advanced')}
+        </Text>
+        {advancedOpen ? (
+          <ChevronDown size={16} color={colors.muted} />
+        ) : (
+          <ChevronRight size={16} color={colors.muted} />
+        )}
+      </Pressable>
+
+      {advancedOpen ? (
+        <View testID="account-advanced-panel" className="mt-1">
+          <Button
+            testID="account-delete"
+            variant="outline-danger"
+            onPress={onDelete}
+            loading={del.isPending}
+          >
+            {t('settings.deleteAccount')}
+          </Button>
+        </View>
+      ) : null}
     </View>
   );
 }

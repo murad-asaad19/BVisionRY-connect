@@ -12,7 +12,7 @@ export function ThinPoolBanner({ count }: Props) {
   const n = count ?? 0;
   // i18next's `count` interpolation resolves to `_one` / `_other` automatically.
   return (
-    <View testID="thin-pool-banner" className="mx-3 my-2">
+    <View testID="thin-pool-banner" className="mx-gutter my-2">
       <Banner variant="muted">{t('discovery.thinPoolBanner', { count: n })}</Banner>
     </View>
   );

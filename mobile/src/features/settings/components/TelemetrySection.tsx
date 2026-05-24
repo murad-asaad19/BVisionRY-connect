@@ -11,15 +11,15 @@ export function TelemetrySection() {
 
   return (
     <View className="mt-6">
-      <Text className="text-muted text-xs uppercase tracking-wide mb-2">
+      <Text className="font-display-semibold text-muted text-display-xs uppercase tracking-wide mb-2">
         {t('settings.telemetry')}
       </Text>
       <View className="flex-row items-center justify-between py-2">
-        <Text className="text-body">{t('settings.analytics')}</Text>
+        <Text className="font-body text-body-lg text-body">{t('settings.analytics')}</Text>
         <Switch testID="pref-analytics" value={analyticsEnabled} onValueChange={setAnalytics} />
       </View>
       <View className="flex-row items-center justify-between py-2">
-        <Text className="text-body">{t('settings.crashReports')}</Text>
+        <Text className="font-body text-body-lg text-body">{t('settings.crashReports')}</Text>
         <Switch
           testID="pref-crash-reports"
           value={crashReportsEnabled}

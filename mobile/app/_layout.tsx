@@ -11,10 +11,12 @@ import {
   Dosis_800ExtraBold,
 } from '@expo-google-fonts/dosis';
 import {
-  useFonts as useOverlock,
-  Overlock_400Regular,
-  Overlock_700Bold,
-} from '@expo-google-fonts/overlock';
+  useFonts as useInter,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
 import { Sentry, initSentry, SentryErrorBoundary } from '~/lib/sentry';
 import { initFirebase } from '~/lib/firebase';
 import { initI18n } from '~/lib/i18n';
@@ -23,6 +25,8 @@ import { queryClient } from '~/lib/query-client';
 import { useRegisterFcmToken } from '~/features/push/hooks/useRegisterFcmToken';
 import { useNotificationTapHandler } from '~/features/push/hooks/useNotificationTapHandler';
 import { PushToast } from '~/features/push/components/PushToast';
+import { ConfirmProvider } from '~/components/ui/ConfirmDialog';
+import { ToastHost } from '~/components/ui/Toast';
 import { useTelemetryStore } from '~/features/settings/store/telemetryStore';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -41,9 +45,11 @@ function RootLayout() {
     Dosis_700Bold,
     Dosis_800ExtraBold,
   });
-  const [overlockLoaded] = useOverlock({
-    Overlock_400Regular,
-    Overlock_700Bold,
+  const [interLoaded] = useInter({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
   });
 
   // GDPR opt-out gate: `initSentry()` and `initFirebase()` read
@@ -75,7 +81,7 @@ function RootLayout() {
     };
   }, []);
 
-  const ready = dosisLoaded && overlockLoaded && telemetryReady;
+  const ready = dosisLoaded && interLoaded && telemetryReady;
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync().catch(() => {});
@@ -87,9 +93,15 @@ function RootLayout() {
     <SentryErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <SessionProvider>
-          <PushBootstrap />
-          <PushToast />
-          <Stack screenOptions={{ headerShown: false }} />
+          <ConfirmProvider>
+            <PushBootstrap />
+            <Stack screenOptions={{ headerShown: false }} />
+            {/* Top-anchored notification surfaces. Order: PushToast (FCM
+                foreground) below ToastHost (in-app) so in-app feedback wins
+                z-order when both fire at once. */}
+            <PushToast />
+            <ToastHost />
+          </ConfirmProvider>
         </SessionProvider>
       </QueryClientProvider>
     </SentryErrorBoundary>

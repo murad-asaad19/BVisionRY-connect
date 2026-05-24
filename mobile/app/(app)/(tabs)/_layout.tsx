@@ -3,15 +3,24 @@ import { useMemo } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import {
+  Home,
+  Inbox as InboxIcon,
+  Users,
+  Briefcase,
+  MessageSquare,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { useUnreadIntros } from '~/features/intros/hooks/useUnreadIntros';
 import { useUnreadCounts } from '~/features/chat/hooks/useUnreadCounts';
+import { colors } from '~/theme/colors';
 
-const ICONS: Record<string, string> = {
-  home: '🏠',
-  inbox: '📬',
-  network: '🤝',
-  opportunities: '💼',
-  chats: '💬',
+const ICONS: Record<string, LucideIcon> = {
+  home: Home,
+  inbox: InboxIcon,
+  network: Users,
+  opportunities: Briefcase,
+  chats: MessageSquare,
 };
 
 type TabBadgeMap = Record<string, number | undefined>;
@@ -23,13 +32,29 @@ function CustomTabBar({
 }: BottomTabBarProps & { badges: TabBadgeMap }) {
   const { t } = useTranslation();
   return (
-    <View className="bg-white border-t border-border flex-row justify-around py-2">
+    // NativeWind v5 preview occasionally fails to compile layout-critical
+    // utilities on the web target, leaving the tab bar stacked vertically
+    // and the page content empty. Belt-and-suspenders: inline `style` for
+    // the flex direction + background so the layout is correct regardless
+    // of whether NativeWind's web compilation produces the matching CSS.
+    <View
+      className="bg-white border-t border-border flex-row justify-around py-2"
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        paddingVertical: 8,
+        backgroundColor: colors.white,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+      }}
+    >
       {state.routes.map((route, i) => {
         const focused = state.index === i;
-        const icon = ICONS[route.name] ?? '·';
+        const Icon = ICONS[route.name];
         const label = t(`nav.tabs.${route.name}`, { defaultValue: route.name });
         const badgeCount = badges[route.name];
         const showBadge = typeof badgeCount === 'number' && badgeCount > 0;
+        const tint = focused ? colors.navy : colors.muted;
         return (
           <Pressable
             key={route.key}
@@ -45,32 +70,34 @@ function CustomTabBar({
             accessibilityLabel={label}
             accessibilityState={{ selected: focused }}
             className="items-center flex-1"
+            style={{ flex: 1, alignItems: 'center' }}
           >
             <View>
-              <Text
-                accessibilityElementsHidden={true}
-                importantForAccessibility="no-hide-descendants"
-                className={`text-[18px] ${focused ? 'text-navy' : 'text-muted'}`}
-              >
-                {icon}
-              </Text>
+              {Icon ? (
+                <Icon
+                  size={20}
+                  color={tint}
+                  accessibilityElementsHidden
+                  importantForAccessibility="no-hide-descendants"
+                />
+              ) : null}
               {showBadge && (
                 <View
-                  // 16px red circle anchored top-right of the icon, with the
-                  // count rendered inside. Hidden from a11y because the count
-                  // is communicated via the parent Pressable's label.
+                  // Brand-gold dot anchored top-right of the icon, with the
+                  // count rendered inside in navy. Hidden from a11y because
+                  // the count is communicated via the parent Pressable's label.
                   accessibilityElementsHidden={true}
                   importantForAccessibility="no-hide-descendants"
-                  className="absolute -top-1 -right-3 min-w-[16px] h-[16px] rounded-full bg-danger-border items-center justify-center px-1"
+                  className="absolute -top-1 -right-2.5 min-w-[16px] h-[16px] rounded-full bg-gold items-center justify-center px-1"
                 >
-                  <Text className="text-white text-[10px] font-display-bold">
+                  <Text className="text-navy text-body-xs font-display-bold">
                     {badgeCount > 99 ? '99+' : badgeCount}
                   </Text>
                 </View>
               )}
             </View>
             <Text
-              className={`font-display-bold text-[10px] mt-0.5 ${
+              className={`font-display-bold text-body-xs mt-0.5 ${
                 focused ? 'text-navy' : 'text-muted'
               }`}
             >

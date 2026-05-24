@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Modal, View, Text, Alert } from 'react-native';
+import { Modal, View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useReportTarget } from '~/features/privacy/hooks/useReportTarget';
 import { Button } from '~/components/ui/Button';
 import { Input } from '~/components/ui/Input';
+import { useToast } from '~/components/ui/Toast';
 import type { ReportReason, ReportTargetType } from '~/features/privacy/services/privacy.service';
 
 const REASON_VALUES: ReportReason[] = [
@@ -25,8 +26,10 @@ type Props = {
 
 export function ReportModal({ visible, targetType, targetId, messageBody, onClose }: Props) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [reason, setReason] = useState<ReportReason | null>(null);
   const [note, setNote] = useState('');
+  const [validationError, setValidationError] = useState<string | null>(null);
   const report = useReportTarget();
 
   return (
@@ -34,7 +37,7 @@ export function ReportModal({ visible, targetType, targetId, messageBody, onClos
       <View className="flex-1 justify-end bg-navy/50">
         <View testID="report-modal" className="bg-white rounded-t-3xl p-5">
           <View className="self-center w-9 h-1 bg-border rounded-full mb-3" />
-          <Text className="font-display-bold text-[16px] text-navy mb-3">
+          <Text className="font-display-bold text-display-md text-navy mb-3">
             {t('privacy.reportModal.title')}
           </Text>
 
@@ -43,10 +46,10 @@ export function ReportModal({ visible, targetType, targetId, messageBody, onClos
               testID="report-quoted-message"
               className="border-l-4 border-danger-text bg-slate-100 rounded-r-[10px] px-3 py-2 mb-3"
             >
-              <Text className="font-display-bold text-[10px] uppercase tracking-wide text-muted mb-0.5">
+              <Text className="font-display-bold text-body-xs uppercase tracking-wide text-muted mb-0.5">
                 {t('privacy.reportModal.quoted')}
               </Text>
-              <Text className="font-body text-[12px] text-body leading-snug" numberOfLines={4}>
+              <Text className="font-body text-body-md text-body leading-snug" numberOfLines={4}>
                 {messageBody}
               </Text>
             </View>
@@ -58,7 +61,10 @@ export function ReportModal({ visible, targetType, targetId, messageBody, onClos
                 key={value}
                 testID={`report-reason-${value}`}
                 variant={reason === value ? 'primary' : 'outline'}
-                onPress={() => setReason(value)}
+                onPress={() => {
+                  setReason(value);
+                  if (validationError) setValidationError(null);
+                }}
               >
                 {t(`privacy.reportModal.reasons.${value}`)}
               </Button>
@@ -76,6 +82,15 @@ export function ReportModal({ visible, targetType, targetId, messageBody, onClos
             maxLength={1000}
           />
 
+          {validationError ? (
+            <Text
+              testID="report-validation-error"
+              className="font-body text-body-sm text-danger-text mt-2"
+            >
+              {validationError}
+            </Text>
+          ) : null}
+
           <View className="flex-row gap-2 mt-2">
             <View className="flex-1">
               <Button testID="report-cancel" variant="outline" onPress={onClose}>
@@ -89,26 +104,21 @@ export function ReportModal({ visible, targetType, targetId, messageBody, onClos
                 loading={report.isPending}
                 onPress={() => {
                   if (!reason) {
-                    Alert.alert(
-                      t('privacy.reportModal.pickReasonTitle'),
-                      t('privacy.reportModal.pickReasonBody')
-                    );
+                    setValidationError(t('privacy.reportModal.pickReasonBody'));
                     return;
                   }
+                  setValidationError(null);
                   report.mutate(
                     { targetType, targetId, reason, note: note.trim() || null },
                     {
                       onSuccess: () => {
-                        Alert.alert(
-                          t('privacy.reportModal.sentTitle'),
-                          t('privacy.reportModal.sentBody')
-                        );
+                        toast.success(t('privacy.reportModal.sentBody'));
                         setNote('');
                         setReason(null);
                         onClose();
                       },
                       onError: (e) =>
-                        Alert.alert(t('privacy.reportModal.failedTitle'), (e as Error).message),
+                        toast.error(`${t('privacy.reportModal.failedTitle')}: ${(e as Error).message}`),
                     }
                   );
                 }}

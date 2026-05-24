@@ -60,7 +60,11 @@ export function IdentityStep() {
   };
 
   return (
-    <StepperLayout currentIndex={1} title={t('onboarding.identity.title')}>
+    <StepperLayout
+      currentIndex={1}
+      title={t('onboarding.identity.title')}
+      stepName={t('onboarding.stepName.identity')}
+    >
       <View>
         <Controller
           control={control}
@@ -95,7 +99,7 @@ export function IdentityStep() {
           )}
         />
 
-        <Text className="font-body text-[10px] text-muted leading-snug mt-1 mb-4">
+        <Text className="font-body text-body-xs text-muted leading-snug mt-1 mb-4">
           {t('onboarding.identity.handleHint')}
         </Text>
 

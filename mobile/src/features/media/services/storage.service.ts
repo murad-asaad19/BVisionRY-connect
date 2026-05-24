@@ -2,17 +2,25 @@ import { supabase } from '~/lib/supabase/client';
 import { mimeFor } from '~/features/media/services/media.constants';
 
 /**
+ * Body accepted by `bucket.upload`. We require Uint8Array on React Native
+ * because the polyfilled Blob is a lazy URI wrapper that XHR uploads as
+ * zero bytes; Blob is still accepted for web call sites that already have
+ * one in hand.
+ */
+export type UploadBody = Uint8Array | Blob;
+
+/**
  * Upload an avatar to the public `avatars` bucket. We use a stable filename
  * (`{userId}/avatar.{ext}`) with `upsert: true` so we never accumulate
  * per-timestamp files. The returned URL has `?v=<now>` appended so clients
  * that previously cached the old image bust their cache.
  */
-export async function uploadAvatar(userId: string, blob: Blob, ext: string): Promise<string> {
+export async function uploadAvatar(userId: string, body: UploadBody, ext: string): Promise<string> {
   const safeExt = ext.toLowerCase();
   const path = `${userId}/avatar.${safeExt}`;
   const contentType = mimeFor(safeExt);
   const bucket = supabase.storage.from('avatars');
-  const { error } = await bucket.upload(path, blob, { contentType, upsert: true });
+  const { error } = await bucket.upload(path, body, { contentType, upsert: true });
   if (error) throw new Error(error.message);
   const { data } = bucket.getPublicUrl(path);
   // Cache-bust to defeat the device-level image cache after re-upload.
@@ -30,7 +38,7 @@ export async function uploadAvatar(userId: string, blob: Blob, ext: string): Pro
 export async function uploadChatMedia(
   conversationId: string,
   messageId: string,
-  blob: Blob,
+  body: UploadBody,
   ext: string,
   contentType: string,
   filename = `media.${ext}`
@@ -38,7 +46,7 @@ export async function uploadChatMedia(
   const safeExt = ext.toLowerCase();
   const path = `${conversationId}/${messageId}/${filename.endsWith(`.${safeExt}`) ? filename : `media.${safeExt}`}`;
   const bucket = supabase.storage.from('chat-media');
-  const { error } = await bucket.upload(path, blob, { contentType });
+  const { error } = await bucket.upload(path, body, { contentType });
   if (error) throw new Error(error.message);
   return path;
 }

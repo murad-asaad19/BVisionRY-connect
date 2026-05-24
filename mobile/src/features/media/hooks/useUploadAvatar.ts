@@ -15,7 +15,7 @@ export function useUploadAvatar() {
       const picked = await pickImage({ aspect: [1, 1] });
       if (!picked) return null;
       try {
-        const publicUrl = await uploadAvatar(userId, picked.blob, picked.ext);
+        const publicUrl = await uploadAvatar(userId, picked.bytes, picked.ext);
         const { error } = await supabase
           .from('profiles')
           .update({ photo_url: publicUrl })

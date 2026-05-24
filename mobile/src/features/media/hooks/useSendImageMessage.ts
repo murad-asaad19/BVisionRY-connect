@@ -34,7 +34,7 @@ export function useSendImageMessage(conversationId: string) {
       const path = await uploadChatMedia(
         conversationId,
         messageId,
-        picked.blob,
+        picked.bytes,
         ext,
         IMAGE_MIME.jpg,
         `${messageId}.${ext}`
@@ -51,7 +51,7 @@ export function useSendImageMessage(conversationId: string) {
             p_conversation_id: conversationId,
             p_media_path: path,
             p_media_mime: IMAGE_MIME.jpg,
-            p_media_size_bytes: picked.blob.size,
+            p_media_size_bytes: picked.size,
           }
         );
         if (error) throw new Error(error.message);

@@ -60,7 +60,16 @@ function wrapWithClient(qc: QueryClient) {
 }
 
 const CONV_ID = 'conv-1';
-const picked = { uri: 'file:///tmp/img.jpg', ext: 'jpg' as const, blob: { size: 12345 } as Blob };
+// `pickImage` now returns raw bytes (Uint8Array) instead of a lazy Blob — the
+// blob path uploaded as 0 bytes on React Native via XHR. See useSendImageMessage.
+const picked = {
+  uri: 'file:///tmp/img.jpg',
+  width: 1200,
+  height: 1200,
+  bytes: new Uint8Array(12345),
+  size: 12345,
+  ext: 'jpg' as const,
+};
 
 describe('useSendImageMessage', () => {
   let qc: QueryClient;
@@ -88,7 +97,7 @@ describe('useSendImageMessage', () => {
     expect(mockUploadChatMedia).toHaveBeenCalledWith(
       CONV_ID,
       'msg-uuid-1',
-      picked.blob,
+      picked.bytes,
       'jpg',
       'image/jpeg',
       'msg-uuid-1.jpg'

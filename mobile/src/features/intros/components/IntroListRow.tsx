@@ -22,7 +22,7 @@ export function IntroListRow({ intro, counterpart, onPress, audience = 'recipien
     <Pressable
       testID={`intro-row-${intro.id}`}
       onPress={onPress}
-      className="flex-row items-start bg-white border border-border rounded-xl px-4 py-3 mx-6 mb-3"
+      className="flex-row items-start bg-white border border-border rounded-xl px-card-lg py-3 mx-gutter mb-3 active:opacity-80"
     >
       <AvatarCircle
         name={counterpart?.name ?? '?'}
@@ -31,7 +31,7 @@ export function IntroListRow({ intro, counterpart, onPress, audience = 'recipien
       />
       <View className="ml-4 flex-1">
         <View className="flex-row items-center justify-between mb-1">
-          <Text className="text-body font-semibold" numberOfLines={1}>
+          <Text className="font-display-bold text-display-sm text-navy flex-1 mr-2" numberOfLines={1}>
             {counterpart?.name ?? 'Unknown'}
           </Text>
           <IntroStateBadge
@@ -40,12 +40,16 @@ export function IntroListRow({ intro, counterpart, onPress, audience = 'recipien
             expiresAt={intro.expires_at}
           />
         </View>
-        <Text className="text-muted text-xs" numberOfLines={1}>
+        <Text className="font-body text-body-sm text-muted" numberOfLines={1}>
           @{counterpart?.handle ?? '?'}
         </Text>
         {/* Two-line note preview — let RN do the ellipsis instead of slicing
             characters (which mishandles multi-byte/emoji and trims at code units). */}
-        <Text className="text-muted text-sm mt-1" numberOfLines={2} ellipsizeMode="tail">
+        <Text
+          className="font-body text-body-md text-muted mt-1"
+          numberOfLines={2}
+          ellipsizeMode="tail"
+        >
           {intro.note}
         </Text>
       </View>

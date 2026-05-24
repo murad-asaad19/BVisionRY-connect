@@ -265,7 +265,11 @@ function mapInterestedRow(r: InterestedRow): InterestedUser {
 // =============================================================================
 // RPCs.
 // =============================================================================
-const rpc = supabase.rpc as unknown as <T, A extends Record<string, unknown>>(
+// IMPORTANT: must use `.bind(supabase)` — without it the call site sees
+// `this === undefined` and supabase-js throws "Cannot read properties of
+// undefined (reading 'rest')". A bare `const rpc = supabase.rpc` aliases the
+// method but drops the receiver.
+const rpc = supabase.rpc.bind(supabase) as unknown as <T, A extends Record<string, unknown>>(
   fn: string,
   args: A
 ) => Promise<{ data: T | null; error: { code?: string | null; message?: string | null } | null }>;

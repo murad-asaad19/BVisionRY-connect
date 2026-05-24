@@ -13,10 +13,16 @@ export function Card({ variant = 'default', onPress, children, testID }: Props) 
     variant === 'featured'
       ? 'bg-gold-pale border-[1.5px] border-gold'
       : 'bg-white border border-border';
-  const className = `rounded-[14px] p-3 ${base}`;
+  const className = `rounded-[14px] p-card ${base}`;
   if (onPress) {
     return (
-      <Pressable testID={testID} onPress={onPress} className={className}>
+      <Pressable
+        testID={testID}
+        onPress={onPress}
+        accessibilityRole="button"
+        // Tactile press feedback — fixes the "did my tap register?" gap.
+        className={`${className} active:opacity-70`}
+      >
         {children}
       </Pressable>
     );

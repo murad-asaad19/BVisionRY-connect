@@ -1,9 +1,30 @@
-@import 'tailwindcss/theme.css' layer(theme);
-@import 'tailwindcss/preflight.css' layer(base);
-@import 'tailwindcss/utilities.css';
-@import 'nativewind/theme';
+/* Tailwind v4 puts everything inside `@layer utilities` by default. CSS
+   cascade layers ALWAYS lose to unlayered declarations (regardless of
+   selector specificity), and react-native-web injects its atomic styles
+   (`.css-view-*`, `.r-flex-*`) UNLAYERED — so any default `@import "tailwindcss"`
+   form leaves Tailwind utilities permanently overridden by RNW.
+
+   Fix: declare the layer order, layer only theme + base + components, and
+   import utilities WITHOUT a layer wrapper so they sit at the top of the
+   cascade and win against RNW's unlayered classes.
+
+   Refs:
+   - https://tailwindcss.com/docs/upgrade-guide#cascade-layers
+   - https://github.com/tailwindlabs/tailwindcss/discussions/13188 */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+@import "nativewind/theme";
+
+/* Tailwind v4 is CSS-first: source detection lives in @source directives,
+   NOT in tailwind.config.js's content array. Without these, the generated
+   stylesheet contains @theme tokens but ZERO utility classes. */
+@source "./app/**/*.{js,jsx,ts,tsx}";
+@source "./src/**/*.{js,jsx,ts,tsx}";
 
 @theme {
+  /* ── Brand colours ─────────────────────────────────────────────────── */
   --color-navy: #0f3460;
   --color-navy-light: #1a4a80;
   --color-navy-dark: #0a2340;
@@ -36,6 +57,39 @@
   --color-info-text: #1d4ed8;
   --color-info-border: #93c5fd;
 
-  --font-display: 'Dosis_700Bold';
-  --font-body: 'Overlock_400Regular';
+  /* ── Typography scale (P1-1) ───────────────────────────────────────── */
+  /* Display = Dosis (UI chrome). Body = Inter (paragraphs + UI text).   */
+  /* Pair px size with a sensible line-height so consumers don't guess.  */
+  --text-display-xl: 28px;
+  --text-display-xl--line-height: 34px;
+  --text-display-lg: 20px;
+  --text-display-lg--line-height: 26px;
+  --text-display-md: 16px;
+  --text-display-md--line-height: 22px;
+  --text-display-sm: 13px;
+  --text-display-sm--line-height: 18px;
+  --text-display-xs: 11px;
+  --text-display-xs--line-height: 14px;
+
+  --text-body-lg: 14px;
+  --text-body-lg--line-height: 20px;
+  --text-body-md: 12px;
+  --text-body-md--line-height: 18px;
+  --text-body-sm: 11px;
+  --text-body-sm--line-height: 15px;
+  --text-body-xs: 10px;
+  --text-body-xs--line-height: 13px;
+
+  /* ── Spacing scale (P1-2) ──────────────────────────────────────────── */
+  /* Multiples of 4: gutter=16, card-pad=12, card-lg=16, section=24      */
+  --spacing-gutter: 16px;
+  --spacing-card: 12px;
+  --spacing-card-lg: 16px;
+  --spacing-section: 24px;
+
+  /* ── Fonts ─────────────────────────────────────────────────────────── */
+  /* Display = Dosis 700 (brand wordmarks, screen titles, eyebrows).     */
+  /* Body = Inter (modern, readable, professional — replaces Overlock).  */
+  --font-display: "Dosis_700Bold";
+  --font-body: "Inter_400Regular";
 }

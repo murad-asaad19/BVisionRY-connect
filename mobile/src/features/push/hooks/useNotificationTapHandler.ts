@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useNextRoute } from '~/features/auth/hooks/useNextRoute';
+import { env } from '~/lib/env';
 import {
   resolveNotificationRoute,
   type PushDataLike,
@@ -45,6 +46,11 @@ export function useNotificationTapHandler() {
   // Subscribe to native messaging events and stash any URL we receive.
   useEffect(() => {
     if (Platform.OS === 'web') return;
+    // Firebase disabled (Expo Go or dev shells without GoogleService files):
+    // loading @react-native-firebase/messaging would trigger the native
+    // RNFBAppModule lookup, which throws when the native modules aren't
+    // bundled — surface no-op cleanly.
+    if (!env.FIREBASE_ENABLED) return;
 
     let cancelled = false;
     let unsub: (() => void) | undefined;

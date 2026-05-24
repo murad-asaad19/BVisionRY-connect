@@ -34,6 +34,7 @@
     "signInCta": "Inicia sesión",
     "forgotPassword": "¿Olvidaste tu contraseña?",
     "forgotPasswordBody": "Escribe tu correo y toca \"Enviar enlace mágico\" abajo.",
+    "forgotPwdInstructions": "Escribe tu correo arriba y toca \"Enviar enlace mágico\" — te enviaremos un enlace de inicio de sesión con un toque.",
     "errors": {
       "socialSignInTitle": "No se pudo iniciar sesión",
       "oauthCancelled": "Inicio de sesión cancelado",
@@ -94,6 +95,7 @@
     "analytics": "Analítica",
     "crashReports": "Informes de errores",
     "about": "Acerca de",
+    "advanced": "Avanzado",
     "deleteConfirm": {
       "title": "¿Eliminar la cuenta?",
       "body": "Esto eliminará permanentemente tu perfil y tus datos. Esta acción no se puede deshacer.",
@@ -148,6 +150,13 @@
     }
   },
   "onboarding": {
+    "stepLabel": "Paso {{current}} de {{total}} · {{stepName}}",
+    "stepName": {
+      "goal": "Objetivo",
+      "identity": "Identidad",
+      "roles": "Roles",
+      "about": "Acerca de"
+    },
     "goal": {
       "title": "¿Cuál es tu objetivo?",
       "label": "Objetivo",
@@ -322,7 +331,8 @@
     "empty": "Aún no tienes conexiones. Acepta una intro para empezar."
   },
   "common": {
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "ok": "OK"
   },
   "intros": {
     "inboxTitle": "Bandeja de entrada",
@@ -363,6 +373,7 @@
       "awaitingResponse": "Entregada, esperando respuesta"
     },
     "detail": {
+      "title": "Intro",
       "notFound": "Intro no encontrada",
       "back": "Atrás",
       "accepted": "Intro aceptada.",
@@ -413,12 +424,27 @@
     "cancel": "Cancelar",
     "newMessages": "Nuevos mensajes",
     "messageActionsTitle": "Acciones del mensaje",
+    "messageActionsMore": "Más acciones",
+    "noMessages": "Aún no hay mensajes. ¡Saluda!",
     "previewImage": "📷 Foto",
     "previewVoice": "🎤 Mensaje de voz",
-    "previewMeeting": "📅 Propuesta de reunión"
+    "previewMeeting": "📅 Propuesta de reunión",
+    "list": {
+      "title": "Chats",
+      "emptyTitle": "Aún no hay conversaciones",
+      "emptyBody": "Acepta una presentación para empezar a chatear."
+    },
+    "deleteConfirm": {
+      "title": "¿Eliminar mensaje?",
+      "body": "Este mensaje se quitará de la conversación.",
+      "confirm": "Eliminar"
+    }
   },
   "network": {
-    "title": "Red"
+    "title": "Red",
+    "empty": {
+      "title": "Aún no hay conexiones"
+    }
   },
   "nav": {
     "tabs": {
@@ -435,7 +461,8 @@
   "opportunities": {
     "feed": {
       "title": "Oportunidades",
-      "empty": "Ninguna oportunidad coincide con tus filtros.",
+      "emptyTitle": "Aún no hay oportunidades",
+      "empty": "Sé el primero en publicar — comparte qué buscas contratar, recaudar o encontrar.",
       "newCta": "Publicar oportunidad"
     },
     "kind": {
@@ -486,7 +513,11 @@
       "viewInterested_one": "{{count}} interesado",
       "viewInterested_other": "{{count}} interesados",
       "closeCta": "Cerrar oportunidad",
-      "closedBadge": "Cerrada"
+      "closedBadge": "Cerrada",
+      "closeConfirmTitle": "¿Cerrar esta oportunidad?",
+      "closeConfirmBody": "Se ocultará del feed y nadie nuevo podrá mostrar interés.",
+      "closeConfirmCta": "Cerrar",
+      "closeSuccess": "Oportunidad cerrada"
     },
     "interest": {
       "subtitle": "Agrega una nota breve para que sepan qué te llamó la atención.",
@@ -613,6 +644,7 @@
     "thinPoolAction": "Refinar objetivo",
     "emptyPicks": "Aún no hay selecciones — invita a tus amigos para llenar tus coincidencias.",
     "emptyFeed": "Aún no hay nadie por descubrir.",
+    "emptyTitle": "Nadie por descubrir",
     "roles": {
       "founder": "Fundador",
       "leader": "Líder",
@@ -633,6 +665,8 @@
   "meetings": {
     "yourTime": "tu hora",
     "addToCalendar": "Añadir al calendario",
+    "icsDownloadFailed": "No se pudo descargar el archivo de calendario.",
+    "icsSavedTo": "Archivo de calendario guardado en {{path}}",
     "title": "Reunión",
     "titleWith": "Reunión con @{{handle}}",
     "statusConfirmed": "Reunión confirmada",
@@ -657,9 +691,9 @@
     "review": {
       "title": "¿Cómo fue la reunión?",
       "subtitle": "Tu respuesta nos ayuda a mejorar la calidad de las coincidencias. Nota opcional para tus registros.",
-      "useful": "👍 Útil",
-      "notUseful": "😐 No útil",
-      "noShow": "🚫 No se presentó",
+      "useful": "Útil",
+      "notUseful": "No útil",
+      "noShow": "No se presentó",
       "notePlaceholder": "Nota opcional…",
       "pickOutcome": "Selecciona un resultado.",
       "submitFailed": "Error al enviar",
@@ -751,6 +785,10 @@
       "enableHelp": "Otros usuarios pueden reservar un espacio directamente desde tu perfil.",
       "windowsTitle": "Disponibilidad semanal",
       "addWindow": "Agregar bloque",
+      "removeWindow": "Eliminar bloque",
+      "copyHours": "Copiar horario",
+      "copyToWeekdays": "Copiar a días laborables",
+      "copyToAll": "Copiar a todos los días",
       "weekday_0": "Domingo",
       "weekday_1": "Lunes",
       "weekday_2": "Martes",
@@ -759,13 +797,16 @@
       "weekday_5": "Viernes",
       "weekday_6": "Sábado",
       "slotDuration": "Duración de cada espacio",
+      "slotDurationOption": "{{minutes}}m",
       "bufferMinutes": "Espacio entre reuniones (minutos)",
       "maxBookingsPerWeek": "Máximo reservas por semana (por reservante)",
       "meetingLinkLabel": "Plantilla de enlace de reunión",
       "meetingLinkHelp": "Usa {slot_id} para insertar el id del espacio.",
       "notesLabel": "Notas previas",
+      "windowEndAfterStart": "La hora de fin debe ser posterior a la de inicio.",
       "save": "Guardar",
-      "saved": "Guardado"
+      "saved": "Guardado",
+      "saveFailed": "No se pudo guardar la configuración."
     },
     "profile": {
       "bookCta": "Reservar un espacio",
@@ -777,13 +818,22 @@
       "topicLabel": "¿De qué te gustaría hablar?",
       "topicPlaceholder": "Tema (5-280 caracteres)",
       "submit": "Confirmar reserva",
-      "success": "¡Reservado!"
+      "success": "Reserva confirmada"
     },
     "bookings": {
       "title": "Mis reservas",
       "cancel": "Cancelar",
       "cancelConfirm": "¿Cancelar esta reserva?",
-      "empty": "No hay reservas próximas."
+      "cancelConfirmBody": "Se notificará al anfitrión. Puedes reservar otro horario.",
+      "cancelled": "Reserva cancelada",
+      "cancelFailed": "No se pudo cancelar la reserva.",
+      "empty": "No hay reservas próximas.",
+      "emptyTitle": "Aún no hay reservas",
+      "emptyBody": "Abre el perfil de un anfitrión para reservar un espacio.",
+      "loading": "Cargando reservas…",
+      "slotsLoading": "Cargando espacios…",
+      "slotsEmptyTitle": "Sin espacios disponibles",
+      "slotsEmptyBody": "Este anfitrión no tiene huecos libres en las próximas semanas."
     },
     "badge": {
       "label": "Horario disponible"

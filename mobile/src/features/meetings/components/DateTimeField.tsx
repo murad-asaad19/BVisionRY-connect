@@ -2,6 +2,7 @@ import { Platform, TextInput, View, Text, Pressable } from 'react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { colors } from '~/theme/colors';
 
 type Props = {
   value: string;
@@ -30,17 +31,21 @@ function WebDateTimeField({ value, onChange, testID, label }: Props) {
   const webProps = { type: 'datetime-local' } as unknown as object;
   return (
     <View className="mb-3">
-      {label && <Text className="text-muted mb-1 text-sm">{label}</Text>}
+      {label && (
+        <Text className="font-body text-body-md text-muted mb-1">{label}</Text>
+      )}
       <TextInput
         testID={testID}
         value={isoToInputValue(value)}
         onChangeText={(text) => onChange(inputValueToIso(text))}
         placeholder="YYYY-MM-DDTHH:mm"
-        placeholderTextColor="#6B7280"
-        className="bg-white text-body px-4 py-3 rounded-lg border border-border"
+        placeholderTextColor={colors.muted}
+        className="bg-white text-body px-card-lg py-3 rounded-lg border border-border font-body text-body-lg"
         {...webProps}
       />
-      <Text className="text-muted text-[10px] mt-1">{t('meetings.inputTimeZoneHint', { tz })}</Text>
+      <Text className="font-body text-body-xs text-muted mt-1">
+        {t('meetings.inputTimeZoneHint', { tz })}
+      </Text>
     </View>
   );
 }
@@ -79,13 +84,17 @@ function NativeDateTimeField({ value, onChange, testID, label }: Props) {
 
   return (
     <View className="mb-3">
-      {label && <Text className="text-muted mb-1 text-sm">{label}</Text>}
+      {label && (
+        <Text className="font-body text-body-md text-muted mb-1">{label}</Text>
+      )}
       <Pressable
         testID={testID}
         onPress={() => setShowDate(true)}
-        className="bg-white px-4 py-3 rounded-lg border border-border"
+        className="bg-white px-card-lg py-3 rounded-lg border border-border"
       >
-        <Text className={value ? 'text-body' : 'text-muted'}>
+        <Text
+          className={`font-body text-body-lg ${value ? 'text-body' : 'text-muted'}`}
+        >
           {value ? formatHuman(current) : 'Pick date & time'}
         </Text>
       </Pressable>
@@ -105,7 +114,9 @@ function NativeDateTimeField({ value, onChange, testID, label }: Props) {
           onChange={onTime}
         />
       )}
-      <Text className="text-muted text-[10px] mt-1">{t('meetings.inputTimeZoneHint', { tz })}</Text>
+      <Text className="font-body text-body-xs text-muted mt-1">
+        {t('meetings.inputTimeZoneHint', { tz })}
+      </Text>
     </View>
   );
 }

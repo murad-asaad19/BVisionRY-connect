@@ -1,21 +1,25 @@
 /** @type {import('tailwindcss').Config} */
-// Color tokens and base font families (`--font-display`, `--font-body`) live in `global.css`
-// under `@theme` (Tailwind v4 is CSS-first). This file only declares the named font-family
-// utilities (e.g. `font-display-bold`, `font-body`) that NativeWind needs at config time;
-// they are NOT duplicated in the CSS theme.
+// Color tokens, typography scale, and spacing scale live in `global.css` under `@theme`
+// (Tailwind v4 is CSS-first). This file declares the named font-family utilities that
+// NativeWind needs at config time so classes like `font-body` / `font-display-bold`
+// resolve to the right family name; weights/sizes/spacings come from CSS.
 module.exports = {
   content: ['./app/**/*.{js,jsx,ts,tsx}', './src/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
       fontFamily: {
+        // Display (Dosis) — kept for screen titles, eyebrows, brand wordmarks.
         'display-regular': ['Dosis_400Regular'],
         'display-medium': ['Dosis_500Medium'],
         'display-semibold': ['Dosis_600SemiBold'],
         'display-bold': ['Dosis_700Bold'],
         'display-extrabold': ['Dosis_800ExtraBold'],
-        body: ['Overlock_400Regular'],
-        'body-bold': ['Overlock_700Bold'],
+        // Body (Inter) — replaces Overlock. Used for paragraphs + UI text.
+        body: ['Inter_400Regular'],
+        'body-medium': ['Inter_500Medium'],
+        'body-semibold': ['Inter_600SemiBold'],
+        'body-bold': ['Inter_700Bold'],
       },
     },
   },

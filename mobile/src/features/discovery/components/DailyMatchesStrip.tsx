@@ -6,6 +6,7 @@ import { useDailyMatches } from '~/features/discovery/hooks/useDailyMatches';
 import { useMarkMatchViewed } from '~/features/discovery/hooks/useMarkMatchViewed';
 import { QueryState } from '~/components/ui/QueryState';
 import { UserCard } from '~/components/ui/UserCard';
+import { SkeletonUserCard } from '~/components/ui/Skeleton';
 
 /**
  * Daily matches render as a vertical stack (mockup C1). The top picks use the
@@ -38,10 +39,15 @@ export function DailyMatchesStrip() {
   return (
     <QueryState
       query={dailyMatches}
+      loadingFallback={
+        <View className="pt-1 pb-2">
+          <SkeletonUserCard count={3} />
+        </View>
+      }
       isEmpty={(data) => data.length === 0}
       emptyFallback={
-        <View className="h-32 items-center justify-center px-6">
-          <Text className="text-muted text-center">{t('discovery.emptyPicks')}</Text>
+        <View className="h-32 items-center justify-center px-gutter">
+          <Text className="font-body text-body-md text-muted text-center">{t('discovery.emptyPicks')}</Text>
         </View>
       }
     >

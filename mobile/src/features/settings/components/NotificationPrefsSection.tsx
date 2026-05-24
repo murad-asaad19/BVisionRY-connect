@@ -11,6 +11,13 @@ import {
 } from '~/features/settings/services/notificationPrefs.service';
 import { Banner } from '~/components/ui/Banner';
 
+/**
+ * Notification prefs reformatted as one card per kind, with one toggle row per
+ * channel inside each card. Replaces the prior 4-column table that overflowed
+ * at narrow viewports (audit P2-3). Per-row labels are clearer than column
+ * headers and accommodate longer channel names in non-English locales without
+ * cramping.
+ */
 export function NotificationPrefsSection() {
   const { t } = useTranslation();
   const prefsQ = useNotificationPrefs();
@@ -18,51 +25,40 @@ export function NotificationPrefsSection() {
   const prefs = prefsQ.data ?? {};
 
   return (
-    <View testID="notification-prefs-section" className="px-3 py-2">
-      <View className="rounded-[10px] overflow-hidden border border-border bg-white">
-        {/* Header row */}
-        <View className="flex-row items-center px-3 py-2 border-b border-slate-100 bg-slate-50">
-          <Text className="flex-1 font-display-bold text-[10px] uppercase tracking-wide text-muted">
-            {t('settings.notif.header')}
+    <View testID="notification-prefs-section" className="px-gutter py-2">
+      {NOTIFICATION_KINDS.map((kind) => (
+        <View key={kind.value} className="mb-4">
+          <Text className="font-display-bold text-body-xs uppercase tracking-wide text-muted mb-1.5 px-1">
+            {t(`settings.notif.kind.${kind.value}`)}
           </Text>
-          {NOTIFICATION_CHANNELS.map((c) => (
-            <Text
-              key={c}
-              className="w-16 text-center font-display-bold text-[10px] uppercase tracking-wide text-muted"
-            >
-              {t(`settings.notif.channel.${c}`)}
-            </Text>
-          ))}
-        </View>
-        {/* Body rows */}
-        {NOTIFICATION_KINDS.map((kind, i) => (
-          <View
-            key={kind.value}
-            className={`flex-row items-center px-3 py-2 ${
-              i === NOTIFICATION_KINDS.length - 1 ? '' : 'border-b border-slate-100'
-            }`}
-          >
-            <Text className="flex-1 font-display-semibold text-[12px] text-body" numberOfLines={2}>
-              {t(`settings.notif.kind.${kind.value}`)}
-            </Text>
-            {NOTIFICATION_CHANNELS.map((c) => {
-              const enabled = isPrefEnabled(prefs, kind.value, c);
+          <View className="rounded-[10px] overflow-hidden border border-border bg-white">
+            {NOTIFICATION_CHANNELS.map((channel, ci) => {
+              const enabled = isPrefEnabled(prefs, kind.value, channel);
+              const isLast = ci === NOTIFICATION_CHANNELS.length - 1;
               return (
-                <View key={c} className="w-16 items-center">
+                <View
+                  key={channel}
+                  className={`flex-row items-center justify-between px-card-lg py-card ${
+                    isLast ? '' : 'border-b border-slate-100'
+                  }`}
+                >
+                  <Text className="font-body text-body-md text-body">
+                    {t(`settings.notif.channel.${channel}`)}
+                  </Text>
                   <Switch
-                    testID={`pref-${kind.value}-${c}`}
+                    testID={`pref-${kind.value}-${channel}`}
                     value={enabled}
                     onValueChange={(v) =>
-                      setPref.mutate({ kind: kind.value, channel: c, enabled: v })
+                      setPref.mutate({ kind: kind.value, channel, enabled: v })
                     }
                   />
                 </View>
               );
             })}
           </View>
-        ))}
-      </View>
-      <View className="mt-3">
+        </View>
+      ))}
+      <View className="mt-2">
         <Banner variant="muted">{t('settings.notif.decayBanner')}</Banner>
       </View>
     </View>

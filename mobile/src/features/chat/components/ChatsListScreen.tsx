@@ -1,10 +1,14 @@
 import { useCallback } from 'react';
-import { View, Text, FlatList, ActivityIndicator } from 'react-native';
+import { View, FlatList, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { MessageSquare } from 'lucide-react-native';
 import { colors } from '~/theme/colors';
 import { useConversations } from '~/features/chat/hooks/useConversations';
 import { QueryState } from '~/components/ui/QueryState';
+import { TopBar } from '~/components/ui/TopBar';
+import { EmptyState } from '~/components/ui/EmptyState';
+import { SkeletonConversationRow } from '~/components/ui/Skeleton';
 import { ConversationListRow } from './ConversationListRow';
 import type { ConversationOverviewRow } from '~/features/chat/services/chat.service';
 
@@ -41,19 +45,22 @@ export function ChatsListScreen() {
   return (
     <View className="flex-1 bg-surface">
       <View className="flex-1 w-full max-w-2xl mx-auto">
-        <View className="pt-16 px-6 pb-4">
-          <Text className="text-body text-2xl font-semibold">{t('chat.chatsTitle')}</Text>
-        </View>
+        <TopBar title={t('chat.list.title')} />
 
         <QueryState
           query={conversationsQuery}
           isEmpty={(data) => data.length === 0}
-          emptyFallback={
-            <View className="py-12 px-6 items-center">
-              <Text className="text-muted text-center">
-                No conversations yet. Accept an intro to start chatting.
-              </Text>
+          loadingFallback={
+            <View className="pt-3">
+              <SkeletonConversationRow count={6} />
             </View>
+          }
+          emptyFallback={
+            <EmptyState
+              icon={MessageSquare}
+              title={t('chat.list.emptyTitle')}
+              body={t('chat.list.emptyBody')}
+            />
           }
         >
           {(rows) => (
@@ -62,6 +69,7 @@ export function ChatsListScreen() {
               data={rows}
               keyExtractor={(c) => c.conversation_id}
               renderItem={renderItem}
+              contentContainerStyle={{ paddingTop: 12 }}
               ListFooterComponent={
                 conversationsQuery.isFetching && !conversationsQuery.isLoading ? (
                   <View className="py-4 items-center">

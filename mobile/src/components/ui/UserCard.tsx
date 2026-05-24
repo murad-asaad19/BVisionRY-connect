@@ -1,8 +1,10 @@
 import { View, Text } from 'react-native';
+import { BadgeCheck } from 'lucide-react-native';
 import { Card } from '~/components/ui/Card';
 import { AvatarCircle } from '~/components/ui/AvatarCircle';
 import { Pill } from '~/components/ui/Pill';
 import { OfficeHoursBadge } from '~/features/office-hours/components/OfficeHoursBadge';
+import { colors } from '~/theme/colors';
 
 type Props = {
   variant?: 'default' | 'featured';
@@ -48,36 +50,32 @@ export function UserCard({
         <AvatarCircle name={name} photoUrl={photoUrl} size={38} featured={variant === 'featured'} />
         <View className="flex-1 min-w-0">
           <View className="flex-row items-center gap-1.5 flex-wrap">
-            <Text className="font-display-bold text-[13px] text-navy" numberOfLines={1}>
+            <Text className="font-display-bold text-display-sm text-navy" numberOfLines={1}>
               {name}
             </Text>
             {verified ? (
-              <Pill variant="success" accessibilityLabel="Verified">
-                ✓
-              </Pill>
+              <View testID="user-card-verified" accessibilityLabel="Verified">
+                <BadgeCheck size={14} color={colors.gold} />
+              </View>
             ) : null}
             {hasOfficeHours ? <OfficeHoursBadge /> : null}
           </View>
-          <Text className="text-[11px] text-muted mt-0.5" numberOfLines={1}>
+          <Text className="font-body text-body-sm text-muted mt-0.5" numberOfLines={1}>
             @{handle} · {primaryRole}
           </Text>
           {headline ? (
-            <Text className="text-[11px] text-body mt-1 font-body" numberOfLines={2}>
+            <Text className="font-body text-body-sm text-body mt-1" numberOfLines={2}>
               {headline}
             </Text>
           ) : null}
           {location ? (
-            <Text className="text-[11px] text-muted mt-1 font-body" numberOfLines={1}>
+            <Text className="font-body text-body-sm text-muted mt-1" numberOfLines={1}>
               {location}
             </Text>
           ) : null}
           <View className="flex-row gap-1.5 mt-1.5 flex-wrap">
             {reason ? (
-              <View
-                className={`px-1.5 py-1 rounded-md ${variant === 'featured' ? 'bg-gold' : 'bg-gold-pale'}`}
-              >
-                <Text className="font-display-bold text-[10px] text-navy">{reason}</Text>
-              </View>
+              <Pill variant={variant === 'featured' ? 'solid' : 'default'}>{reason}</Pill>
             ) : null}
             {activity ? <Pill variant="success">{activity}</Pill> : null}
           </View>

@@ -45,8 +45,8 @@ describe('UserCard', () => {
     expect(getByText('Shared role')).toBeTruthy();
   });
 
-  it('shows verified badge when verified=true', () => {
-    const { getByText } = render(
+  it('shows verified badge icon when verified=true', () => {
+    const { getByTestId } = render(
       <UserCard
         name="Alice"
         handle="alice"
@@ -55,6 +55,6 @@ describe('UserCard', () => {
         verified
       />
     );
-    expect(getByText(/✓/)).toBeTruthy();
+    expect(getByTestId('user-card-verified')).toBeTruthy();
   });
 });

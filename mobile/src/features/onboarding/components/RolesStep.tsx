@@ -63,7 +63,11 @@ export function RolesStep() {
   };
 
   return (
-    <StepperLayout currentIndex={2} title={t('onboarding.roles.title')}>
+    <StepperLayout
+      currentIndex={2}
+      title={t('onboarding.roles.title')}
+      stepName={t('onboarding.stepName.roles')}
+    >
       <View>
         <View className="flex-row flex-wrap gap-2 mb-2">
           {ROLE_VALUES.map((value) => {
@@ -87,7 +91,7 @@ export function RolesStep() {
 
         {selected.length > 1 && (
           <View className="mt-4">
-            <Text className="font-display-bold text-[10px] text-muted uppercase tracking-wide mb-2">
+            <Text className="font-display-bold text-body-xs text-muted uppercase tracking-wide mb-2">
               {t('onboarding.roles.primaryQuestion')}
             </Text>
             <View className="flex-row flex-wrap gap-2">

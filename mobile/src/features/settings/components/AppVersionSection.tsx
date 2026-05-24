@@ -8,8 +8,10 @@ export function AppVersionSection() {
   const build = Application.nativeBuildVersion ?? '';
   return (
     <View className="mt-6 mb-4">
-      <Text className="text-muted text-xs uppercase tracking-wide mb-2">{t('settings.about')}</Text>
-      <Text testID="app-version" className="text-muted text-sm">
+      <Text className="font-display-semibold text-muted text-display-xs uppercase tracking-wide mb-2">
+        {t('settings.about')}
+      </Text>
+      <Text testID="app-version" className="font-body text-muted text-body-md">
         {t('settings.version')} {version}
         {build ? ` (${build})` : ''}
       </Text>

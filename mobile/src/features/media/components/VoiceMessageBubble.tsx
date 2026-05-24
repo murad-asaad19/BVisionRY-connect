@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import { Play, Pause } from 'lucide-react-native';
 import { useSignedUrl } from '~/features/media/hooks/useSignedUrl';
 import { useVoicePlayerCoordinator } from '~/features/media/hooks/useVoicePlayerCoordinator';
+import { colors } from '~/theme/colors';
 
 type Props = {
   mediaPath: string;
@@ -105,6 +107,9 @@ export function VoiceMessageBubble({
       ? Math.round(status.currentTime * 1000)
       : durationMs;
 
+  const PlayIcon = status.playing ? Pause : Play;
+  const playIconColor = isMine ? colors.navy : colors.gold;
+
   return (
     <View className={isMine ? 'self-end' : 'self-start'}>
       <View
@@ -117,19 +122,19 @@ export function VoiceMessageBubble({
           testID="voice-toggle"
           onPress={toggle}
           accessibilityRole="button"
-          accessibilityLabel="Play voice message"
+          accessibilityLabel={status.playing ? 'Pause voice message' : 'Play voice message'}
           className={`w-7 h-7 rounded-full items-center justify-center mr-2 ${
             isMine ? 'bg-gold' : 'bg-navy'
           }`}
         >
-          <Text className={`font-display-bold text-[12px] ${isMine ? 'text-navy' : 'text-gold'}`}>
-            {status.playing ? '||' : '▶'}
-          </Text>
+          <PlayIcon size={14} color={playIconColor} />
         </Pressable>
         <View
           className={`flex-1 h-[18px] rounded ${isMine ? 'bg-navy-light' : 'bg-slate-100'} mr-2`}
         />
-        <Text className={`font-body text-[10px] ${isMine ? 'text-gold-light' : 'text-muted'}`}>
+        <Text
+          className={`font-body text-body-xs ${isMine ? 'text-gold-light' : 'text-muted'}`}
+        >
           {fmt(liveMs)}
         </Text>
       </View>
@@ -143,7 +148,7 @@ export function VoiceMessageBubble({
             accessibilityLabel={showTranscript ? 'Hide transcript' : 'Show transcript'}
           >
             <Text
-              className={`font-body text-[10px] ${isMine ? 'text-right' : 'text-left'} text-muted underline mt-1`}
+              className={`font-body text-body-xs ${isMine ? 'text-right' : 'text-left'} text-muted underline mt-1`}
             >
               {showTranscript ? 'Hide transcript' : 'Show transcript'}
             </Text>
@@ -153,11 +158,13 @@ export function VoiceMessageBubble({
               testID="voice-transcript-banner"
               className="bg-white border border-border rounded-xl px-3 py-2 max-w-[80%] mt-1"
             >
-              <Text className="font-display-bold text-[10px] text-muted uppercase tracking-wide mb-0.5">
+              <Text className="font-display-bold text-display-xs text-muted uppercase tracking-wide mb-0.5">
                 Transcript
               </Text>
-              <Text className="font-body text-[11px] text-body leading-snug">{transcriptBody}</Text>
-              <Text className="font-body text-[10px] text-muted mt-1.5 leading-snug">
+              <Text className="font-body text-body-sm text-body leading-snug">
+                {transcriptBody}
+              </Text>
+              <Text className="font-body text-body-xs text-muted mt-1.5 leading-snug">
                 Voice notes are transcribed for accessibility and safety.
               </Text>
             </View>

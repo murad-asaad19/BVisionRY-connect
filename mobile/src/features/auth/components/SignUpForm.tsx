@@ -88,16 +88,16 @@ export function SignUpForm() {
 
   return (
     <AuthShell brandTestID="sign-up-brand">
-      <Text testID="sign-up-title" className="font-display-bold text-[18px] text-navy mb-1">
+      <Text testID="sign-up-title" className="font-display-bold text-display-lg text-navy mb-1">
         {t('auth.signUpTitle')}
       </Text>
-      <Text className="font-body text-[12px] text-muted mb-3">{t('auth.signUpTagline')}</Text>
+      <Text className="font-body text-body-md text-muted mb-3">{t('auth.signUpTagline')}</Text>
 
       <SocialSignInButtons />
 
       <View className="flex-row items-center my-3">
         <View className="flex-1 h-px bg-border" />
-        <Text className="text-muted text-[11px] font-body mx-2.5 uppercase">{t('signIn.or')}</Text>
+        <Text className="text-muted text-display-xs font-body mx-2.5 uppercase">{t('signIn.or')}</Text>
         <View className="flex-1 h-px bg-border" />
       </View>
 
@@ -169,7 +169,7 @@ export function SignUpForm() {
       {/* Inline length hint — flips to success tone once the rule is met. */}
       <Text
         testID="sign-up-password-hint"
-        className={`font-body text-[10px] -mt-1 mb-2 ${
+        className={`font-body text-body-xs -mt-1 mb-2 ${
           passwordMet ? 'text-success-text' : 'text-muted'
         }`}
       >
@@ -199,19 +199,19 @@ export function SignUpForm() {
       </View>
 
       <View className="flex-row items-center justify-center mt-3 gap-1">
-        <Text className="font-body text-[11px] text-muted">{t('auth.haveAccount')}</Text>
+        <Text className="font-body text-display-xs text-muted">{t('auth.haveAccount')}</Text>
         <Pressable
           testID="sign-up-go-sign-in"
           onPress={() => router.replace('/(auth)/sign-in' as never)}
         >
-          <Text className="font-display-bold text-[11px] text-navy">{t('auth.signInCta')}</Text>
+          <Text className="font-display-bold text-display-xs text-navy">{t('auth.signInCta')}</Text>
         </Pressable>
       </View>
 
       {magic.sentTo && (
         <Text
           testID="sign-up-sent"
-          className="text-success-text font-body text-[12px] mt-3 text-center"
+          className="text-success-text font-body text-body-md mt-3 text-center"
         >
           {t('auth.magicLinkSent')}
         </Text>
@@ -220,7 +220,7 @@ export function SignUpForm() {
         <Text
           testID="sign-up-error"
           accessibilityLiveRegion="polite"
-          className="text-danger-text font-body text-[12px] mt-3 text-center"
+          className="text-danger-text font-body text-body-md mt-3 text-center"
         >
           {t(errorKey)}
         </Text>

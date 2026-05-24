@@ -35,8 +35,16 @@ jest.mock('~/features/media/services/media.constants', () => {
   };
 });
 
+// expo-file-system's File class is how we read raw bytes off the recording URI
+// (the legacy `fetch(uri).blob()` path uploaded as 0 bytes on React Native).
+// Stub `bytes()` per-test so we can control the simulated recording size.
+const mockFileBytes = jest.fn<Promise<Uint8Array>, []>();
 jest.mock('expo-file-system', () => ({
-  File: jest.fn().mockImplementation(() => ({ exists: false, delete: jest.fn() })),
+  File: jest.fn().mockImplementation(() => ({
+    exists: false,
+    delete: jest.fn(),
+    bytes: mockFileBytes,
+  })),
 }));
 
 jest.mock('~/lib/i18n', () => ({
@@ -59,14 +67,13 @@ function wrapWithClient(qc: QueryClient) {
 
 const CONV_ID = 'conv-1';
 
-function stubFetchWithBlob(size: number) {
-  global.fetch = jest.fn().mockResolvedValue({ blob: async () => ({ size }) }) as typeof fetch;
+function stubRecordingBytes(size: number) {
+  mockFileBytes.mockResolvedValueOnce(new Uint8Array(size));
 }
 
 describe('useSendVoiceMessage', () => {
   let qc: QueryClient;
   let alertSpy: jest.SpyInstance;
-  const realFetch = global.fetch;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -76,11 +83,10 @@ describe('useSendVoiceMessage', () => {
   afterEach(() => {
     qc.clear();
     alertSpy.mockRestore();
-    global.fetch = realFetch;
   });
 
   it('uploads then calls send_voice_message with the canonical args and invalidates caches', async () => {
-    stubFetchWithBlob(123_456);
+    stubRecordingBytes(123_456);
     mockUploadChatMedia.mockResolvedValueOnce('conv-1/msg-uuid-2/msg-uuid-2.m4a');
     mockSupabaseRpc.mockResolvedValueOnce({ data: { id: 'msg-uuid-2' }, error: null });
     const invalidateSpy = jest.spyOn(qc, 'invalidateQueries');
@@ -100,11 +106,13 @@ describe('useSendVoiceMessage', () => {
     expect(mockUploadChatMedia).toHaveBeenCalledWith(
       CONV_ID,
       'msg-uuid-2',
-      expect.objectContaining({ size: 123_456 }),
+      expect.any(Uint8Array),
       'm4a',
       'audio/m4a',
       'msg-uuid-2.m4a'
     );
+    const bytesArg = mockUploadChatMedia.mock.calls[0]![2] as Uint8Array;
+    expect(bytesArg.byteLength).toBe(123_456);
     expect(mockSupabaseRpc).toHaveBeenCalledWith('send_voice_message', {
       p_conversation_id: CONV_ID,
       p_media_path: 'conv-1/msg-uuid-2/msg-uuid-2.m4a',
@@ -136,8 +144,8 @@ describe('useSendVoiceMessage', () => {
     expect(mockSupabaseRpc).not.toHaveBeenCalled();
   });
 
-  it('short-circuits with an Alert when blob exceeds MAX_VOICE_BYTES', async () => {
-    stubFetchWithBlob(MAX_VOICE_BYTES + 1);
+  it('short-circuits with an Alert when recording exceeds MAX_VOICE_BYTES', async () => {
+    stubRecordingBytes(MAX_VOICE_BYTES + 1);
 
     const { result } = renderHook(() => useSendVoiceMessage(CONV_ID), {
       wrapper: wrapWithClient(qc),
@@ -176,7 +184,7 @@ describe('useSendVoiceMessage', () => {
   });
 
   it('throws when the RPC errors and does NOT invalidate caches', async () => {
-    stubFetchWithBlob(50_000);
+    stubRecordingBytes(50_000);
     mockUploadChatMedia.mockResolvedValueOnce('conv-1/msg-uuid-2/msg-uuid-2.m4a');
     mockSupabaseRpc.mockResolvedValueOnce({ data: null, error: { message: 'rls denied' } });
     const invalidateSpy = jest.spyOn(qc, 'invalidateQueries');

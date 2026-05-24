@@ -16,12 +16,12 @@ export default function HelpSubScreen() {
     <View testID="settings-screen" className="flex-1 bg-surface">
       <Stack.Screen options={{ title: t('settings.help') }} />
       <ScrollView className="flex-1">
-        <View className="w-full max-w-2xl mx-auto p-4">
-          <View className="bg-white rounded-xl border border-border p-4 mb-4">
-            <Text className="font-display-bold text-[12px] text-body mb-1">
+        <View className="w-full max-w-2xl mx-auto p-card-lg">
+          <View className="bg-white rounded-xl border border-border p-card-lg mb-4">
+            <Text className="font-display-bold text-body-md text-body mb-1">
               {t('settings.contactTitle')}
             </Text>
-            <Text className="font-body text-[11px] text-muted leading-relaxed">
+            <Text className="font-body text-body-sm text-muted leading-relaxed">
               {t('settings.contactBody')}
             </Text>
             <Pressable
@@ -29,9 +29,9 @@ export default function HelpSubScreen() {
               accessibilityRole="link"
               accessibilityLabel={`mailto:${supportEmail}`}
               onPress={openSupport}
-              className="mt-2"
+              className="mt-2 active:opacity-70"
             >
-              <Text className="text-navy text-[12px] font-display-semibold underline">
+              <Text className="text-navy text-body-md font-display-semibold underline">
                 {supportEmail}
               </Text>
             </Pressable>

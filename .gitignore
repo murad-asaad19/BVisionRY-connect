@@ -10,6 +10,19 @@ node_modules/
 supabase/.temp/
 supabase/.branches/
 
+# Expo local cache
+.expo/
+
+# Claude scheduled-task state
+.claude/scheduled_tasks.lock
+
+# Audit artefacts (the audit doc itself is kept; the raw screenshots are large)
+.audit-screenshots/
+
+# Ad-hoc screenshots from debugging / smoke checks
+*.png
+!mobile/assets/**/*.png
+
 # IDE
 .idea/
 .vscode/

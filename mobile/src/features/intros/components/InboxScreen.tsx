@@ -12,8 +12,10 @@ import { EmptyInbox } from './EmptyInbox';
 import { QueryState } from '~/components/ui/QueryState';
 import { TopBar } from '~/components/ui/TopBar';
 import { Banner } from '~/components/ui/Banner';
+import { SkeletonIntroRow } from '~/components/ui/Skeleton';
 import { supabase } from '~/lib/supabase/client';
 import { fetchIntrosTodayCount } from '~/features/intros/services/intros.service';
+import { colors } from '~/theme/colors';
 import type { Database } from '~/lib/supabase/types.gen';
 import type { IntroRow } from '~/features/intros/services/intros.service';
 
@@ -80,7 +82,7 @@ export function InboxScreen() {
       <View className="flex-1 w-full max-w-2xl mx-auto">
         <TopBar title={t('intros.inboxTitle')} />
         {overCap ? (
-          <View testID="inbox-cap-banner" className="mx-3 mt-2">
+          <View testID="inbox-cap-banner" className="mx-gutter mt-2">
             <Banner variant="warning" title={t('intros.banner.dailyCapTitle')}>
               {t('intros.banner.dailyCapBody', { cap: DAILY_INBOUND_CAP })}
             </Banner>
@@ -90,6 +92,11 @@ export function InboxScreen() {
 
         <QueryState
           query={active}
+          loadingFallback={
+            <View className="pt-3">
+              <SkeletonIntroRow count={5} />
+            </View>
+          }
           isEmpty={(data) => data.pages.flatMap((p) => p.rows).length === 0}
           emptyFallback={<EmptyInbox segment={segment} />}
         >
@@ -109,7 +116,7 @@ export function InboxScreen() {
                 ListFooterComponent={
                   active.isFetchingNextPage ? (
                     <View className="py-4 items-center">
-                      <ActivityIndicator color="#0f3460" />
+                      <ActivityIndicator color={colors.navy} />
                     </View>
                   ) : null
                 }

@@ -144,7 +144,7 @@ as $$
 begin
   if p_handle is null
      or btrim(p_handle) = ''
-     or not (p_handle operator(extensions.~)
+     or not (p_handle::extensions.citext operator(extensions.~)
        '^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])?$'::extensions.citext) then
     return false;
   end if;

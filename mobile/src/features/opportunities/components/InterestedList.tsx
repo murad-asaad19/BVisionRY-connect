@@ -39,13 +39,13 @@ export function InterestedList({ opportunityId, isAuthor }: Props) {
                   photoUrl={item.photoUrl}
                   onPress={() =>
                     router.push({
-                      pathname: '/(app)/p/[handle]',
+                      pathname: '/p/[handle]',
                       params: { handle: item.handle },
                     })
                   }
                 />
                 {item.note ? (
-                  <Text className="font-body text-[12px] text-body mt-1 px-2">
+                  <Text className="font-body text-body-md text-body mt-1 px-2">
                     {item.note}
                   </Text>
                 ) : null}

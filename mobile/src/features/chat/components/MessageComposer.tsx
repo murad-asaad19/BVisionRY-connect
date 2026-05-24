@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { View, TextInput, Pressable, Text, ActivityIndicator } from 'react-native';
+import { View, TextInput, Text, ActivityIndicator, Pressable } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Plus, Camera, Send } from 'lucide-react-native';
 import { useSendMessage, newMessageId } from '~/features/chat/hooks/useSendMessage';
 import { ProposeMeetingSheet } from '~/features/meetings/components/ProposeMeetingSheet';
 import { useSendImageMessage } from '~/features/media/hooks/useSendImageMessage';
 import { VoiceRecorderSheet } from '~/features/media/components/VoiceRecorderSheet';
+import { IconButton } from '~/components/ui/IconButton';
+import { colors } from '~/theme/colors';
 
 type Props = {
   conversationId: string;
@@ -42,34 +45,37 @@ export function MessageComposer({ conversationId, onTyping, onStoppedTyping }: P
   return (
     <View className="border-t border-border px-3 py-2 bg-white">
       {error && (
-        <Text testID="composer-error" className="text-danger-text text-[11px] mb-1.5 font-body">
+        <Text testID="composer-error" className="font-body text-body-sm text-danger-text mb-1.5">
           {error}
         </Text>
       )}
       <View className="flex-row items-center gap-1.5">
-        <Pressable
+        <IconButton
           testID="composer-propose"
+          icon={Plus}
+          size="sm"
+          variant="subtle"
+          label="Propose meeting"
           onPress={() => setProposeOpen(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Propose meeting"
-          className="w-7 h-7 rounded-full bg-gold-pale items-center justify-center"
-        >
-          <Text className="text-navy text-[14px]">+</Text>
-        </Pressable>
-        <Pressable
-          testID="composer-image"
-          onPress={() => sendImage.mutate()}
-          disabled={sendImage.isPending}
-          accessibilityRole="button"
-          accessibilityLabel="Send photo"
-          className="w-7 h-7 rounded-full bg-gold-pale items-center justify-center"
-        >
-          {sendImage.isPending ? (
-            <ActivityIndicator color="#0f3460" />
-          ) : (
-            <Text className="text-navy text-[12px]">📷</Text>
-          )}
-        </Pressable>
+        />
+        {sendImage.isPending ? (
+          <View
+            testID="composer-image-pending"
+            className="w-8 h-8 rounded-full bg-slate-100 items-center justify-center"
+          >
+            <ActivityIndicator color={colors.navy} />
+          </View>
+        ) : (
+          <IconButton
+            testID="composer-image"
+            icon={Camera}
+            size="sm"
+            variant="subtle"
+            label="Send photo"
+            onPress={() => sendImage.mutate()}
+            disabled={sendImage.isPending}
+          />
+        )}
         <VoiceRecorderSheet conversationId={conversationId} />
         <TextInput
           testID="composer-input"
@@ -84,10 +90,10 @@ export function MessageComposer({ conversationId, onTyping, onStoppedTyping }: P
           }}
           onBlur={() => onStoppedTyping?.()}
           placeholder={t('chat.composerPlaceholder')}
-          placeholderTextColor="#94a3b8"
+          placeholderTextColor={colors.muted}
           multiline
           maxLength={4000}
-          className="flex-1 bg-white border border-border rounded-2xl px-3 py-2 text-[12px] text-body font-body max-h-32"
+          className="flex-1 bg-white border border-border rounded-2xl px-3 py-2 font-body text-body-md text-body max-h-32"
           style={{ textAlignVertical: 'top' }}
         />
         <Pressable
@@ -96,14 +102,14 @@ export function MessageComposer({ conversationId, onTyping, onStoppedTyping }: P
           disabled={sendDisabled}
           accessibilityRole="button"
           accessibilityLabel="Send message"
-          className={`w-7 h-7 rounded-full items-center justify-center ${
+          className={`w-10 h-10 rounded-full items-center justify-center ${
             sendDisabled ? 'bg-slate-300' : 'bg-navy'
           }`}
         >
           {send.isPending ? (
-            <ActivityIndicator color="#ffffff" />
+            <ActivityIndicator color={colors.white} />
           ) : (
-            <Text className="font-display-bold text-[14px] text-white leading-none">→</Text>
+            <Send size={16} color={colors.white} />
           )}
         </Pressable>
       </View>

@@ -26,18 +26,19 @@ export function AuthShell({ children, brandTestID = 'auth-brand' }: Props) {
       />
       <View className="flex-1 px-5 pt-12">
         <View className="items-center mb-7">
+          {/* P3-1: Single weight (bold) across the wordmark for visual cohesion. */}
           <Text
-            className="font-display-bold text-[28px] text-white tracking-wide"
+            className="font-display-bold text-display-xl text-white tracking-wide"
             testID={brandTestID}
           >
             <Text className="text-gold">B</Text>VisionRY{' '}
-            <Text className="text-gold-light font-display-medium">Connect</Text>
+            <Text className="text-gold-light">Connect</Text>
           </Text>
-          <Text className="font-display-medium text-[11px] text-gold-light mt-1">
+          <Text className="font-display-medium text-display-xs text-gold-light mt-1">
             {t('signIn.brandTagline')}
           </Text>
         </View>
-        <View className="bg-white rounded-2xl p-5 w-full self-center">{children}</View>
+        <View className="bg-white rounded-2xl p-card-lg w-full self-center">{children}</View>
       </View>
     </View>
   );

@@ -1,10 +1,16 @@
 import { useState } from 'react';
-import { View, Text, Pressable, Alert } from 'react-native';
+import { View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Calendar, Trash2 } from 'lucide-react-native';
 import { useMyBookings } from '~/features/office-hours/hooks/useMyBookings';
 import { useCancelBooking } from '~/features/office-hours/hooks/useCancelBooking';
 import { AvatarCircle } from '~/components/ui/AvatarCircle';
 import { QueryState } from '~/components/ui/QueryState';
+import { EmptyState } from '~/components/ui/EmptyState';
+import { Skeleton } from '~/components/ui/Skeleton';
+import { IconButton } from '~/components/ui/IconButton';
+import { useConfirm } from '~/components/ui/ConfirmDialog';
+import { useToast } from '~/components/ui/Toast';
 import type { MyBooking } from '~/features/office-hours/services/officeHours.service';
 
 function formatRange(start: string, end: string): string {
@@ -21,7 +27,36 @@ function formatRange(start: string, end: string): string {
 }
 
 /**
+ * Skeleton for the bookings list. Mirrors the BookingRow geometry (avatar +
+ * two-line text + trailing action) so the swap to real data doesn't reflow.
+ */
+function BookingsSkeleton({ count = 4 }: { count?: number }) {
+  return (
+    <View testID="bookings-list-loading">
+      {Array.from({ length: count }).map((_, i) => (
+        <View
+          key={i}
+          className={`bg-white border border-border rounded-[10px] p-card flex-row items-center gap-3 ${
+            i === 0 ? '' : 'mt-2'
+          }`}
+        >
+          <Skeleton w={38} h={38} radius={19} />
+          <View className="flex-1">
+            <Skeleton w="55%" h={12} />
+            <View className="mt-1.5">
+              <Skeleton w="80%" h={10} />
+            </View>
+          </View>
+          <Skeleton w={32} h={32} radius={16} />
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/**
  * Renders the caller's upcoming office-hours bookings with a cancel CTA.
+ * Loading state is a skeleton list; empty state is the branded EmptyState.
  */
 export function BookingsList() {
   const { t } = useTranslation();
@@ -29,8 +64,16 @@ export function BookingsList() {
   return (
     <QueryState
       query={query}
+      loadingFallback={<BookingsSkeleton count={4} />}
       isEmpty={(rows) => rows.length === 0}
-      emptyText={t('officeHours.bookings.empty')}
+      emptyFallback={
+        <EmptyState
+          testID="bookings-empty"
+          icon={Calendar}
+          title={t('officeHours.bookings.emptyTitle')}
+          body={t('officeHours.bookings.emptyBody')}
+        />
+      }
     >
       {(rows) => (
         <View testID="bookings-list">
@@ -45,59 +88,61 @@ export function BookingsList() {
 
 function BookingRow({ row }: { row: MyBooking }) {
   const { t } = useTranslation();
+  const confirm = useConfirm();
+  const toast = useToast();
   const cancel = useCancelBooking();
   const [busy, setBusy] = useState(false);
 
-  const confirm = () => {
+  const onCancel = async () => {
     if (busy) return;
-    Alert.alert(t('officeHours.bookings.cancelConfirm'), undefined, [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('officeHours.bookings.cancel'),
-        style: 'destructive',
-        onPress: async () => {
-          setBusy(true);
-          try {
-            await cancel.mutateAsync({ slotId: row.slotId, hostId: row.hostId });
-          } finally {
-            setBusy(false);
-          }
-        },
-      },
-    ]);
+    const ok = await confirm({
+      title: t('officeHours.bookings.cancelConfirm'),
+      body: t('officeHours.bookings.cancelConfirmBody'),
+      confirmLabel: t('officeHours.bookings.cancel'),
+      cancelLabel: t('common.cancel'),
+      destructive: true,
+    });
+    if (!ok) return;
+    setBusy(true);
+    try {
+      await cancel.mutateAsync({ slotId: row.slotId, hostId: row.hostId });
+      toast.success(t('officeHours.bookings.cancelled'));
+    } catch (e) {
+      const message = e instanceof Error ? e.message : t('officeHours.bookings.cancelFailed');
+      toast.error(message);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
     <View
       testID={`booking-row-${row.slotId}`}
-      className="bg-white border border-border rounded-[10px] p-3 mb-2 flex-row items-center gap-3"
+      className="bg-white border border-border rounded-[10px] p-card mb-2 flex-row items-center gap-3"
     >
       <AvatarCircle name={row.hostName} photoUrl={row.hostPhotoUrl} size={38} />
       <View className="flex-1 min-w-0">
-        <Text className="font-display-bold text-[13px] text-navy" numberOfLines={1}>
+        <Text className="font-display-bold text-display-sm text-navy" numberOfLines={1}>
           {row.hostName}
         </Text>
-        <Text className="text-[11px] text-muted mt-0.5" numberOfLines={1}>
+        <Text className="font-body text-body-sm text-muted mt-0.5" numberOfLines={1}>
           {formatRange(row.startsAt, row.endsAt)}
         </Text>
         {row.topic ? (
-          <Text className="text-[11px] text-body font-body mt-1" numberOfLines={2}>
+          <Text className="font-body text-body-sm text-body mt-1" numberOfLines={2}>
             {row.topic}
           </Text>
         ) : null}
       </View>
-      <Pressable
-        testID={`booking-cancel-${row.slotId}`}
-        accessibilityRole="button"
-        accessibilityLabel={t('officeHours.bookings.cancel')}
-        onPress={confirm}
+      <IconButton
+        icon={Trash2}
+        onPress={onCancel}
         disabled={busy}
-        className="px-2.5 py-1.5 rounded-md bg-white border border-border"
-      >
-        <Text className="font-display-bold text-[11px] text-danger-text">
-          {t('officeHours.bookings.cancel')}
-        </Text>
-      </Pressable>
+        label={t('officeHours.bookings.cancel')}
+        size="sm"
+        variant="subtle"
+        testID={`booking-cancel-${row.slotId}`}
+      />
     </View>
   );
 }

@@ -114,27 +114,27 @@ export function ComposeIntroSheet({
       {/* Recipient preview card (mockup E1) */}
       <View
         testID="compose-intro-recipient"
-        className="bg-gold-pale border border-gold rounded-xl p-3 mb-3 flex-row items-center gap-2.5"
+        className="bg-gold-pale border border-gold rounded-xl p-card mb-3 flex-row items-center gap-2.5"
       >
         <AvatarCircle name={recipientName} photoUrl={recipientPhotoUrl ?? null} size={48} />
         <View className="flex-1 min-w-0">
-          <Text className="font-display-bold text-[14px] text-navy" numberOfLines={1}>
+          <Text className="font-display-bold text-body-lg text-navy" numberOfLines={1}>
             {recipientName}
           </Text>
           {recipientHandle ? (
-            <Text className="font-body text-[11px] text-muted" numberOfLines={1}>
+            <Text className="font-body text-body-sm text-muted" numberOfLines={1}>
               @{recipientHandle}
             </Text>
           ) : null}
           {recipientHeadline ? (
-            <Text className="font-body text-[11px] text-body mt-0.5" numberOfLines={2}>
+            <Text className="font-body text-body-sm text-body mt-0.5" numberOfLines={2}>
               {recipientHeadline}
             </Text>
           ) : null}
         </View>
       </View>
 
-      <Text className="font-body text-[12px] text-muted mb-3">{t('intros.compose.hint')}</Text>
+      <Text className="font-body text-body-md text-muted mb-3">{t('intros.compose.hint')}</Text>
 
       <Input
         testID="compose-intro-note"
@@ -150,7 +150,7 @@ export function ComposeIntroSheet({
         errorText={error ?? undefined}
       />
       <Text
-        className={`font-body text-[11px] ${inRange ? 'text-success-text' : 'text-muted'} mb-2`}
+        className={`font-body text-body-sm ${inRange ? 'text-success-text' : 'text-muted'} mb-2`}
       >
         {t('intros.compose.counter', { count: charCount, max: NOTE_MAX, min: NOTE_MIN })}
       </Text>

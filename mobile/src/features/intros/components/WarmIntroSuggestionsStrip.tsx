@@ -42,7 +42,7 @@ export function WarmIntroSuggestionsStrip({ limit }: Props) {
 
   return (
     <View testID="warm-intro-strip" className="mt-2">
-      <Text className="font-display-bold text-[12px] text-navy uppercase tracking-wide px-3 mb-2">
+      <Text className="font-display-bold text-body-md text-navy uppercase tracking-wide px-gutter mb-2">
         {t('intros.warm.stripTitle')}
       </Text>
       <FlatList

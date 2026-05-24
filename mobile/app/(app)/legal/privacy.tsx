@@ -13,12 +13,12 @@ export default function PrivacyPolicyScreen() {
   return (
     <View className="flex-1 bg-surface">
       <Stack.Screen options={{ title, headerShown: true }} />
-      <ScrollView testID="privacy-screen" className="px-6 pt-4">
-        <Text className="text-body text-xl font-semibold mb-3">{title}</Text>
+      <ScrollView testID="privacy-screen" className="px-gutter pt-4">
+        <Text className="font-display-bold text-body text-display-lg mb-3">{title}</Text>
         {paragraphs.map((p, i) => (
           <Text
             key={i}
-            className={`text-muted ${i === paragraphs.length - 1 ? 'mb-8' : 'mb-3'}`}
+            className={`font-body text-body-md text-muted leading-relaxed ${i === paragraphs.length - 1 ? 'mb-8' : 'mb-3'}`}
           >
             {p}
           </Text>

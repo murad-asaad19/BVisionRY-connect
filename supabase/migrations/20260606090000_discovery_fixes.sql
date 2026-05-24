@@ -30,6 +30,7 @@ returns table (
 )
 language plpgsql security definer set search_path = public, extensions
 as $$
+#variable_conflict use_column
 declare
   v_user_id uuid := auth.uid();
   v_existing int;

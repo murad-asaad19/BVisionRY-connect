@@ -91,21 +91,21 @@ export function WarmIntroForwardSheet({
       testID="warm-intro-forward-sheet"
       dismissible={!forward.isPending}
     >
-      <Text className="font-display-bold text-[16px] text-navy mb-2">
+      <Text className="font-display-bold text-display-md text-navy mb-2">
         {t('intros.warm.forwardTitle', { targetName })}
       </Text>
 
       <View
         testID="warm-intro-forward-target"
-        className="bg-gold-pale border border-gold rounded-xl p-3 mb-3 flex-row items-center gap-2.5"
+        className="bg-gold-pale border border-gold rounded-xl p-card mb-3 flex-row items-center gap-2.5"
       >
         <AvatarCircle name={targetName} photoUrl={targetPhotoUrl ?? null} size={48} />
         <View className="flex-1 min-w-0">
-          <Text className="font-display-bold text-[13px] text-navy" numberOfLines={1}>
+          <Text className="font-display-bold text-display-sm text-navy" numberOfLines={1}>
             {targetName}
           </Text>
           {targetHandle ? (
-            <Text className="font-body text-[11px] text-muted" numberOfLines={1}>
+            <Text className="font-body text-body-sm text-muted" numberOfLines={1}>
               @{targetHandle}
             </Text>
           ) : null}
@@ -132,7 +132,7 @@ export function WarmIntroForwardSheet({
         errorText={error ?? undefined}
       />
 
-      <Text className={`font-body text-[11px] ${inRange ? 'text-success-text' : 'text-muted'} mb-2`}>
+      <Text className={`font-body text-body-sm ${inRange ? 'text-success-text' : 'text-muted'} mb-2`}>
         {t('intros.compose.counter', { count: charCount, max: 400, min: 80 })}
       </Text>
 

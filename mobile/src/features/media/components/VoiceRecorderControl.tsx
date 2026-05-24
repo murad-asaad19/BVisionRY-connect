@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Pressable, Text, ActivityIndicator } from 'react-native';
+import { Pressable, ActivityIndicator, View } from 'react-native';
+import { Mic, Square } from 'lucide-react-native';
 import { useRecordAudio } from '~/features/media/hooks/useRecordAudio';
 import { useSendVoiceMessage } from '~/features/media/hooks/useSendVoiceMessage';
+import { colors } from '~/theme/colors';
 
 type Props = { conversationId: string };
 
@@ -24,19 +26,26 @@ export function VoiceRecorderControl({ conversationId }: Props) {
     }
   };
 
+  const Icon = isRecording ? Square : Mic;
+  const iconColor = isRecording ? colors.danger : colors.navy;
+
   return (
     <Pressable
       testID="composer-voice"
       onPress={onPress}
       disabled={submitting}
+      accessibilityRole="button"
+      accessibilityLabel={isRecording ? 'Stop recording' : 'Record voice message'}
       className={`px-3 py-2 rounded-2xl items-center justify-center ${
         isRecording ? 'bg-danger-bg' : 'bg-white border border-border'
       }`}
     >
       {submitting ? (
-        <ActivityIndicator color="#fff" />
+        <ActivityIndicator color={colors.white} />
       ) : (
-        <Text className="text-body">{isRecording ? '⏹' : '🎤'}</Text>
+        <View pointerEvents="none">
+          <Icon size={16} color={iconColor} />
+        </View>
       )}
     </Pressable>
   );

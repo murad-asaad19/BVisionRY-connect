@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { BottomSheet } from '~/components/ui/Modal';
 import { Input } from '~/components/ui/Input';
 import { Button } from '~/components/ui/Button';
+import { useToast } from '~/components/ui/Toast';
 import { useExpressInterest } from '~/features/opportunities/hooks/useExpressInterest';
 
 type Props = {
@@ -24,6 +25,7 @@ export function ExpressInterestSheet({
   onSent,
 }: Props) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
   const mutate = useExpressInterest();
@@ -43,6 +45,7 @@ export function ExpressInterestSheet({
         note: trimmed.length > 0 ? trimmed : undefined,
       });
       setNote('');
+      toast.success(t('opportunities.interest.success'));
       onSent?.();
       onClose();
     } catch (e) {
@@ -58,11 +61,11 @@ export function ExpressInterestSheet({
       dismissible={!mutate.isPending}
     >
       {opportunityTitle ? (
-        <Text className="font-display-bold text-[14px] text-navy mb-1" numberOfLines={2}>
+        <Text className="font-display-bold text-body-lg text-navy mb-1" numberOfLines={2}>
           {opportunityTitle}
         </Text>
       ) : null}
-      <Text className="font-body text-[12px] text-muted mb-3">
+      <Text className="font-body text-body-md text-muted mb-3">
         {t('opportunities.interest.subtitle')}
       </Text>
 

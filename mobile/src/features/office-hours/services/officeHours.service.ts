@@ -188,7 +188,10 @@ function mapMyBooking(r: MyBookingRow): MyBooking {
 // =============================================================================
 // RPCs.
 // =============================================================================
-const rpc = supabase.rpc as unknown as <T, A extends Record<string, unknown>>(
+// Must `.bind(supabase)` — supabase-js's `rpc` reads `this.rest` internally,
+// so an unbound alias raises "Cannot read properties of undefined (reading
+// 'rest')" at the first call. Same issue as opportunities.service.ts.
+const rpc = supabase.rpc.bind(supabase) as unknown as <T, A extends Record<string, unknown>>(
   fn: string,
   args: A
 ) => Promise<{ data: T | null; error: { code?: string | null; message?: string | null } | null }>;

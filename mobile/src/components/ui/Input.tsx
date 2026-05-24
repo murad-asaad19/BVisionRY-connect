@@ -18,6 +18,7 @@ type Props = {
   keyboardType?: TextInputProps['keyboardType'];
   textContentType?: TextInputProps['textContentType'];
   returnKeyType?: TextInputProps['returnKeyType'];
+  onFocus?: TextInputProps['onFocus'];
   onBlur?: TextInputProps['onBlur'];
   onSubmitEditing?: TextInputProps['onSubmitEditing'];
   editable?: TextInputProps['editable'];
@@ -42,6 +43,7 @@ export const Input = React.forwardRef<TextInput, Props>(function Input(
     keyboardType,
     textContentType,
     returnKeyType,
+    onFocus,
     onBlur,
     onSubmitEditing,
     editable,
@@ -50,10 +52,18 @@ export const Input = React.forwardRef<TextInput, Props>(function Input(
   ref
 ) {
   const hasError = Boolean(errorText);
+  // Drive border colour with a focused boolean so the same logic works on
+  // native (no `focus:` selector support) and on the NativeWind web target.
+  const [focused, setFocused] = React.useState(false);
+  const borderClass = hasError
+    ? 'border-danger-border'
+    : focused
+      ? 'border-navy'
+      : 'border-border';
   return (
     <View className="mb-2">
       {label ? (
-        <Text className="font-display-semibold text-[10px] text-muted uppercase tracking-wide mb-1">
+        <Text className="font-display-semibold text-body-xs text-muted uppercase tracking-wide mb-1">
           {label}
         </Text>
       ) : null}
@@ -74,19 +84,25 @@ export const Input = React.forwardRef<TextInput, Props>(function Input(
         keyboardType={keyboardType}
         textContentType={textContentType}
         returnKeyType={returnKeyType}
-        onBlur={onBlur}
+        onFocus={(e) => {
+          setFocused(true);
+          onFocus?.(e);
+        }}
+        onBlur={(e) => {
+          setFocused(false);
+          onBlur?.(e);
+        }}
         onSubmitEditing={onSubmitEditing}
         editable={editable}
         accessibilityLabel={label ?? placeholder}
-        accessibilityState={hasError ? { invalid: true } : undefined}
-        className={`bg-white border-[1.5px] ${hasError ? 'border-danger-border' : 'border-border'} rounded-[10px] px-3 py-2 text-[12px] text-body font-body ${multiline ? 'min-h-24' : ''}`}
+        className={`bg-white border-[1.5px] ${borderClass} rounded-[10px] px-3 py-2 text-body-md text-body font-body ${multiline ? 'min-h-24' : ''}`}
         style={multiline ? { textAlignVertical: 'top' } : undefined}
       />
       {errorText ? (
         <Text
           testID={testID ? `${testID}-error` : undefined}
           accessibilityLiveRegion="polite"
-          className="font-body text-[10px] text-danger-text mt-1"
+          className="font-body text-body-xs text-danger-text mt-1"
         >
           {errorText}
         </Text>

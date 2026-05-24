@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { View, Text, Pressable, Alert, type TextInput } from 'react-native';
+import { View, Text, Pressable, type TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
@@ -9,6 +9,7 @@ import { mapAuthError } from '~/features/auth/services/errorMap';
 import { useMagicLinkSubmit } from '~/features/auth/hooks/useMagicLinkSubmit';
 import { Button } from '~/components/ui/Button';
 import { Input } from '~/components/ui/Input';
+import { useToast } from '~/components/ui/Toast';
 import { SocialSignInButtons } from '~/features/auth/components/SocialSignInButtons';
 import { AuthShell } from '~/features/auth/components/AuthShell';
 
@@ -20,6 +21,7 @@ type FormValues = z.infer<typeof FormSchema>;
 
 export function SignInForm() {
   const { t } = useTranslation();
+  const toast = useToast();
   const passwordRef = useRef<TextInput>(null);
 
   const [passwordSubmitting, setPasswordSubmitting] = useState(false);
@@ -69,22 +71,25 @@ export function SignInForm() {
   // Inline error band combines whichever surfaced last.
   const errorKey = passwordErrorKey ?? magic.errorKey;
 
+  // P0-3: Replace Alert.alert with a branded toast that points the user at the
+  // magic-link CTA below — the real recovery path until a dedicated /forgot-password
+  // screen ships.
   const onForgotPassword = useCallback(() => {
-    Alert.alert(t('auth.forgotPassword'), t('auth.forgotPasswordBody'));
-  }, [t]);
+    toast.info(t('auth.forgotPwdInstructions'));
+  }, [toast, t]);
 
   return (
     <AuthShell brandTestID="sign-in-title">
-      <Text testID="sign-in-welcome" className="font-display-bold text-[18px] text-navy mb-1">
+      <Text testID="sign-in-welcome" className="font-display-bold text-display-lg text-navy mb-1">
         {t('auth.signInTitle')}
       </Text>
-      <Text className="font-body text-[12px] text-muted mb-3">{t('auth.signInTagline')}</Text>
+      <Text className="font-body text-body-md text-muted mb-3">{t('auth.signInTagline')}</Text>
 
       <SocialSignInButtons />
 
       <View className="flex-row items-center my-3">
         <View className="flex-1 h-px bg-border" />
-        <Text className="text-muted text-[11px] font-body mx-2.5 uppercase">{t('signIn.or')}</Text>
+        <Text className="text-muted text-display-xs font-body mx-2.5 uppercase">{t('signIn.or')}</Text>
         <View className="flex-1 h-px bg-border" />
       </View>
 
@@ -170,25 +175,25 @@ export function SignInForm() {
       </View>
 
       <Pressable testID="sign-in-forgot" className="mt-3 self-center" onPress={onForgotPassword}>
-        <Text className="font-body text-[11px] text-muted underline">
+        <Text className="font-body text-display-xs text-muted underline">
           {t('auth.forgotPassword')}
         </Text>
       </Pressable>
 
       <View className="flex-row items-center justify-center mt-3 gap-1">
-        <Text className="font-body text-[11px] text-muted">{t('auth.noAccount')}</Text>
+        <Text className="font-body text-display-xs text-muted">{t('auth.noAccount')}</Text>
         <Pressable
           testID="sign-in-go-sign-up"
           onPress={() => router.push('/(auth)/sign-up' as never)}
         >
-          <Text className="font-display-bold text-[11px] text-navy">{t('auth.signUpCta')}</Text>
+          <Text className="font-display-bold text-display-xs text-navy">{t('auth.signUpCta')}</Text>
         </Pressable>
       </View>
 
       {magic.sentTo && (
         <Text
           testID="sign-in-sent"
-          className="text-success-text font-body text-[12px] mt-3 text-center"
+          className="text-success-text font-body text-body-md mt-3 text-center"
         >
           {t('auth.magicLinkSent')}
         </Text>
@@ -197,7 +202,7 @@ export function SignInForm() {
         <Text
           testID="sign-in-error"
           accessibilityLiveRegion="polite"
-          className="text-danger-text font-body text-[12px] mt-3 text-center"
+          className="text-danger-text font-body text-body-md mt-3 text-center"
         >
           {t(errorKey)}
         </Text>

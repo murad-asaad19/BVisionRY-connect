@@ -8,6 +8,7 @@ import { QueryState } from '~/components/ui/QueryState';
 import { Button } from '~/components/ui/Button';
 import { Banner } from '~/components/ui/Banner';
 import { Pill } from '~/components/ui/Pill';
+import { TopBar } from '~/components/ui/TopBar';
 import { IntroStateBadge } from './IntroStateBadge';
 import { WarmIntroForwardSheet } from '~/features/intros/components/WarmIntroForwardSheet';
 import { useIntroById } from '~/features/intros/hooks/useIntroById';
@@ -66,13 +67,13 @@ export function IntroDetailView({ id }: Props) {
       query={introQuery}
       isEmpty={(data) => data === null}
       emptyFallback={
-        <View className="flex-1 items-center justify-center bg-surface px-6">
-          <Text className="text-body mb-2">{t('intros.detail.notFound')}</Text>
+        <View className="flex-1 items-center justify-center bg-surface px-gutter">
+          <Text className="font-body text-body-lg text-body mb-2">{t('intros.detail.notFound')}</Text>
           <Pressable
             onPress={() => router.back()}
-            className="bg-white px-4 py-2 rounded-lg border border-border"
+            className="bg-white px-4 py-2 rounded-lg border border-border active:opacity-80"
           >
-            <Text className="text-body">{t('intros.detail.back')}</Text>
+            <Text className="font-body text-body-lg text-body">{t('intros.detail.back')}</Text>
           </Pressable>
         </View>
       }
@@ -164,7 +165,8 @@ function Body({
 
   return (
     <ScrollView className="flex-1 bg-surface">
-      <View className="px-6 pt-16 pb-8">
+      <TopBar back title={t('intros.detail.title')} />
+      <View className="px-gutter pt-4 pb-8">
         {banner && (
           <View testID="intro-banner" className="mb-4">
             <Banner variant="info">{banner}</Banner>
@@ -193,21 +195,21 @@ function Body({
               size={64}
             />
             <View className="ml-3 flex-1">
-              <Text className="text-muted text-xs">{counterpartLabel}</Text>
+              <Text className="font-body text-body-sm text-muted">{counterpartLabel}</Text>
               <Text
-                className="text-body font-semibold"
+                className="font-display-bold text-display-md text-navy"
                 numberOfLines={1}
                 testID="intro-counterpart-name"
               >
                 {counterpart?.name ?? '...'}
               </Text>
-              <Text className="text-muted text-xs" numberOfLines={1}>
+              <Text className="font-body text-body-sm text-muted" numberOfLines={1}>
                 @{counterpart?.handle ?? '?'}
               </Text>
               {isWarmForward && warmReferenceQuery.data?.name ? (
                 <Text
                   testID="intro-warm-forward-via"
-                  className="text-muted text-[10px] mt-0.5"
+                  className="font-body text-body-xs text-muted mt-0.5"
                   numberOfLines={1}
                 >
                   {t('intros.warm.kindWarmForwardVia', { name: warmReferenceQuery.data.name })}
@@ -224,7 +226,7 @@ function Body({
 
         <View className="mb-4">
           <Banner variant="muted" title={noteCaption}>
-            <Text testID="intro-note" className="font-body text-[12px] text-body leading-snug">
+            <Text testID="intro-note" className="font-body text-body-md text-body">
               {intro.note}
             </Text>
           </Banner>
@@ -239,7 +241,7 @@ function Body({
         ) : null}
 
         {!isSender && intro.state === 'delivered' && !isExpired && !isWarmRequest ? (
-          <Text className="font-body text-[10px] text-muted leading-snug mb-3">
+          <Text className="font-body text-body-xs text-muted mb-3">
             {t('intros.detail.declineSilent')}
           </Text>
         ) : null}

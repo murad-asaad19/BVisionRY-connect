@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -29,10 +29,15 @@ export function PhotoNudgeBanner({ photoUrl, visible = true }: Props) {
   if (!visible || photoUrl || dismissed || !userId) return null;
 
   return (
-    <View className="mx-4 mb-2">
-      <Banner testID="photo-nudge-banner" variant="info" title={t('profile.photoNudgeTitle')}>
+    <View className="mx-gutter mb-2">
+      <Banner
+        testID="photo-nudge-banner"
+        variant="info"
+        title={t('profile.photoNudgeTitle')}
+        onDismiss={() => dismissPhotoNudge(userId)}
+      >
         <View className="flex-row items-center justify-between gap-2">
-          <Text className="text-info-text text-[11px] font-body flex-1">
+          <Text className="text-info-text text-body-sm font-body flex-1">
             {t('profile.photoNudgeBody')}
           </Text>
           <Button
@@ -45,15 +50,6 @@ export function PhotoNudgeBanner({ photoUrl, visible = true }: Props) {
           >
             {t('profile.photoNudgeAction')}
           </Button>
-          <Pressable
-            testID="photo-nudge-dismiss"
-            onPress={() => dismissPhotoNudge(userId)}
-            className="px-2 py-2"
-            accessibilityRole="button"
-            accessibilityLabel={t('profile.photoNudgeDismiss')}
-          >
-            <Text className="text-muted font-display-bold">X</Text>
-          </Pressable>
         </View>
       </Banner>
     </View>

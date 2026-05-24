@@ -9,7 +9,7 @@ export default function NotificationsSubScreen() {
     <View testID="settings-screen" className="flex-1 bg-surface">
       <Stack.Screen options={{ title: t('settings.notifications') }} />
       <ScrollView className="flex-1">
-        <View className="w-full max-w-2xl mx-auto p-4">
+        <View className="w-full max-w-2xl mx-auto">
           <NotificationPrefsSection />
         </View>
       </ScrollView>

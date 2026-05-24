@@ -1,29 +1,12 @@
-import { Pressable, Text } from 'react-native';
-import { Stack, router } from 'expo-router';
-import { useTranslation } from 'react-i18next';
+import { Stack } from 'expo-router';
 import { ProfileView } from '~/features/profile/components/ProfileView';
 
 export default function ProfileRoute() {
-  const { t } = useTranslation();
+  // ProfileView renders its own TopBar (with Edit/Share actions); the Stack
+  // header would duplicate the chrome and clash with the gradient hero.
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: t('settings.profile'),
-          headerShown: true,
-          headerRight: () => (
-            <Pressable
-              testID="profile-settings"
-              onPress={() => router.push('/(app)/settings' as never)}
-              accessibilityRole="button"
-              accessibilityLabel={t('profile.settingsA11y')}
-              className="px-2 py-1"
-            >
-              <Text className="text-body text-base">⚙</Text>
-            </Pressable>
-          ),
-        }}
-      />
+      <Stack.Screen options={{ headerShown: false }} />
       <ProfileView />
     </>
   );
