@@ -93,7 +93,7 @@ void main() {
       tester,
       intros: stubIntros(
         received: <Intro>[
-          buildIntro(id: 'i-1', note: 'Hi Alice, ' + ('x' * 90)),
+          buildIntro(id: 'i-1', note: 'Hi Alice, ${'x' * 90}'),
           buildIntro(
             id: 'i-2',
             senderId: 'sender-2',

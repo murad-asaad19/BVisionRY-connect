@@ -60,7 +60,9 @@ class SupabaseIntrosGateway implements IntrosGateway {
 final Provider<IntrosService> introsServiceProvider = Provider<IntrosService>((
   Ref<IntrosService> ref,
 ) {
-  return IntrosService(SupabaseIntrosGateway(ref.watch(supabaseClientProvider)));
+  return IntrosService(
+    SupabaseIntrosGateway(ref.watch(supabaseClientProvider)),
+  );
 });
 
 /// Thin wrapper over the four intro RPCs and the two list-by-side SELECTs.
