@@ -150,6 +150,7 @@
     }
   },
   "onboarding": {
+    "skip": "Skip",
     "stepLabel": "Step {{current}} of {{total}} · {{stepName}}",
     "stepName": {
       "goal": "Goal",
@@ -661,6 +662,16 @@
       "advise": "Advise",
       "find_advisor": "Find advisor",
       "peer_connect": "Peer connect"
+    },
+    "goalLabel": {
+      "hire": "Hiring",
+      "be_hired": "Looking for work",
+      "co_found": "Co-founding",
+      "invest": "Investing",
+      "take_investment": "Raising",
+      "advise": "Advising",
+      "find_advisor": "Seeking an advisor",
+      "peer_connect": "Peer connection"
     }
   },
   "meetings": {

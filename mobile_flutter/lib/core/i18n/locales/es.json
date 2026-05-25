@@ -150,6 +150,7 @@
     }
   },
   "onboarding": {
+    "skip": "Omitir",
     "stepLabel": "Paso {{current}} de {{total}} · {{stepName}}",
     "stepName": {
       "goal": "Objetivo",
@@ -661,6 +662,16 @@
       "advise": "Asesorar",
       "find_advisor": "Buscar asesor",
       "peer_connect": "Conectar entre pares"
+    },
+    "goalLabel": {
+      "hire": "Contratando",
+      "be_hired": "Buscando empleo",
+      "co_found": "Cofundando",
+      "invest": "Invirtiendo",
+      "take_investment": "Levantando inversión",
+      "advise": "Asesorando",
+      "find_advisor": "Buscando asesor",
+      "peer_connect": "Conexión entre pares"
     }
   },
   "meetings": {
