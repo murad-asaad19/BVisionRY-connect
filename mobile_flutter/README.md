@@ -1,17 +1,36 @@
-# connect_mobile
+# mobile_flutter — BVisionry Connect (Flutter rebuild)
 
-BVisionry Connect (Flutter rebuild)
+Sibling Flutter app to `../mobile/` (the React Native original). The
+Supabase backend in `../supabase/` is shared.
 
-## Getting Started
+## Dev quickstart
 
-This project is a starting point for a Flutter application.
+```bash
+# Copy and fill in your local Supabase keys
+cp env/dev.json.example env/dev.json
 
-A few resources to get you started if this is your first Flutter project:
+# Run on web (quick smoke)
+flutter run -d chrome --dart-define-from-file=env/dev.json
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+# Run on a simulator / connected device
+flutter run --dart-define-from-file=env/dev.json
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Test
+
+```bash
+flutter test                       # unit + widget
+flutter test --update-goldens      # refresh golden snapshots
+flutter analyze
+dart format --set-exit-if-changed lib test
+```
+
+## Codegen (run after editing freezed models / riverpod generators)
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+## Project layout
+
+See [`docs/superpowers/plans/2026-05-25-flutter-rebuild-00-master.md`](../docs/superpowers/plans/2026-05-25-flutter-rebuild-00-master.md).
