@@ -8,6 +8,7 @@ import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/top_bar.dart';
 import '../../discovery/presentation/widgets/daily_matches_section.dart';
 import '../../discovery/providers/daily_matches_provider.dart';
+import '../../intros/presentation/warm_intro_suggestions_strip.dart';
 import 'widgets/home_skeleton.dart';
 import 'widgets/thin_pool_banner.dart';
 import 'widgets/todays_matches_header.dart';
@@ -60,6 +61,7 @@ class HomeScreen extends ConsumerWidget {
                   date: matches.first.forDateLocal,
                 ),
                 DailyMatchesSection(matches: matches),
+                const WarmIntroSuggestionsStrip(),
                 const SizedBox(height: 16),
               ],
             ),
