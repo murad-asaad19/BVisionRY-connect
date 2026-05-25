@@ -6,7 +6,10 @@
 /// strings fall back to [MatchReason.dailyPick] so the UI never crashes if
 /// the server adds a new reason.
 enum MatchReason {
-  complementaryGoals('Complementary goals', 'discovery.reason.complementaryGoals'),
+  complementaryGoals(
+    'Complementary goals',
+    'discovery.reason.complementaryGoals',
+  ),
   sharedRole('Shared role', 'discovery.reason.sharedRole'),
   sameCity('Same city', 'discovery.reason.sameCity'),
   newOnConnect('New on Connect', 'discovery.reason.newOnConnect'),

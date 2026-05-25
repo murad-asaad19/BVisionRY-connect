@@ -26,7 +26,9 @@ class FeedFilters with _$FeedFilters {
   /// True when any filter is set — used to decide whether the inline filter
   /// bar should render the "+ Filter" affordance vs the active chips.
   bool get isActive =>
-      query.isNotEmpty || roles.isNotEmpty || goalTypes.isNotEmpty ||
+      query.isNotEmpty ||
+      roles.isNotEmpty ||
+      goalTypes.isNotEmpty ||
       country != null;
 
   /// Returns a JSON map suitable for persisting to `shared_preferences`,

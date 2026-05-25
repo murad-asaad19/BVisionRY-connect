@@ -9,7 +9,12 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../domain/feed_filters.dart';
 
-const List<String> _kRoles = <String>['founder', 'leader', 'builder', 'investor'];
+const List<String> _kRoles = <String>[
+  'founder',
+  'leader',
+  'builder',
+  'investor',
+];
 const List<String> _kGoals = <String>[
   'hire',
   'be_hired',
@@ -124,7 +129,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String?>(
-            value: _country,
+            initialValue: _country,
             isExpanded: true,
             hint: Text(context.t('discovery.countryPlaceholder')),
             items: <DropdownMenuItem<String?>>[

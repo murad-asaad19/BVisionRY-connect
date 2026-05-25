@@ -18,7 +18,8 @@ void main() {
       service = DiscoveryService(gateway);
     });
 
-    test('fetchDailyMatches calls get_daily_matches with optional p_for_date', () async {
+    test('fetchDailyMatches calls get_daily_matches with optional p_for_date',
+        () async {
       when(
         () => gateway.rpc('get_daily_matches', params: any(named: 'params')),
       ).thenAnswer(
@@ -106,7 +107,8 @@ void main() {
       },
     );
 
-    test('searchDiscoverableProfiles uses sentinel cursor on first page', () async {
+    test('searchDiscoverableProfiles uses sentinel cursor on first page',
+        () async {
       when(
         () => gateway.rpc(
           'search_discoverable_profiles',

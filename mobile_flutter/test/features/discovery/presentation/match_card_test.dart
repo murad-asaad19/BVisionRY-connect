@@ -28,7 +28,8 @@ void main() {
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
   });
 
-  testWidgets('renders user name + handle and dispatches onTap', (tester) async {
+  testWidgets('renders user name + handle and dispatches onTap',
+      (tester) async {
     var tapped = false;
     final w = await wrapWithTheme(
       child: Scaffold(
@@ -53,7 +54,8 @@ void main() {
     expect(seen, 1);
   });
 
-  testWidgets('does NOT fire onSeen when match already viewedAt set', (tester) async {
+  testWidgets('does NOT fire onSeen when match already viewedAt set',
+      (tester) async {
     var seen = 0;
     final w = await wrapWithTheme(
       child: Scaffold(

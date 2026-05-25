@@ -17,7 +17,8 @@ void main() {
   setUpAll(() => registerDiscoveryFallbacks());
   setUp(() => SharedPreferences.setMockInitialValues(<String, Object>{}));
 
-  test('initial load uses sentinel cursor, applies persisted filters', () async {
+  test('initial load uses sentinel cursor, applies persisted filters',
+      () async {
     final fake = FakeDiscoveryService();
     when(
       () => fake.searchDiscoverableProfiles(
@@ -115,7 +116,8 @@ void main() {
     ).called(1);
   });
 
-  test('applyFilters writes through to feedFiltersProvider and reloads', () async {
+  test('applyFilters writes through to feedFiltersProvider and reloads',
+      () async {
     final fake = FakeDiscoveryService();
     when(
       () => fake.searchDiscoverableProfiles(
@@ -135,10 +137,10 @@ void main() {
     await container.read(searchProvider.future);
 
     await container.read(searchProvider.notifier).applyFilters(
-          roles: <String>['founder'],
-          goalTypes: <String>['hire'],
-          country: 'UK',
-        );
+      roles: <String>['founder'],
+      goalTypes: <String>['hire'],
+      country: 'UK',
+    );
 
     final filters = await container.read(feedFiltersProvider.future);
     expect(filters.roles, <String>['founder']);

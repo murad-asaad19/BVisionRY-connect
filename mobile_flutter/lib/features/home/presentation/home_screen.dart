@@ -51,8 +51,7 @@ class HomeScreen extends ConsumerWidget {
             );
           }
           return RefreshIndicator(
-            onRefresh: () =>
-                ref.read(dailyMatchesProvider.notifier).refresh(),
+            onRefresh: () => ref.read(dailyMatchesProvider.notifier).refresh(),
             child: ListView(
               children: <Widget>[
                 if (matches.length < 3) ThinPoolBanner(count: matches.length),

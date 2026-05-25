@@ -93,7 +93,11 @@ class SearchController extends AsyncNotifier<SearchState> {
     state = const AsyncLoading<SearchState>().copyWithPrevious(state);
     final filters = await ref.read(feedFiltersProvider.future);
     state = await AsyncValue.guard<SearchState>(
-      () => _loadPage(filters, cursor: null, existing: const <DiscoveryProfile>[]),
+      () => _loadPage(
+        filters,
+        cursor: null,
+        existing: const <DiscoveryProfile>[],
+      ),
     );
   }
 }

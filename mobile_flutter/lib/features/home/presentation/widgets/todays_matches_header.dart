@@ -27,12 +27,10 @@ class TodaysMatchesHeader extends StatelessWidget {
     // `initializeDateFormatting()` from `main.dart` (the default locale
     // bundle is initialised eagerly by intl on import).
     final formatted = DateFormat('EEE, MMM d').format(date).toUpperCase();
-    final pickWord = context
-        .t(
-          'home.picksHeader',
-          vars: <String, Object>{'count': count},
-        )
-        .toUpperCase();
+    final pickWord = context.t(
+      'home.picksHeader',
+      vars: <String, Object>{'count': count},
+    ).toUpperCase();
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Row(

@@ -69,8 +69,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           const FeedFilterBar(),
           Expanded(
             child: searchAsync.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text(e.toString())),
               data: (state) {
                 if (state.items.isEmpty) {

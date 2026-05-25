@@ -69,9 +69,7 @@ class FeedFilterBar extends ConsumerWidget {
               onTap: () async {
                 final next = await showFilterSheet(context, initial: f);
                 if (next != null) {
-                  await ref
-                      .read(searchProvider.notifier)
-                      .applyFilters(
+                  await ref.read(searchProvider.notifier).applyFilters(
                         roles: next.roles,
                         goalTypes: next.goalTypes,
                         country: next.country,
