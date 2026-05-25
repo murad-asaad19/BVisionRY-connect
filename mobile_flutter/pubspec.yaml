@@ -54,6 +54,14 @@ dev_dependencies:
   riverpod_generator: ^2.6.3
   riverpod_lint: ^2.6.3
 
+# custom_lint 0.7.3 / riverpod_lint 2.6.4 pin analyzer_plugin to 0.12.0, which
+# only compiles against analyzer 6.x. Our toolchain resolves analyzer 7.6.0
+# (a transitive of newer packages) so we override analyzer_plugin to a 7.x-
+# compatible release. Codegen (build_runner / freezed / json_serializable)
+# happens out-of-process so the lint plugins are unaffected at editor time.
+dependency_overrides:
+  analyzer_plugin: ^0.13.0
+
 flutter:
   uses-material-design: true
   assets:
