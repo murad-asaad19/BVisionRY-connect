@@ -60,3 +60,16 @@ class ValidationException extends AppException {
 class ForbiddenException extends AppException {
   ForbiddenException() : super('auth.errors.signInFailed');
 }
+
+/// `accept_intro` was called against a `warm_request` row, which the
+/// server refuses with Postgrest `22023` + message `"wrong intro kind"`.
+/// The UI should route to the forward sheet instead.
+class WrongIntroKindException extends AppException {
+  WrongIntroKindException() : super('intros.detail.acceptFailed');
+}
+
+/// The intro note failed the server-side 80-400 char range check
+/// (Postgrest `22023` with `char_length(btrim(note))` in the message).
+class IntroNoteRangeException extends AppException {
+  IntroNoteRangeException() : super('intros.compose.errorRange');
+}

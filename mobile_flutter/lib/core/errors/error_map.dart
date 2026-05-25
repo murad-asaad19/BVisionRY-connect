@@ -17,10 +17,23 @@ AppException mapPostgrestError(Object error) {
     ('P0001', 'daily_cap') => DailyCapException(),
     ('23505', _) => DuplicateException(),
     ('P0002', _) => NotOnboardedException(),
-    ('22023', _) => ValidationException('intros.compose.errorRange'),
+    ('22023', _) => _map22023(error),
     ('42501', _) => ForbiddenException(),
     _ => GenericAppException(error),
   };
+}
+
+/// Disambiguates `22023` by sniffing the message string.
+///
+/// `accept_intro` raises `22023 wrong intro kind` when given a `warm_request`
+/// row; `send_intro` / `send_warm_request` / `forward_warm_intro` raise
+/// `22023` with a `char_length(btrim(note))` predicate in the message when
+/// the note falls outside `[80, 400]`. We treat note-range as the default
+/// `22023` outcome and only carve out the kind-specific case.
+AppException _map22023(PostgrestException error) {
+  final msg = error.message.toLowerCase();
+  if (msg.contains('wrong intro kind')) return WrongIntroKindException();
+  return IntroNoteRangeException();
 }
 
 /// Converts a GoTrue auth error into a typed [AppException].
