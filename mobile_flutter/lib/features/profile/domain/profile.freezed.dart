@@ -1,0 +1,699 @@
+// coverage:ignore-file
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'profile.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+T _$identity<T>(T value) => value;
+
+final _privateConstructorUsedError = UnsupportedError(
+    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
+
+Profile _$ProfileFromJson(Map<String, dynamic> json) {
+  return _Profile.fromJson(json);
+}
+
+/// @nodoc
+mixin _$Profile {
+  String get id => throw _privateConstructorUsedError;
+  String? get handle => throw _privateConstructorUsedError;
+  String? get name => throw _privateConstructorUsedError;
+  String? get headline => throw _privateConstructorUsedError;
+  String? get bio => throw _privateConstructorUsedError;
+  List<String> get roles => throw _privateConstructorUsedError;
+  @JsonKey(name: 'primary_role')
+  String? get primaryRole => throw _privateConstructorUsedError;
+  String? get city => throw _privateConstructorUsedError;
+  String? get country => throw _privateConstructorUsedError;
+  @JsonKey(name: 'goal_type')
+  String? get goalType => throw _privateConstructorUsedError;
+  @JsonKey(name: 'goal_text')
+  String? get goalText => throw _privateConstructorUsedError;
+  @JsonKey(name: 'goal_updated_at')
+  DateTime? get goalUpdatedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'photo_url')
+  String? get photoUrl => throw _privateConstructorUsedError;
+  bool get onboarded => throw _privateConstructorUsedError;
+  @JsonKey(name: 'verified_github_username')
+  String? get verifiedGithubUsername => throw _privateConstructorUsedError;
+  @JsonKey(name: 'verified_github_id')
+  int? get verifiedGithubId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'verified_at')
+  DateTime? get verifiedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'suspended_at')
+  DateTime? get suspendedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'private_mode')
+  bool get privateMode => throw _privateConstructorUsedError;
+  @JsonKey(name: 'read_receipts_enabled')
+  bool get readReceiptsEnabled => throw _privateConstructorUsedError;
+  @JsonKey(name: 'public_investor_page')
+  bool get publicInvestorPage => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
+  DateTime? get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'updated_at')
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
+
+  /// Serializes this Profile to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of Profile
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $ProfileCopyWith<Profile> get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ProfileCopyWith<$Res> {
+  factory $ProfileCopyWith(Profile value, $Res Function(Profile) then) =
+      _$ProfileCopyWithImpl<$Res, Profile>;
+  @useResult
+  $Res call(
+      {String id,
+      String? handle,
+      String? name,
+      String? headline,
+      String? bio,
+      List<String> roles,
+      @JsonKey(name: 'primary_role') String? primaryRole,
+      String? city,
+      String? country,
+      @JsonKey(name: 'goal_type') String? goalType,
+      @JsonKey(name: 'goal_text') String? goalText,
+      @JsonKey(name: 'goal_updated_at') DateTime? goalUpdatedAt,
+      @JsonKey(name: 'photo_url') String? photoUrl,
+      bool onboarded,
+      @JsonKey(name: 'verified_github_username') String? verifiedGithubUsername,
+      @JsonKey(name: 'verified_github_id') int? verifiedGithubId,
+      @JsonKey(name: 'verified_at') DateTime? verifiedAt,
+      @JsonKey(name: 'suspended_at') DateTime? suspendedAt,
+      @JsonKey(name: 'private_mode') bool privateMode,
+      @JsonKey(name: 'read_receipts_enabled') bool readReceiptsEnabled,
+      @JsonKey(name: 'public_investor_page') bool publicInvestorPage,
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'updated_at') DateTime? updatedAt});
+}
+
+/// @nodoc
+class _$ProfileCopyWithImpl<$Res, $Val extends Profile>
+    implements $ProfileCopyWith<$Res> {
+  _$ProfileCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of Profile
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? handle = freezed,
+    Object? name = freezed,
+    Object? headline = freezed,
+    Object? bio = freezed,
+    Object? roles = null,
+    Object? primaryRole = freezed,
+    Object? city = freezed,
+    Object? country = freezed,
+    Object? goalType = freezed,
+    Object? goalText = freezed,
+    Object? goalUpdatedAt = freezed,
+    Object? photoUrl = freezed,
+    Object? onboarded = null,
+    Object? verifiedGithubUsername = freezed,
+    Object? verifiedGithubId = freezed,
+    Object? verifiedAt = freezed,
+    Object? suspendedAt = freezed,
+    Object? privateMode = null,
+    Object? readReceiptsEnabled = null,
+    Object? publicInvestorPage = null,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
+  }) {
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      handle: freezed == handle
+          ? _value.handle
+          : handle // ignore: cast_nullable_to_non_nullable
+              as String?,
+      name: freezed == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String?,
+      headline: freezed == headline
+          ? _value.headline
+          : headline // ignore: cast_nullable_to_non_nullable
+              as String?,
+      bio: freezed == bio
+          ? _value.bio
+          : bio // ignore: cast_nullable_to_non_nullable
+              as String?,
+      roles: null == roles
+          ? _value.roles
+          : roles // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      primaryRole: freezed == primaryRole
+          ? _value.primaryRole
+          : primaryRole // ignore: cast_nullable_to_non_nullable
+              as String?,
+      city: freezed == city
+          ? _value.city
+          : city // ignore: cast_nullable_to_non_nullable
+              as String?,
+      country: freezed == country
+          ? _value.country
+          : country // ignore: cast_nullable_to_non_nullable
+              as String?,
+      goalType: freezed == goalType
+          ? _value.goalType
+          : goalType // ignore: cast_nullable_to_non_nullable
+              as String?,
+      goalText: freezed == goalText
+          ? _value.goalText
+          : goalText // ignore: cast_nullable_to_non_nullable
+              as String?,
+      goalUpdatedAt: freezed == goalUpdatedAt
+          ? _value.goalUpdatedAt
+          : goalUpdatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      photoUrl: freezed == photoUrl
+          ? _value.photoUrl
+          : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      onboarded: null == onboarded
+          ? _value.onboarded
+          : onboarded // ignore: cast_nullable_to_non_nullable
+              as bool,
+      verifiedGithubUsername: freezed == verifiedGithubUsername
+          ? _value.verifiedGithubUsername
+          : verifiedGithubUsername // ignore: cast_nullable_to_non_nullable
+              as String?,
+      verifiedGithubId: freezed == verifiedGithubId
+          ? _value.verifiedGithubId
+          : verifiedGithubId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      verifiedAt: freezed == verifiedAt
+          ? _value.verifiedAt
+          : verifiedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      suspendedAt: freezed == suspendedAt
+          ? _value.suspendedAt
+          : suspendedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      privateMode: null == privateMode
+          ? _value.privateMode
+          : privateMode // ignore: cast_nullable_to_non_nullable
+              as bool,
+      readReceiptsEnabled: null == readReceiptsEnabled
+          ? _value.readReceiptsEnabled
+          : readReceiptsEnabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      publicInvestorPage: null == publicInvestorPage
+          ? _value.publicInvestorPage
+          : publicInvestorPage // ignore: cast_nullable_to_non_nullable
+              as bool,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$ProfileImplCopyWith<$Res> implements $ProfileCopyWith<$Res> {
+  factory _$$ProfileImplCopyWith(
+          _$ProfileImpl value, $Res Function(_$ProfileImpl) then) =
+      __$$ProfileImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String id,
+      String? handle,
+      String? name,
+      String? headline,
+      String? bio,
+      List<String> roles,
+      @JsonKey(name: 'primary_role') String? primaryRole,
+      String? city,
+      String? country,
+      @JsonKey(name: 'goal_type') String? goalType,
+      @JsonKey(name: 'goal_text') String? goalText,
+      @JsonKey(name: 'goal_updated_at') DateTime? goalUpdatedAt,
+      @JsonKey(name: 'photo_url') String? photoUrl,
+      bool onboarded,
+      @JsonKey(name: 'verified_github_username') String? verifiedGithubUsername,
+      @JsonKey(name: 'verified_github_id') int? verifiedGithubId,
+      @JsonKey(name: 'verified_at') DateTime? verifiedAt,
+      @JsonKey(name: 'suspended_at') DateTime? suspendedAt,
+      @JsonKey(name: 'private_mode') bool privateMode,
+      @JsonKey(name: 'read_receipts_enabled') bool readReceiptsEnabled,
+      @JsonKey(name: 'public_investor_page') bool publicInvestorPage,
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'updated_at') DateTime? updatedAt});
+}
+
+/// @nodoc
+class __$$ProfileImplCopyWithImpl<$Res>
+    extends _$ProfileCopyWithImpl<$Res, _$ProfileImpl>
+    implements _$$ProfileImplCopyWith<$Res> {
+  __$$ProfileImplCopyWithImpl(
+      _$ProfileImpl _value, $Res Function(_$ProfileImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of Profile
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? handle = freezed,
+    Object? name = freezed,
+    Object? headline = freezed,
+    Object? bio = freezed,
+    Object? roles = null,
+    Object? primaryRole = freezed,
+    Object? city = freezed,
+    Object? country = freezed,
+    Object? goalType = freezed,
+    Object? goalText = freezed,
+    Object? goalUpdatedAt = freezed,
+    Object? photoUrl = freezed,
+    Object? onboarded = null,
+    Object? verifiedGithubUsername = freezed,
+    Object? verifiedGithubId = freezed,
+    Object? verifiedAt = freezed,
+    Object? suspendedAt = freezed,
+    Object? privateMode = null,
+    Object? readReceiptsEnabled = null,
+    Object? publicInvestorPage = null,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
+  }) {
+    return _then(_$ProfileImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      handle: freezed == handle
+          ? _value.handle
+          : handle // ignore: cast_nullable_to_non_nullable
+              as String?,
+      name: freezed == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String?,
+      headline: freezed == headline
+          ? _value.headline
+          : headline // ignore: cast_nullable_to_non_nullable
+              as String?,
+      bio: freezed == bio
+          ? _value.bio
+          : bio // ignore: cast_nullable_to_non_nullable
+              as String?,
+      roles: null == roles
+          ? _value._roles
+          : roles // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      primaryRole: freezed == primaryRole
+          ? _value.primaryRole
+          : primaryRole // ignore: cast_nullable_to_non_nullable
+              as String?,
+      city: freezed == city
+          ? _value.city
+          : city // ignore: cast_nullable_to_non_nullable
+              as String?,
+      country: freezed == country
+          ? _value.country
+          : country // ignore: cast_nullable_to_non_nullable
+              as String?,
+      goalType: freezed == goalType
+          ? _value.goalType
+          : goalType // ignore: cast_nullable_to_non_nullable
+              as String?,
+      goalText: freezed == goalText
+          ? _value.goalText
+          : goalText // ignore: cast_nullable_to_non_nullable
+              as String?,
+      goalUpdatedAt: freezed == goalUpdatedAt
+          ? _value.goalUpdatedAt
+          : goalUpdatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      photoUrl: freezed == photoUrl
+          ? _value.photoUrl
+          : photoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
+      onboarded: null == onboarded
+          ? _value.onboarded
+          : onboarded // ignore: cast_nullable_to_non_nullable
+              as bool,
+      verifiedGithubUsername: freezed == verifiedGithubUsername
+          ? _value.verifiedGithubUsername
+          : verifiedGithubUsername // ignore: cast_nullable_to_non_nullable
+              as String?,
+      verifiedGithubId: freezed == verifiedGithubId
+          ? _value.verifiedGithubId
+          : verifiedGithubId // ignore: cast_nullable_to_non_nullable
+              as int?,
+      verifiedAt: freezed == verifiedAt
+          ? _value.verifiedAt
+          : verifiedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      suspendedAt: freezed == suspendedAt
+          ? _value.suspendedAt
+          : suspendedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      privateMode: null == privateMode
+          ? _value.privateMode
+          : privateMode // ignore: cast_nullable_to_non_nullable
+              as bool,
+      readReceiptsEnabled: null == readReceiptsEnabled
+          ? _value.readReceiptsEnabled
+          : readReceiptsEnabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      publicInvestorPage: null == publicInvestorPage
+          ? _value.publicInvestorPage
+          : publicInvestorPage // ignore: cast_nullable_to_non_nullable
+              as bool,
+      createdAt: freezed == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      updatedAt: freezed == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$ProfileImpl extends _Profile {
+  const _$ProfileImpl(
+      {required this.id,
+      this.handle,
+      this.name,
+      this.headline,
+      this.bio,
+      final List<String> roles = const <String>[],
+      @JsonKey(name: 'primary_role') this.primaryRole,
+      this.city,
+      this.country,
+      @JsonKey(name: 'goal_type') this.goalType,
+      @JsonKey(name: 'goal_text') this.goalText,
+      @JsonKey(name: 'goal_updated_at') this.goalUpdatedAt,
+      @JsonKey(name: 'photo_url') this.photoUrl,
+      this.onboarded = false,
+      @JsonKey(name: 'verified_github_username') this.verifiedGithubUsername,
+      @JsonKey(name: 'verified_github_id') this.verifiedGithubId,
+      @JsonKey(name: 'verified_at') this.verifiedAt,
+      @JsonKey(name: 'suspended_at') this.suspendedAt,
+      @JsonKey(name: 'private_mode') this.privateMode = false,
+      @JsonKey(name: 'read_receipts_enabled') this.readReceiptsEnabled = false,
+      @JsonKey(name: 'public_investor_page') this.publicInvestorPage = false,
+      @JsonKey(name: 'created_at') this.createdAt,
+      @JsonKey(name: 'updated_at') this.updatedAt})
+      : _roles = roles,
+        super._();
+
+  factory _$ProfileImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ProfileImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  final String? handle;
+  @override
+  final String? name;
+  @override
+  final String? headline;
+  @override
+  final String? bio;
+  final List<String> _roles;
+  @override
+  @JsonKey()
+  List<String> get roles {
+    if (_roles is EqualUnmodifiableListView) return _roles;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_roles);
+  }
+
+  @override
+  @JsonKey(name: 'primary_role')
+  final String? primaryRole;
+  @override
+  final String? city;
+  @override
+  final String? country;
+  @override
+  @JsonKey(name: 'goal_type')
+  final String? goalType;
+  @override
+  @JsonKey(name: 'goal_text')
+  final String? goalText;
+  @override
+  @JsonKey(name: 'goal_updated_at')
+  final DateTime? goalUpdatedAt;
+  @override
+  @JsonKey(name: 'photo_url')
+  final String? photoUrl;
+  @override
+  @JsonKey()
+  final bool onboarded;
+  @override
+  @JsonKey(name: 'verified_github_username')
+  final String? verifiedGithubUsername;
+  @override
+  @JsonKey(name: 'verified_github_id')
+  final int? verifiedGithubId;
+  @override
+  @JsonKey(name: 'verified_at')
+  final DateTime? verifiedAt;
+  @override
+  @JsonKey(name: 'suspended_at')
+  final DateTime? suspendedAt;
+  @override
+  @JsonKey(name: 'private_mode')
+  final bool privateMode;
+  @override
+  @JsonKey(name: 'read_receipts_enabled')
+  final bool readReceiptsEnabled;
+  @override
+  @JsonKey(name: 'public_investor_page')
+  final bool publicInvestorPage;
+  @override
+  @JsonKey(name: 'created_at')
+  final DateTime? createdAt;
+  @override
+  @JsonKey(name: 'updated_at')
+  final DateTime? updatedAt;
+
+  @override
+  String toString() {
+    return 'Profile(id: $id, handle: $handle, name: $name, headline: $headline, bio: $bio, roles: $roles, primaryRole: $primaryRole, city: $city, country: $country, goalType: $goalType, goalText: $goalText, goalUpdatedAt: $goalUpdatedAt, photoUrl: $photoUrl, onboarded: $onboarded, verifiedGithubUsername: $verifiedGithubUsername, verifiedGithubId: $verifiedGithubId, verifiedAt: $verifiedAt, suspendedAt: $suspendedAt, privateMode: $privateMode, readReceiptsEnabled: $readReceiptsEnabled, publicInvestorPage: $publicInvestorPage, createdAt: $createdAt, updatedAt: $updatedAt)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ProfileImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.handle, handle) || other.handle == handle) &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.headline, headline) ||
+                other.headline == headline) &&
+            (identical(other.bio, bio) || other.bio == bio) &&
+            const DeepCollectionEquality().equals(other._roles, _roles) &&
+            (identical(other.primaryRole, primaryRole) ||
+                other.primaryRole == primaryRole) &&
+            (identical(other.city, city) || other.city == city) &&
+            (identical(other.country, country) || other.country == country) &&
+            (identical(other.goalType, goalType) ||
+                other.goalType == goalType) &&
+            (identical(other.goalText, goalText) ||
+                other.goalText == goalText) &&
+            (identical(other.goalUpdatedAt, goalUpdatedAt) ||
+                other.goalUpdatedAt == goalUpdatedAt) &&
+            (identical(other.photoUrl, photoUrl) ||
+                other.photoUrl == photoUrl) &&
+            (identical(other.onboarded, onboarded) ||
+                other.onboarded == onboarded) &&
+            (identical(other.verifiedGithubUsername, verifiedGithubUsername) ||
+                other.verifiedGithubUsername == verifiedGithubUsername) &&
+            (identical(other.verifiedGithubId, verifiedGithubId) ||
+                other.verifiedGithubId == verifiedGithubId) &&
+            (identical(other.verifiedAt, verifiedAt) ||
+                other.verifiedAt == verifiedAt) &&
+            (identical(other.suspendedAt, suspendedAt) ||
+                other.suspendedAt == suspendedAt) &&
+            (identical(other.privateMode, privateMode) ||
+                other.privateMode == privateMode) &&
+            (identical(other.readReceiptsEnabled, readReceiptsEnabled) ||
+                other.readReceiptsEnabled == readReceiptsEnabled) &&
+            (identical(other.publicInvestorPage, publicInvestorPage) ||
+                other.publicInvestorPage == publicInvestorPage) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        handle,
+        name,
+        headline,
+        bio,
+        const DeepCollectionEquality().hash(_roles),
+        primaryRole,
+        city,
+        country,
+        goalType,
+        goalText,
+        goalUpdatedAt,
+        photoUrl,
+        onboarded,
+        verifiedGithubUsername,
+        verifiedGithubId,
+        verifiedAt,
+        suspendedAt,
+        privateMode,
+        readReceiptsEnabled,
+        publicInvestorPage,
+        createdAt,
+        updatedAt
+      ]);
+
+  /// Create a copy of Profile
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ProfileImplCopyWith<_$ProfileImpl> get copyWith =>
+      __$$ProfileImplCopyWithImpl<_$ProfileImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ProfileImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _Profile extends Profile {
+  const factory _Profile(
+      {required final String id,
+      final String? handle,
+      final String? name,
+      final String? headline,
+      final String? bio,
+      final List<String> roles,
+      @JsonKey(name: 'primary_role') final String? primaryRole,
+      final String? city,
+      final String? country,
+      @JsonKey(name: 'goal_type') final String? goalType,
+      @JsonKey(name: 'goal_text') final String? goalText,
+      @JsonKey(name: 'goal_updated_at') final DateTime? goalUpdatedAt,
+      @JsonKey(name: 'photo_url') final String? photoUrl,
+      final bool onboarded,
+      @JsonKey(name: 'verified_github_username')
+      final String? verifiedGithubUsername,
+      @JsonKey(name: 'verified_github_id') final int? verifiedGithubId,
+      @JsonKey(name: 'verified_at') final DateTime? verifiedAt,
+      @JsonKey(name: 'suspended_at') final DateTime? suspendedAt,
+      @JsonKey(name: 'private_mode') final bool privateMode,
+      @JsonKey(name: 'read_receipts_enabled') final bool readReceiptsEnabled,
+      @JsonKey(name: 'public_investor_page') final bool publicInvestorPage,
+      @JsonKey(name: 'created_at') final DateTime? createdAt,
+      @JsonKey(name: 'updated_at') final DateTime? updatedAt}) = _$ProfileImpl;
+  const _Profile._() : super._();
+
+  factory _Profile.fromJson(Map<String, dynamic> json) = _$ProfileImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  String? get handle;
+  @override
+  String? get name;
+  @override
+  String? get headline;
+  @override
+  String? get bio;
+  @override
+  List<String> get roles;
+  @override
+  @JsonKey(name: 'primary_role')
+  String? get primaryRole;
+  @override
+  String? get city;
+  @override
+  String? get country;
+  @override
+  @JsonKey(name: 'goal_type')
+  String? get goalType;
+  @override
+  @JsonKey(name: 'goal_text')
+  String? get goalText;
+  @override
+  @JsonKey(name: 'goal_updated_at')
+  DateTime? get goalUpdatedAt;
+  @override
+  @JsonKey(name: 'photo_url')
+  String? get photoUrl;
+  @override
+  bool get onboarded;
+  @override
+  @JsonKey(name: 'verified_github_username')
+  String? get verifiedGithubUsername;
+  @override
+  @JsonKey(name: 'verified_github_id')
+  int? get verifiedGithubId;
+  @override
+  @JsonKey(name: 'verified_at')
+  DateTime? get verifiedAt;
+  @override
+  @JsonKey(name: 'suspended_at')
+  DateTime? get suspendedAt;
+  @override
+  @JsonKey(name: 'private_mode')
+  bool get privateMode;
+  @override
+  @JsonKey(name: 'read_receipts_enabled')
+  bool get readReceiptsEnabled;
+  @override
+  @JsonKey(name: 'public_investor_page')
+  bool get publicInvestorPage;
+  @override
+  @JsonKey(name: 'created_at')
+  DateTime? get createdAt;
+  @override
+  @JsonKey(name: 'updated_at')
+  DateTime? get updatedAt;
+
+  /// Create a copy of Profile
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$ProfileImplCopyWith<_$ProfileImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
