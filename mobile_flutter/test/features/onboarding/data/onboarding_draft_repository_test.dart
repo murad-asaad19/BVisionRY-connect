@@ -50,7 +50,8 @@ void main() {
     expect(await repo.read(), isNull);
   });
 
-  test('read() returns null when payload references unknown goal_type', () async {
+  test('read() returns null when payload references unknown goal_type',
+      () async {
     // Forward-compat: a future client could persist a goal_type the current
     // build doesn't recognise — round-trip rather than throw.
     final SharedPreferences prefs = await SharedPreferences.getInstance();

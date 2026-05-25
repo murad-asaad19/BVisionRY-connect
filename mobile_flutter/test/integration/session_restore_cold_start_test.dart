@@ -55,10 +55,10 @@ void main() {
     );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(secureStorageChannel, (
-          MethodCall call,
-        ) async {
-          return null;
-        });
+      MethodCall call,
+    ) async {
+      return null;
+    });
   });
 
   testWidgets('cold-start with restored session lands on /home', (
@@ -103,7 +103,8 @@ void main() {
     expect(find.byKey(const Key('sign-out')), findsOneWidget);
   });
 
-  testWidgets('cold-start with session but no profile row lands on onboarding', (
+  testWidgets('cold-start with session but no profile row lands on onboarding',
+      (
     WidgetTester tester,
   ) async {
     final FakeAuthGateway auth = FakeAuthGateway();
@@ -114,8 +115,7 @@ void main() {
     await _pumpApp(tester, auth: auth, query: _Q(null));
     // GoalStep renders the goal text input — assert the AppInput frame is
     // present, which is unique to the Goal step shell.
-    expect(find.byKey(const ValueKey<String>('app-input-frame')),
-        findsWidgets);
+    expect(find.byKey(const ValueKey<String>('app-input-frame')), findsWidgets);
   });
 
   testWidgets('cold-start with no session lands on /sign-in', (

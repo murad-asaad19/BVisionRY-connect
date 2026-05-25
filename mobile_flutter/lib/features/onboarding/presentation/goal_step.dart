@@ -82,9 +82,8 @@ class _GoalStepState extends ConsumerState<GoalStep> {
       footer: AppButton(
         key: const ValueKey<String>('goal-next'),
         label: context.t('onboarding.goal.next'),
-        onPressed: canProceed
-            ? () => context.go(Routes.onboardingIdentity)
-            : null,
+        onPressed:
+            canProceed ? () => context.go(Routes.onboardingIdentity) : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

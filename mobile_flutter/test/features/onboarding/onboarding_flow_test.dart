@@ -140,8 +140,11 @@ void main() {
 
       // We should now be on /onboarding/goal — there's exactly one TextField
       // visible (the goal AppInput's inner TextField).
-      expect(find.byType(TextField), findsOneWidget,
-          reason: 'route guard should have landed on /onboarding/goal');
+      expect(
+        find.byType(TextField),
+        findsOneWidget,
+        reason: 'route guard should have landed on /onboarding/goal',
+      );
 
       // STEP 1 — Goal: type a long goal description so inference fires
       // and the chip auto-selects (high confidence → GoalType.hire).

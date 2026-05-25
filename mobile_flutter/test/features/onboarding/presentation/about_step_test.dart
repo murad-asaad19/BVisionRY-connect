@@ -46,8 +46,7 @@ Future<Widget> _renderAboutStep({
       onboardingDraftRepositoryProvider
           .overrideWith((_) async => OnboardingDraftRepository(prefs)),
       sharedPreferencesProvider.overrideWith((_) async => prefs),
-      onboardingServiceProvider
-          .overrideWithValue(OnboardingService(runner)),
+      onboardingServiceProvider.overrideWithValue(OnboardingService(runner)),
       // sessionProvider is a StreamProvider — overriding the synchronous
       // accessor is enough for AboutStep, which reads `currentSessionProvider`.
       currentSessionProvider.overrideWithValue(session),

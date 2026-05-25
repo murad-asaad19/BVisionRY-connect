@@ -121,7 +121,7 @@ void main() {
 
   test('PostgrestException is mapped via mapPostgrestError', () async {
     final _FakeRunner runner = _FakeRunner(
-      willThrow: PostgrestException(
+      willThrow: const PostgrestException(
         message: 'duplicate key',
         code: '23505',
       ),

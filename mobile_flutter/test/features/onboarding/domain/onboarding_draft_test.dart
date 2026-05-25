@@ -19,8 +19,7 @@ void main() {
 
   test('copyWith updates a single field without touching others', () {
     const OnboardingDraft base = OnboardingDraft();
-    final OnboardingDraft updated =
-        base.copyWith(name: 'Ada', handle: 'ada');
+    final OnboardingDraft updated = base.copyWith(name: 'Ada', handle: 'ada');
     expect(updated.name, 'Ada');
     expect(updated.handle, 'ada');
     expect(updated.goalText, isEmpty);

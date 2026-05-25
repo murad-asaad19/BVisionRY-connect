@@ -29,8 +29,7 @@ void main() {
     final _FakeRunner runner = _FakeRunner((String h) async => true);
     final ProviderContainer c = makeContainer(runner);
     addTearDown(c.dispose);
-    final bool? result =
-        await c.read(handleAvailabilityProvider('ada').future);
+    final bool? result = await c.read(handleAvailabilityProvider('ada').future);
     expect(result, isTrue);
     expect(runner.calls, 1);
     expect(runner.lastHandle, 'ada');

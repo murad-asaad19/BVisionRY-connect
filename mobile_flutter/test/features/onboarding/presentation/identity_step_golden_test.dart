@@ -24,10 +24,12 @@ void main() {
       (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await OnboardingDraftRepository(prefs).write(const OnboardingDraft(
-      name: 'Ada Lovelace',
-      handle: 'ada',
-    ));
+    await OnboardingDraftRepository(prefs).write(
+      const OnboardingDraft(
+        name: 'Ada Lovelace',
+        handle: 'ada',
+      ),
+    );
 
     final loader = await primedLocaleLoader();
     await tester.pumpWidgetBuilder(
@@ -37,7 +39,8 @@ void main() {
           onboardingDraftRepositoryProvider
               .overrideWith((_) async => OnboardingDraftRepository(prefs)),
           sharedPreferencesProvider.overrideWith((_) async => prefs),
-          handleAvailabilityRunnerProvider.overrideWithValue(_AvailableRunner()),
+          handleAvailabilityRunnerProvider
+              .overrideWithValue(_AvailableRunner()),
         ],
         child: const IdentityStep(),
       ),

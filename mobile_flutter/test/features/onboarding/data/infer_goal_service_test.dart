@@ -42,11 +42,11 @@ void main() {
   });
 
   test('returns low confidence with null goal_type', () async {
-    functions.onInvoke = (String name, {Object? body}) async =>
-        FunctionResponse(
-          data: <String, dynamic>{'goal_type': null, 'confidence': 'low'},
-          status: 200,
-        );
+    functions.onInvoke =
+        (String name, {Object? body}) async => FunctionResponse(
+              data: <String, dynamic>{'goal_type': null, 'confidence': 'low'},
+              status: 200,
+            );
 
     final InferGoalResult r = await service.infer(
       text: 'looking for stuff in general here ok',
@@ -58,11 +58,11 @@ void main() {
   test('maps a sentinel "none" goal_type string to null', () async {
     // The infer-goal-type edge function may emit either null or the string
     // "none" for unclassifiable input; treat both as "no auto-selection".
-    functions.onInvoke = (String name, {Object? body}) async =>
-        FunctionResponse(
-          data: <String, dynamic>{'goal_type': 'none', 'confidence': 'low'},
-          status: 200,
-        );
+    functions.onInvoke =
+        (String name, {Object? body}) async => FunctionResponse(
+              data: <String, dynamic>{'goal_type': 'none', 'confidence': 'low'},
+              status: 200,
+            );
     final InferGoalResult r = await service.infer(text: 'a' * 25);
     expect(r.goalType, isNull);
   });

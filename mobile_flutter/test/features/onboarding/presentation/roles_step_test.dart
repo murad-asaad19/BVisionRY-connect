@@ -57,14 +57,22 @@ void main() {
     await tester.tap(find.byKey(const ValueKey<String>('role-chip-investor')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey<String>('primary-pill-founder')),
-        findsOneWidget);
-    expect(find.byKey(const ValueKey<String>('primary-pill-investor')),
-        findsOneWidget);
-    expect(find.byKey(const ValueKey<String>('primary-pill-builder')),
-        findsNothing);
-    expect(find.byKey(const ValueKey<String>('primary-pill-leader')),
-        findsNothing);
+    expect(
+      find.byKey(const ValueKey<String>('primary-pill-founder')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('primary-pill-investor')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('primary-pill-builder')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('primary-pill-leader')),
+      findsNothing,
+    );
   });
 
   testWidgets('deselecting the primary role auto-clears primary',
@@ -74,7 +82,8 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey<String>('role-chip-founder')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey<String>('primary-pill-founder')));
+    await tester
+        .tap(find.byKey(const ValueKey<String>('primary-pill-founder')));
     await tester.pumpAndSettle();
     expect((await _readDraft(prefs)).primaryRole, 'founder');
 
@@ -104,7 +113,8 @@ void main() {
     expect(ink.onTap, isNull);
 
     // Pick primary — now enabled.
-    await tester.tap(find.byKey(const ValueKey<String>('primary-pill-builder')));
+    await tester
+        .tap(find.byKey(const ValueKey<String>('primary-pill-builder')));
     await tester.pumpAndSettle();
     ink = tester.widget<InkWell>(
       find.descendant(of: btn, matching: find.byType(InkWell)),

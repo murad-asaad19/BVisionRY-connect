@@ -71,8 +71,7 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
       ),
       GoRoute(
         path: Routes.authCallback,
-        builder: (_, GoRouterState state) =>
-            AuthCallbackScreen(uri: state.uri),
+        builder: (_, GoRouterState state) => AuthCallbackScreen(uri: state.uri),
       ),
       GoRoute(
         path: Routes.suspended,

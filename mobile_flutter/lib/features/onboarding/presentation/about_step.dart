@@ -36,8 +36,7 @@ class _AboutStepState extends ConsumerState<AboutStep> {
   bool _submitting = false;
 
   Future<void> _submit() async {
-    final OnboardingDraft? draft =
-        ref.read(onboardingDraftProvider).value;
+    final OnboardingDraft? draft = ref.read(onboardingDraftProvider).value;
     if (draft == null) return;
     final String? err = OnboardingSubmissionSchema.firstError(draft);
     if (err != null) {
@@ -63,8 +62,10 @@ class _AboutStepState extends ConsumerState<AboutStep> {
       // The route guard re-evaluates on profile invalidation and advances
       // the user to /home; no explicit navigation needed here.
     } on AppException catch (e) {
+      if (!mounted) return;
       _toast(context.t(e.i18nKey), AppIntent.danger);
     } catch (_) {
+      if (!mounted) return;
       _toast(
         context.t('onboarding.about.errorSubmit'),
         AppIntent.danger,
@@ -98,14 +99,14 @@ class _AboutStepState extends ConsumerState<AboutStep> {
     final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
     final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
 
-    final bool canSubmit =
-        OnboardingSubmissionSchema.firstError(draft) == null;
+    final bool canSubmit = OnboardingSubmissionSchema.firstError(draft) == null;
 
     final HeadlineError? headlineErr =
         HeadlineInput.dirty(draft.headline).error;
     final BioError? bioErr = BioInput.dirty(draft.bio).error;
     final CityCountryError? cityErr = CityInput.dirty(draft.city).error;
-    final CityCountryError? countryErr = CountryInput.dirty(draft.country).error;
+    final CityCountryError? countryErr =
+        CountryInput.dirty(draft.country).error;
 
     return StepperLayout(
       stepIndex: 3,

@@ -85,8 +85,7 @@ class _AppInputState extends State<AppInput> {
       final selection = _controller.selection;
       _controller.value = TextEditingValue(
         text: widget.value,
-        selection: selection.isValid &&
-                selection.end <= widget.value.length
+        selection: selection.isValid && selection.end <= widget.value.length
             ? selection
             : TextSelection.collapsed(offset: widget.value.length),
       );
@@ -165,8 +164,7 @@ class _AppInputState extends State<AppInput> {
                   autofillHints: widget.autofillHints,
                   obscureText: widget.obscureText,
                   maxLength: widget.maxLength,
-                  minLines:
-                      widget.minLines ?? (widget.multiline ? 3 : null),
+                  minLines: widget.minLines ?? (widget.multiline ? 3 : null),
                   maxLines: widget.multiline ? widget.maxLines : 1,
                   style: typo.bodyLg.copyWith(color: colors.body),
                   cursorColor: colors.navy,

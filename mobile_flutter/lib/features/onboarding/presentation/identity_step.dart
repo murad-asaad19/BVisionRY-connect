@@ -59,11 +59,10 @@ class _IdentityStepState extends ConsumerState<IdentityStep> {
 
     // Only watch the availability provider for a format-valid handle —
     // otherwise we'd waste a provider subscription on every invalid keystroke.
-    final AsyncValue<bool?> availability = handleFormatValid &&
-            _handleBlurred &&
-            draft.handle.isNotEmpty
-        ? ref.watch(handleAvailabilityProvider(draft.handle))
-        : const AsyncValue<bool?>.data(null);
+    final AsyncValue<bool?> availability =
+        handleFormatValid && _handleBlurred && draft.handle.isNotEmpty
+            ? ref.watch(handleAvailabilityProvider(draft.handle))
+            : const AsyncValue<bool?>.data(null);
 
     Widget? trailing;
     String? handleError;
@@ -103,8 +102,7 @@ class _IdentityStepState extends ConsumerState<IdentityStep> {
       footer: AppButton(
         key: const ValueKey<String>('identity-next'),
         label: context.t('onboarding.identity.next'),
-        onPressed:
-            canProceed ? () => context.go(Routes.onboardingRoles) : null,
+        onPressed: canProceed ? () => context.go(Routes.onboardingRoles) : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

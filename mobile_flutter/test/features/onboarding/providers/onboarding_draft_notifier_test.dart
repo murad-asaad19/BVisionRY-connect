@@ -78,9 +78,7 @@ void main() {
     final ProviderContainer container = await makeContainer();
     addTearDown(container.dispose);
     await container.read(onboardingDraftProvider.future);
-    await container
-        .read(onboardingDraftProvider.notifier)
-        .updateName('Ada');
+    await container.read(onboardingDraftProvider.notifier).updateName('Ada');
     await container.read(onboardingDraftProvider.notifier).reset();
     expect(
       container.read(onboardingDraftProvider).value,
@@ -101,7 +99,10 @@ void main() {
         container.read(onboardingDraftProvider.notifier);
     await notifier.updateRoles(<String>['founder', 'leader']);
     await notifier.updatePrimaryRole('founder');
-    expect(container.read(onboardingDraftProvider).value!.primaryRole, 'founder');
+    expect(
+      container.read(onboardingDraftProvider).value!.primaryRole,
+      'founder',
+    );
 
     // Now drop "founder" from roles — primaryRole must be cleared.
     await notifier.updateRoles(<String>['leader']);

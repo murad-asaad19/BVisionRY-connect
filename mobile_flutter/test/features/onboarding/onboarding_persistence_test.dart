@@ -31,7 +31,9 @@ void main() {
     await first.read(onboardingDraftProvider.future);
     await first.read(onboardingDraftProvider.notifier).updateName('Ada');
     await first.read(onboardingDraftProvider.notifier).updateHandle('ada');
-    await first.read(onboardingDraftProvider.notifier).updateGoalType(GoalType.hire);
+    await first
+        .read(onboardingDraftProvider.notifier)
+        .updateGoalType(GoalType.hire);
     await first
         .read(onboardingDraftProvider.notifier)
         .updateGoalText('Looking to hire a fractional designer for our app.');
@@ -53,12 +55,14 @@ void main() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     // Pre-seed as if a prior run had persisted the draft.
-    await OnboardingDraftRepository(prefs).write(const OnboardingDraft(
-      name: 'Pre Seeded',
-      handle: 'preseed',
-      roles: <String>['founder'],
-      primaryRole: 'founder',
-    ));
+    await OnboardingDraftRepository(prefs).write(
+      const OnboardingDraft(
+        name: 'Pre Seeded',
+        handle: 'preseed',
+        roles: <String>['founder'],
+        primaryRole: 'founder',
+      ),
+    );
 
     final ProviderContainer container = ProviderContainer(
       overrides: <Override>[

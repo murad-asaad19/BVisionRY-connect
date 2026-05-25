@@ -74,8 +74,7 @@ class OnboardingService {
     }
   }
 
-  static String? _nullIfEmpty(String? v) =>
-      (v == null || v.isEmpty) ? null : v;
+  static String? _nullIfEmpty(String? v) => (v == null || v.isEmpty) ? null : v;
 }
 
 final Provider<OnboardingService> onboardingServiceProvider =

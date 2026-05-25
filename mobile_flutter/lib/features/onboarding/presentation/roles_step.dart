@@ -48,8 +48,7 @@ class RolesStep extends ConsumerWidget {
     final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
     final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
 
-    final bool canProceed =
-        draft.roles.isNotEmpty && draft.primaryRole != null;
+    final bool canProceed = draft.roles.isNotEmpty && draft.primaryRole != null;
 
     return StepperLayout(
       stepIndex: 2,
@@ -58,8 +57,7 @@ class RolesStep extends ConsumerWidget {
       footer: AppButton(
         key: const ValueKey<String>('roles-next'),
         label: context.t('onboarding.roles.next'),
-        onPressed:
-            canProceed ? () => context.go(Routes.onboardingAbout) : null,
+        onPressed: canProceed ? () => context.go(Routes.onboardingAbout) : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

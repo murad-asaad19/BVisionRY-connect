@@ -35,10 +35,12 @@ void main() {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     // Seed a representative draft so the golden surfaces the chip-selected
     // state and a typical 30-ish char goal description.
-    await OnboardingDraftRepository(prefs).write(const OnboardingDraft(
-      goalText: 'Hiring a fractional design lead',
-      goalType: GoalType.hire,
-    ));
+    await OnboardingDraftRepository(prefs).write(
+      const OnboardingDraft(
+        goalText: 'Hiring a fractional design lead',
+        goalType: GoalType.hire,
+      ),
+    );
 
     final loader = await primedLocaleLoader();
     await tester.pumpWidgetBuilder(

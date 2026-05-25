@@ -3,7 +3,6 @@ import 'package:connect_mobile/features/onboarding/data/onboarding_draft_reposit
 import 'package:connect_mobile/features/onboarding/domain/goal_type.dart';
 import 'package:connect_mobile/features/onboarding/domain/onboarding_draft.dart';
 import 'package:connect_mobile/features/onboarding/presentation/goal_step.dart';
-import 'package:connect_mobile/features/onboarding/providers/onboarding_draft_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -72,7 +71,11 @@ void main() {
     (WidgetTester tester) async {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final _FakeInferService svc = _FakeInferService(
-        ({required String text, String? primaryRole, List<String>? roles}) async =>
+        ({
+          required String text,
+          String? primaryRole,
+          List<String>? roles,
+        }) async =>
             _high(GoalType.hire),
       );
       await pumpWithI18n(
@@ -92,8 +95,9 @@ void main() {
       expect(svc.lastText, 'I want to hire a designer for an app');
 
       // Auto-select happened: draft.goalType == hire.
-      final OnboardingDraft draft = await OnboardingDraftRepository(prefs).read() ??
-          const OnboardingDraft();
+      final OnboardingDraft draft =
+          await OnboardingDraftRepository(prefs).read() ??
+              const OnboardingDraft();
       expect(draft.goalType, GoalType.hire);
     },
   );
@@ -102,7 +106,11 @@ void main() {
       (WidgetTester tester) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final _FakeInferService svc = _FakeInferService(
-      ({required String text, String? primaryRole, List<String>? roles}) async =>
+      ({
+        required String text,
+        String? primaryRole,
+        List<String>? roles,
+      }) async =>
           _high(GoalType.hire),
     );
     await pumpWithI18n(
@@ -120,7 +128,11 @@ void main() {
       (WidgetTester tester) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final _FakeInferService svc = _FakeInferService(
-      ({required String text, String? primaryRole, List<String>? roles}) async =>
+      ({
+        required String text,
+        String? primaryRole,
+        List<String>? roles,
+      }) async =>
           _low(),
     );
     await pumpWithI18n(
@@ -135,8 +147,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 900));
     await tester.pumpAndSettle();
 
-    final OnboardingDraft draft = await OnboardingDraftRepository(prefs).read() ??
-        const OnboardingDraft();
+    final OnboardingDraft draft =
+        await OnboardingDraftRepository(prefs).read() ??
+            const OnboardingDraft();
     expect(draft.goalType, isNull);
   });
 
@@ -144,7 +157,11 @@ void main() {
       (WidgetTester tester) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final _FakeInferService svc = _FakeInferService(
-      ({required String text, String? primaryRole, List<String>? roles}) async =>
+      ({
+        required String text,
+        String? primaryRole,
+        List<String>? roles,
+      }) async =>
           _low(),
     );
     await pumpWithI18n(
@@ -155,7 +172,7 @@ void main() {
     // Initially disabled: the button's InkWell.onTap is null.
     final Finder btn = find.byKey(const ValueKey<String>('goal-next'));
     expect(btn, findsOneWidget);
-    InkWell ink = tester.widget<InkWell>(
+    final InkWell ink = tester.widget<InkWell>(
       find.descendant(of: btn, matching: find.byType(InkWell)),
     );
     expect(ink.onTap, isNull);
@@ -164,7 +181,11 @@ void main() {
   testWidgets('counter renders count/max', (WidgetTester tester) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final _FakeInferService svc = _FakeInferService(
-      ({required String text, String? primaryRole, List<String>? roles}) async =>
+      ({
+        required String text,
+        String? primaryRole,
+        List<String>? roles,
+      }) async =>
           _low(),
     );
     await pumpWithI18n(
@@ -182,7 +203,11 @@ void main() {
       (WidgetTester tester) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final _FakeInferService svc = _FakeInferService(
-      ({required String text, String? primaryRole, List<String>? roles}) async =>
+      ({
+        required String text,
+        String? primaryRole,
+        List<String>? roles,
+      }) async =>
           _low(),
     );
     await pumpWithI18n(
@@ -194,8 +219,9 @@ void main() {
     await tester.tap(find.byKey(const ValueKey<String>('goal-chip-co_found')));
     await tester.pumpAndSettle();
 
-    final OnboardingDraft draft = await OnboardingDraftRepository(prefs).read() ??
-        const OnboardingDraft();
+    final OnboardingDraft draft =
+        await OnboardingDraftRepository(prefs).read() ??
+            const OnboardingDraft();
     expect(draft.goalType, GoalType.coFound);
   });
 }

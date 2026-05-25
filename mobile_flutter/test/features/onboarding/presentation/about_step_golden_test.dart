@@ -20,18 +20,21 @@ void main() {
   testGoldens('AboutStep — fully populated', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await OnboardingDraftRepository(prefs).write(const OnboardingDraft(
-      goalText: 'Hiring a fractional design lead for our healthtech app.',
-      goalType: GoalType.hire,
-      name: 'Ada Lovelace',
-      handle: 'ada',
-      roles: <String>['founder'],
-      primaryRole: 'founder',
-      city: 'Berlin',
-      country: 'Germany',
-      headline: 'Healthtech founder',
-      bio: 'Building privacy-first mental wellness tools. Hiring design talent.',
-    ));
+    await OnboardingDraftRepository(prefs).write(
+      const OnboardingDraft(
+        goalText: 'Hiring a fractional design lead for our healthtech app.',
+        goalType: GoalType.hire,
+        name: 'Ada Lovelace',
+        handle: 'ada',
+        roles: <String>['founder'],
+        primaryRole: 'founder',
+        city: 'Berlin',
+        country: 'Germany',
+        headline: 'Healthtech founder',
+        bio:
+            'Building privacy-first mental wellness tools. Hiring design talent.',
+      ),
+    );
 
     final loader = await primedLocaleLoader();
     await tester.pumpWidgetBuilder(

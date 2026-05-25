@@ -18,10 +18,12 @@ void main() {
       (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await OnboardingDraftRepository(prefs).write(const OnboardingDraft(
-      roles: <String>['founder', 'leader'],
-      primaryRole: 'founder',
-    ));
+    await OnboardingDraftRepository(prefs).write(
+      const OnboardingDraft(
+        roles: <String>['founder', 'leader'],
+        primaryRole: 'founder',
+      ),
+    );
 
     final loader = await primedLocaleLoader();
     await tester.pumpWidgetBuilder(

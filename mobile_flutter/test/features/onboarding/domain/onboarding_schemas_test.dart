@@ -132,8 +132,7 @@ void main() {
 
   group('OnboardingSubmissionSchema', () {
     const OnboardingDraft valid = OnboardingDraft(
-      goalText:
-          'Looking to hire a fractional designer for our healthtech app.',
+      goalText: 'Looking to hire a fractional designer for our healthtech app.',
       goalType: GoalType.hire,
       name: 'Ada',
       handle: 'ada',

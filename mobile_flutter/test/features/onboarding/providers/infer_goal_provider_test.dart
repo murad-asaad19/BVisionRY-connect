@@ -12,8 +12,7 @@ class _FakeInferService implements InferGoalService {
     required String text,
     String? primaryRole,
     List<String>? roles,
-  })
-      _answer;
+  }) _answer;
 
   int calls = 0;
   String? lastText;
@@ -49,11 +48,15 @@ void main() {
 
   test('starts idle', () {
     final _FakeInferService svc = _FakeInferService(
-      ({required String text, String? primaryRole, List<String>? roles}) async =>
+      ({
+        required String text,
+        String? primaryRole,
+        List<String>? roles,
+      }) async =>
           const InferGoalResult(
-            goalType: GoalType.hire,
-            confidence: InferConfidence.high,
-          ),
+        goalType: GoalType.hire,
+        confidence: InferConfidence.high,
+      ),
     );
     final ProviderContainer c = makeContainer(svc);
     addTearDown(c.dispose);
@@ -62,11 +65,15 @@ void main() {
 
   test('does NOT call service when text < 20 chars', () async {
     final _FakeInferService svc = _FakeInferService(
-      ({required String text, String? primaryRole, List<String>? roles}) async =>
+      ({
+        required String text,
+        String? primaryRole,
+        List<String>? roles,
+      }) async =>
           const InferGoalResult(
-            goalType: GoalType.hire,
-            confidence: InferConfidence.high,
-          ),
+        goalType: GoalType.hire,
+        confidence: InferConfidence.high,
+      ),
     );
     final ProviderContainer c = makeContainer(svc);
     addTearDown(c.dispose);
@@ -77,11 +84,15 @@ void main() {
 
   test('debounces multiple rapid calls into a single invocation', () async {
     final _FakeInferService svc = _FakeInferService(
-      ({required String text, String? primaryRole, List<String>? roles}) async =>
+      ({
+        required String text,
+        String? primaryRole,
+        List<String>? roles,
+      }) async =>
           const InferGoalResult(
-            goalType: GoalType.hire,
-            confidence: InferConfidence.high,
-          ),
+        goalType: GoalType.hire,
+        confidence: InferConfidence.high,
+      ),
     );
     final ProviderContainer c = makeContainer(svc);
     addTearDown(c.dispose);
@@ -143,19 +154,23 @@ void main() {
 
   test('forwards primaryRole + roles to the service', () async {
     final _FakeInferService svc = _FakeInferService(
-      ({required String text, String? primaryRole, List<String>? roles}) async =>
+      ({
+        required String text,
+        String? primaryRole,
+        List<String>? roles,
+      }) async =>
           const InferGoalResult(
-            goalType: GoalType.hire,
-            confidence: InferConfidence.high,
-          ),
+        goalType: GoalType.hire,
+        confidence: InferConfidence.high,
+      ),
     );
     final ProviderContainer c = makeContainer(svc);
     addTearDown(c.dispose);
     c.read(inferGoalProvider.notifier).requestInference(
-          text: 'a long enough text to fire the inference',
-          primaryRole: 'founder',
-          roles: const <String>['founder', 'leader'],
-        );
+      text: 'a long enough text to fire the inference',
+      primaryRole: 'founder',
+      roles: const <String>['founder', 'leader'],
+    );
     await Future<void>.delayed(const Duration(milliseconds: 900));
     expect(svc.lastPrimaryRole, 'founder');
     expect(svc.lastRoles, <String>['founder', 'leader']);
@@ -163,11 +178,15 @@ void main() {
 
   test('reset() returns to idle and cancels pending timer', () async {
     final _FakeInferService svc = _FakeInferService(
-      ({required String text, String? primaryRole, List<String>? roles}) async =>
+      ({
+        required String text,
+        String? primaryRole,
+        List<String>? roles,
+      }) async =>
           const InferGoalResult(
-            goalType: GoalType.hire,
-            confidence: InferConfidence.high,
-          ),
+        goalType: GoalType.hire,
+        confidence: InferConfidence.high,
+      ),
     );
     final ProviderContainer c = makeContainer(svc);
     addTearDown(c.dispose);
@@ -181,11 +200,15 @@ void main() {
 
   test('shrinking text below the 20-char gate returns to idle', () async {
     final _FakeInferService svc = _FakeInferService(
-      ({required String text, String? primaryRole, List<String>? roles}) async =>
+      ({
+        required String text,
+        String? primaryRole,
+        List<String>? roles,
+      }) async =>
           const InferGoalResult(
-            goalType: GoalType.hire,
-            confidence: InferConfidence.high,
-          ),
+        goalType: GoalType.hire,
+        confidence: InferConfidence.high,
+      ),
     );
     final ProviderContainer c = makeContainer(svc);
     addTearDown(c.dispose);

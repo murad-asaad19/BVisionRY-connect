@@ -28,8 +28,10 @@ class StepperLayout extends StatelessWidget {
     this.onBack,
     this.onSkip,
     this.footer,
-  }) : assert(stepIndex >= 0 && stepIndex < totalSteps,
-            'stepIndex must be in 0..${totalSteps - 1}');
+  }) : assert(
+          stepIndex >= 0 && stepIndex < totalSteps,
+          'stepIndex must be in 0..${totalSteps - 1}',
+        );
 
   /// Number of wizard steps. Fixed by the spec (goal → identity → roles →
   /// about); exposed as a constant so step screens can reference it without
