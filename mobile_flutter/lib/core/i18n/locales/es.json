@@ -344,7 +344,11 @@
     }
   },
   "connections": {
-    "empty": "Aún no tienes conexiones. Acepta una intro para empezar."
+    "title": "Conexiones",
+    "connectedOn": "Conectado {{date}}",
+    "empty": {
+      "body": "Aún no tienes conexiones. Acepta una intro para empezar."
+    }
   },
   "common": {
     "cancel": "Cancelar",
@@ -394,6 +398,8 @@
       "hint": "Cuenta por qué quieres conectar. Mínimo 80 caracteres. Tu mensaje pasa por una verificación rápida de seguridad antes de entregarse.",
       "placeholder": "Te escribo porque...",
       "counter": "{{count}} / {{max}} (mín. {{min}})",
+      "charsLabel": "{{count}} caracteres",
+      "todaysIntros": "Intros de hoy: {{count}}/{{cap}}",
       "cancel": "Cancelar",
       "send": "Enviar",
       "errorRange": "La nota debe tener entre 80 y 400 caracteres.",
@@ -402,6 +408,19 @@
       "errorRateLimit": "Has alcanzado el límite de envíos de hoy. Inténtalo de nuevo mañana.",
       "errorExpired": "Esta intro ha caducado.",
       "errorGeneric": "Error al enviar. Inténtalo de nuevo."
+    },
+    "warmRequest": {
+      "title": "Reenviar presentación",
+      "fromAsker": "DE",
+      "viaMutual": "REENVIAR A",
+      "forwardNote": "Agrega una nota para {{targetName}}",
+      "forwardCta": "Reenviar",
+      "skipCta": "Ahora no",
+      "hintBody": "Reenviar esta presentación les envía una intro {{kind}} de tu parte — pueden aceptarla, rechazarla o ignorarla."
+    },
+    "warmSuggestion": {
+      "viaOne": "Vía {{name}}",
+      "viaOther": "Vía {{name}} +{{count}} más"
     },
     "badge": {
       "delivered": "Pendiente",
@@ -429,6 +448,8 @@
       "declineCta": "Rechazar",
       "forwardCta": "Reenviar intro",
       "warmRequestHint": "{{name}} te pide que les hagas una presentación.",
+      "connectedDate": "Conectado {{date}}",
+      "expiresAt": "Caduca {{date}}",
       "acceptFailed": "No se pudo aceptar",
       "declineFailed": "No se pudo rechazar"
     },

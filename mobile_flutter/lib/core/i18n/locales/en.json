@@ -344,7 +344,11 @@
     }
   },
   "connections": {
-    "empty": "No connections yet. Accept an intro to start."
+    "title": "Connections",
+    "connectedOn": "Connected {{date}}",
+    "empty": {
+      "body": "No connections yet. Accept an intro to start."
+    }
   },
   "common": {
     "cancel": "Cancel",
@@ -394,6 +398,8 @@
       "hint": "Say why you want to connect. Min 80 characters. Your message goes through a quick safety check before delivery.",
       "placeholder": "I'm reaching out because...",
       "counter": "{{count}} / {{max}} (min {{min}})",
+      "charsLabel": "{{count}} characters",
+      "todaysIntros": "Today's intros: {{count}}/{{cap}}",
       "cancel": "Cancel",
       "send": "Send",
       "errorRange": "Note must be 80-400 characters.",
@@ -402,6 +408,19 @@
       "errorRateLimit": "You've reached today's send limit. Try again tomorrow.",
       "errorExpired": "This intro has expired.",
       "errorGeneric": "Send failed. Please try again."
+    },
+    "warmRequest": {
+      "title": "Forward warm intro",
+      "fromAsker": "FROM",
+      "viaMutual": "FORWARD TO",
+      "forwardNote": "Add a note for {{targetName}}",
+      "forwardCta": "Forward",
+      "skipCta": "Not now",
+      "hintBody": "Forwarding this introduction sends them a {{kind}} intro on your behalf — they can accept, decline, or ignore."
+    },
+    "warmSuggestion": {
+      "viaOne": "Via {{name}}",
+      "viaOther": "Via {{name}} +{{count}} more"
     },
     "badge": {
       "delivered": "Pending",
@@ -429,6 +448,8 @@
       "declineCta": "Decline",
       "forwardCta": "Forward warm intro",
       "warmRequestHint": "{{name}} is asking you to introduce them.",
+      "connectedDate": "Connected {{date}}",
+      "expiresAt": "Expires {{date}}",
       "acceptFailed": "Accept failed",
       "declineFailed": "Decline failed"
     },
