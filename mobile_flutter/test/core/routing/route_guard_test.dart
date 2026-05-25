@@ -65,4 +65,37 @@ void main() {
       Routes.home,
     );
   });
+
+  group('anon-allowed paths', () {
+    test('isAnonAllowed matches /p/:handle prefix', () {
+      expect(isAnonAllowed('/p/omar-d'), isTrue);
+      expect(isAnonAllowed('/p/some-other-handle'), isTrue);
+      expect(isAnonAllowed('/profile'), isFalse);
+      expect(isAnonAllowed('/home'), isFalse);
+    });
+
+    test(
+        'resolveNextRoute returns null for anon-allowed paths even when '
+        'there is no session', () {
+      expect(
+        resolveNextRoute(
+          sessionLoading: false,
+          hasSession: false,
+          currentLocation: '/p/omar-d',
+        ),
+        isNull,
+      );
+    });
+
+    test('resolveNextRoute keeps standard behaviour for non-anon paths', () {
+      expect(
+        resolveNextRoute(
+          sessionLoading: false,
+          hasSession: false,
+          currentLocation: '/profile',
+        ),
+        Routes.signIn,
+      );
+    });
+  });
 }

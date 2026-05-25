@@ -14,6 +14,11 @@ import '../../features/onboarding/presentation/about_step.dart';
 import '../../features/onboarding/presentation/goal_step.dart';
 import '../../features/onboarding/presentation/identity_step.dart';
 import '../../features/onboarding/presentation/roles_step.dart';
+import '../../features/profile/presentation/profile_edit_screen.dart';
+import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/profile/presentation/public_profile_screen.dart';
+import '../../features/verification/presentation/verification_screen.dart';
+import 'route_guard.dart';
 import 'router_refresh.dart';
 import 'routes.dart';
 
@@ -43,6 +48,9 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
     initialLocation: Routes.signIn,
     refreshListenable: refresh,
     redirect: (BuildContext context, GoRouterState state) {
+      // /p/:handle (and any future anon-allowed prefix) is reachable without
+      // a session — never redirect away from these locations.
+      if (isAnonAllowed(state.matchedLocation)) return null;
       final String? next = ref.read(routeGuardProvider);
       if (next == null) return null; // still loading — keep splash up
       // Don't redirect away from /auth — let the callback screen run.
@@ -96,6 +104,23 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
       GoRoute(
         path: Routes.home,
         builder: (_, __) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: Routes.profile,
+        builder: (_, __) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: Routes.profileEdit,
+        builder: (_, __) => const ProfileEditScreen(),
+      ),
+      GoRoute(
+        path: '/p/:handle',
+        builder: (_, GoRouterState state) =>
+            PublicProfileScreen(handle: state.pathParameters['handle']!),
+      ),
+      GoRoute(
+        path: Routes.settingsVerification,
+        builder: (_, __) => const VerificationScreen(),
       ),
     ],
   );
