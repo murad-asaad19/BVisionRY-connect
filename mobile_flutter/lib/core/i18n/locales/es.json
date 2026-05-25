@@ -474,13 +474,15 @@
     }
   },
   "chat": {
+    "title": "Chats",
     "chatsTitle": "Chats",
     "composerPlaceholder": "Mensaje...",
     "typing": "escribiendo...",
     "edited": "editado",
     "deletedPlaceholder": "Mensaje eliminado",
-    "mute": "Silenciar",
-    "unmute": "Reactivar",
+    "messageDeleted": "Mensaje eliminado",
+    "muteCta": "Silenciar",
+    "unmuteCta": "Reactivar",
     "muted": "Silenciado",
     "edit": "Editar",
     "delete": "Eliminar",
@@ -493,6 +495,25 @@
     "previewImage": "📷 Foto",
     "previewVoice": "🎤 Mensaje de voz",
     "previewMeeting": "📅 Propuesta de reunión",
+    "empty": {
+      "title": "Aún no hay conversaciones",
+      "body": "Acepta una presentación para empezar a chatear."
+    },
+    "lastMessage": {
+      "image": "Foto",
+      "voice": "Voz ({{duration}})",
+      "meeting": "Propuesta de reunión",
+      "deleted": "Mensaje eliminado"
+    },
+    "mute": {
+      "menuMute": "Silenciar",
+      "menuUnmute": "Reactivar",
+      "confirmTitle": "¿Silenciar este chat?",
+      "confirmMuteBody": "No recibirás notificaciones push de nuevos mensajes en este chat.",
+      "muteSuccess": "Silenciado",
+      "unmuteSuccess": "Reactivado",
+      "actionFailed": "No se pudo actualizar el ajuste de silencio"
+    },
     "list": {
       "title": "Chats",
       "emptyTitle": "Aún no hay conversaciones",

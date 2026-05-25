@@ -65,7 +65,7 @@ void main() {
   });
 
   group('canEditBy', () {
-    final userId = 'user-1';
+    const userId = 'user-1';
     final now = DateTime.utc(2026, 5, 25, 10);
     Message base() => Message(
       id: 'm1',
@@ -112,7 +112,7 @@ void main() {
   });
 
   group('canDeleteBy', () {
-    final userId = 'user-1';
+    const userId = 'user-1';
     final now = DateTime.utc(2026, 5, 25, 10);
 
     test('own non-deleted message', () {

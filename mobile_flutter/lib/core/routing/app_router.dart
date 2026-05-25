@@ -9,7 +9,8 @@ import '../../features/auth/presentation/suspended_screen.dart';
 import '../../features/auth/providers/profile_provider.dart';
 import '../../features/auth/providers/route_guard_provider.dart';
 import '../../features/auth/providers/session_provider.dart';
-import '../../features/chat/presentation/chats_screen_stub.dart';
+import '../../features/chat/presentation/chats_list_screen.dart';
+import '../../features/chat/presentation/conversation_screen_stub.dart';
 import '../../features/connections/presentation/connections_screen.dart';
 import '../../features/connections/presentation/network_screen_stub.dart';
 import '../../features/discovery/presentation/search_screen.dart';
@@ -177,7 +178,16 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
             routes: <RouteBase>[
               GoRoute(
                 path: Routes.chats,
-                builder: (_, __) => const ChatsScreenStub(),
+                builder: (_, __) => const ChatsListScreen(),
+                routes: <RouteBase>[
+                  GoRoute(
+                    path: ':id',
+                    builder: (_, GoRouterState state) =>
+                        ConversationScreenStub(
+                          conversationId: state.pathParameters['id']!,
+                        ),
+                  ),
+                ],
               ),
             ],
           ),

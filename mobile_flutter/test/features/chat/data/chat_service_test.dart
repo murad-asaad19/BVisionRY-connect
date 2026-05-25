@@ -25,20 +25,22 @@ void main() {
     test('calls RPC with no args and parses rows', () async {
       when(
         () => gw.rpc('list_conversation_overview'),
-      ).thenAnswer((_) async => <Map<String, dynamic>>[
-        <String, dynamic>{
-          'conversation_id': 'c1',
-          'peer_id': 'u2',
-          'peer_name': 'Ada',
-          'peer_handle': 'ada',
-          'peer_photo_url': null,
-          'last_message_body': 'hi',
-          'last_message_kind': 'text',
-          'last_message_at': '2026-05-25T10:00:00Z',
-          'unread_count': 1,
-          'is_muted': false,
-        },
-      ]);
+      ).thenAnswer(
+        (_) async => <Map<String, dynamic>>[
+          <String, dynamic>{
+            'conversation_id': 'c1',
+            'peer_id': 'u2',
+            'peer_name': 'Ada',
+            'peer_handle': 'ada',
+            'peer_photo_url': null,
+            'last_message_body': 'hi',
+            'last_message_kind': 'text',
+            'last_message_at': '2026-05-25T10:00:00Z',
+            'unread_count': 1,
+            'is_muted': false,
+          },
+        ],
+      );
       final rows = await svc.listConversationOverview();
       expect(rows, hasLength(1));
       expect(rows.first.lastMessageKind, MessageKind.text);
@@ -57,10 +59,12 @@ void main() {
     test('maps RPC rows into typed records', () async {
       when(
         () => gw.rpc('list_conversation_unread'),
-      ).thenAnswer((_) async => <Map<String, dynamic>>[
-        <String, dynamic>{'conversation_id': 'c1', 'unread_count': 3},
-        <String, dynamic>{'conversation_id': 'c2', 'unread_count': 0},
-      ]);
+      ).thenAnswer(
+        (_) async => <Map<String, dynamic>>[
+          <String, dynamic>{'conversation_id': 'c1', 'unread_count': 3},
+          <String, dynamic>{'conversation_id': 'c2', 'unread_count': 0},
+        ],
+      );
       final rows = await svc.listConversationUnread();
       expect(rows, hasLength(2));
       expect(rows.first.conversationId, 'c1');

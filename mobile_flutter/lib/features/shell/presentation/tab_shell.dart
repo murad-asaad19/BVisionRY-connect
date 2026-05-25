@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../chat/providers/unread_counts_provider.dart';
 import '../../intros/providers/intros_providers.dart';
 import 'widgets/connect_bottom_nav_bar.dart';
 
@@ -13,7 +14,7 @@ import 'widgets/connect_bottom_nav_bar.dart';
 /// Bottom-nav badge counts hang off Riverpod providers per tab so each
 /// surface owns its own unread shape:
 /// - Inbox tab (index 1): `unreadIntrosCountProvider`
-/// - Chats tab (index 4): wired in Phase 7 to `unreadCountsProvider`.
+/// - Chats tab (index 4): `unreadCountsProvider` (sum across all chats).
 class TabShell extends ConsumerWidget {
   const TabShell({super.key, required this.navigationShell});
 
@@ -23,12 +24,18 @@ class TabShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final int introBadge =
         ref.watch(unreadIntrosCountProvider).asData?.value ?? 0;
+    final Map<String, int>? unread =
+        ref.watch(unreadCountsProvider).asData?.value;
+    final int chatsBadge = unread == null
+        ? 0
+        : unread.values.fold<int>(0, (a, b) => a + b);
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: ConnectBottomNavBar(
         currentIndex: navigationShell.currentIndex,
         badgeCounts: <int, int>{
           if (introBadge > 0) 1: introBadge,
+          if (chatsBadge > 0) 4: chatsBadge,
         },
         onTap: (i) => navigationShell.goBranch(
           i,

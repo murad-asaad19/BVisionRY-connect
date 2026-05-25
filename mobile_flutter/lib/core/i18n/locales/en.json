@@ -474,13 +474,15 @@
     }
   },
   "chat": {
+    "title": "Chats",
     "chatsTitle": "Chats",
     "composerPlaceholder": "Message...",
     "typing": "typing...",
     "edited": "edited",
     "deletedPlaceholder": "Message deleted",
-    "mute": "Mute",
-    "unmute": "Unmute",
+    "messageDeleted": "Message deleted",
+    "muteCta": "Mute",
+    "unmuteCta": "Unmute",
     "muted": "Muted",
     "edit": "Edit",
     "delete": "Delete",
@@ -493,6 +495,25 @@
     "previewImage": "📷 Photo",
     "previewVoice": "🎤 Voice message",
     "previewMeeting": "📅 Meeting proposal",
+    "empty": {
+      "title": "No conversations yet",
+      "body": "Accept an intro to start chatting."
+    },
+    "lastMessage": {
+      "image": "Photo",
+      "voice": "Voice ({{duration}})",
+      "meeting": "Meeting proposal",
+      "deleted": "Message deleted"
+    },
+    "mute": {
+      "menuMute": "Mute",
+      "menuUnmute": "Unmute",
+      "confirmTitle": "Mute this chat?",
+      "confirmMuteBody": "You won't get push notifications for new messages in this chat.",
+      "muteSuccess": "Muted",
+      "unmuteSuccess": "Unmuted",
+      "actionFailed": "Couldn't update mute setting"
+    },
     "list": {
       "title": "Chats",
       "emptyTitle": "No conversations yet",
