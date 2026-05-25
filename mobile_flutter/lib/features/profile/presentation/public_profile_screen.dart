@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../auth/providers/session_provider.dart';
+import '../../intros/presentation/send_intro_sheet.dart';
 import '../data/public_profile_service.dart';
 import '../providers/public_profile_provider.dart';
 import 'profile_hero.dart';
@@ -104,13 +105,24 @@ class PublicProfileScreen extends ConsumerWidget {
                       : context.t('profile.signInToConnect'),
                   variant: AppButtonVariant.primary,
                   onPressed: () {
-                    if (isAuthed) {
-                      // Phase 6 wires the intro composer. For now, do nothing
-                      // — the button is reachable but the deeper flow is
-                      // out of scope for Phase 4 chunk B.
-                    } else {
+                    if (!isAuthed) {
                       context.go(Routes.signIn);
+                      return;
                     }
+                    showSendIntroSheet(
+                      context,
+                      recipient: SendIntroRecipient(
+                        id: profile.id,
+                        name: profile.name ?? profile.handle,
+                        handle: profile.handle,
+                        photoUrl: profile.photoUrl,
+                        // Per spec §17.2 we don't render the verified
+                        // badge anonymously — but the sheet only opens for
+                        // an authed caller, so it's safe to honour the
+                        // server-provided flag here.
+                        verified: profile.verifiedGithubUsername != null,
+                      ),
+                    );
                   },
                 ),
               ),
