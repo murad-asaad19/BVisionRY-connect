@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:connect_mobile/features/auth/providers/auth_service_provider.dart';
 import 'package:connect_mobile/features/auth/providers/session_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
