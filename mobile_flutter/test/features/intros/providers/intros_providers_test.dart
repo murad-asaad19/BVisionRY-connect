@@ -89,13 +89,15 @@ void main() {
       final fake = _FakeIntrosService();
       when(
         () => fake.listReceivedIntros(viewerId: any(named: 'viewerId')),
-      ).thenAnswer((_) async => <Intro>[
-            buildIntro(id: 'a', state: IntroState.delivered),
-            buildIntro(id: 'b', state: IntroState.accepted),
-            buildIntro(id: 'c', state: IntroState.connected),
-            buildIntro(id: 'd', state: IntroState.declined),
-            buildIntro(id: 'e', state: IntroState.expired),
-          ],);
+      ).thenAnswer(
+        (_) async => <Intro>[
+          buildIntro(id: 'a', state: IntroState.delivered),
+          buildIntro(id: 'b', state: IntroState.accepted),
+          buildIntro(id: 'c', state: IntroState.connected),
+          buildIntro(id: 'd', state: IntroState.declined),
+          buildIntro(id: 'e', state: IntroState.expired),
+        ],
+      );
 
       final container = ProviderContainer(
         overrides: <Override>[

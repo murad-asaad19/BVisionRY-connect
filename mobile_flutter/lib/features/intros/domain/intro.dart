@@ -11,8 +11,7 @@ String _stateToJson(IntroState s) => s.toJson();
 IntroKind _kindFromJson(String raw) => IntroKind.fromJson(raw);
 String _kindToJson(IntroKind k) => k.toJson();
 
-DateTime _utcFromJson(Object v) =>
-    DateTime.parse(v as String).toUtc();
+DateTime _utcFromJson(Object v) => DateTime.parse(v as String).toUtc();
 String _utcToJson(DateTime v) => v.toUtc().toIso8601String();
 DateTime? _utcFromJsonNullable(Object? v) =>
     v == null ? null : DateTime.parse(v as String).toUtc();

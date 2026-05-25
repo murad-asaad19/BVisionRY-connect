@@ -123,9 +123,8 @@ void main() {
       expect(
         base
             .copyWith(
-              expiresAt: DateTime.now()
-                  .toUtc()
-                  .subtract(const Duration(days: 1)),
+              expiresAt:
+                  DateTime.now().toUtc().subtract(const Duration(days: 1)),
             )
             .isActionable,
         isFalse,

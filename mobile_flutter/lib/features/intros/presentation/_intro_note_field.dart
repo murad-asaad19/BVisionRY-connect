@@ -58,8 +58,11 @@ class IntroNoteField extends StatelessWidget {
           value: value,
           // Clamp typed values to [0, kIntroNoteMax]; the trimmed length
           // is what the server's `char_length(btrim(note))` check sees.
-          onChanged: (v) =>
-              onChanged(v.length > kIntroNoteMax ? v.substring(0, kIntroNoteMax) : v),
+          onChanged: (String v) {
+            onChanged(
+              v.length > kIntroNoteMax ? v.substring(0, kIntroNoteMax) : v,
+            );
+          },
           placeholder: context.t(placeholderKey),
           multiline: true,
           minLines: 4,

@@ -55,7 +55,8 @@ void main() {
       ProviderScope(
         overrides: <Override>[
           localeLoaderProvider.overrideWithValue(loader),
-          introsServiceProvider.overrideWithValue(stub(received: <Intro>[intro])),
+          introsServiceProvider
+              .overrideWithValue(stub(received: <Intro>[intro])),
           peerProfileServiceProvider.overrideWithValue(stubPeer()),
           currentUserIdProvider.overrideWithValue('me'),
         ],
