@@ -6,11 +6,11 @@ part 'daily_match.freezed.dart';
 
 /// One row from the `get_daily_matches` RPC.
 ///
-/// The RPC returns rows flattened with the joined profile fields; the
-/// `fromJson` factory pulls the profile subset out into a nested
-/// [DiscoveryProfile] so callers can pass it directly to [MatchCard] /
-/// [UserCard].
-@freezed
+/// The RPC returns rows flattened with the joined profile fields. The
+/// [fromRow] factory normalises a flat RPC row into a [DailyMatch] with
+/// a nested [DiscoveryProfile] so callers can pass the model straight to
+/// [MatchCard] / [UserCard].
+@Freezed(toJson: false, fromJson: false)
 class DailyMatch with _$DailyMatch {
   const factory DailyMatch({
     required String id,
@@ -22,6 +22,8 @@ class DailyMatch with _$DailyMatch {
     required DiscoveryProfile profile,
   }) = _DailyMatch;
 
+  /// Builds a [DailyMatch] from a flat `get_daily_matches` RPC row that
+  /// includes the joined profile fields.
   factory DailyMatch.fromJson(Map<String, dynamic> json) => DailyMatch(
         id: json['id'] as String,
         pickUserId: json['pick_user_id'] as String,

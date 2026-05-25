@@ -23,10 +23,10 @@ class TodaysMatchesHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Theme.of(context).extension<AppColors>()!;
     final t = Theme.of(context).extension<AppTypography>()!;
-    final formatted = DateFormat(
-      'EEE, MMM d',
-      Localizations.localeOf(context).languageCode,
-    ).format(date).toUpperCase();
+    // Use the default-locale formatter so we don't have to call
+    // `initializeDateFormatting()` from `main.dart` (the default locale
+    // bundle is initialised eagerly by intl on import).
+    final formatted = DateFormat('EEE, MMM d').format(date).toUpperCase();
     final pickWord = context
         .t(
           'home.picksHeader',
