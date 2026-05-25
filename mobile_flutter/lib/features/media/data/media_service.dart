@@ -82,15 +82,17 @@ class SupabaseMediaGateway implements MediaGateway {
 class MediaService {
   MediaService(this._gateway, {String Function()? idGenerator, ImagePicker? picker})
     : _idGen = idGenerator ?? (() => const Uuid().v4()),
-      _picker = picker ?? ImagePicker() {
+      _picker = picker ?? _defaultPicker() {
     _signedUrls = SignedUrlCache(
-      ttl: Duration(seconds: MediaConstants.signedUrlTtlSeconds),
+      ttl: const Duration(seconds: MediaConstants.signedUrlTtlSeconds),
       safetyWindow: const Duration(seconds: 5),
       fetcher: _fetchSignedUrl,
     );
   }
 
   static const String chatBucket = 'chat-media';
+
+  static ImagePicker _defaultPicker() => ImagePicker();
 
   final MediaGateway _gateway;
   final String Function() _idGen;
