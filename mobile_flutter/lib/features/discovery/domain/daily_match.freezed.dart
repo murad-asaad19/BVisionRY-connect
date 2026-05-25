@@ -14,10 +14,6 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-DailyMatch _$DailyMatchFromJson(Map<String, dynamic> json) {
-  return _DailyMatch.fromJson(json);
-}
-
 /// @nodoc
 mixin _$DailyMatch {
   String get id => throw _privateConstructorUsedError;
@@ -27,9 +23,6 @@ mixin _$DailyMatch {
   DateTime? get viewedAt => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DiscoveryProfile get profile => throw _privateConstructorUsedError;
-
-  /// Serializes this DailyMatch to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of DailyMatch
   /// with the given fields replaced by the non-null parameter values.
@@ -198,7 +191,7 @@ class __$$DailyMatchImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$DailyMatchImpl implements _DailyMatch {
   const _$DailyMatchImpl(
       {required this.id,
@@ -208,9 +201,6 @@ class _$DailyMatchImpl implements _DailyMatch {
       this.viewedAt,
       required this.createdAt,
       required this.profile});
-
-  factory _$DailyMatchImpl.fromJson(Map<String, dynamic> json) =>
-      _$$DailyMatchImplFromJson(json);
 
   @override
   final String id;
@@ -251,7 +241,6 @@ class _$DailyMatchImpl implements _DailyMatch {
             (identical(other.profile, profile) || other.profile == profile));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(runtimeType, id, pickUserId, matchReason,
       forDateLocal, viewedAt, createdAt, profile);
@@ -263,13 +252,6 @@ class _$DailyMatchImpl implements _DailyMatch {
   @pragma('vm:prefer-inline')
   _$$DailyMatchImplCopyWith<_$DailyMatchImpl> get copyWith =>
       __$$DailyMatchImplCopyWithImpl<_$DailyMatchImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$DailyMatchImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _DailyMatch implements DailyMatch {
@@ -281,9 +263,6 @@ abstract class _DailyMatch implements DailyMatch {
       final DateTime? viewedAt,
       required final DateTime createdAt,
       required final DiscoveryProfile profile}) = _$DailyMatchImpl;
-
-  factory _DailyMatch.fromJson(Map<String, dynamic> json) =
-      _$DailyMatchImpl.fromJson;
 
   @override
   String get id;
