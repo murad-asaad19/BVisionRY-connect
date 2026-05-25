@@ -33,4 +33,11 @@ void main() {
       expect(pubspec, contains(dep), reason: 'missing dev dep $dep');
     }
   });
+
+  test('pubspec declares chat-phase dependencies', () {
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+    for (final dep in const ['uuid:']) {
+      expect(pubspec, contains(dep), reason: 'missing $dep');
+    }
+  });
 }
