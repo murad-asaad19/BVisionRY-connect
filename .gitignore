@@ -22,6 +22,8 @@ supabase/.branches/
 # Ad-hoc screenshots from debugging / smoke checks
 *.png
 !mobile/assets/**/*.png
+# Allow Flutter golden snapshots — they ARE source-controlled artifacts.
+!mobile_flutter/**/goldens/**/*.png
 
 # IDE
 .idea/
