@@ -30,6 +30,8 @@ class AppInput extends StatefulWidget {
     this.textInputAction,
     this.onSubmitted,
     this.enabled = true,
+    this.trailing,
+    this.onBlur,
   });
 
   final String value;
@@ -48,6 +50,15 @@ class AppInput extends StatefulWidget {
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
   final bool enabled;
+
+  /// Optional trailing widget rendered inside the input frame on the right —
+  /// typically an availability indicator (check / X / spinner).
+  final Widget? trailing;
+
+  /// Fires when the field loses focus. Used by the onboarding Identity step
+  /// to debounce the `check_handle_available` RPC on blur rather than on
+  /// every keystroke.
+  final VoidCallback? onBlur;
 
   @override
   State<AppInput> createState() => _AppInputState();
@@ -91,7 +102,14 @@ class _AppInputState extends State<AppInput> {
   }
 
   void _onFocusChange() {
-    if (mounted) setState(() => _focused = _focusNode.hasFocus);
+    final bool hadFocus = _focused;
+    final bool hasFocus = _focusNode.hasFocus;
+    if (mounted) setState(() => _focused = hasFocus);
+    // Fire onBlur on the focus → unfocus transition so callers can debounce
+    // expensive checks (e.g. handle availability RPC) at the right moment.
+    if (hadFocus && !hasFocus) {
+      widget.onBlur?.call();
+    }
   }
 
   @override
@@ -128,33 +146,47 @@ class _AppInputState extends State<AppInput> {
             border: Border.all(color: borderColor, width: 1.5),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: TextField(
-            controller: _controller,
-            focusNode: _focusNode,
-            enabled: widget.enabled,
-            onChanged: widget.onChanged,
-            onSubmitted: widget.onSubmitted,
-            keyboardType: widget.keyboardType ??
-                (widget.multiline ? TextInputType.multiline : null),
-            textInputAction: widget.textInputAction,
-            autocorrect: widget.autocorrect,
-            autofillHints: widget.autofillHints,
-            obscureText: widget.obscureText,
-            maxLength: widget.maxLength,
-            minLines: widget.minLines ?? (widget.multiline ? 3 : null),
-            maxLines: widget.multiline ? widget.maxLines : 1,
-            style: typo.bodyLg.copyWith(color: colors.body),
-            cursorColor: colors.navy,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              isCollapsed: true,
-              hintText: widget.placeholder,
-              hintStyle: typo.bodyLg.copyWith(color: colors.muted),
-              counterText: '',
-            ),
-            inputFormatters: widget.maxLength != null
-                ? [LengthLimitingTextInputFormatter(widget.maxLength)]
-                : null,
+          child: Row(
+            crossAxisAlignment: widget.multiline
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.center,
+            children: <Widget>[
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  enabled: widget.enabled,
+                  onChanged: widget.onChanged,
+                  onSubmitted: widget.onSubmitted,
+                  keyboardType: widget.keyboardType ??
+                      (widget.multiline ? TextInputType.multiline : null),
+                  textInputAction: widget.textInputAction,
+                  autocorrect: widget.autocorrect,
+                  autofillHints: widget.autofillHints,
+                  obscureText: widget.obscureText,
+                  maxLength: widget.maxLength,
+                  minLines:
+                      widget.minLines ?? (widget.multiline ? 3 : null),
+                  maxLines: widget.multiline ? widget.maxLines : 1,
+                  style: typo.bodyLg.copyWith(color: colors.body),
+                  cursorColor: colors.navy,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    isCollapsed: true,
+                    hintText: widget.placeholder,
+                    hintStyle: typo.bodyLg.copyWith(color: colors.muted),
+                    counterText: '',
+                  ),
+                  inputFormatters: widget.maxLength != null
+                      ? [LengthLimitingTextInputFormatter(widget.maxLength)]
+                      : null,
+                ),
+              ),
+              if (widget.trailing != null) ...<Widget>[
+                const SizedBox(width: 8),
+                widget.trailing!,
+              ],
+            ],
           ),
         ),
         if (widget.errorText != null) ...[
