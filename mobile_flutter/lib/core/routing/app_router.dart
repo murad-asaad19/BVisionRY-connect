@@ -10,21 +10,12 @@ import '../../features/auth/providers/profile_provider.dart';
 import '../../features/auth/providers/route_guard_provider.dart';
 import '../../features/auth/providers/session_provider.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/onboarding/presentation/about_step.dart';
+import '../../features/onboarding/presentation/goal_step.dart';
+import '../../features/onboarding/presentation/identity_step.dart';
+import '../../features/onboarding/presentation/roles_step.dart';
 import 'router_refresh.dart';
 import 'routes.dart';
-
-/// Placeholder destination for Phase 3 onboarding. The real wizard
-/// (goal/identity/roles/about) replaces this in Phase 3.
-class _OnboardingGoalStub extends StatelessWidget {
-  const _OnboardingGoalStub();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text('Onboarding (Phase 3 stub)')),
-    );
-  }
-}
 
 /// Application-wide [GoRouter] instance.
 ///
@@ -80,7 +71,19 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
       ),
       GoRoute(
         path: Routes.onboardingGoal,
-        builder: (_, __) => const _OnboardingGoalStub(),
+        builder: (_, __) => const GoalStep(),
+      ),
+      GoRoute(
+        path: Routes.onboardingIdentity,
+        builder: (_, __) => const IdentityStep(),
+      ),
+      GoRoute(
+        path: Routes.onboardingRoles,
+        builder: (_, __) => const RolesStep(),
+      ),
+      GoRoute(
+        path: Routes.onboardingAbout,
+        builder: (_, __) => const AboutStep(),
       ),
       GoRoute(
         path: Routes.home,
