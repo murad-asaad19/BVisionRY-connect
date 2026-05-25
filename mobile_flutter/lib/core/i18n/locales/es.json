@@ -332,7 +332,8 @@
   },
   "common": {
     "cancel": "Cancelar",
-    "ok": "OK"
+    "ok": "OK",
+    "retry": "Reintentar"
   },
   "intros": {
     "inboxTitle": "Bandeja de entrada",
