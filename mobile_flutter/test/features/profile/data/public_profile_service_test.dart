@@ -68,7 +68,8 @@ void main() {
       expect(await svc.getPublicProfile('nobody'), isNull);
     });
 
-    test('parses a single-row record (RPC returns a Map, not a List)', () async {
+    test('parses a single-row record (RPC returns a Map, not a List)',
+        () async {
       // The Supabase client may unwrap a single-row JSON object when the
       // function declares `returns ... language sql stable rows 1` — guard
       // both shapes.

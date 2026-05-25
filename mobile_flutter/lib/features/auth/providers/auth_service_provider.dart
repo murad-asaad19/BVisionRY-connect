@@ -24,39 +24,44 @@ class SupabaseAuthGateway implements AuthGateway {
   Future<AuthResponse> signInWithPassword({
     required String email,
     required String password,
-  }) => _client.auth.signInWithPassword(email: email, password: password);
+  }) =>
+      _client.auth.signInWithPassword(email: email, password: password);
 
   @override
   Future<void> signInWithOtp({
     required String email,
     required String emailRedirectTo,
-  }) => _client.auth.signInWithOtp(
-    email: email,
-    emailRedirectTo: emailRedirectTo,
-  );
+  }) =>
+      _client.auth.signInWithOtp(
+        email: email,
+        emailRedirectTo: emailRedirectTo,
+      );
 
   @override
   Future<bool> signInWithOAuth(
     OAuthProvider provider, {
     required String redirectTo,
-  }) => _client.auth.signInWithOAuth(provider, redirectTo: redirectTo);
+  }) =>
+      _client.auth.signInWithOAuth(provider, redirectTo: redirectTo);
 
   @override
   Future<AuthResponse> signUp({
     required String email,
     required String password,
     required String emailRedirectTo,
-  }) => _client.auth.signUp(
-    email: email,
-    password: password,
-    emailRedirectTo: emailRedirectTo,
-  );
+  }) =>
+      _client.auth.signUp(
+        email: email,
+        password: password,
+        emailRedirectTo: emailRedirectTo,
+      );
 
   @override
   Future<AuthResponse> setSession({
     required String accessToken,
     required String refreshToken,
-  }) => _client.auth.setSession(refreshToken, accessToken: accessToken);
+  }) =>
+      _client.auth.setSession(refreshToken, accessToken: accessToken);
 
   @override
   Future<AuthSessionUrlResponse> exchangeCodeForSession(String code) =>
@@ -98,8 +103,8 @@ final Provider<AuthGateway> authGatewayProvider = Provider<AuthGateway>((
 /// The single [FunctionsGateway] instance for edge-function invocations.
 final Provider<FunctionsGateway> functionsGatewayProvider =
     Provider<FunctionsGateway>((Ref<FunctionsGateway> ref) {
-      return SupabaseFunctionsGateway(ref.watch(supabaseClientProvider));
-    });
+  return SupabaseFunctionsGateway(ref.watch(supabaseClientProvider));
+});
 
 /// Persists the most-recently-registered FCM token. Phase 12 wires the full
 /// FCM lifecycle; the store is exposed here so [AuthService.signOut] can
@@ -114,8 +119,8 @@ final Provider<FcmTokenStore> fcmTokenStoreProvider = Provider<FcmTokenStore>((
 /// Zustand-equivalent local store. Placeholders for Phases 5/10/14.
 final Provider<PersistedStores> persistedStoresProvider =
     Provider<PersistedStores>((Ref<PersistedStores> ref) {
-      return PersistedStores();
-    });
+  return PersistedStores();
+});
 
 /// Best-effort FCM deregister callback wired through the Supabase RPC
 /// `unregister_device_token`. Phase 12 will replace this with the full
@@ -123,20 +128,20 @@ final Provider<PersistedStores> persistedStoresProvider =
 /// [AuthService.signOut] honours its contract.
 final Provider<Future<void> Function(String token)?> fcmDeregisterProvider =
     Provider<Future<void> Function(String token)?>((
-      Ref<Future<void> Function(String token)?> ref,
-    ) {
-      final SupabaseClient client = ref.watch(supabaseClientProvider);
-      return (String token) async {
-        try {
-          await client.rpc<dynamic>(
-            'unregister_device_token',
-            params: <String, dynamic>{'p_token': token},
-          );
-        } catch (_) {
-          // best-effort — sign-out must still proceed even if RPC fails.
-        }
-      };
-    });
+  Ref<Future<void> Function(String token)?> ref,
+) {
+  final SupabaseClient client = ref.watch(supabaseClientProvider);
+  return (String token) async {
+    try {
+      await client.rpc<dynamic>(
+        'unregister_device_token',
+        params: <String, dynamic>{'p_token': token},
+      );
+    } catch (_) {
+      // best-effort — sign-out must still proceed even if RPC fails.
+    }
+  };
+});
 
 /// The fully-wired [AuthService] the UI consumes. Tests override this with a
 /// hand-built `AuthService` whose collaborators are fakes.
@@ -156,13 +161,13 @@ final Provider<AuthService> authServiceProvider = Provider<AuthService>((
 /// Apple + Google OAuth entry-point service.
 final Provider<SocialAuthService> socialAuthServiceProvider =
     Provider<SocialAuthService>((Ref<SocialAuthService> ref) {
-      return SocialAuthService(ref.watch(authGatewayProvider));
-    });
+  return SocialAuthService(ref.watch(authGatewayProvider));
+});
 
 /// Production [ProfileRepository] wired against the real Supabase client.
 /// Tests override this with a hand-built repo whose query runner is a fake.
 final Provider<ProfileRepository> profileRepositoryProvider =
     Provider<ProfileRepository>((Ref<ProfileRepository> ref) {
-      final SupabaseClient client = ref.watch(supabaseClientProvider);
-      return ProfileRepository(SupabaseProfileQueryRunner(client));
-    });
+  final SupabaseClient client = ref.watch(supabaseClientProvider);
+  return ProfileRepository(SupabaseProfileQueryRunner(client));
+});

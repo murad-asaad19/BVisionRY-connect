@@ -135,8 +135,7 @@ class SupabaseAvatarStorageGateway implements AvatarStorageGateway {
   }) async {
     await _client
         .from('profiles')
-        .update(<String, dynamic>{'photo_url': url})
-        .eq('id', userId);
+        .update(<String, dynamic>{'photo_url': url}).eq('id', userId);
   }
 }
 

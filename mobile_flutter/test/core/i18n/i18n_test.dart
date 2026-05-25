@@ -16,8 +16,7 @@ void main() {
               final AsyncValue<void> ready = ref.watch(localeReadyProvider);
               return ready.when(
                 loading: () => const SizedBox.shrink(),
-                error: (Object err, StackTrace st) =>
-                    Text('err: $err'),
+                error: (Object err, StackTrace st) => Text('err: $err'),
                 data: (_) => Builder(
                   builder: (BuildContext c) => Text(c.t('common.cancel')),
                 ),

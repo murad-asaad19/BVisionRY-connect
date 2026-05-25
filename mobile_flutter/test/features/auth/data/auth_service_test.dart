@@ -16,7 +16,8 @@ void main() {
       final auth = FakeAuthGateway();
       String? capturedEmail;
       String? capturedRedirect;
-      auth.onOtp = ({required String email, required String emailRedirectTo}) async {
+      auth.onOtp =
+          ({required String email, required String emailRedirectTo}) async {
         capturedEmail = email;
         capturedRedirect = emailRedirectTo;
       };
@@ -34,7 +35,8 @@ void main() {
     test('trims whitespace and lowercases', () async {
       final auth = FakeAuthGateway();
       String? captured;
-      auth.onOtp = ({required String email, required String emailRedirectTo}) async {
+      auth.onOtp =
+          ({required String email, required String emailRedirectTo}) async {
         captured = email;
       };
       final svc = AuthService(
@@ -54,20 +56,19 @@ void main() {
       String? capEmail;
       String? capPwd;
       String? capRedirect;
-      auth.onSignUp =
-          ({
-            required String email,
-            required String password,
-            required String emailRedirectTo,
-          }) async {
-            capEmail = email;
-            capPwd = password;
-            capRedirect = emailRedirectTo;
-            return AuthResponse(
-              session: fakeSession(),
-              user: fakeSession().user,
-            );
-          };
+      auth.onSignUp = ({
+        required String email,
+        required String password,
+        required String emailRedirectTo,
+      }) async {
+        capEmail = email;
+        capPwd = password;
+        capRedirect = emailRedirectTo;
+        return AuthResponse(
+          session: fakeSession(),
+          user: fakeSession().user,
+        );
+      };
       final svc = AuthService(
         auth: auth,
         functions: FakeFunctionsGateway(),
@@ -99,7 +100,8 @@ void main() {
       final auth = FakeAuthGateway();
       String? capEmail;
       String? capPwd;
-      auth.onSignIn = ({required String email, required String password}) async {
+      auth.onSignIn =
+          ({required String email, required String password}) async {
         capEmail = email;
         capPwd = password;
         return AuthResponse(session: fakeSession(), user: fakeSession().user);
@@ -122,7 +124,8 @@ void main() {
   group('signInWithIdentifier', () {
     test('routes "user@example.com" to email path', () async {
       final auth = FakeAuthGateway();
-      auth.onSignIn = ({required String email, required String password}) async {
+      auth.onSignIn =
+          ({required String email, required String password}) async {
         expect(email, 'user@example.com');
         return AuthResponse(session: fakeSession(), user: fakeSession().user);
       };
@@ -160,13 +163,13 @@ void main() {
       String? capRefresh;
       auth.onSetSession =
           ({required String accessToken, required String refreshToken}) async {
-            capAccess = accessToken;
-            capRefresh = refreshToken;
-            return AuthResponse(
-              session: fakeSession(),
-              user: fakeSession().user,
-            );
-          };
+        capAccess = accessToken;
+        capRefresh = refreshToken;
+        return AuthResponse(
+          session: fakeSession(),
+          user: fakeSession().user,
+        );
+      };
       final svc = AuthService(
         auth: auth,
         functions: fn,
@@ -187,9 +190,9 @@ void main() {
     test('non-200 edge response throws AuthException with 401 body', () async {
       final fn = FakeFunctionsGateway();
       fn.onInvoke = (String name, {Object? body}) async => FunctionResponse(
-        status: 401,
-        data: <String, dynamic>{'error': 'invalid_credentials'},
-      );
+            status: 401,
+            data: <String, dynamic>{'error': 'invalid_credentials'},
+          );
       final svc = AuthService(
         auth: FakeAuthGateway(),
         functions: fn,
@@ -230,19 +233,20 @@ void main() {
       expect(session, isNotNull);
     });
 
-    test('implicit: parses #access_token & refresh_token then setSession', () async {
+    test('implicit: parses #access_token & refresh_token then setSession',
+        () async {
       final auth = FakeAuthGateway();
       String? capA;
       String? capR;
       auth.onSetSession =
           ({required String accessToken, required String refreshToken}) async {
-            capA = accessToken;
-            capR = refreshToken;
-            return AuthResponse(
-              session: fakeSession(),
-              user: fakeSession().user,
-            );
-          };
+        capA = accessToken;
+        capR = refreshToken;
+        return AuthResponse(
+          session: fakeSession(),
+          user: fakeSession().user,
+        );
+      };
       final svc = AuthService(
         auth: auth,
         functions: FakeFunctionsGateway(),
@@ -274,7 +278,9 @@ void main() {
   });
 
   group('signOut', () {
-    test('deregisters FCM token before signOut, clears stores, opt-out telemetry', () async {
+    test(
+        'deregisters FCM token before signOut, clears stores, opt-out telemetry',
+        () async {
       SharedPreferences.setMockInitialValues(<String, Object>{
         'connect.fcm_last_token': 'fcm-tok-123',
         'connect.feed_filters': 'x',
@@ -335,8 +341,8 @@ void main() {
       });
       final auth = FakeAuthGateway();
       var called = false;
-      auth.onSignOut = ({SignOutScope scope = SignOutScope.local}) async =>
-          called = true;
+      auth.onSignOut =
+          ({SignOutScope scope = SignOutScope.local}) async => called = true;
       final svc = AuthService(
         auth: auth,
         functions: FakeFunctionsGateway(),

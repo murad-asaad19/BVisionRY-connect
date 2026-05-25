@@ -70,12 +70,12 @@ class AuthService {
     required PersistedStores stores,
     Future<void> Function(String token)? deregisterFcm,
     Future<void> Function()? resetTelemetry,
-  }) : _auth = auth,
-       _functions = functions,
-       _tokens = tokens,
-       _stores = stores,
-       _deregisterFcm = deregisterFcm,
-       _resetTelemetry = resetTelemetry;
+  })  : _auth = auth,
+        _functions = functions,
+        _tokens = tokens,
+        _stores = stores,
+        _deregisterFcm = deregisterFcm,
+        _resetTelemetry = resetTelemetry;
 
   final AuthGateway _auth;
   final FunctionsGateway _functions;

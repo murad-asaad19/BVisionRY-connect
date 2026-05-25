@@ -22,10 +22,10 @@ void main() {
     );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(secureStorageChannel, (
-          MethodCall call,
-        ) async {
-          return null;
-        });
+      MethodCall call,
+    ) async {
+      return null;
+    });
   });
 
   testWidgets('shows spinner then settles when exchange succeeds', (
@@ -70,8 +70,8 @@ void main() {
     WidgetTester tester,
   ) async {
     final FakeAuthGateway auth = FakeAuthGateway();
-    auth.onExchange = (String code) async =>
-        throw const AuthException('expired');
+    auth.onExchange =
+        (String code) async => throw const AuthException('expired');
     final AuthService svc = AuthService(
       auth: auth,
       functions: FakeFunctionsGateway(),

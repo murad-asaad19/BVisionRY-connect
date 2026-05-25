@@ -22,10 +22,10 @@ void main() {
     );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(secureStorageChannel, (
-          MethodCall call,
-        ) async {
-          return null;
-        });
+      MethodCall call,
+    ) async {
+      return null;
+    });
   });
 
   testWidgets('renders title, body, appeal and sign-out buttons', (

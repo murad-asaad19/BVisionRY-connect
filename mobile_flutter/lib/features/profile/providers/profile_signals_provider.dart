@@ -12,8 +12,6 @@ final AutoDisposeFutureProviderFamily<ProfileSignals, String>
     profileSignalsProvider =
     FutureProvider.family.autoDispose<ProfileSignals, String>(
   (Ref<AsyncValue<ProfileSignals>> ref, String targetUserId) {
-    return ref
-        .watch(profileSignalsServiceProvider)
-        .fetchSignals(targetUserId);
+    return ref.watch(profileSignalsServiceProvider).fetchSignals(targetUserId);
   },
 );

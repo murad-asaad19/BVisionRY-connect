@@ -34,8 +34,8 @@ void main() {
 
   test('user-cancelled (returns false) yields AuthException', () async {
     final auth = FakeAuthGateway();
-    auth.onOAuth = (OAuthProvider p, {required String redirectTo}) async =>
-        false;
+    auth.onOAuth =
+        (OAuthProvider p, {required String redirectTo}) async => false;
     final svc = SocialAuthService(auth);
     expect(() => svc.signInWithApple(), throwsA(isA<AuthException>()));
   });

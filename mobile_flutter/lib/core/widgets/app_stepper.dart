@@ -59,9 +59,8 @@ class AppStepper extends StatelessWidget {
             size: AppIconButtonSize.sm,
             variant: AppIconButtonVariant.subtle,
             disabled: atMin,
-            onPressed: atMin
-                ? null
-                : () => onChanged((value - step).clamp(min, max)),
+            onPressed:
+                atMin ? null : () => onChanged((value - step).clamp(min, max)),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -81,9 +80,8 @@ class AppStepper extends StatelessWidget {
             size: AppIconButtonSize.sm,
             variant: AppIconButtonVariant.subtle,
             disabled: atMax,
-            onPressed: atMax
-                ? null
-                : () => onChanged((value + step).clamp(min, max)),
+            onPressed:
+                atMax ? null : () => onChanged((value + step).clamp(min, max)),
           ),
         ],
       ),

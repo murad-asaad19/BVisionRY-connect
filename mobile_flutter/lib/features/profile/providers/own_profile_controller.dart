@@ -23,8 +23,7 @@ class OwnProfileController extends AsyncNotifier<Profile?> {
   /// patch flows through the same column-allowlist guard the service
   /// enforces — sensitive columns surface as `ForbiddenColumnException`.
   Future<Profile?> updateOwnProfile(Map<String, dynamic> patch) async {
-    final String? userId =
-        (await ref.read(sessionProvider.future))?.user.id;
+    final String? userId = (await ref.read(sessionProvider.future))?.user.id;
     if (userId == null) return null;
     final ProfileService svc = ref.read(profileServiceProvider);
     state = const AsyncValue<Profile?>.loading();

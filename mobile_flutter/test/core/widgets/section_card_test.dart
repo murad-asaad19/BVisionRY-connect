@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('SectionCard uppercases title and renders child',
-      (tester) async {
+  testWidgets('SectionCard uppercases title and renders child', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: buildAppTheme(Brightness.light),
@@ -21,8 +20,7 @@ void main() {
     expect(find.text('Body text'), findsOneWidget);
   });
 
-  testWidgets('SectionCard without title only renders body',
-      (tester) async {
+  testWidgets('SectionCard without title only renders body', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: buildAppTheme(Brightness.light),
@@ -32,8 +30,7 @@ void main() {
     expect(find.text('only body'), findsOneWidget);
   });
 
-  testWidgets('SectionCard has white bg + border decoration',
-      (tester) async {
+  testWidgets('SectionCard has white bg + border decoration', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: buildAppTheme(Brightness.light),

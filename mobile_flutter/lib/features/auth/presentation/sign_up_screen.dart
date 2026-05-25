@@ -55,9 +55,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           .read(authServiceProvider)
           .signUpWithPassword(email: _email, password: _password);
       if (!mounted) return;
-      ref
-          .read(toastServiceProvider.notifier)
-          .showToast(
+      ref.read(toastServiceProvider.notifier).showToast(
             title: context.t('auth.magicLinkSent'),
             intent: AppIntent.success,
           );
@@ -129,8 +127,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     ? context.t('auth.passwordHint8Met')
                     : context.t('auth.passwordHint8'),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: hintOk ? colors.success : colors.muted,
-                ),
+                      color: hintOk ? colors.success : colors.muted,
+                    ),
               ),
             ],
           ),

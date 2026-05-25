@@ -111,17 +111,21 @@ void main() {
     test('isSuspended true iff suspended_at present', () {
       expect(Profile.empty('u').isSuspended, isFalse);
       expect(
-        Profile.empty('u').copyWith(suspendedAt: DateTime.utc(2026)).isSuspended,
+        Profile.empty('u')
+            .copyWith(suspendedAt: DateTime.utc(2026))
+            .isSuspended,
         isTrue,
       );
     });
 
     test('isGoalStale returns true when goal_updated_at > 56 days ago', () {
       final Profile stale = Profile.empty('u').copyWith(
-        goalUpdatedAt: DateTime.now().toUtc().subtract(const Duration(days: 57)),
+        goalUpdatedAt:
+            DateTime.now().toUtc().subtract(const Duration(days: 57)),
       );
       final Profile fresh = Profile.empty('u').copyWith(
-        goalUpdatedAt: DateTime.now().toUtc().subtract(const Duration(days: 10)),
+        goalUpdatedAt:
+            DateTime.now().toUtc().subtract(const Duration(days: 10)),
       );
       final Profile never = Profile.empty('u');
       expect(stale.isGoalStale, isTrue);

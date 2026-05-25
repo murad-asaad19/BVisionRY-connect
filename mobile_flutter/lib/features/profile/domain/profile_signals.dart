@@ -22,15 +22,13 @@ class ProfileSignals with _$ProfileSignals {
   const factory ProfileSignals({
     @JsonKey(name: 'mutual_connection_count')
     @Default(0)
-        int mutualConnectionCount,
+    int mutualConnectionCount,
     @JsonKey(name: 'mutual_top_user_ids')
     @Default(<String>[])
-        List<String> mutualTopUserIds,
+    List<String> mutualTopUserIds,
     @JsonKey(name: 'avg_meeting_rating', fromJson: _avgFromJson)
-        double? avgMeetingRating,
-    @JsonKey(name: 'total_meeting_reviews')
-    @Default(0)
-        int totalMeetingReviews,
+    double? avgMeetingRating,
+    @JsonKey(name: 'total_meeting_reviews') @Default(0) int totalMeetingReviews,
   }) = _ProfileSignals;
 
   /// All-zeros / no-rating signals row. Used when the RPC returns an empty
@@ -46,6 +44,5 @@ class ProfileSignals with _$ProfileSignals {
   /// Per spec §17.6 — the average rating MUST be hidden until the user has
   /// 3 or more meeting reviews. Belt-and-braces guard against a future RPC
   /// regression that drops the floor.
-  bool get showRating =>
-      avgMeetingRating != null && totalMeetingReviews >= 3;
+  bool get showRating => avgMeetingRating != null && totalMeetingReviews >= 3;
 }

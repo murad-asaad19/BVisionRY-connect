@@ -15,7 +15,8 @@ void main() {
     const MethodChannel secureStorageChannel =
         MethodChannel('plugins.it_nomads.com/flutter_secure_storage');
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(secureStorageChannel, (MethodCall call) async {
+        .setMockMethodCallHandler(secureStorageChannel,
+            (MethodCall call) async {
       if (call.method == 'read') return null;
       if (call.method == 'readAll') return <String, String>{};
       if (call.method == 'containsKey') return false;

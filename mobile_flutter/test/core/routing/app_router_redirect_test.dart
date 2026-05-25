@@ -27,10 +27,10 @@ void main() {
     );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(secureStorageChannel, (
-          MethodCall call,
-        ) async {
-          return null;
-        });
+      MethodCall call,
+    ) async {
+      return null;
+    });
   });
 
   testWidgets('with no session, app shows the SignIn screen', (

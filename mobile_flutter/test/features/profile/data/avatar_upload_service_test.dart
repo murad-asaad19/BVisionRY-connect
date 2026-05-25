@@ -72,7 +72,8 @@ class _FakeStorage implements AvatarStorageGateway {
 
 void main() {
   group('AvatarUploadService', () {
-    test('happy path uploads bytes to {userId}/avatar.jpg + returns a cache-busted URL',
+    test(
+        'happy path uploads bytes to {userId}/avatar.jpg + returns a cache-busted URL',
         () async {
       final _FakeSource src =
           _FakeSource(Uint8List.fromList(List<int>.filled(64 * 1024, 1)));
@@ -203,7 +204,8 @@ void main() {
       );
     });
 
-    test('photo_url patch failure does NOT mask the upload (returns URL anyway)',
+    test(
+        'photo_url patch failure does NOT mask the upload (returns URL anyway)',
         () async {
       // Bytes are already in the bucket; surfacing the URL is still useful —
       // the edit form can retry the patch on the next save.

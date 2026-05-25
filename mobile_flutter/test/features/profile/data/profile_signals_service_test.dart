@@ -58,8 +58,7 @@ void main() {
       expect(signals.mutualConnectionCount, 0);
     });
 
-    test(
-        'accepts a single Map row (RPC may unwrap with `returns ... rows 1`)',
+    test('accepts a single Map row (RPC may unwrap with `returns ... rows 1`)',
         () async {
       final _FakeGateway g = _FakeGateway()
         ..response = <String, dynamic>{

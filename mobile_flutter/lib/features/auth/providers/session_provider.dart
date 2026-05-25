@@ -20,9 +20,9 @@ final StreamProvider<Session?> sessionProvider = StreamProvider<Session?>((
   final AuthGateway gateway = ref.watch(authGatewayProvider);
   final StreamController<Session?> controller = StreamController<Session?>();
   final StreamSubscription<AuthState> sub = gateway.onAuthStateChange().listen(
-    (AuthState state) => controller.add(state.session),
-    onError: controller.addError,
-  );
+        (AuthState state) => controller.add(state.session),
+        onError: controller.addError,
+      );
   ref.onDispose(() {
     sub.cancel();
     controller.close();

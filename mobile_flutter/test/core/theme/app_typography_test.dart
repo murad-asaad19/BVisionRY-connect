@@ -25,7 +25,8 @@ void main() {
     );
   });
 
-  test('AppTypography exposes Dosis display + Inter body scale per spec §8.2', () {
+  test('AppTypography exposes Dosis display + Inter body scale per spec §8.2',
+      () {
     expect(t.displayXl.fontSize, 28);
     expect(t.displayLg.fontSize, 20);
     expect(t.displayMd.fontSize, 16);
@@ -40,11 +41,16 @@ void main() {
   });
 
   test('AppTypography line heights match spec ratios', () {
-    expect((t.displayXl.height ?? 0) * t.displayXl.fontSize!, closeTo(34, 0.01));
-    expect((t.displayLg.height ?? 0) * t.displayLg.fontSize!, closeTo(26, 0.01));
-    expect((t.displayMd.height ?? 0) * t.displayMd.fontSize!, closeTo(22, 0.01));
-    expect((t.displaySm.height ?? 0) * t.displaySm.fontSize!, closeTo(18, 0.01));
-    expect((t.displayXs.height ?? 0) * t.displayXs.fontSize!, closeTo(14, 0.01));
+    expect(
+        (t.displayXl.height ?? 0) * t.displayXl.fontSize!, closeTo(34, 0.01));
+    expect(
+        (t.displayLg.height ?? 0) * t.displayLg.fontSize!, closeTo(26, 0.01));
+    expect(
+        (t.displayMd.height ?? 0) * t.displayMd.fontSize!, closeTo(22, 0.01));
+    expect(
+        (t.displaySm.height ?? 0) * t.displaySm.fontSize!, closeTo(18, 0.01));
+    expect(
+        (t.displayXs.height ?? 0) * t.displayXs.fontSize!, closeTo(14, 0.01));
     expect((t.bodyLg.height ?? 0) * t.bodyLg.fontSize!, closeTo(20, 0.01));
     expect((t.bodyMd.height ?? 0) * t.bodyMd.fontSize!, closeTo(18, 0.01));
     expect((t.bodySm.height ?? 0) * t.bodySm.fontSize!, closeTo(15, 0.01));

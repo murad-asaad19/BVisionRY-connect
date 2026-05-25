@@ -64,10 +64,10 @@ class PersistedStores {
     ProfileNudgeStore? nudge,
     OnboardingDraftStore? onboarding,
     TelemetryConsentStore? telemetry,
-  }) : feedFilters = feed ?? FeedFiltersStore(),
-       profileNudge = nudge ?? ProfileNudgeStore(),
-       onboardingDraft = onboarding ?? OnboardingDraftStore(),
-       telemetryConsent = telemetry ?? TelemetryConsentStore();
+  })  : feedFilters = feed ?? FeedFiltersStore(),
+        profileNudge = nudge ?? ProfileNudgeStore(),
+        onboardingDraft = onboarding ?? OnboardingDraftStore(),
+        telemetryConsent = telemetry ?? TelemetryConsentStore();
 
   final FeedFiltersStore feedFilters;
   final ProfileNudgeStore profileNudge;

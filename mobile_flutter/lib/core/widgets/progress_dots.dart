@@ -12,7 +12,7 @@ class ProgressDots extends StatelessWidget {
     super.key,
     required this.total,
     required this.current,
-  }) : assert(total > 0, 'total must be > 0'),
+  })  : assert(total > 0, 'total must be > 0'),
         assert(current >= 0, 'current must be >= 0');
 
   /// Total number of segments.

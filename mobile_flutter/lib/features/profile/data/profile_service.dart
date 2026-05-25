@@ -70,11 +70,8 @@ class SupabaseProfileGateway implements ProfileGateway {
     required String id,
     required Map<String, dynamic> patch,
   }) async {
-    final List<Map<String, dynamic>> rows = await _client
-        .from('profiles')
-        .update(patch)
-        .eq('id', id)
-        .select();
+    final List<Map<String, dynamic>> rows =
+        await _client.from('profiles').update(patch).eq('id', id).select();
     if (rows.isEmpty) {
       // Should not happen — RLS lets the caller read their own row — but be
       // defensive so a future migration that adds a returning-rows trigger

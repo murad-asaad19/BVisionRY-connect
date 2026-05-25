@@ -32,18 +32,17 @@ class Profile with _$Profile {
     @JsonKey(name: 'goal_updated_at') DateTime? goalUpdatedAt,
     @JsonKey(name: 'photo_url') String? photoUrl,
     @Default(false) bool onboarded,
-    @JsonKey(name: 'verified_github_username')
-        String? verifiedGithubUsername,
+    @JsonKey(name: 'verified_github_username') String? verifiedGithubUsername,
     @JsonKey(name: 'verified_github_id') int? verifiedGithubId,
     @JsonKey(name: 'verified_at') DateTime? verifiedAt,
     @JsonKey(name: 'suspended_at') DateTime? suspendedAt,
     @JsonKey(name: 'private_mode') @Default(false) bool privateMode,
     @JsonKey(name: 'read_receipts_enabled')
     @Default(false)
-        bool readReceiptsEnabled,
+    bool readReceiptsEnabled,
     @JsonKey(name: 'public_investor_page')
     @Default(false)
-        bool publicInvestorPage,
+    bool publicInvestorPage,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
   }) = _Profile;

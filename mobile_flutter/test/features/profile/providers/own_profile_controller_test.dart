@@ -87,7 +87,8 @@ void main() {
   group('OwnProfileController', () {
     test('build() returns whatever profileProvider returns', () async {
       final FakeAuthGateway auth = FakeAuthGateway();
-      auth.pushAuthState(AuthChangeEvent.initialSession, fakeSession(id: 'u-1'));
+      auth.pushAuthState(
+          AuthChangeEvent.initialSession, fakeSession(id: 'u-1'));
       final _FakeQueryRunner runner = _FakeQueryRunner(<String, dynamic>{
         'id': 'u-1',
         'handle': 'h',
@@ -108,7 +109,8 @@ void main() {
     test('updateOwnProfile patches the row and invalidates profileProvider',
         () async {
       final FakeAuthGateway auth = FakeAuthGateway();
-      auth.pushAuthState(AuthChangeEvent.initialSession, fakeSession(id: 'u-1'));
+      auth.pushAuthState(
+          AuthChangeEvent.initialSession, fakeSession(id: 'u-1'));
       final _FakeQueryRunner runner = _FakeQueryRunner(<String, dynamic>{
         'id': 'u-1',
         'handle': 'h',
@@ -164,7 +166,8 @@ void main() {
     test('togglePrivateMode forwards to setPrivateMode and invalidates',
         () async {
       final FakeAuthGateway auth = FakeAuthGateway();
-      auth.pushAuthState(AuthChangeEvent.initialSession, fakeSession(id: 'u-1'));
+      auth.pushAuthState(
+          AuthChangeEvent.initialSession, fakeSession(id: 'u-1'));
       final _FakeQueryRunner runner = _FakeQueryRunner(<String, dynamic>{
         'id': 'u-1',
         'onboarded': true,
@@ -189,7 +192,8 @@ void main() {
 
     test('refresh invalidates the underlying provider', () async {
       final FakeAuthGateway auth = FakeAuthGateway();
-      auth.pushAuthState(AuthChangeEvent.initialSession, fakeSession(id: 'u-1'));
+      auth.pushAuthState(
+          AuthChangeEvent.initialSession, fakeSession(id: 'u-1'));
       final _FakeQueryRunner runner = _FakeQueryRunner(<String, dynamic>{
         'id': 'u-1',
         'onboarded': true,

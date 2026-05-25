@@ -22,10 +22,10 @@ void main() {
     );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(secureStorageChannel, (
-          MethodCall call,
-        ) async {
-          return null;
-        });
+      MethodCall call,
+    ) async {
+      return null;
+    });
   });
 
   Future<void> pump(WidgetTester tester, AuthService svc) async {
@@ -68,15 +68,14 @@ void main() {
   ) async {
     final FakeAuthGateway auth = FakeAuthGateway();
     String? capEmail;
-    auth.onSignUp =
-        ({
-          required String email,
-          required String password,
-          required String emailRedirectTo,
-        }) async {
-          capEmail = email;
-          return AuthResponse(session: fakeSession(), user: fakeSession().user);
-        };
+    auth.onSignUp = ({
+      required String email,
+      required String password,
+      required String emailRedirectTo,
+    }) async {
+      capEmail = email;
+      return AuthResponse(session: fakeSession(), user: fakeSession().user);
+    };
     final AuthService svc = AuthService(
       auth: auth,
       functions: FakeFunctionsGateway(),

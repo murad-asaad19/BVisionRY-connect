@@ -25,8 +25,7 @@ void main() {
                           children: [
                             const Text('Sheet body'),
                             TextButton(
-                              onPressed: () =>
-                                  Navigator.of(sheetCtx).pop('ok'),
+                              onPressed: () => Navigator.of(sheetCtx).pop('ok'),
                               child: const Text('Submit'),
                             ),
                           ],
@@ -73,6 +72,7 @@ void main() {
     );
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('app-bottom-sheet-handle')), findsOneWidget);
+    expect(
+        find.byKey(const ValueKey('app-bottom-sheet-handle')), findsOneWidget);
   });
 }

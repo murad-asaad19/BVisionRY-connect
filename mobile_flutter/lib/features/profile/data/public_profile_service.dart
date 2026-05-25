@@ -28,8 +28,7 @@ class PublicProfile with _$PublicProfile {
     @Default(<String>[]) List<String> roles,
     String? city,
     String? country,
-    @JsonKey(name: 'verified_github_username')
-        String? verifiedGithubUsername,
+    @JsonKey(name: 'verified_github_username') String? verifiedGithubUsername,
   }) = _PublicProfile;
 
   factory PublicProfile.fromJson(Map<String, dynamic> json) =>

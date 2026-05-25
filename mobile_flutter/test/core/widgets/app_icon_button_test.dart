@@ -60,7 +60,8 @@ void main() {
       ),
     );
     // The outer SizedBox enforces the minimum touch target.
-    final size = tester.getSize(find.byKey(const ValueKey('app-icon-button-hit')));
+    final size =
+        tester.getSize(find.byKey(const ValueKey('app-icon-button-hit')));
     expect(size.width, greaterThanOrEqualTo(44));
     expect(size.height, greaterThanOrEqualTo(44));
   });

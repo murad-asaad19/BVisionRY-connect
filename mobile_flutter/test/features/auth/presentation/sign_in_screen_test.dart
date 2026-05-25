@@ -23,10 +23,10 @@ void main() {
     );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(secureStorageChannel, (
-          MethodCall call,
-        ) async {
-          return null;
-        });
+      MethodCall call,
+    ) async {
+      return null;
+    });
   });
 
   Future<void> pumpScreen(
@@ -89,8 +89,8 @@ void main() {
     bool called = false;
     auth.onOtp =
         ({required String email, required String emailRedirectTo}) async {
-          called = true;
-        };
+      called = true;
+    };
     await pumpScreen(tester, auth: auth, fn: FakeFunctionsGateway());
     await tester.enterText(
       find.byKey(const Key('identifier-input')),
@@ -108,8 +108,8 @@ void main() {
     String? capEmail;
     auth.onOtp =
         ({required String email, required String emailRedirectTo}) async {
-          capEmail = email;
-        };
+      capEmail = email;
+    };
     await pumpScreen(tester, auth: auth, fn: FakeFunctionsGateway());
     await tester.enterText(
       find.byKey(const Key('identifier-input')),

@@ -95,9 +95,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       () async {
         await ref.read(authServiceProvider).sendMagicLink(email);
         if (!mounted) return;
-        ref
-            .read(toastServiceProvider.notifier)
-            .showToast(
+        ref.read(toastServiceProvider.notifier).showToast(
               title: context.t('auth.magicLinkSent'),
               intent: AppIntent.success,
             );
@@ -107,14 +105,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   }
 
   Future<void> _onApple() => _runGuard(
-    () async => ref.read(socialAuthServiceProvider).signInWithApple(),
-    AuthMode.signIn,
-  );
+        () async => ref.read(socialAuthServiceProvider).signInWithApple(),
+        AuthMode.signIn,
+      );
 
   Future<void> _onGoogle() => _runGuard(
-    () async => ref.read(socialAuthServiceProvider).signInWithGoogle(),
-    AuthMode.signIn,
-  );
+        () async => ref.read(socialAuthServiceProvider).signInWithGoogle(),
+        AuthMode.signIn,
+      );
 
   Future<void> _onForgot() async {
     await showDialog<void>(

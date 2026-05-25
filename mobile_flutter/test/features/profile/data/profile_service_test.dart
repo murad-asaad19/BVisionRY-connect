@@ -103,7 +103,8 @@ void main() {
         patch: <String, dynamic>{'headline': 'New headline'},
       );
       expect(g.capturedUpdateId, 'u-1');
-      expect(g.capturedUpdatePatch, <String, dynamic>{'headline': 'New headline'});
+      expect(
+          g.capturedUpdatePatch, <String, dynamic>{'headline': 'New headline'});
       expect(p.headline, 'New headline');
     });
 
@@ -153,8 +154,7 @@ void main() {
       );
     });
 
-    test('setPrivateMode calls set_private_mode RPC with bool param',
-        () async {
+    test('setPrivateMode calls set_private_mode RPC with bool param', () async {
       final _FakeGateway g = _FakeGateway();
       final ProfileService svc = ProfileService(g);
       await svc.setPrivateMode(true);
@@ -162,17 +162,19 @@ void main() {
       expect(g.capturedRpcParams, <String, dynamic>{'p_value': true});
     });
 
-    test('exportMyData calls export_my_data RPC and returns the map',
-        () async {
+    test('exportMyData calls export_my_data RPC and returns the map', () async {
       final _FakeGateway g = _FakeGateway()
-        ..rpcResult = <String, dynamic>{'profile': <String, dynamic>{'id': 'u'}};
+        ..rpcResult = <String, dynamic>{
+          'profile': <String, dynamic>{'id': 'u'}
+        };
       final ProfileService svc = ProfileService(g);
       final Map<String, dynamic> result = await svc.exportMyData();
       expect(g.capturedRpc, 'export_my_data');
       expect(result.containsKey('profile'), isTrue);
     });
 
-    test('deleteMyAccount invokes the delete-account edge function (NOT the RPC directly)',
+    test(
+        'deleteMyAccount invokes the delete-account edge function (NOT the RPC directly)',
         () async {
       final _FakeGateway g = _FakeGateway()
         ..functionResponse =

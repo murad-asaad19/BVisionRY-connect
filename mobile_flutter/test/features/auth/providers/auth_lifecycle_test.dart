@@ -48,7 +48,8 @@ void main() {
     lc.dispose();
   });
 
-  test('authLifecycleProvider builds, registers observer, and disposes cleanly', () async {
+  test('authLifecycleProvider builds, registers observer, and disposes cleanly',
+      () async {
     final FakeAuthGateway auth = FakeAuthGateway();
     final ProviderContainer container = ProviderContainer(
       overrides: <Override>[authGatewayProvider.overrideWithValue(auth)],

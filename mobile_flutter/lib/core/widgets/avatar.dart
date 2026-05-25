@@ -39,9 +39,8 @@ class _AvatarState extends State<Avatar> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
-    final showImage = widget.photoUrl != null &&
-        widget.photoUrl!.isNotEmpty &&
-        !_failed;
+    final showImage =
+        widget.photoUrl != null && widget.photoUrl!.isNotEmpty && !_failed;
     final border = switch (widget.tone) {
       AvatarTone.featured => Border.all(color: colors.gold, width: 3),
       AvatarTone.defaultTone => Border.all(color: colors.border, width: 2),
@@ -97,8 +96,7 @@ String _initials(String raw) {
   if (trimmed.isEmpty) return '?';
   final parts = trimmed.split(RegExp(r'\s+'));
   final first = parts.first.isNotEmpty ? parts.first[0] : '';
-  final last =
-      parts.length > 1 && parts.last.isNotEmpty ? parts.last[0] : '';
+  final last = parts.length > 1 && parts.last.isNotEmpty ? parts.last[0] : '';
   final result = (first + last).toUpperCase();
   return result.isEmpty ? '?' : result;
 }

@@ -25,7 +25,6 @@ class AppBanner extends StatelessWidget {
   /// Semantic intent — drives the bg / text / border palette.
   final AppIntent intent;
 
-
   /// Optional title shown above the body.
   final String? title;
 

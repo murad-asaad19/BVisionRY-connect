@@ -7,7 +7,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../helpers/fake_supabase.dart';
 
 void main() {
-  test('seeds with currentSession on first read (no AsyncLoading flash)', () async {
+  test('seeds with currentSession on first read (no AsyncLoading flash)',
+      () async {
     final FakeAuthGateway auth = FakeAuthGateway();
     // Seed the gateway's synchronous currentSession before subscribing.
     auth.pushAuthState(
@@ -25,7 +26,8 @@ void main() {
     expect(first?.user.id, 'u-1');
   });
 
-  test('forwards subsequent auth-state transitions through the stream', () async {
+  test('forwards subsequent auth-state transitions through the stream',
+      () async {
     final FakeAuthGateway auth = FakeAuthGateway();
     final ProviderContainer container = ProviderContainer(
       overrides: <Override>[authGatewayProvider.overrideWithValue(auth)],
