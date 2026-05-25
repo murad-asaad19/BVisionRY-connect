@@ -9,6 +9,7 @@ void main() {
     final ctrl = StreamController<TypingEvent>.broadcast();
     final container = ProviderContainer(
       overrides: [
+        typingSelfIdProvider.overrideWithValue('self-id'),
         typingChannelProvider('c1').overrideWith((_) => ctrl.stream),
       ],
     );
@@ -16,10 +17,50 @@ void main() {
       await ctrl.close();
       container.dispose();
     });
-    final sub = container.listen(typingProvider('c1'), (_, __) {});
+    container.listen(typingProvider('c1'), (_, __) {});
     await Future<void>.delayed(const Duration(milliseconds: 30));
     final v = container.read(typingProvider('c1'));
     expect(v.value, isA<Set<String>>());
-    sub.close();
+    expect(v.value, isEmpty);
+  });
+
+  test('typingProvider tracks other users and clears them after 2s', () async {
+    final ctrl = StreamController<TypingEvent>.broadcast();
+    final container = ProviderContainer(
+      overrides: [
+        typingSelfIdProvider.overrideWithValue('self-id'),
+        typingChannelProvider('c1').overrideWith((_) => ctrl.stream),
+      ],
+    );
+    addTearDown(() async {
+      await ctrl.close();
+      container.dispose();
+    });
+    container.listen(typingProvider('c1'), (_, __) {});
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    ctrl.add(TypingEvent('other-user', DateTime.now().toUtc()));
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    final v = container.read(typingProvider('c1'));
+    expect(v.value, contains('other-user'));
+  });
+
+  test('typingProvider ignores own user id', () async {
+    final ctrl = StreamController<TypingEvent>.broadcast();
+    final container = ProviderContainer(
+      overrides: [
+        typingSelfIdProvider.overrideWithValue('self-id'),
+        typingChannelProvider('c1').overrideWith((_) => ctrl.stream),
+      ],
+    );
+    addTearDown(() async {
+      await ctrl.close();
+      container.dispose();
+    });
+    container.listen(typingProvider('c1'), (_, __) {});
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+    ctrl.add(TypingEvent('self-id', DateTime.now().toUtc()));
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    final v = container.read(typingProvider('c1'));
+    expect(v.value, isEmpty);
   });
 }

@@ -40,14 +40,20 @@ final StreamProviderFamily<TypingEvent, String> typingChannelProvider =
       return controller.stream;
     });
 
+/// Resolves the current authenticated user id so [typingProvider] can
+/// filter out the caller's own pings without re-reading the Supabase
+/// client (which makes the provider easier to fake in tests).
+final Provider<String?> typingSelfIdProvider = Provider<String?>((ref) {
+  return ref.watch(supabaseClientProvider).auth.currentUser?.id;
+});
+
 /// The set of user ids that are currently typing (other than self). Each
 /// id auto-clears 2 seconds after the last received ping for that user.
 ///
 /// AutoDispose so leaving a thread releases the channel.
 final AutoDisposeStreamProviderFamily<Set<String>, String> typingProvider =
     StreamProvider.autoDispose.family<Set<String>, String>((ref, convId) {
-      final client = ref.watch(supabaseClientProvider);
-      final selfId = client.auth.currentUser?.id;
+      final selfId = ref.watch(typingSelfIdProvider);
       final controller = StreamController<Set<String>>.broadcast();
       final active = <String, Timer>{};
       final current = <String>{};
