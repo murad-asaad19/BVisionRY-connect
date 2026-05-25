@@ -10,6 +10,7 @@ import '../../features/auth/providers/profile_provider.dart';
 import '../../features/auth/providers/route_guard_provider.dart';
 import '../../features/auth/providers/session_provider.dart';
 import '../../features/chat/presentation/chats_screen_stub.dart';
+import '../../features/connections/presentation/connections_screen.dart';
 import '../../features/connections/presentation/network_screen_stub.dart';
 import '../../features/discovery/presentation/search_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
@@ -131,6 +132,10 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
         path: '/intros/:id',
         builder: (_, GoRouterState state) =>
             IntroDetailScreen(introId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: Routes.connections,
+        builder: (_, __) => const ConnectionsScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (_, __, StatefulNavigationShell shell) =>
