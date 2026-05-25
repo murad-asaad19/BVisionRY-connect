@@ -25,6 +25,9 @@ abstract final class Routes {
   static const String opportunities = '/opportunities';
   static const String chats = '/chats';
 
+  // Discovery
+  static const String search = '/search';
+
   // Detail routes (dynamic)
   static String chat(String id) => '/chats/$id';
   static String intro(String id) => '/intros/$id';

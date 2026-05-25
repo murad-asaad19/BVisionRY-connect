@@ -9,14 +9,20 @@ import '../../features/auth/presentation/suspended_screen.dart';
 import '../../features/auth/providers/profile_provider.dart';
 import '../../features/auth/providers/route_guard_provider.dart';
 import '../../features/auth/providers/session_provider.dart';
+import '../../features/chat/presentation/chats_screen_stub.dart';
+import '../../features/connections/presentation/network_screen_stub.dart';
+import '../../features/discovery/presentation/search_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/intros/presentation/inbox_screen_stub.dart';
 import '../../features/onboarding/presentation/about_step.dart';
 import '../../features/onboarding/presentation/goal_step.dart';
 import '../../features/onboarding/presentation/identity_step.dart';
 import '../../features/onboarding/presentation/roles_step.dart';
+import '../../features/opportunities/presentation/opportunities_screen_stub.dart';
 import '../../features/profile/presentation/profile_edit_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/profile/presentation/public_profile_screen.dart';
+import '../../features/shell/presentation/tab_shell.dart';
 import '../../features/verification/presentation/verification_screen.dart';
 import 'route_guard.dart';
 import 'router_refresh.dart';
@@ -34,6 +40,10 @@ import 'routes.dart';
 /// The `/auth` callback path is pass-through: the [AuthCallbackScreen]
 /// runs first, exchanges the deep-link payload for a session, and the
 /// resulting state change drives the redirect on the next tick.
+///
+/// The 5 main tabs (`/home`, `/inbox`, `/network`, `/opportunities`,
+/// `/chats`) live inside a [StatefulShellRoute.indexedStack] hosted by
+/// [TabShell] so navigation between tabs preserves their stack state.
 final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
   Ref<GoRouter> ref,
 ) {
@@ -69,14 +79,8 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
       return next;
     },
     routes: <RouteBase>[
-      GoRoute(
-        path: Routes.signIn,
-        builder: (_, __) => const SignInScreen(),
-      ),
-      GoRoute(
-        path: Routes.signUp,
-        builder: (_, __) => const SignUpScreen(),
-      ),
+      GoRoute(path: Routes.signIn, builder: (_, __) => const SignInScreen()),
+      GoRoute(path: Routes.signUp, builder: (_, __) => const SignUpScreen()),
       GoRoute(
         path: Routes.authCallback,
         builder: (_, GoRouterState state) => AuthCallbackScreen(uri: state.uri),
@@ -102,8 +106,8 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
         builder: (_, __) => const AboutStep(),
       ),
       GoRoute(
-        path: Routes.home,
-        builder: (_, __) => const HomeScreen(),
+        path: Routes.search,
+        builder: (_, __) => const SearchScreen(),
       ),
       GoRoute(
         path: Routes.profile,
@@ -121,6 +125,52 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
       GoRoute(
         path: Routes.settingsVerification,
         builder: (_, __) => const VerificationScreen(),
+      ),
+      StatefulShellRoute.indexedStack(
+        builder: (_, __, StatefulNavigationShell shell) =>
+            TabShell(navigationShell: shell),
+        branches: <StatefulShellBranch>[
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: Routes.home,
+                builder: (_, __) => const HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: Routes.inbox,
+                builder: (_, __) => const InboxScreenStub(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: Routes.network,
+                builder: (_, __) => const NetworkScreenStub(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: Routes.opportunities,
+                builder: (_, __) => const OpportunitiesScreenStub(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
+                path: Routes.chats,
+                builder: (_, __) => const ChatsScreenStub(),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );
