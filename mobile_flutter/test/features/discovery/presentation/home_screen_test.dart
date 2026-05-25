@@ -35,8 +35,18 @@ void main() {
   });
   setUp(() => SharedPreferences.setMockInitialValues(<String, Object>{}));
 
+  // Per-test fake created inside each `testWidgets` body, but the
+  // `markMatchViewed` stub is shared: VisibilityDetector fires `onSeen` as
+  // soon as a [MatchCard] is laid out and an unstubbed `mocktail` method
+  // would return `null` (not the expected `Future<void>`), crashing the
+  // frame. Returning a completed future here keeps the controller silent.
+  void stubMarkViewed(FakeDiscoveryService fake) {
+    when(() => fake.markMatchViewed(any())).thenAnswer((_) async {});
+  }
+
   testWidgets('shows skeleton while loading', (tester) async {
     final fake = FakeDiscoveryService();
+    stubMarkViewed(fake);
     final completer = Completer<List<DailyMatch>>();
     when(
       () => fake.fetchDailyMatches(date: any(named: 'date')),
@@ -53,6 +63,7 @@ void main() {
 
   testWidgets('renders 5 matches and section header', (tester) async {
     final fake = FakeDiscoveryService();
+    stubMarkViewed(fake);
     when(
       () => fake.fetchDailyMatches(date: any(named: 'date')),
     ).thenAnswer(
@@ -72,6 +83,7 @@ void main() {
 
   testWidgets('thin-pool banner appears when < 3 matches', (tester) async {
     final fake = FakeDiscoveryService();
+    stubMarkViewed(fake);
     when(
       () => fake.fetchDailyMatches(date: any(named: 'date')),
     ).thenAnswer((_) async => <DailyMatch>[_m('only')]);
@@ -85,6 +97,7 @@ void main() {
 
   testWidgets('empty list renders branded EmptyState', (tester) async {
     final fake = FakeDiscoveryService();
+    stubMarkViewed(fake);
     when(
       () => fake.fetchDailyMatches(date: any(named: 'date')),
     ).thenAnswer((_) async => <DailyMatch>[]);

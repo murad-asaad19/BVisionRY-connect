@@ -64,6 +64,17 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
   Widget build(BuildContext context) {
     final c = Theme.of(context).extension<AppColors>()!;
     final t = Theme.of(context).extension<AppTypography>()!;
+    // Guard: if the persisted country isn't in the seed list, fall back to
+    // `null` (i.e. show the "All" sentinel) instead of crashing the
+    // DropdownButtonFormField with an `assert(items.where(value).length == 1)`
+    // violation. The underlying `_country` state is preserved — the user can
+    // still pick a known country to overwrite it.
+    final Set<String> knownCountries =
+        CountryOption.all.map((CountryOption o) => o.name).toSet();
+    final String? effectiveCountry =
+        (_country != null && knownCountries.contains(_country))
+            ? _country
+            : null;
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
       child: Column(
@@ -129,7 +140,7 @@ class _FilterSheetBodyState extends State<_FilterSheetBody> {
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String?>(
-            initialValue: _country,
+            initialValue: effectiveCountry,
             isExpanded: true,
             hint: Text(context.t('discovery.countryPlaceholder')),
             items: <DropdownMenuItem<String?>>[

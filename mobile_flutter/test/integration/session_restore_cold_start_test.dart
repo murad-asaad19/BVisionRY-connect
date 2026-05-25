@@ -1,15 +1,23 @@
+import 'package:connect_mobile/core/i18n/locale_loader.dart';
+import 'package:connect_mobile/core/i18n/locale_notifier.dart';
 import 'package:connect_mobile/core/routing/app_router.dart';
 import 'package:connect_mobile/core/theme/app_theme.dart';
 import 'package:connect_mobile/features/auth/data/profile_repository.dart';
 import 'package:connect_mobile/features/auth/providers/auth_service_provider.dart';
+import 'package:connect_mobile/features/discovery/data/discovery_service.dart';
+import 'package:connect_mobile/features/discovery/domain/daily_match.dart';
+import 'package:connect_mobile/features/discovery/providers/midnight_invalidator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../helpers/fake_discovery_service.dart';
 import '../helpers/fake_supabase.dart';
+import '../helpers/pump.dart';
 
 class _Q implements ProfileQueryRunner {
   _Q(this.row);
@@ -18,11 +26,35 @@ class _Q implements ProfileQueryRunner {
   Future<Map<String, dynamic>?> selectById(String id) async => row;
 }
 
+/// No-op stand-in for [MidnightInvalidator] used by the integration test.
+/// The production class schedules a 24h-distant `Timer` + an
+/// `AppLifecycleListener`, both of which would leak past the test's
+/// `pumpAndSettle` and trip the `!timersPending` invariant on tear-down.
+class _NoOpMidnightInvalidator extends MidnightInvalidator {
+  @override
+  void build() {
+    // intentionally empty: skip Timer + lifecycle listener registration.
+  }
+}
+
 Future<void> _pumpApp(
   WidgetTester tester, {
   required FakeAuthGateway auth,
   required _Q query,
 }) async {
+  // Pre-load the English locale bundle so screens that resolve `context.t`
+  // synchronously on first frame (BottomNav labels, etc.) render real
+  // English strings instead of raw keys.
+  final LocaleLoader loader = await primedLocaleLoader();
+  // Override `discoveryServiceProvider` with a no-op fake — the real
+  // adapter pulls `supabaseClientProvider`, which boots GoTrue's auto-refresh
+  // timer and leaves a periodic Timer pending past the test's lifecycle.
+  // The Home screen reads `dailyMatchesProvider` as soon as it mounts, so
+  // every test that lands on /home needs this in place.
+  final FakeDiscoveryService fakeDiscovery = FakeDiscoveryService();
+  when(
+    () => fakeDiscovery.fetchDailyMatches(date: any(named: 'date')),
+  ).thenAnswer((_) async => const <DailyMatch>[]);
   await tester.pumpWidget(
     ProviderScope(
       overrides: <Override>[
@@ -30,6 +62,9 @@ Future<void> _pumpApp(
         profileRepositoryProvider.overrideWithValue(
           ProfileRepository(query),
         ),
+        localeLoaderProvider.overrideWithValue(loader),
+        discoveryServiceProvider.overrideWithValue(fakeDiscovery),
+        midnightInvalidatorProvider.overrideWith(_NoOpMidnightInvalidator.new),
       ],
       child: Builder(
         builder: (BuildContext ctx) {
@@ -48,6 +83,7 @@ Future<void> _pumpApp(
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(registerDiscoveryFallbacks);
   setUp(() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     const MethodChannel secureStorageChannel = MethodChannel(
@@ -78,7 +114,9 @@ void main() {
         'suspended_at': null,
       }),
     );
-    // HomeScreen is the Phase 1 stub rendering "Home (stub)".
+    // HomeScreen renders the localized "Home" label in the BottomNav and
+    // in its TopBar title (`home.title`). With the locale loader primed
+    // both resolve to the English string "Home".
     expect(find.textContaining('Home'), findsWidgets);
   });
 
