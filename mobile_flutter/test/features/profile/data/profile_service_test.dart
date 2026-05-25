@@ -131,8 +131,11 @@ void main() {
           reason: 'should reject $col',
         );
       }
-      expect(g.capturedUpdatePatch, isNull,
-          reason: 'gateway must NOT be hit when a forbidden column is present');
+      expect(
+        g.capturedUpdatePatch,
+        isNull,
+        reason: 'gateway must NOT be hit when a forbidden column is present',
+      );
     });
 
     test('updateProfile maps PostgrestException via mapPostgrestError',

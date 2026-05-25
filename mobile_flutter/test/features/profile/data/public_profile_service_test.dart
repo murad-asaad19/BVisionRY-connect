@@ -44,8 +44,11 @@ void main() {
         ];
       final PublicProfileService svc = PublicProfileService(g);
       final PublicProfile? result = await svc.getPublicProfile('Omar-D');
-      expect(g.capturedHandle, 'omar-d',
-          reason: 'service lowercases + trims before forwarding the handle');
+      expect(
+        g.capturedHandle,
+        'omar-d',
+        reason: 'service lowercases + trims before forwarding the handle',
+      );
       expect(result, isNotNull);
       expect(result!.handle, 'omar-d');
       expect(result.primaryRole, 'builder');

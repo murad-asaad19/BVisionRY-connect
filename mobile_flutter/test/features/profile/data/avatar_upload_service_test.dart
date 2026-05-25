@@ -85,8 +85,10 @@ void main() {
 
       final String? url = await svc.pickAndUpload();
       expect(url, isNotNull);
-      expect(url!.startsWith('https://cdn.example.com/avatars/u-1/avatar.jpg?v='),
-          isTrue);
+      expect(
+        url!.startsWith('https://cdn.example.com/avatars/u-1/avatar.jpg?v='),
+        isTrue,
+      );
       expect(storage.capturedPath, 'u-1/avatar.jpg');
       expect(storage.capturedContentType, 'image/jpeg');
       expect(storage.capturedUpsert, isTrue);
@@ -103,8 +105,11 @@ void main() {
         userId: 'u-1',
       );
       expect(await svc.pickAndUpload(), isNull);
-      expect(storage.capturedPath, isNull,
-          reason: 'cancel must NOT trigger an upload');
+      expect(
+        storage.capturedPath,
+        isNull,
+        reason: 'cancel must NOT trigger an upload',
+      );
       expect(storage.capturedPatchUrl, isNull);
     });
 
@@ -149,8 +154,11 @@ void main() {
           ),
         ),
       );
-      expect(src.calls, 0,
-          reason: 'no session → bail before even prompting the picker');
+      expect(
+        src.calls,
+        0,
+        reason: 'no session → bail before even prompting the picker',
+      );
     });
 
     test('wraps picker exceptions as pickFailed', () async {
@@ -209,8 +217,11 @@ void main() {
       );
       final String? url = await svc.pickAndUpload();
       expect(url, isNotNull);
-      expect(storage.capturedPath, 'u-1/avatar.jpg',
-          reason: 'upload still happened');
+      expect(
+        storage.capturedPath,
+        'u-1/avatar.jpg',
+        reason: 'upload still happened',
+      );
     });
   });
 }
