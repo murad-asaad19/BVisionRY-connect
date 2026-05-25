@@ -34,7 +34,9 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('SignIn (stub)'), findsOneWidget);
+    // After Phase 2 the real SignInScreen wraps the form in AuthShell which
+    // renders the BVisionRY wordmark.
+    expect(find.text('BVisionRY'), findsOneWidget);
     // Stop the auto-refresh Timer.periodic GoTrue spins up on init —
     // otherwise the test framework flags a pending timer after teardown.
     Supabase.instance.client.auth.stopAutoRefresh();
