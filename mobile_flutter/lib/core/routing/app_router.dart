@@ -49,6 +49,15 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
       if (state.matchedLocation == Routes.authCallback) return null;
       // Avoid loops.
       if (state.matchedLocation == next) return null;
+      // Once the guard decided the user belongs in onboarding, let them
+      // move between the four steps freely — without this carve-out the
+      // redirect would yank them back to /onboarding/goal the moment Goal
+      // pushes /onboarding/identity (since `onboarded=false` always
+      // resolves to /onboarding/goal until submitOnboarding flips it).
+      if (next == Routes.onboardingGoal &&
+          state.matchedLocation.startsWith('/onboarding/')) {
+        return null;
+      }
       return next;
     },
     routes: <RouteBase>[

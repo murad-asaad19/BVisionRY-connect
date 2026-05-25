@@ -112,7 +112,10 @@ void main() {
       fakeSession(id: 'new'),
     );
     await _pumpApp(tester, auth: auth, query: _Q(null));
-    expect(find.textContaining('Onboarding'), findsWidgets);
+    // GoalStep renders the goal text input — assert the AppInput frame is
+    // present, which is unique to the Goal step shell.
+    expect(find.byKey(const ValueKey<String>('app-input-frame')),
+        findsWidgets);
   });
 
   testWidgets('cold-start with no session lands on /sign-in', (
