@@ -34,7 +34,7 @@ Future<void> main() async {
   // Subscribe synchronously — wins the race vs cold-start deep links.
   // `sessionProvider` is a StreamProvider; touching `.stream` attaches the
   // upstream listener immediately.
-  // ignore: unused_local_variable
+  // ignore: deprecated_member_use, unused_local_variable
   final Stream<dynamic> _ = container.read(sessionProvider.stream);
 
   // Boot Supabase. After this completes the supabase singleton is usable

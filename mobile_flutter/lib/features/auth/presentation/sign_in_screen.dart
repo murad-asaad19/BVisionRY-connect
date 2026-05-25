@@ -75,11 +75,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       setState(() => _error = context.t('auth.errors.passwordRequired'));
       return;
     }
-    await _runGuard(() async {
-      await ref
-          .read(authServiceProvider)
-          .signInWithIdentifier(identifier: id, password: pwd);
-    }, AuthMode.signIn);
+    await _runGuard(
+      () async {
+        await ref
+            .read(authServiceProvider)
+            .signInWithIdentifier(identifier: id, password: pwd);
+      },
+      AuthMode.signIn,
+    );
   }
 
   Future<void> _onMagicLink() async {
@@ -88,16 +91,19 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       setState(() => _error = context.t('auth.errors.magicLinkNeedsEmail'));
       return;
     }
-    await _runGuard(() async {
-      await ref.read(authServiceProvider).sendMagicLink(email);
-      if (!mounted) return;
-      ref
-          .read(toastServiceProvider.notifier)
-          .showToast(
-            title: context.t('auth.magicLinkSent'),
-            intent: AppIntent.success,
-          );
-    }, AuthMode.signIn);
+    await _runGuard(
+      () async {
+        await ref.read(authServiceProvider).sendMagicLink(email);
+        if (!mounted) return;
+        ref
+            .read(toastServiceProvider.notifier)
+            .showToast(
+              title: context.t('auth.magicLinkSent'),
+              intent: AppIntent.success,
+            );
+      },
+      AuthMode.signIn,
+    );
   }
 
   Future<void> _onApple() => _runGuard(
