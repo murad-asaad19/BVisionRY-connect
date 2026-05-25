@@ -105,7 +105,7 @@ class _SendIntroSheetState extends ConsumerState<SendIntroSheet> {
   @override
   Widget build(BuildContext context) {
     final bool valid = isIntroNoteInRange(_note);
-    return Padding(
+    return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
         16,
         12,

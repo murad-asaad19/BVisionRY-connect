@@ -92,7 +92,7 @@ class _SendWarmRequestSheetState extends ConsumerState<SendWarmRequestSheet> {
   Widget build(BuildContext context) {
     final bool valid = isIntroNoteInRange(_note);
     final s = widget.suggestion;
-    return Padding(
+    return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
         16,
         12,

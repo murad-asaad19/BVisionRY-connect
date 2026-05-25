@@ -416,7 +416,7 @@
       "forwardNote": "Agrega una nota para {{targetName}}",
       "forwardCta": "Reenviar",
       "skipCta": "Ahora no",
-      "hintBody": "Reenviar esta presentación les envía una intro {{kind}} de tu parte — pueden aceptarla, rechazarla o ignorarla."
+      "hintBody": "Reenviar les envía una intro cálida de tu parte — pueden aceptarla, rechazarla o ignorarla."
     },
     "warmSuggestion": {
       "viaOne": "Vía {{name}}",

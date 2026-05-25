@@ -416,7 +416,7 @@
       "forwardNote": "Add a note for {{targetName}}",
       "forwardCta": "Forward",
       "skipCta": "Not now",
-      "hintBody": "Forwarding this introduction sends them a {{kind}} intro on your behalf — they can accept, decline, or ignore."
+      "hintBody": "Forwarding sends them a warm intro on your behalf — they can accept, decline, or ignore."
     },
     "warmSuggestion": {
       "viaOne": "Via {{name}}",

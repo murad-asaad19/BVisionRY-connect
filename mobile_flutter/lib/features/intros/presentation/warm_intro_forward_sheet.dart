@@ -108,7 +108,7 @@ class _WarmIntroForwardSheetState extends ConsumerState<WarmIntroForwardSheet> {
     final intro = widget.intro;
     final bool valid = isIntroNoteInRange(_note);
 
-    return Padding(
+    return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
         16,
         12,
