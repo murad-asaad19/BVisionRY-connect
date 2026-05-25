@@ -61,9 +61,14 @@
     "contactBody": "Para apelar, contacta a support@bvisionry.com."
   },
   "home": {
-    "title": "Inicio",
+    "title": "Hoy",
     "picks": "Selecciones de hoy",
-    "discover": "Descubrir"
+    "discover": "Descubrir",
+    "picksHeader_one": "{{count}} selección para ti",
+    "picksHeader_other": "{{count}} selecciones para ti",
+    "matchesEmptyTitle": "Sin coincidencias hoy",
+    "matchesEmptyBody": "Vuelve mañana a las 4 AM en tu zona horaria.",
+    "loadingTodaysMatches": "Cargando las coincidencias de hoy"
   },
   "settings": {
     "title": "Ajustes",
@@ -344,7 +349,14 @@
   "common": {
     "cancel": "Cancelar",
     "ok": "OK",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "tabs": {
+      "home": "Inicio",
+      "inbox": "Bandeja",
+      "network": "Red",
+      "opportunities": "Oportunidades",
+      "chats": "Chats"
+    }
   },
   "intros": {
     "inboxTitle": "Bandeja de entrada",
@@ -720,7 +732,25 @@
       "advise": "Asesorando",
       "find_advisor": "Buscando asesor",
       "peer_connect": "Conexión entre pares"
-    }
+    },
+    "reason": {
+      "complementaryGoals": "Objetivos complementarios",
+      "sharedRole": "Rol compartido",
+      "sameCity": "Misma ciudad",
+      "newOnConnect": "Nuevo en Connect",
+      "dailyPick": "Selección diaria"
+    },
+    "searchEmptyTitle": "Sin resultados",
+    "searchEmptyBody": "Prueba otras palabras o quita los filtros.",
+    "loadMore": "Cargar más",
+    "filtersTitle": "Filtros",
+    "filtersApply": "Aplicar",
+    "filtersReset": "Restablecer",
+    "filtersRoles": "Roles",
+    "filtersGoals": "Objetivos",
+    "filtersCountry": "País",
+    "countryPlaceholder": "País (nombre ISO)",
+    "openSearch": "Buscar"
   },
   "meetings": {
     "yourTime": "tu hora",
