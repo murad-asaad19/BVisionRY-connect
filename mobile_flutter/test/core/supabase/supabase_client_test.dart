@@ -32,6 +32,10 @@ void main() {
     expect(client, same(Supabase.instance.client));
     expect(client.auth, isA<GoTrueClient>());
     expect(client.headers, containsPair('X-Client-Info', isNotEmpty));
+    // Stop GoTrue's auto-refresh Timer.periodic + dispose to avoid the test
+    // framework's "pending timer" assertion at teardown.
+    client.auth.stopAutoRefresh();
     container.dispose();
+    await Supabase.instance.dispose();
   });
 }

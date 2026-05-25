@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/theme/app_theme.dart';
+import 'app.dart';
+import 'core/env.dart';
+import 'core/supabase/supabase_client.dart';
 
-void main() {
-  runApp(const FoundationApp());
-}
-
-class FoundationApp extends StatelessWidget {
-  const FoundationApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'BVisionry Connect',
-      theme: buildAppTheme(Brightness.light),
-      home: const Scaffold(
-        body: Center(child: Text('Foundation OK')),
-      ),
-    );
-  }
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Env.requireProdInvariants();
+  final ProviderContainer container = ProviderContainer();
+  await container.read(supabaseInitProvider.future);
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: const ConnectApp(),
+    ),
+  );
 }
