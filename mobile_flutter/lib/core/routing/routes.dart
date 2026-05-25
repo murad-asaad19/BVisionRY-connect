@@ -25,6 +25,9 @@ abstract final class Routes {
   static const String opportunities = '/opportunities';
   static const String chats = '/chats';
 
+  // Connections list (full-screen, dedicated route)
+  static const String connections = '/connections';
+
   // Discovery
   static const String search = '/search';
 

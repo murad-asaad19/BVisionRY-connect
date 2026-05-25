@@ -361,16 +361,31 @@
   "intros": {
     "inboxTitle": "Bandeja de entrada",
     "sentTitle": "Enviados",
+    "tab": {
+      "received": "Recibidos",
+      "sent": "Enviados",
+      "connections": "Conexiones"
+    },
     "tabs": {
       "received": "Recibidos",
       "sent": "Enviados"
     },
     "empty": {
       "title": "Aún no hay intros",
+      "body": "Cuando alguien te envíe una intro, aparecerá aquí.",
       "received": "Cuando alguien te envíe una intro, aparecerá aquí. Vuelve mañana a las 4 a. m. de tu hora para ver nuevas selecciones.",
       "sent": "Aún no has enviado ninguna intro. Encuentra a alguien interesante en Descubrir.",
+      "connections": "Aún no tienes conexiones. Acepta una intro para empezar.",
       "browse": "Ver las coincidencias de hoy"
     },
+    "state": {
+      "delivered": "Pendiente",
+      "accepted": "Aceptada",
+      "declined": "Rechazada",
+      "expired": "Caducada",
+      "connected": "Conectado"
+    },
+    "todayBannerCapped": "Has enviado {{count}} de {{cap}} intros hoy.",
     "banner": {
       "dailyCapTitle": "Límite diario alcanzado",
       "dailyCapBody": "Las intros entrantes superiores a {{cap}} quedan en cola para mañana."
@@ -410,6 +425,10 @@
       "says": "{{name}} DICE",
       "accept": "Aceptar",
       "decline": "Rechazar",
+      "acceptCta": "Aceptar",
+      "declineCta": "Rechazar",
+      "forwardCta": "Reenviar intro",
+      "warmRequestHint": "{{name}} te pide que les hagas una presentación.",
       "acceptFailed": "No se pudo aceptar",
       "declineFailed": "No se pudo rechazar"
     },

@@ -13,7 +13,8 @@ import '../../features/chat/presentation/chats_screen_stub.dart';
 import '../../features/connections/presentation/network_screen_stub.dart';
 import '../../features/discovery/presentation/search_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
-import '../../features/intros/presentation/inbox_screen_stub.dart';
+import '../../features/intros/presentation/inbox_screen.dart';
+import '../../features/intros/presentation/intro_detail_screen.dart';
 import '../../features/onboarding/presentation/about_step.dart';
 import '../../features/onboarding/presentation/goal_step.dart';
 import '../../features/onboarding/presentation/identity_step.dart';
@@ -126,6 +127,11 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
         path: Routes.settingsVerification,
         builder: (_, __) => const VerificationScreen(),
       ),
+      GoRoute(
+        path: '/intros/:id',
+        builder: (_, GoRouterState state) =>
+            IntroDetailScreen(introId: state.pathParameters['id']!),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (_, __, StatefulNavigationShell shell) =>
             TabShell(navigationShell: shell),
@@ -142,7 +148,7 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
             routes: <RouteBase>[
               GoRoute(
                 path: Routes.inbox,
-                builder: (_, __) => const InboxScreenStub(),
+                builder: (_, __) => const InboxScreen(),
               ),
             ],
           ),

@@ -361,16 +361,31 @@
   "intros": {
     "inboxTitle": "Inbox",
     "sentTitle": "Sent",
+    "tab": {
+      "received": "Received",
+      "sent": "Sent",
+      "connections": "Connections"
+    },
     "tabs": {
       "received": "Received",
       "sent": "Sent"
     },
     "empty": {
       "title": "No intros yet",
+      "body": "When someone sends you an intro, it shows up here.",
       "received": "When someone sends you an intro, it shows up here. Check back tomorrow at 4 AM your time for new picks.",
       "sent": "You haven't sent any intros yet. Find someone interesting in Discover.",
+      "connections": "No connections yet. Accept an intro to start.",
       "browse": "Browse today's matches"
     },
+    "state": {
+      "delivered": "Pending",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "expired": "Expired",
+      "connected": "Connected"
+    },
+    "todayBannerCapped": "You've sent {{count}} of {{cap}} intros today.",
     "banner": {
       "dailyCapTitle": "Daily limit reached",
       "dailyCapBody": "Incoming intros above {{cap}} are queued for tomorrow."
@@ -410,6 +425,10 @@
       "says": "{{name}} SAYS",
       "accept": "Accept",
       "decline": "Decline",
+      "acceptCta": "Accept",
+      "declineCta": "Decline",
+      "forwardCta": "Forward warm intro",
+      "warmRequestHint": "{{name}} is asking you to introduce them.",
       "acceptFailed": "Accept failed",
       "declineFailed": "Decline failed"
     },
