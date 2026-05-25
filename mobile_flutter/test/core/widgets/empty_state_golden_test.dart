@@ -1,7 +1,6 @@
 import 'package:connect_mobile/core/theme/app_theme.dart';
 import 'package:connect_mobile/core/widgets/empty_state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 
 void main() {
