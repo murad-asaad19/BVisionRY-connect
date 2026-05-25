@@ -3,10 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/i18n/i18n.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
-import '../../connections/domain/connection.dart';
+import '../../connections/presentation/connection_row.dart';
 import '../../connections/providers/connections_provider.dart';
 import '../domain/intro.dart';
 import '../providers/intros_providers.dart';
@@ -191,7 +189,7 @@ class _ConnectionsTab extends ConsumerWidget {
           return ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: rows.length,
-            itemBuilder: (_, i) => _ConnectionRow(connection: rows[i]),
+            itemBuilder: (_, i) => ConnectionRow(connection: rows[i]),
           );
         },
       ),
@@ -213,61 +211,11 @@ class _IntroListView extends StatelessWidget {
       separatorBuilder: (_, __) =>
           Divider(height: 1, color: Theme.of(context).dividerColor),
       itemBuilder: (_, i) {
-        final intro = intros[i];
-        // Peer name / handle / photo will be resolved through
-        // profileByIdProvider in Chunk B. For Chunk A we render the user
-        // id so the UI is functional and tests can pin a stable string.
-        final peerId = viewerIsRecipient ? intro.senderId : intro.recipientId;
         return IntroListRow(
-          intro: intro,
-          peerName: peerId,
-          peerHandle: peerId,
-          peerPhotoUrl: null,
+          intro: intros[i],
+          viewerIsRecipient: viewerIsRecipient,
         );
       },
-    );
-  }
-}
-
-class _ConnectionRow extends StatelessWidget {
-  const _ConnectionRow({required this.connection});
-
-  final Connection connection;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    final typo = Theme.of(context).extension<AppTypography>()!;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Avatar(
-            name: connection.name,
-            photoUrl: connection.photoUrl,
-            size: 44,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  connection.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: typo.displaySm.copyWith(color: colors.navy),
-                ),
-                if (connection.primaryRole != null)
-                  Text(
-                    connection.primaryRole!,
-                    style: typo.bodyMd.copyWith(color: colors.muted),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

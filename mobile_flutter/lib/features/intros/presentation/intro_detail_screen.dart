@@ -3,19 +3,21 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../profile/domain/profile.dart';
+import '../../profile/providers/peer_profile_provider.dart';
 import '../data/intros_service.dart';
 import '../domain/intro.dart';
 import '../domain/intro_enums.dart';
 import '../providers/intro_by_id_provider.dart';
 import '../providers/intros_providers.dart';
 import 'intro_state_badge.dart';
+import 'warm_intro_forward_sheet.dart';
 
 /// Detail surface for one intro row.
 ///
@@ -111,10 +113,17 @@ class _IntroDetailBodyState extends ConsumerState<_IntroDetailBody> {
     final intro = widget.intro;
     final colors = Theme.of(context).extension<AppColors>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
-    final senderName = intro.sender?.name ?? intro.senderId;
-    final senderHandle = intro.sender?.handle ?? intro.senderId;
-    final senderPhoto = intro.sender?.photoUrl;
-    final senderRole = intro.sender?.primaryRole;
+    // Resolve the peer (the *sender* for an incoming intro is the person
+    // the recipient is deciding about; for an outgoing intro we still
+    // surface the sender hero as a deterministic "who started this thread"
+    // anchor — matches the gallery's E3 layout).
+    final AsyncValue<Profile?> peerAsync =
+        ref.watch(peerProfileProvider(intro.senderId));
+    final Profile? peer = peerAsync.asData?.value;
+    final senderName = peer?.name ?? intro.sender?.name ?? intro.senderId;
+    final senderHandle = peer?.handle ?? intro.sender?.handle ?? intro.senderId;
+    final senderPhoto = peer?.photoUrl ?? intro.sender?.photoUrl;
+    final senderRole = peer?.primaryRole ?? intro.sender?.primaryRole;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -196,7 +205,7 @@ class _IntroDetailBodyState extends ConsumerState<_IntroDetailBody> {
             busy: _busy,
             onAccept: _accept,
             onDecline: _decline,
-            onForward: () => _showForwardPlaceholder(context),
+            onForward: _openForwardSheet,
           ),
           const SizedBox(height: 8),
           Text(
@@ -208,45 +217,14 @@ class _IntroDetailBodyState extends ConsumerState<_IntroDetailBody> {
     );
   }
 
-  void _showForwardPlaceholder(BuildContext context) {
-    // The actual `WarmIntroForwardSheet` ships in Chunk B. Until then we
-    // expose a stub so the kind-dispatch path is wired and discoverable
-    // in widget tests.
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Icon(
-              LucideIcons.share2,
-              size: 40,
-              color: Theme.of(context).extension<AppColors>()!.gold,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              context.t('intros.warm.forwardTitle', vars: const {'targetName': '...'}),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Coming soon — full forward flow lands in the warm-intro sheet.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 16),
-            AppButton(
-              label: context.t('common.ok'),
-              onPressed: () => Navigator.of(context).maybePop(),
-            ),
-          ],
-        ),
-      ),
+  Future<void> _openForwardSheet() async {
+    final intro = widget.intro;
+    assert(
+      intro.kind == IntroKind.warmRequest,
+      'WarmIntroForwardSheet may only be opened for warm_request rows; '
+      'got ${intro.kind}',
     );
+    await showWarmIntroForwardSheet(context, intro: intro);
   }
 }
 

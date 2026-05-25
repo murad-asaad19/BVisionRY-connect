@@ -3,6 +3,7 @@ import 'package:connect_mobile/features/intros/domain/intro.dart';
 import 'package:connect_mobile/features/intros/domain/intro_enums.dart';
 import 'package:connect_mobile/features/intros/presentation/intro_detail_screen.dart';
 import 'package:connect_mobile/features/intros/providers/intros_providers.dart';
+import 'package:connect_mobile/features/profile/data/peer_profile_service.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,6 +13,8 @@ import '../../../helpers/intros_fixtures.dart';
 import '../../../helpers/pump.dart';
 
 class _FakeIntrosService extends Mock implements IntrosService {}
+
+class _FakePeerProfileService extends Mock implements PeerProfileService {}
 
 void main() {
   setUpAll(() => registerFallbackValue(<String, dynamic>{}));
@@ -28,6 +31,12 @@ void main() {
     return fake;
   }
 
+  _FakePeerProfileService stubPeer() {
+    final fake = _FakePeerProfileService();
+    when(() => fake.fetchById(any())).thenAnswer((_) async => null);
+    return fake;
+  }
+
   testWidgets('shows note text + delivered badge for a direct intro', (
     tester,
   ) async {
@@ -36,6 +45,7 @@ void main() {
       child: const IntroDetailScreen(introId: 'intro-1'),
       overrides: <Override>[
         introsServiceProvider.overrideWithValue(stub(received: <Intro>[intro])),
+        peerProfileServiceProvider.overrideWithValue(stubPeer()),
         currentUserIdProvider.overrideWithValue('me'),
       ],
     );
@@ -57,6 +67,7 @@ void main() {
       child: const IntroDetailScreen(introId: 'intro-1'),
       overrides: <Override>[
         introsServiceProvider.overrideWithValue(stub(received: <Intro>[intro])),
+        peerProfileServiceProvider.overrideWithValue(stubPeer()),
         currentUserIdProvider.overrideWithValue('me'),
       ],
     );
@@ -71,6 +82,7 @@ void main() {
       child: const IntroDetailScreen(introId: 'intro-1'),
       overrides: <Override>[
         introsServiceProvider.overrideWithValue(stub(received: <Intro>[intro])),
+        peerProfileServiceProvider.overrideWithValue(stubPeer()),
         currentUserIdProvider.overrideWithValue('me'),
       ],
     );
@@ -88,6 +100,7 @@ void main() {
       child: const IntroDetailScreen(introId: 'intro-1'),
       overrides: <Override>[
         introsServiceProvider.overrideWithValue(stub(received: <Intro>[intro])),
+        peerProfileServiceProvider.overrideWithValue(stubPeer()),
         currentUserIdProvider.overrideWithValue('me'),
       ],
     );
@@ -101,6 +114,7 @@ void main() {
       child: const IntroDetailScreen(introId: 'unknown'),
       overrides: <Override>[
         introsServiceProvider.overrideWithValue(stub()),
+        peerProfileServiceProvider.overrideWithValue(stubPeer()),
         currentUserIdProvider.overrideWithValue('me'),
       ],
     );

@@ -4,6 +4,7 @@ import 'package:connect_mobile/features/intros/data/intros_service.dart';
 import 'package:connect_mobile/features/intros/domain/intro.dart';
 import 'package:connect_mobile/features/intros/presentation/inbox_screen.dart';
 import 'package:connect_mobile/features/intros/providers/intros_providers.dart';
+import 'package:connect_mobile/features/profile/data/peer_profile_service.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +16,8 @@ import '../../../helpers/pump.dart';
 class _FakeIntrosService extends Mock implements IntrosService {}
 
 class _FakeConnectionsService extends Mock implements ConnectionsService {}
+
+class _FakePeerProfileService extends Mock implements PeerProfileService {}
 
 void main() {
   setUpAll(() => registerFallbackValue(<String, dynamic>{}));
@@ -41,12 +44,19 @@ void main() {
     return fake;
   }
 
+  _FakePeerProfileService stubPeer() {
+    final fake = _FakePeerProfileService();
+    when(() => fake.fetchById(any())).thenAnswer((_) async => null);
+    return fake;
+  }
+
   testWidgets('empty received tab shows EmptyState body', (tester) async {
     final widget = await wrapWithTheme(
       child: const InboxScreen(),
       overrides: <Override>[
         introsServiceProvider.overrideWithValue(stubIntros()),
         connectionsServiceProvider.overrideWithValue(stubConnections()),
+        peerProfileServiceProvider.overrideWithValue(stubPeer()),
         currentUserIdProvider.overrideWithValue('me'),
       ],
     );
@@ -62,6 +72,7 @@ void main() {
           stubIntros(received: <Intro>[buildIntro()]),
         ),
         connectionsServiceProvider.overrideWithValue(stubConnections()),
+        peerProfileServiceProvider.overrideWithValue(stubPeer()),
         currentUserIdProvider.overrideWithValue('me'),
       ],
     );
@@ -77,6 +88,7 @@ void main() {
       overrides: <Override>[
         introsServiceProvider.overrideWithValue(stubIntros(today: 22)),
         connectionsServiceProvider.overrideWithValue(stubConnections()),
+        peerProfileServiceProvider.overrideWithValue(stubPeer()),
         currentUserIdProvider.overrideWithValue('me'),
       ],
     );
@@ -90,6 +102,7 @@ void main() {
       overrides: <Override>[
         introsServiceProvider.overrideWithValue(stubIntros(today: 22)),
         connectionsServiceProvider.overrideWithValue(stubConnections()),
+        peerProfileServiceProvider.overrideWithValue(stubPeer()),
         currentUserIdProvider.overrideWithValue('me'),
       ],
     );
@@ -109,6 +122,7 @@ void main() {
       overrides: <Override>[
         introsServiceProvider.overrideWithValue(stubIntros()),
         connectionsServiceProvider.overrideWithValue(stubConnections()),
+        peerProfileServiceProvider.overrideWithValue(stubPeer()),
         currentUserIdProvider.overrideWithValue('me'),
       ],
     );
@@ -129,6 +143,7 @@ void main() {
         connectionsServiceProvider.overrideWithValue(
           stubConnections(<Connection>[buildConnection(name: 'Alice')]),
         ),
+        peerProfileServiceProvider.overrideWithValue(stubPeer()),
         currentUserIdProvider.overrideWithValue('me'),
       ],
     );
