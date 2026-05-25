@@ -4,26 +4,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class _FakeClient extends Mock implements SupabaseClient {}
+class _FakeGateway extends Mock implements DiscoveryGateway {}
 
 void main() {
   setUpAll(() => registerFallbackValue(<String, dynamic>{}));
 
   group('DiscoveryService', () {
-    late _FakeClient client;
+    late _FakeGateway gateway;
     late DiscoveryService service;
 
     setUp(() {
-      client = _FakeClient();
-      service = DiscoveryService(client);
+      gateway = _FakeGateway();
+      service = DiscoveryService(gateway);
     });
 
     test('fetchDailyMatches calls get_daily_matches with optional p_for_date', () async {
       when(
-        () => client.rpc<List<Map<String, dynamic>>>(
-          'get_daily_matches',
-          params: any(named: 'params'),
-        ),
+        () => gateway.rpc('get_daily_matches', params: any(named: 'params')),
       ).thenAnswer(
         (_) async => <Map<String, dynamic>>[
           <String, dynamic>{
@@ -53,7 +50,7 @@ void main() {
       expect(res, hasLength(1));
       expect(res.first.profile.handle, 'u');
       verify(
-        () => client.rpc<List<Map<String, dynamic>>>(
+        () => gateway.rpc(
           'get_daily_matches',
           params: <String, dynamic>{'p_for_date': '2026-05-25'},
         ),
@@ -62,10 +59,7 @@ void main() {
 
     test('markMatchViewed swallows errors (idempotent)', () async {
       when(
-        () => client.rpc<void>(
-          'mark_match_viewed',
-          params: any(named: 'params'),
-        ),
+        () => gateway.rpc('mark_match_viewed', params: any(named: 'params')),
       ).thenThrow(
         const PostgrestException(message: 'forbidden', code: '42501'),
       );
@@ -74,8 +68,7 @@ void main() {
 
     test('isMutualMatch returns boolean from RPC', () async {
       when(
-        () =>
-            client.rpc<bool>('is_mutual_match', params: any(named: 'params')),
+        () => gateway.rpc('is_mutual_match', params: any(named: 'params')),
       ).thenAnswer((_) async => true);
       expect(await service.isMutualMatch('other-id'), isTrue);
     });
@@ -84,7 +77,7 @@ void main() {
       'searchDiscoverableProfiles passes cursor, query, roles, goal_types, country, limit',
       () async {
         when(
-          () => client.rpc<List<Map<String, dynamic>>>(
+          () => gateway.rpc(
             'search_discoverable_profiles',
             params: any(named: 'params'),
           ),
@@ -99,7 +92,7 @@ void main() {
           limit: 20,
         );
         final captured = verify(
-          () => client.rpc<List<Map<String, dynamic>>>(
+          () => gateway.rpc(
             'search_discoverable_profiles',
             params: captureAny(named: 'params'),
           ),
@@ -115,7 +108,7 @@ void main() {
 
     test('searchDiscoverableProfiles uses sentinel cursor on first page', () async {
       when(
-        () => client.rpc<List<Map<String, dynamic>>>(
+        () => gateway.rpc(
           'search_discoverable_profiles',
           params: any(named: 'params'),
         ),
@@ -123,7 +116,7 @@ void main() {
 
       await service.searchDiscoverableProfiles();
       final captured = verify(
-        () => client.rpc<List<Map<String, dynamic>>>(
+        () => gateway.rpc(
           'search_discoverable_profiles',
           params: captureAny(named: 'params'),
         ),
@@ -133,10 +126,7 @@ void main() {
 
     test('fetchDailyMatches maps PostgrestException via error_map', () async {
       when(
-        () => client.rpc<List<Map<String, dynamic>>>(
-          'get_daily_matches',
-          params: any(named: 'params'),
-        ),
+        () => gateway.rpc('get_daily_matches', params: any(named: 'params')),
       ).thenThrow(const PostgrestException(message: 'nope', code: '42501'));
       await expectLater(
         () => service.fetchDailyMatches(),

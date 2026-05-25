@@ -6,10 +6,30 @@ import '../../../core/supabase/supabase_client.dart';
 import '../domain/daily_match.dart';
 import '../domain/discovery_profile.dart';
 
+/// Test-seam abstraction over the `rpc(...)` calls the Discovery flow makes.
+///
+/// Concrete adapter binds to the live [SupabaseClient]; unit tests inject
+/// a `mocktail`-driven fake to avoid touching the network.
+abstract class DiscoveryGateway {
+  Future<Object?> rpc(String name, {Map<String, dynamic>? params});
+}
+
+class SupabaseDiscoveryGateway implements DiscoveryGateway {
+  SupabaseDiscoveryGateway(this._client);
+
+  final SupabaseClient _client;
+
+  @override
+  Future<Object?> rpc(String name, {Map<String, dynamic>? params}) =>
+      _client.rpc(name, params: params);
+}
+
 /// Riverpod accessor for the [DiscoveryService] singleton.
 final Provider<DiscoveryService> discoveryServiceProvider =
     Provider<DiscoveryService>((Ref<DiscoveryService> ref) {
-  return DiscoveryService(ref.watch(supabaseClientProvider));
+  return DiscoveryService(
+    SupabaseDiscoveryGateway(ref.watch(supabaseClientProvider)),
+  );
 });
 
 /// Thin wrapper over the four Supabase RPCs the Discovery feature consumes:
@@ -24,9 +44,9 @@ final Provider<DiscoveryService> discoveryServiceProvider =
 /// failures are swallowed silently because the call is idempotent and
 /// fired-and-forget from a visibility detector.
 class DiscoveryService {
-  DiscoveryService(this._client);
+  DiscoveryService(this._gateway);
 
-  final SupabaseClient _client;
+  final DiscoveryGateway _gateway;
 
   /// Sentinel matching the Postgres default for
   /// `search_discoverable_profiles(p_cursor default '9999-12-31')` —
@@ -45,12 +65,11 @@ class DiscoveryService {
             '${date.month.toString().padLeft(2, '0')}-'
             '${date.day.toString().padLeft(2, '0')}';
       }
-      final rows = await _client.rpc<List<Map<String, dynamic>>>(
-        'get_daily_matches',
-        params: params,
-      );
+      final raw = await _gateway.rpc('get_daily_matches', params: params);
+      final rows = (raw as List<dynamic>? ?? const <dynamic>[])
+          .cast<Map<String, dynamic>>();
       return rows.map(DailyMatch.fromJson).toList(growable: false);
-    } catch (e) {
+    } on PostgrestException catch (e) {
       throw mapPostgrestError(e);
     }
   }
@@ -60,7 +79,7 @@ class DiscoveryService {
   /// never surface them to the UI.
   Future<void> markMatchViewed(String matchId) async {
     try {
-      await _client.rpc<void>(
+      await _gateway.rpc(
         'mark_match_viewed',
         params: <String, dynamic>{'p_match_id': matchId},
       );
@@ -72,12 +91,12 @@ class DiscoveryService {
   /// Returns `true` when the caller and [otherUserId] are mutually connected.
   Future<bool> isMutualMatch(String otherUserId) async {
     try {
-      final v = await _client.rpc<bool>(
+      final raw = await _gateway.rpc(
         'is_mutual_match',
         params: <String, dynamic>{'p_other': otherUserId},
       );
-      return v;
-    } catch (e) {
+      return raw == true;
+    } on PostgrestException catch (e) {
       throw mapPostgrestError(e);
     }
   }
@@ -102,14 +121,14 @@ class DiscoveryService {
         'p_cursor': (cursor ?? _maxCursor).toUtc().toIso8601String(),
         'p_limit': limit,
       };
-      final rows = await _client.rpc<List<Map<String, dynamic>>>(
-        'search_discoverable_profiles',
-        params: params,
-      );
+      final raw =
+          await _gateway.rpc('search_discoverable_profiles', params: params);
+      final rows = (raw as List<dynamic>? ?? const <dynamic>[])
+          .cast<Map<String, dynamic>>();
       return rows
-          .map((m) => DiscoveryProfile.fromJson(m.cast<String, dynamic>()))
+          .map((m) => DiscoveryProfile.fromJson(m))
           .toList(growable: false);
-    } catch (e) {
+    } on PostgrestException catch (e) {
       throw mapPostgrestError(e);
     }
   }
