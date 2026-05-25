@@ -9,6 +9,9 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
+# custom_lint and riverpod_lint are activated via `dart run custom_lint`
+# (CLI tool from the custom_lint dev dep). The analyzer's `plugins:` section
+# is not supported in this Dart version.
 linter:
   rules:
     - prefer_const_constructors

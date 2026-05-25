@@ -6,7 +6,7 @@ void main() {
   testWidgets('App boots and renders foundation placeholder', (
     tester,
   ) async {
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const FoundationApp());
     expect(find.text('Foundation OK'), findsOneWidget);
   });
 }

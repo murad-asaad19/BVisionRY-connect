@@ -17,7 +17,9 @@ ThemeData buildAppTheme(Brightness brightness) {
       brightness: brightness,
       primary: colors.navy,
       secondary: colors.gold,
-      surface: colors.white,
+      surface: colors.surface, // matches scaffoldBackgroundColor
+      surfaceContainerHighest: colors.white, // card whites use this slot
+      surfaceContainer: colors.white,
       error: colors.danger,
     ),
     textTheme: TextTheme(
