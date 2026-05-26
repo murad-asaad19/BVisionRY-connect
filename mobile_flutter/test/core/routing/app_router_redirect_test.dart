@@ -1,16 +1,21 @@
 import 'package:connect_mobile/core/i18n/locale_loader.dart';
 import 'package:connect_mobile/core/i18n/locale_notifier.dart';
 import 'package:connect_mobile/core/routing/app_router.dart';
+import 'package:connect_mobile/core/supabase/supabase_client.dart';
 import 'package:connect_mobile/core/theme/app_theme.dart';
 import 'package:connect_mobile/features/auth/data/profile_repository.dart';
 import 'package:connect_mobile/features/auth/providers/auth_service_provider.dart';
+import 'package:connect_mobile/features/discovery/data/discovery_service.dart';
+import 'package:connect_mobile/features/discovery/domain/daily_match.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../helpers/fake_discovery_service.dart';
 import '../../helpers/fake_supabase.dart';
 import '../../helpers/pump.dart';
 
@@ -21,12 +26,21 @@ class _Q implements ProfileQueryRunner {
   Future<Map<String, dynamic>?> selectById(String id) async => row;
 }
 
+FakeDiscoveryService _emptyDiscovery() {
+  final fake = FakeDiscoveryService();
+  when(() => fake.fetchDailyMatches(date: any(named: 'date')))
+      .thenAnswer((_) async => const <DailyMatch>[]);
+  when(() => fake.markMatchViewed(any())).thenAnswer((_) async {});
+  return fake;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late LocaleLoader loader;
   setUpAll(() async {
     loader = await primedLocaleLoader();
+    registerDiscoveryFallbacks();
   });
 
   setUp(() {
@@ -50,6 +64,8 @@ void main() {
       ProviderScope(
         overrides: <Override>[
           localeLoaderProvider.overrideWithValue(loader),
+          supabaseInitProvider.overrideWith((_) async {}),
+          discoveryServiceProvider.overrideWithValue(_emptyDiscovery()),
           authGatewayProvider.overrideWithValue(auth),
           profileRepositoryProvider.overrideWithValue(
             ProfileRepository(_Q(null)),
@@ -84,6 +100,8 @@ void main() {
       ProviderScope(
         overrides: <Override>[
           localeLoaderProvider.overrideWithValue(loader),
+          supabaseInitProvider.overrideWith((_) async {}),
+          discoveryServiceProvider.overrideWithValue(_emptyDiscovery()),
           authGatewayProvider.overrideWithValue(auth),
           profileRepositoryProvider.overrideWithValue(
             ProfileRepository(
@@ -123,6 +141,8 @@ void main() {
       ProviderScope(
         overrides: <Override>[
           localeLoaderProvider.overrideWithValue(loader),
+          supabaseInitProvider.overrideWith((_) async {}),
+          discoveryServiceProvider.overrideWithValue(_emptyDiscovery()),
           authGatewayProvider.overrideWithValue(auth),
           profileRepositoryProvider.overrideWithValue(
             ProfileRepository(

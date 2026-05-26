@@ -1,9 +1,11 @@
 import 'package:connect_mobile/core/i18n/locale_notifier.dart';
+import 'package:connect_mobile/core/supabase/supabase_client.dart';
 import 'package:connect_mobile/core/theme/app_theme.dart';
 import 'package:connect_mobile/features/discovery/data/discovery_service.dart';
 import 'package:connect_mobile/features/discovery/domain/daily_match.dart';
 import 'package:connect_mobile/features/discovery/domain/discovery_profile.dart';
 import 'package:connect_mobile/features/home/presentation/home_screen.dart';
+import 'package:connect_mobile/features/intros/providers/warm_intros_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -66,6 +68,8 @@ void main() {
         overrides: <Override>[
           localeLoaderProvider.overrideWithValue(loader),
           discoveryServiceProvider.overrideWithValue(fake),
+          supabaseInitProvider.overrideWith((_) async {}),
+          warmSuggestionsProvider.overrideWith((_) async => const []),
         ],
         child: const HomeScreen(),
       ),

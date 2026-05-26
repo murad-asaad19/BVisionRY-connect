@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:connect_mobile/core/supabase/supabase_client.dart';
 import 'package:connect_mobile/features/discovery/data/discovery_service.dart';
 import 'package:connect_mobile/features/discovery/domain/daily_match.dart';
 import 'package:connect_mobile/features/discovery/domain/discovery_profile.dart';
 import 'package:connect_mobile/features/home/presentation/home_screen.dart';
+import 'package:connect_mobile/features/intros/providers/warm_intros_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -44,6 +46,15 @@ void main() {
     when(() => fake.markMatchViewed(any())).thenAnswer((_) async {});
   }
 
+  // Overrides shared by every HomeScreen test — neutralise providers that
+  // would otherwise reach for `Supabase.instance` (and start a periodic
+  // GoTrue refresh timer that leaks past the test).
+  List<Override> sharedOverrides(FakeDiscoveryService fake) => [
+        discoveryServiceProvider.overrideWithValue(fake),
+        supabaseInitProvider.overrideWith((_) async {}),
+        warmSuggestionsProvider.overrideWith((_) async => const []),
+      ];
+
   testWidgets('shows skeleton while loading', (tester) async {
     final fake = FakeDiscoveryService();
     stubMarkViewed(fake);
@@ -53,7 +64,7 @@ void main() {
     ).thenAnswer((_) => completer.future);
     final w = await wrapWithTheme(
       child: const HomeScreen(),
-      overrides: <Override>[discoveryServiceProvider.overrideWithValue(fake)],
+      overrides: sharedOverrides(fake),
     );
     await tester.pumpWidget(w);
     await tester.pump(); // first frame
@@ -73,7 +84,7 @@ void main() {
     );
     final w = await wrapWithTheme(
       child: const HomeScreen(),
-      overrides: <Override>[discoveryServiceProvider.overrideWithValue(fake)],
+      overrides: sharedOverrides(fake),
     );
     await pumpWithI18n(tester, w);
     expect(find.text('Person 0'), findsOneWidget);
@@ -89,7 +100,7 @@ void main() {
     ).thenAnswer((_) async => <DailyMatch>[_m('only')]);
     final w = await wrapWithTheme(
       child: const HomeScreen(),
-      overrides: <Override>[discoveryServiceProvider.overrideWithValue(fake)],
+      overrides: sharedOverrides(fake),
     );
     await pumpWithI18n(tester, w);
     expect(find.textContaining('being picky'), findsOneWidget);
@@ -103,7 +114,7 @@ void main() {
     ).thenAnswer((_) async => <DailyMatch>[]);
     final w = await wrapWithTheme(
       child: const HomeScreen(),
-      overrides: <Override>[discoveryServiceProvider.overrideWithValue(fake)],
+      overrides: sharedOverrides(fake),
     );
     await pumpWithI18n(tester, w);
     expect(find.textContaining('No matches today'), findsOneWidget);

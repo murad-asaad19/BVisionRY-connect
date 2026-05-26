@@ -19,6 +19,7 @@ import 'package:connect_mobile/features/meetings/domain/meeting_proposal.dart';
 import 'package:connect_mobile/features/meetings/domain/meeting_state.dart';
 import 'package:connect_mobile/features/meetings/providers/meeting_proposals_provider.dart';
 import 'package:connect_mobile/features/meetings/providers/pending_reviews_provider.dart';
+import 'package:connect_mobile/core/supabase/supabase_client.dart';
 import 'package:connect_mobile/features/profile/data/peer_profile_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -121,6 +122,7 @@ void main() {
     final widget = await wrapWithTheme(
       child: const ConversationScreen(conversationId: 'c1'),
       overrides: <Override>[
+        supabaseInitProvider.overrideWith((_) async {}),
         messagesServiceProvider.overrideWithValue(msgSvc),
         chatServiceProvider.overrideWithValue(chatSvc),
         peerProfileServiceProvider.overrideWithValue(peerSvc),
@@ -176,6 +178,7 @@ void main() {
     });
     final container = ProviderContainer(
       overrides: <Override>[
+        supabaseInitProvider.overrideWith((_) async {}),
         messagesServiceProvider.overrideWithValue(msgSvc),
         chatServiceProvider.overrideWithValue(chatSvc),
         peerProfileServiceProvider.overrideWithValue(peerSvc),

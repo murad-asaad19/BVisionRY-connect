@@ -1,7 +1,9 @@
 import 'package:connect_mobile/core/i18n/locale_loader.dart';
 import 'package:connect_mobile/core/i18n/locale_notifier.dart';
 import 'package:connect_mobile/core/routing/app_router.dart';
+import 'package:connect_mobile/core/supabase/supabase_client.dart';
 import 'package:connect_mobile/core/theme/app_theme.dart';
+import 'package:connect_mobile/features/intros/providers/warm_intros_provider.dart';
 import 'package:connect_mobile/features/auth/data/profile_repository.dart';
 import 'package:connect_mobile/features/auth/providers/auth_service_provider.dart';
 import 'package:connect_mobile/features/discovery/data/discovery_service.dart';
@@ -58,12 +60,14 @@ Future<void> _pumpApp(
   await tester.pumpWidget(
     ProviderScope(
       overrides: <Override>[
+        supabaseInitProvider.overrideWith((_) async {}),
         authGatewayProvider.overrideWithValue(auth),
         profileRepositoryProvider.overrideWithValue(
           ProfileRepository(query),
         ),
         localeLoaderProvider.overrideWithValue(loader),
         discoveryServiceProvider.overrideWithValue(fakeDiscovery),
+        warmSuggestionsProvider.overrideWith((_) async => const []),
         midnightInvalidatorProvider.overrideWith(_NoOpMidnightInvalidator.new),
       ],
       child: Builder(
