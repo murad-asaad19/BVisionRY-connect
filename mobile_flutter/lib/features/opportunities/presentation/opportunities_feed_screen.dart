@@ -129,10 +129,9 @@ class _OpportunitiesFeedScreenState
                       controller: _scrollController,
                       padding: const EdgeInsets.fromLTRB(12, 12, 12, 32),
                       physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: state.items.length +
-                          (state.isLoadingMore ? 1 : 0),
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: 12),
+                      itemCount:
+                          state.items.length + (state.isLoadingMore ? 1 : 0),
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (BuildContext c, int i) {
                         if (i == state.items.length) {
                           return const Padding(
@@ -169,8 +168,7 @@ class _OpportunitiesFeedScreenState
 
   Future<void> _showKebab(BuildContext context) async {
     final RenderBox? box = context.findRenderObject() as RenderBox?;
-    final Offset offset =
-        box?.localToGlobal(Offset.zero) ?? Offset.zero;
+    final Offset offset = box?.localToGlobal(Offset.zero) ?? Offset.zero;
     final int? selected = await showMenu<int>(
       context: context,
       position: RelativeRect.fromLTRB(

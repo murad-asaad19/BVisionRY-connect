@@ -31,9 +31,8 @@ class BookingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
-    final dateLabel = DateFormat.MMMEd()
-        .add_jm()
-        .format(booking.startsAt.toLocal());
+    final dateLabel =
+        DateFormat.MMMEd().add_jm().format(booking.startsAt.toLocal());
     return AppCard(
       onTap: onTap,
       child: Column(

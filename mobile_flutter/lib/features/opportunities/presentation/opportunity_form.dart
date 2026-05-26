@@ -144,10 +144,10 @@ class _OpportunityFormState extends State<OpportunityForm> {
 
   Future<void> _pickExpiresAt() async {
     final DateTime now = DateTime.now();
-    final DateTime min = DateTime(now.year, now.month, now.day)
-        .add(const Duration(days: 1));
-    final DateTime max = DateTime(now.year, now.month, now.day)
-        .add(const Duration(days: 90));
+    final DateTime min =
+        DateTime(now.year, now.month, now.day).add(const Duration(days: 1));
+    final DateTime max =
+        DateTime(now.year, now.month, now.day).add(const Duration(days: 90));
     final DateTime initial =
         _value.expiresAt.isBefore(min) ? min : _value.expiresAt;
     final DateTime? picked = await showDatePicker(
@@ -205,8 +205,7 @@ class _OpportunityFormState extends State<OpportunityForm> {
   @override
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
-    final AppTypography typo =
-        Theme.of(context).extension<AppTypography>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     return ListView(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
       children: <Widget>[
@@ -241,8 +240,7 @@ class _OpportunityFormState extends State<OpportunityForm> {
                 placeholder:
                     context.t('opportunities.composer.titlePlaceholder'),
                 value: _value.title,
-                onChanged: (String v) =>
-                    _update(_value.copyWith(title: v)),
+                onChanged: (String v) => _update(_value.copyWith(title: v)),
                 maxLength: 120,
                 errorText: _errorForTitle(),
               ),
@@ -252,8 +250,7 @@ class _OpportunityFormState extends State<OpportunityForm> {
                 placeholder:
                     context.t('opportunities.composer.bodyPlaceholder'),
                 value: _value.body,
-                onChanged: (String v) =>
-                    _update(_value.copyWith(body: v)),
+                onChanged: (String v) => _update(_value.copyWith(body: v)),
                 multiline: true,
                 minLines: 4,
                 maxLines: 8,
@@ -298,15 +295,13 @@ class _OpportunityFormState extends State<OpportunityForm> {
                 label: context.t('opportunities.composer.remoteLabel'),
                 trailing: Switch(
                   value: _value.remoteOk,
-                  onChanged: (bool v) =>
-                      _update(_value.copyWith(remoteOk: v)),
+                  onChanged: (bool v) => _update(_value.copyWith(remoteOk: v)),
                 ),
               ),
               const SizedBox(height: 6),
               SettingsRow(
                 label: context.t('opportunities.composer.expiresLabel'),
-                description:
-                    context.t('opportunities.composer.expiresHint'),
+                description: context.t('opportunities.composer.expiresHint'),
                 onTap: _pickExpiresAt,
                 trailing: Text(
                   _formatDate(_value.expiresAt),

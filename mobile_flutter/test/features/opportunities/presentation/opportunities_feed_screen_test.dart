@@ -76,8 +76,7 @@ void main() {
         offset: any(named: 'offset'),
       ),
     ).thenAnswer(
-      (_) async =>
-          <OpportunityWithAuthor>[_opp('a'), _opp('b'), _opp('c')],
+      (_) async => <OpportunityWithAuthor>[_opp('a'), _opp('b'), _opp('c')],
     );
 
     await tester.pumpWidget(

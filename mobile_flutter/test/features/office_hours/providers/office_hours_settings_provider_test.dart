@@ -55,9 +55,7 @@ void main() {
     addTearDown(container.dispose);
     await container.read(officeHoursSettingsProvider.future);
 
-    await container
-        .read(officeHoursSettingsProvider.notifier)
-        .save(updated);
+    await container.read(officeHoursSettingsProvider.notifier).save(updated);
     final after = container.read(officeHoursSettingsProvider).requireValue;
     expect(after.enabled, isTrue);
   });

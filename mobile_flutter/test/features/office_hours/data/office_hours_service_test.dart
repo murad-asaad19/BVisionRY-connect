@@ -78,7 +78,8 @@ void main() {
       when(
         () => gateway.rpc('set_office_hours', params: any(named: 'params')),
       ).thenThrow(
-        const PostgrestException(message: 'bad', code: 'P0001', hint: 'blocked'),
+        const PostgrestException(
+            message: 'bad', code: 'P0001', hint: 'blocked'),
       );
       await expectLater(
         svc.setOfficeHours(
@@ -142,7 +143,8 @@ void main() {
       when(
         () => gateway.rpc('book_slot', params: any(named: 'params')),
       ).thenAnswer((_) async => 'mp-123');
-      final id = await svc.bookSlot(slotId: 's1', topic: 'Career advice please');
+      final id =
+          await svc.bookSlot(slotId: 's1', topic: 'Career advice please');
       expect(id, 'mp-123');
     });
 

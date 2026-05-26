@@ -42,10 +42,8 @@ class OpportunityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
-    final AppTypography typo =
-        Theme.of(context).extension<AppTypography>()!;
-    final AppSpacing spacing =
-        Theme.of(context).extension<AppSpacing>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
+    final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
     final o = data.opportunity;
     final int count = interestedCount ?? data.interestedCount ?? 0;
 
@@ -82,7 +80,8 @@ class OpportunityCard extends StatelessWidget {
                   ],
                 ),
               ),
-              if (statusOverlay && o.status != OpportunityStatus.open) ...<Widget>[
+              if (statusOverlay &&
+                  o.status != OpportunityStatus.open) ...<Widget>[
                 Pill(
                   label: _statusLabel(context, o.status),
                   size: PillSize.sm,
@@ -177,7 +176,8 @@ class OpportunityCard extends StatelessWidget {
   static String _statusLabel(BuildContext context, OpportunityStatus status) {
     return switch (status) {
       OpportunityStatus.closed => context.t('opportunities.detail.closedBadge'),
-      OpportunityStatus.archived => context.t('opportunities.detail.closedBadge'),
+      OpportunityStatus.archived =>
+        context.t('opportunities.detail.closedBadge'),
       OpportunityStatus.open => '',
     };
   }

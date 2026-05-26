@@ -29,7 +29,8 @@ class TelemetryPrefs {
   @override
   int get hashCode => Object.hash(analyticsEnabled, crashReportsEnabled);
 
-  TelemetryPrefs copyWith({bool? analyticsEnabled, bool? crashReportsEnabled}) =>
+  TelemetryPrefs copyWith(
+          {bool? analyticsEnabled, bool? crashReportsEnabled}) =>
       TelemetryPrefs(
         analyticsEnabled: analyticsEnabled ?? this.analyticsEnabled,
         crashReportsEnabled: crashReportsEnabled ?? this.crashReportsEnabled,

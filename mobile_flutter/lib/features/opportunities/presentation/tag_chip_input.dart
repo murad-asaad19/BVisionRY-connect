@@ -90,12 +90,10 @@ class _TagChipInputState extends State<TagChipInput> {
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
     final AppRadii radii = Theme.of(context).extension<AppRadii>()!;
-    final AppTypography typo =
-        Theme.of(context).extension<AppTypography>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     final bool capped = widget.value.value.length >= TagInput.maxTags;
     final bool hasError = widget.errorText != null;
-    final Color borderColor =
-        hasError ? colors.dangerBorder : colors.border;
+    final Color borderColor = hasError ? colors.dangerBorder : colors.border;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -126,8 +124,7 @@ class _TagChipInputState extends State<TagChipInput> {
               for (final String tag in widget.value.value)
                 _RemovableChip(
                   label: tag,
-                  onRemove: () =>
-                      widget.onChanged(widget.value.remove(tag)),
+                  onRemove: () => widget.onChanged(widget.value.remove(tag)),
                 ),
               SizedBox(
                 width: 140,
@@ -145,8 +142,7 @@ class _TagChipInputState extends State<TagChipInput> {
                       isCollapsed: true,
                       contentPadding: EdgeInsets.zero,
                       hintText: capped ? '' : widget.placeholder,
-                      hintStyle:
-                          typo.bodyLg.copyWith(color: colors.muted),
+                      hintStyle: typo.bodyLg.copyWith(color: colors.muted),
                     ),
                   ),
                 ),
@@ -187,8 +183,7 @@ class _RemovableChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
     final AppRadii radii = Theme.of(context).extension<AppRadii>()!;
-    final AppTypography typo =
-        Theme.of(context).extension<AppTypography>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     return Container(
       padding: const EdgeInsets.fromLTRB(9, 3, 4, 3),
       decoration: BoxDecoration(

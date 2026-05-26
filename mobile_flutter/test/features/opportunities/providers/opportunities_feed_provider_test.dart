@@ -191,10 +191,10 @@ void main() {
       addTearDown(container.dispose);
       await container.read(opportunitiesFeedProvider.future);
       await container.read(opportunitiesFeedProvider.notifier).setFilters(
-            kinds: const <OpportunityKind>[OpportunityKind.cofounder],
-            remoteOnly: true,
-            search: 'pm',
-          );
+        kinds: const <OpportunityKind>[OpportunityKind.cofounder],
+        remoteOnly: true,
+        search: 'pm',
+      );
       final OpportunitiesFeedState state =
           container.read(opportunitiesFeedProvider).value!;
       expect(state.kinds, <OpportunityKind>[OpportunityKind.cofounder]);

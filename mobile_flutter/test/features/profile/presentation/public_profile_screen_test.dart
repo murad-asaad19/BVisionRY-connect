@@ -93,8 +93,7 @@ Future<Widget> _renderPublicProfile({
       publicProfileProvider('omar-d').overrideWith(
         (Ref<AsyncValue<PublicProfile?>> _) async => data,
       ),
-      officeHoursServiceProvider
-          .overrideWithValue(_FakeOfficeHoursService()),
+      officeHoursServiceProvider.overrideWithValue(_FakeOfficeHoursService()),
     ],
   );
 }

@@ -65,11 +65,11 @@ void main() {
   });
 
   test('validate() rejects buffer minutes out of 0..60', () {
-    final bad = OfficeHoursSettings.defaults(userId: 'u')
-        .copyWith(bufferMinutes: -1);
+    final bad =
+        OfficeHoursSettings.defaults(userId: 'u').copyWith(bufferMinutes: -1);
     expect(bad.validate(), 'officeHours.settings.invalidBuffer');
-    final bad2 = OfficeHoursSettings.defaults(userId: 'u')
-        .copyWith(bufferMinutes: 61);
+    final bad2 =
+        OfficeHoursSettings.defaults(userId: 'u').copyWith(bufferMinutes: 61);
     expect(bad2.validate(), 'officeHours.settings.invalidBuffer');
   });
 

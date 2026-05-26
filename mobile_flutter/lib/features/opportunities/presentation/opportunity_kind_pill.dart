@@ -34,13 +34,16 @@ class OpportunityKindPill extends StatelessWidget {
   /// the same palette without duplicating the switch.
   static PillVariant variantFor(OpportunityKind k) {
     return switch (k) {
-      OpportunityKind.hiring || OpportunityKind.seekingRole =>
+      OpportunityKind.hiring ||
+      OpportunityKind.seekingRole =>
         PillVariant.solid,
       OpportunityKind.cofounder => PillVariant.navy,
       OpportunityKind.collaboration => PillVariant.info,
-      OpportunityKind.fundraising || OpportunityKind.investing =>
+      OpportunityKind.fundraising ||
+      OpportunityKind.investing =>
         PillVariant.defaultVariant,
-      OpportunityKind.advising || OpportunityKind.seekingAdvisor =>
+      OpportunityKind.advising ||
+      OpportunityKind.seekingAdvisor =>
         PillVariant.muted,
     };
   }

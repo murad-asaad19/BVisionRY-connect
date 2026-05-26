@@ -11,7 +11,8 @@ void main() {
 
   test('NotificationKind.uiMatrixOrder lists 10 rows in display order', () {
     expect(NotificationKind.uiMatrixOrder.length, 10);
-    expect(NotificationKind.uiMatrixOrder.first, NotificationKind.introReceived);
+    expect(
+        NotificationKind.uiMatrixOrder.first, NotificationKind.introReceived);
   });
 
   test('NotificationKind.hasEmitter is false only for the 4 §17.4 kinds', () {

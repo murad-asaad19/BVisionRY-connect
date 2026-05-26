@@ -27,8 +27,7 @@ void main() {
     expect(find.text('99+'), findsOneWidget);
   });
 
-  testWidgets('TabBadge uses gold bg + navy text',
-      (WidgetTester tester) async {
+  testWidgets('TabBadge uses gold bg + navy text', (WidgetTester tester) async {
     await tester.pumpWidget(host(const TabBadge(count: 7)));
     final Container container = tester.widget<Container>(
       find.byKey(const Key('tab_badge.container')),

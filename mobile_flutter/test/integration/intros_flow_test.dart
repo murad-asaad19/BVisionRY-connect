@@ -133,8 +133,7 @@ void main() {
         .thenAnswer((_) async => sent);
     when(() => fake.introsTodayCount()).thenAnswer((_) async => 0);
     if (acceptResult != null) {
-      when(() => fake.acceptIntro(any()))
-          .thenAnswer((_) async => acceptResult);
+      when(() => fake.acceptIntro(any())).thenAnswer((_) async => acceptResult);
     }
     when(
       () => fake.sendIntro(

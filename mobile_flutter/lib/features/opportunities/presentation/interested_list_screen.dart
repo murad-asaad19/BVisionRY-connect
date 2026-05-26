@@ -80,15 +80,13 @@ class InterestedListScreen extends ConsumerWidget {
                   return RefreshIndicator(
                     onRefresh: () async {
                       ref.invalidate(interestedProvider(opportunityId));
-                      await ref
-                          .read(interestedProvider(opportunityId).future);
+                      await ref.read(interestedProvider(opportunityId).future);
                     },
                     child: ListView.separated(
                       padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
                       physics: const AlwaysScrollableScrollPhysics(),
                       itemCount: users.length,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: 8),
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
                       itemBuilder: (BuildContext c, int i) {
                         return _InterestedRow(user: users[i]);
                       },
@@ -112,10 +110,8 @@ class _InterestedRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
-    final AppTypography typo =
-        Theme.of(context).extension<AppTypography>()!;
-    final AppSpacing spacing =
-        Theme.of(context).extension<AppSpacing>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
+    final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
     return AppCard(
       onTap: () => context.push(Routes.publicProfile(user.handle)),
       child: Row(

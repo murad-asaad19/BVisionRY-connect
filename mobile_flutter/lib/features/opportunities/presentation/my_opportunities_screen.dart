@@ -55,13 +55,10 @@ class MyOpportunitiesScreen extends ConsumerWidget {
                         children: <Widget>[
                           EmptyState(
                             icon: LucideIcons.briefcaseBusiness,
-                            title:
-                                context.t('opportunities.mine.emptyTitle'),
-                            body:
-                                context.t('opportunities.mine.empty'),
+                            title: context.t('opportunities.mine.emptyTitle'),
+                            body: context.t('opportunities.mine.empty'),
                             action: EmptyStateAction(
-                              label:
-                                  context.t('opportunities.mine.newCta'),
+                              label: context.t('opportunities.mine.newCta'),
                               onPressed: () =>
                                   context.push(Routes.opportunityNew),
                             ),
@@ -73,8 +70,7 @@ class MyOpportunitiesScreen extends ConsumerWidget {
                       padding: const EdgeInsets.fromLTRB(12, 12, 12, 32),
                       physics: const AlwaysScrollableScrollPhysics(),
                       itemCount: items.length,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: 12),
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (BuildContext c, int i) {
                         final item = items[i];
                         return OpportunityCard(

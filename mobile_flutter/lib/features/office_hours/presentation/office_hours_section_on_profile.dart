@@ -57,8 +57,7 @@ class OfficeHoursSectionOnProfile extends ConsumerWidget {
               for (var i = 0; i < slots.length; i++) ...<Widget>[
                 SlotCard(
                   slot: slots[i],
-                  onBook: (slotId, topic) =>
-                      _book(context, ref, slotId, topic),
+                  onBook: (slotId, topic) => _book(context, ref, slotId, topic),
                 ),
                 if (i < slots.length - 1) const SizedBox(height: 8),
               ],

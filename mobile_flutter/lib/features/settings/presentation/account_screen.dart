@@ -40,8 +40,7 @@ class AccountScreen extends ConsumerWidget {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
     final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     final String? email = Supabase.instance.client.auth.currentUser?.email;
-    final AsyncValue<TelemetryPrefs> telemetry =
-        ref.watch(telemetryProvider);
+    final AsyncValue<TelemetryPrefs> telemetry = ref.watch(telemetryProvider);
 
     return Scaffold(
       appBar: PreferredSize(

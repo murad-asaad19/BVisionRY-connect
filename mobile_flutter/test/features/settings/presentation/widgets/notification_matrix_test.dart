@@ -121,6 +121,7 @@ void main() {
         onChanged: (_, __, ___) {},
       ),
     );
-    expect(find.byKey(const Key('matrix.emailUnavailableNote')), findsOneWidget);
+    expect(
+        find.byKey(const Key('matrix.emailUnavailableNote')), findsOneWidget);
   });
 }

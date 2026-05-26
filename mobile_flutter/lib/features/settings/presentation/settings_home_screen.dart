@@ -104,14 +104,13 @@ class SettingsHomeScreen extends ConsumerWidget {
             label: context.t('settings.signOut'),
             destructive: true,
             onTap: () async {
-              final bool ok =
-                  await ref.read(confirmServiceProvider).confirm(
-                        context,
-                        title: context.t('settings.signOutConfirm.title'),
-                        body: context.t('settings.signOutConfirm.body'),
-                        confirmLabel: context.t('settings.signOut'),
-                        destructive: true,
-                      );
+              final bool ok = await ref.read(confirmServiceProvider).confirm(
+                    context,
+                    title: context.t('settings.signOutConfirm.title'),
+                    body: context.t('settings.signOutConfirm.body'),
+                    confirmLabel: context.t('settings.signOut'),
+                    destructive: true,
+                  );
               if (!ok) return;
               await ref.read(authServiceProvider).signOut();
             },

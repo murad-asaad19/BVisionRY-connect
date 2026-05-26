@@ -11,7 +11,8 @@ export '../push/providers/notification_prefs_provider.dart'
         notificationPrefsMatrixProvider,
         NotificationPrefsMatrix;
 export 'data/language_service.dart';
-export 'data/settings_service.dart' show SettingsService, settingsServiceProvider;
+export 'data/settings_service.dart'
+    show SettingsService, settingsServiceProvider;
 export 'data/telemetry_store.dart' show TelemetryPrefs, TelemetryStore;
 export 'providers/telemetry_provider.dart'
     show telemetryProvider, telemetryReadyProvider, telemetryStoreProvider;

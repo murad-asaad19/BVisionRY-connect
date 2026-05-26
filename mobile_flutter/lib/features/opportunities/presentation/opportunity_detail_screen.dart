@@ -59,8 +59,8 @@ class OpportunityDetailScreen extends ConsumerWidget {
           child: QueryState<OpportunityWithCounts>(
             value: async,
             data: (OpportunityWithCounts d) {
-              final bool isAuthor =
-                  viewerId != null && viewerId == d.withAuthor.opportunity.authorId;
+              final bool isAuthor = viewerId != null &&
+                  viewerId == d.withAuthor.opportunity.authorId;
               return _Body(detail: d, isAuthor: isAuthor);
             },
           ),
@@ -77,28 +77,24 @@ class _Body extends ConsumerWidget {
   final bool isAuthor;
 
   Future<void> _close(BuildContext context, WidgetRef ref) async {
-    final bool confirmed =
-        await ref.read(confirmServiceProvider).confirm(
-              context,
-              title: context.t('opportunities.detail.closeConfirmTitle'),
-              body: context.t('opportunities.detail.closeConfirmBody'),
-              confirmLabel:
-                  context.t('opportunities.detail.closeConfirmCta'),
-              cancelLabel: 'Cancel',
-              destructive: true,
-              onConfirm: () async {
-                await ref
-                    .read(opportunitiesServiceProvider)
-                    .closeOpportunity(
-                      detail.withAuthor.opportunity.id,
-                    );
-                ref.invalidate(
-                  opportunityProvider(detail.withAuthor.opportunity.id),
-                );
-                ref.invalidate(myOpportunitiesProvider);
-                ref.invalidate(opportunitiesFeedProvider);
-              },
+    final bool confirmed = await ref.read(confirmServiceProvider).confirm(
+      context,
+      title: context.t('opportunities.detail.closeConfirmTitle'),
+      body: context.t('opportunities.detail.closeConfirmBody'),
+      confirmLabel: context.t('opportunities.detail.closeConfirmCta'),
+      cancelLabel: 'Cancel',
+      destructive: true,
+      onConfirm: () async {
+        await ref.read(opportunitiesServiceProvider).closeOpportunity(
+              detail.withAuthor.opportunity.id,
             );
+        ref.invalidate(
+          opportunityProvider(detail.withAuthor.opportunity.id),
+        );
+        ref.invalidate(myOpportunitiesProvider);
+        ref.invalidate(opportunitiesFeedProvider);
+      },
+    );
     if (!context.mounted) return;
     if (confirmed) {
       ref.read(toastServiceProvider.notifier).showToast(
@@ -153,10 +149,8 @@ class _Body extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
-    final AppTypography typo =
-        Theme.of(context).extension<AppTypography>()!;
-    final AppSpacing spacing =
-        Theme.of(context).extension<AppSpacing>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
+    final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
     final o = detail.withAuthor.opportunity;
     final bool isClosed = o.status != OpportunityStatus.open;
     final bool isExpired = o.expiresAt.isBefore(DateTime.now().toUtc());
@@ -223,8 +217,7 @@ class _Body extends ConsumerWidget {
                   if (isClosed) ...<Widget>[
                     const SizedBox(width: 6),
                     Pill(
-                      label: context
-                          .t('opportunities.detail.closedBadge'),
+                      label: context.t('opportunities.detail.closedBadge'),
                       variant: PillVariant.muted,
                     ),
                   ],
@@ -292,8 +285,7 @@ class _Body extends ConsumerWidget {
                   detail: detail,
                   isClosed: isClosed,
                   isExpired: isExpired,
-                  onExpressInterest: () =>
-                      _onExpressInterest(context),
+                  onExpressInterest: () => _onExpressInterest(context),
                 ),
               SizedBox(height: spacing.cardLg),
             ],
@@ -313,8 +305,7 @@ class _MetaRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
-    final AppTypography typo =
-        Theme.of(context).extension<AppTypography>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(

@@ -99,8 +99,7 @@ class PublicProfileScreen extends ConsumerWidget {
               if (isAuthed)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                  child:
-                      OfficeHoursSectionOnProfile(hostId: profile.id),
+                  child: OfficeHoursSectionOnProfile(hostId: profile.id),
                 ),
               const SizedBox(height: 24),
               Padding(

@@ -67,8 +67,7 @@ void main() {
   testWidgets('detail loads from provider and shows title + body',
       (tester) async {
     final _FakeService fake = _FakeService();
-    when(() => fake.getOpportunity('oid'))
-        .thenAnswer((_) async => _detail());
+    when(() => fake.getOpportunity('oid')).thenAnswer((_) async => _detail());
     await pumpWith(tester, fake);
     expect(find.text('Senior PM'), findsOneWidget);
     expect(find.text('Looking for someone great.'), findsOneWidget);
@@ -76,8 +75,7 @@ void main() {
 
   testWidgets('non-author + open + not-expressed shows CTA', (tester) async {
     final _FakeService fake = _FakeService();
-    when(() => fake.getOpportunity('oid'))
-        .thenAnswer((_) async => _detail());
+    when(() => fake.getOpportunity('oid')).thenAnswer((_) async => _detail());
     await pumpWith(tester, fake);
     expect(find.text('Express interest'), findsOneWidget);
   });

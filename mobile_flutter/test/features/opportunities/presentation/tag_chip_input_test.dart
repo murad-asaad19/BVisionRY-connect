@@ -14,7 +14,8 @@ Future<void> _pumpWithState(
     await wrapWithTheme(
       child: Scaffold(
         body: StatefulBuilder(
-          builder: (BuildContext context, void Function(VoidCallback) setState) {
+          builder:
+              (BuildContext context, void Function(VoidCallback) setState) {
             return TagChipInput(
               value: value,
               onChanged: (TagInput v) => setState(() => value = v),

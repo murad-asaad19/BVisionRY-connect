@@ -81,8 +81,7 @@ class OpportunitiesFeedState {
 ///     load is in flight); preserves filter state.
 ///   - `refresh()` re-issues page 1 with the current filters (used by
 ///     pull-to-refresh and by the create / update / close mutations).
-class OpportunitiesFeedNotifier
-    extends AsyncNotifier<OpportunitiesFeedState> {
+class OpportunitiesFeedNotifier extends AsyncNotifier<OpportunitiesFeedState> {
   @override
   Future<OpportunitiesFeedState> build() async {
     return _initialLoad(
@@ -180,6 +179,6 @@ class OpportunitiesFeedNotifier
 }
 
 final AsyncNotifierProvider<OpportunitiesFeedNotifier, OpportunitiesFeedState>
-    opportunitiesFeedProvider = AsyncNotifierProvider<
-        OpportunitiesFeedNotifier,
-        OpportunitiesFeedState>(OpportunitiesFeedNotifier.new);
+    opportunitiesFeedProvider =
+    AsyncNotifierProvider<OpportunitiesFeedNotifier, OpportunitiesFeedState>(
+        OpportunitiesFeedNotifier.new);

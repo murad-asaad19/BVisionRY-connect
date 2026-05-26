@@ -10,8 +10,7 @@ import '../domain/office_hours_settings.dart';
 /// Use from the host-side Office Hours settings screen:
 /// `ref.watch(officeHoursSettingsProvider)` for the current state and
 /// `ref.read(officeHoursSettingsProvider.notifier).save(next)` to persist.
-class OfficeHoursSettingsNotifier
-    extends AsyncNotifier<OfficeHoursSettings> {
+class OfficeHoursSettingsNotifier extends AsyncNotifier<OfficeHoursSettings> {
   @override
   Future<OfficeHoursSettings> build() async {
     final svc = ref.watch(officeHoursServiceProvider);
@@ -24,8 +23,8 @@ class OfficeHoursSettingsNotifier
   /// screen can render a toast with the localized `e.i18nKey`.
   Future<void> save(OfficeHoursSettings next) async {
     final svc = ref.read(officeHoursServiceProvider);
-    state = const AsyncValue<OfficeHoursSettings>.loading()
-        .copyWithPrevious(state);
+    state =
+        const AsyncValue<OfficeHoursSettings>.loading().copyWithPrevious(state);
     state = await AsyncValue.guard(
       () => svc.setOfficeHours(
         enabled: next.enabled,
@@ -41,7 +40,7 @@ class OfficeHoursSettingsNotifier
 }
 
 final AsyncNotifierProvider<OfficeHoursSettingsNotifier, OfficeHoursSettings>
-    officeHoursSettingsProvider = AsyncNotifierProvider<
-        OfficeHoursSettingsNotifier, OfficeHoursSettings>(
+    officeHoursSettingsProvider =
+    AsyncNotifierProvider<OfficeHoursSettingsNotifier, OfficeHoursSettings>(
   OfficeHoursSettingsNotifier.new,
 );

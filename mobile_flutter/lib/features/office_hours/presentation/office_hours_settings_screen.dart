@@ -231,8 +231,7 @@ class _BodyState extends ConsumerState<_Body> {
               value: _draft.maxBookingsPerWeek,
               min: 1,
               max: 50,
-              onChanged: (v) =>
-                  _save(_draft.copyWith(maxBookingsPerWeek: v)),
+              onChanged: (v) => _save(_draft.copyWith(maxBookingsPerWeek: v)),
             ),
           ),
         ),

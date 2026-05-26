@@ -50,8 +50,7 @@ void main() {
     await tester.tap(analyticsSwitch);
     await tester.pumpAndSettle();
 
-    final TelemetryPrefs? prefs =
-        container.read(telemetryProvider).valueOrNull;
+    final TelemetryPrefs? prefs = container.read(telemetryProvider).valueOrNull;
     expect(prefs?.analyticsEnabled, isTrue);
     final SharedPreferences sp = await SharedPreferences.getInstance();
     expect(sp.getBool('telemetry.analyticsEnabled'), isTrue);
@@ -98,8 +97,7 @@ void main() {
 
     await container.read(telemetryProvider.future);
     // Pre-condition: both ON.
-    final TelemetryPrefs pre =
-        container.read(telemetryProvider).requireValue;
+    final TelemetryPrefs pre = container.read(telemetryProvider).requireValue;
     expect(pre.analyticsEnabled, isTrue);
     expect(pre.crashReportsEnabled, isTrue);
 

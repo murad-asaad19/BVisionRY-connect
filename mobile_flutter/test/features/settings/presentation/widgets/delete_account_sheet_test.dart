@@ -17,7 +17,8 @@ void main() {
     );
     await pumpWithI18n(tester, shell);
 
-    final Finder confirmFinder = find.byKey(const Key('deleteSheet.confirmBtn'));
+    final Finder confirmFinder =
+        find.byKey(const Key('deleteSheet.confirmBtn'));
     ElevatedButton btn = tester.widget<ElevatedButton>(confirmFinder);
     expect(btn.onPressed, isNull); // disabled by default
 

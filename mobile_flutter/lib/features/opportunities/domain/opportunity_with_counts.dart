@@ -24,8 +24,7 @@ class OpportunityWithCounts with _$OpportunityWithCounts {
     return OpportunityWithCounts(
       withAuthor: OpportunityWithAuthor.fromJson(json),
       interestedCount: (json['interested_count'] as num).toInt(),
-      viewerHasExpressedInterest:
-          json['viewer_has_expressed_interest'] as bool,
+      viewerHasExpressedInterest: json['viewer_has_expressed_interest'] as bool,
     );
   }
 }

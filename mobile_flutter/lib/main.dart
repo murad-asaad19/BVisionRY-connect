@@ -67,8 +67,7 @@ Future<void> main() async {
   // 4. Gate on telemetry rehydration. After this completes, prefs are known
   //    and we can safely decide whether to init Sentry / Firebase telemetry.
   await container.read(telemetryReadyProvider.future);
-  final TelemetryPrefs prefs =
-      container.read(telemetryProvider).requireValue;
+  final TelemetryPrefs prefs = container.read(telemetryProvider).requireValue;
 
   // Subscribe synchronously to session updates - wins the race vs
   // cold-start deep links.

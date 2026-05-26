@@ -42,21 +42,15 @@ void main() {
     addTearDown(container.dispose);
     final GoRouter router = container.read(appRouterProvider);
     expect(
-      router.configuration
-          .findMatch(Uri.parse('/opportunities/new'))
-          .fullPath,
+      router.configuration.findMatch(Uri.parse('/opportunities/new')).fullPath,
       '/opportunities/new',
     );
     expect(
-      router.configuration
-          .findMatch(Uri.parse('/opportunities/mine'))
-          .fullPath,
+      router.configuration.findMatch(Uri.parse('/opportunities/mine')).fullPath,
       '/opportunities/mine',
     );
     expect(
-      router.configuration
-          .findMatch(Uri.parse('/opportunities/oid'))
-          .fullPath,
+      router.configuration.findMatch(Uri.parse('/opportunities/oid')).fullPath,
       '/opportunities/:id',
     );
     expect(

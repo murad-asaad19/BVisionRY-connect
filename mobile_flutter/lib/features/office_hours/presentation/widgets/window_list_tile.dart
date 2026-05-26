@@ -28,8 +28,7 @@ class WindowListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
-    final range =
-        '${OfficeHoursWindow.minuteToHhmm(window.startMinute)} – '
+    final range = '${OfficeHoursWindow.minuteToHhmm(window.startMinute)} – '
         '${OfficeHoursWindow.minuteToHhmm(window.endMinute)}';
     final weekdayLabel = context.t(
       'officeHours.settings.weekday_${window.weekday}',

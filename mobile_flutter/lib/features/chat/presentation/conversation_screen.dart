@@ -236,9 +236,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   Widget _buildMeetingBubble(Message m, String selfId) {
     final id = m.meetingProposalId;
     if (id == null) return const SizedBox.shrink();
-    final proposals =
-        ref.watch(meetingProposalsProvider(widget.conversationId)).valueOrNull ??
-            const [];
+    final proposals = ref
+            .watch(meetingProposalsProvider(widget.conversationId))
+            .valueOrNull ??
+        const [];
     for (final p in proposals) {
       if (p.id == id) {
         return MeetingCardBubble(proposal: p, viewerId: selfId);

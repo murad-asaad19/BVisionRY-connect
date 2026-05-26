@@ -44,8 +44,7 @@ class MyBookingsNotifier extends AsyncNotifier<List<MyBooking>> {
   /// Explicit refresh — used by the My Bookings screen after a successful
   /// `cancel_booking` call.
   Future<void> refresh() async {
-    state = const AsyncValue<List<MyBooking>>.loading()
-        .copyWithPrevious(state);
+    state = const AsyncValue<List<MyBooking>>.loading().copyWithPrevious(state);
     state = await AsyncValue.guard(
       ref.read(officeHoursServiceProvider).myBookings,
     );
@@ -53,5 +52,6 @@ class MyBookingsNotifier extends AsyncNotifier<List<MyBooking>> {
 }
 
 final AsyncNotifierProvider<MyBookingsNotifier, List<MyBooking>>
-    myBookingsProvider = AsyncNotifierProvider<
-        MyBookingsNotifier, List<MyBooking>>(MyBookingsNotifier.new);
+    myBookingsProvider =
+    AsyncNotifierProvider<MyBookingsNotifier, List<MyBooking>>(
+        MyBookingsNotifier.new);

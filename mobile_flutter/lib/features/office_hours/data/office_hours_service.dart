@@ -102,7 +102,8 @@ class OfficeHoursService {
       );
       final rows = (raw as List).cast<dynamic>();
       return rows
-          .map((r) => OfficeHoursSlot.fromJson(Map<String, dynamic>.from(r as Map)))
+          .map((r) =>
+              OfficeHoursSlot.fromJson(Map<String, dynamic>.from(r as Map)))
           .toList(growable: false);
     } on PostgrestException catch (e) {
       throw mapPostgrestError(e);

@@ -54,8 +54,8 @@ void main() {
           localeLoaderProvider.overrideWithValue(loader),
           unreadIntrosCountProvider
               .overrideWith((Ref<AsyncValue<int>> _) async => 3),
-          unreadCountsProvider
-              .overrideWith((Ref<AsyncValue<Map<String, int>>> _) async =>
+          unreadCountsProvider.overrideWith(
+              (Ref<AsyncValue<Map<String, int>>> _) async =>
                   <String, int>{'c1': 4, 'c2': 5}),
         ],
         child: MaterialApp.router(

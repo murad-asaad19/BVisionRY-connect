@@ -115,9 +115,7 @@ class _Row extends ConsumerWidget {
     );
     if (!ok) return;
     try {
-      await ref
-          .read(officeHoursServiceProvider)
-          .cancelBooking(booking.slotId);
+      await ref.read(officeHoursServiceProvider).cancelBooking(booking.slotId);
       await ref.read(myBookingsProvider.notifier).refresh();
       toast.showToast(
         title: translator('officeHours.bookings.cancelled'),

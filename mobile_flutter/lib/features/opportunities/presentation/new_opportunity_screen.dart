@@ -42,8 +42,7 @@ class _NewOpportunityScreenState extends ConsumerState<NewOpportunityScreen> {
                 title: v.title,
                 body: v.body,
                 tags: v.tags.value,
-                locationCity:
-                    v.locationCity.isEmpty ? null : v.locationCity,
+                locationCity: v.locationCity.isEmpty ? null : v.locationCity,
                 locationCountry:
                     v.locationCountry.isEmpty ? null : v.locationCountry,
                 remoteOk: v.remoteOk,
@@ -59,9 +58,8 @@ class _NewOpportunityScreenState extends ConsumerState<NewOpportunityScreen> {
       context.replace(Routes.opportunity(id));
     } catch (e) {
       if (!mounted) return;
-      final String key = e is AppException
-          ? e.i18nKey
-          : 'opportunities.composer.errorSubmit';
+      final String key =
+          e is AppException ? e.i18nKey : 'opportunities.composer.errorSubmit';
       ref.read(toastServiceProvider.notifier).showToast(
             title: context.t(key),
             intent: AppIntent.danger,

@@ -38,8 +38,7 @@ class PrivacySettingsScreen extends ConsumerStatefulWidget {
       _PrivacySettingsScreenState();
 }
 
-class _PrivacySettingsScreenState
-    extends ConsumerState<PrivacySettingsScreen> {
+class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   bool _publicInvestorComingSoon = false;
 
   @override
@@ -86,8 +85,7 @@ class _PrivacySettingsScreenState
               if (_publicInvestorComingSoon)
                 ComingSoonCard(
                   title: context.t('settings.publicInvestorPage.title'),
-                  body:
-                      context.t('settings.publicInvestorPage.comingSoon'),
+                  body: context.t('settings.publicInvestorPage.comingSoon'),
                 ),
             ],
           );

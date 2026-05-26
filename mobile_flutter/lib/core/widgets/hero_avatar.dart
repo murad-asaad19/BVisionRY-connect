@@ -31,8 +31,8 @@ class HeroAvatar extends StatelessWidget {
       tag: 'avatar-$userId',
       // Material wrapper avoids "no Material widget found" mid-flight
       // when the destination is on a non-Material route.
-      flightShuttleBuilder:
-          (flightCtx, animation, direction, fromCtx, toCtx) => Material(
+      flightShuttleBuilder: (flightCtx, animation, direction, fromCtx, toCtx) =>
+          Material(
         color: Colors.transparent,
         child: Avatar(
           name: name,

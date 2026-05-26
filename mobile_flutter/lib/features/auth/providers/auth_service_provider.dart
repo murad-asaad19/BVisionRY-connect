@@ -153,8 +153,7 @@ final Provider<AuthService> authServiceProvider = Provider<AuthService>((
     // Phase 14: refresh the in-memory telemetry notifier after the persisted
     // store reset so any subscribed UI reflects the opt-out immediately
     // without waiting for the next rebuild.
-    resetTelemetry: () =>
-        ref.read(telemetryProvider.notifier).signOutReset(),
+    resetTelemetry: () => ref.read(telemetryProvider.notifier).signOutReset(),
   );
 });
 

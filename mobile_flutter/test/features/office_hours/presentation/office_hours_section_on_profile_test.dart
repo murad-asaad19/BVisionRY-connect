@@ -88,7 +88,6 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey<String>('slot-book')));
     await tester.pumpAndSettle();
-    verify(() => svc.bookSlot(slotId: 's1', topic: 'My valid topic'))
-        .called(1);
+    verify(() => svc.bookSlot(slotId: 's1', topic: 'My valid topic')).called(1);
   });
 }

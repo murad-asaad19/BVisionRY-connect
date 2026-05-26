@@ -53,8 +53,7 @@ void main() {
     expect(find.text('A great topic'), findsOneWidget);
   });
 
-  testWidgets('cancel error after confirm shows danger toast',
-      (tester) async {
+  testWidgets('cancel error after confirm shows danger toast', (tester) async {
     when(svc.myBookings).thenAnswer(
       (_) async => <MyBooking>[
         MyBooking(

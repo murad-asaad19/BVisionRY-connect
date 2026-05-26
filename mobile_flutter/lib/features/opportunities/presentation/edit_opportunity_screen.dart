@@ -30,8 +30,7 @@ class EditOpportunityScreen extends ConsumerStatefulWidget {
       _EditOpportunityScreenState();
 }
 
-class _EditOpportunityScreenState
-    extends ConsumerState<EditOpportunityScreen> {
+class _EditOpportunityScreenState extends ConsumerState<EditOpportunityScreen> {
   bool _submitting = false;
 
   Future<void> _submit(OpportunityFormValue v) async {
@@ -44,8 +43,7 @@ class _EditOpportunityScreenState
             title: v.title,
             body: v.body,
             tags: v.tags.value,
-            locationCity:
-                v.locationCity.isEmpty ? null : v.locationCity,
+            locationCity: v.locationCity.isEmpty ? null : v.locationCity,
             locationCountry:
                 v.locationCountry.isEmpty ? null : v.locationCountry,
             remoteOk: v.remoteOk,
@@ -62,9 +60,8 @@ class _EditOpportunityScreenState
       context.pop();
     } catch (e) {
       if (!mounted) return;
-      final String key = e is AppException
-          ? e.i18nKey
-          : 'opportunities.composer.errorSubmit';
+      final String key =
+          e is AppException ? e.i18nKey : 'opportunities.composer.errorSubmit';
       ref.read(toastServiceProvider.notifier).showToast(
             title: context.t(key),
             intent: AppIntent.danger,

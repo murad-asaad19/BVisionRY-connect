@@ -326,7 +326,10 @@ void main() {
     test('parses interested_count', () async {
       when(() => gateway.rpc('list_my_opportunities')).thenAnswer(
         (_) async => <Map<String, dynamic>>[
-          <String, dynamic>{..._withAuthor(_opportunityRow()), 'interested_count': 5},
+          <String, dynamic>{
+            ..._withAuthor(_opportunityRow()),
+            'interested_count': 5
+          },
         ],
       );
       final r = await service.listMyOpportunities();
@@ -359,7 +362,8 @@ void main() {
     test('maps 42501 to ForbiddenException', () async {
       when(
         () => gateway.rpc('list_interested', params: any(named: 'params')),
-      ).thenThrow(const PostgrestException(message: 'forbidden', code: '42501'));
+      ).thenThrow(
+          const PostgrestException(message: 'forbidden', code: '42501'));
       expect(
         () => service.listInterested('oid'),
         throwsA(isA<ForbiddenException>()),

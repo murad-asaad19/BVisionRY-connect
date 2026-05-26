@@ -47,6 +47,6 @@ class MyBooking with _$MyBooking {
 
   /// Cancellation policy: when the slot starts more than 24h from now, the
   /// server reopens it for someone else; otherwise it just cancels in place.
-  bool willReopenOnCancel({DateTime? now}) =>
-      startsAt.isAfter((now ?? DateTime.now().toUtc()).add(const Duration(hours: 24)));
+  bool willReopenOnCancel({DateTime? now}) => startsAt
+      .isAfter((now ?? DateTime.now().toUtc()).add(const Duration(hours: 24)));
 }

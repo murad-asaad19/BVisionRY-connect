@@ -73,9 +73,8 @@ class _ExpressInterestSheetBodyState
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
-      final String key = e is AppException
-          ? e.i18nKey
-          : 'opportunities.interest.errorGeneric';
+      final String key =
+          e is AppException ? e.i18nKey : 'opportunities.interest.errorGeneric';
       ref.read(toastServiceProvider.notifier).showToast(
             title: context.t(key),
             intent: AppIntent.danger,
@@ -87,8 +86,7 @@ class _ExpressInterestSheetBodyState
   @override
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
-    final AppTypography typo =
-        Theme.of(context).extension<AppTypography>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         16,
@@ -111,8 +109,7 @@ class _ExpressInterestSheetBodyState
           ),
           const SizedBox(height: 16),
           AppInput(
-            placeholder:
-                context.t('opportunities.interest.notePlaceholder'),
+            placeholder: context.t('opportunities.interest.notePlaceholder'),
             value: _note,
             onChanged: (String v) => setState(() {
               _note = v;
