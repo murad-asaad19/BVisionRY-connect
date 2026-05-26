@@ -10,6 +10,10 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../auth/providers/session_provider.dart';
 import '../../media/data/media_service.dart';
+import '../../meetings/presentation/meeting_card_bubble.dart';
+import '../../meetings/presentation/meeting_review_prompt.dart';
+import '../../meetings/presentation/propose_meeting_sheet.dart';
+import '../../meetings/providers/meeting_proposals_provider.dart';
 import '../../profile/providers/peer_profile_provider.dart';
 import '../data/chat_service.dart';
 import '../domain/conversation_overview.dart';
@@ -21,7 +25,6 @@ import '../providers/messages_provider.dart';
 import '../providers/typing_provider.dart';
 import 'widgets/conversation_app_bar.dart';
 import 'widgets/image_bubble.dart';
-import 'widgets/meeting_placeholder_bubble.dart';
 import 'widgets/message_actions_sheet.dart';
 import 'widgets/message_input_bar.dart';
 import 'widgets/text_bubble.dart';
@@ -160,6 +163,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     ref.invalidate(conversationOverviewProvider);
   }
 
+  Future<void> _openProposeMeetingSheet() async {
+    await showAppBottomSheet<void>(
+      context: context,
+      child: ProposeMeetingSheet(conversationId: widget.conversationId),
+    );
+  }
+
   Future<void> _toggleMute(ConversationOverview overview) async {
     final svc = ref.read(chatServiceProvider);
     final toast = ref.read(toastServiceProvider.notifier);
@@ -219,8 +229,25 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           onLongPress: longPress,
         );
       case MessageKind.meeting:
-        return const MeetingPlaceholderBubble();
+        return _buildMeetingBubble(m, selfId);
     }
+  }
+
+  Widget _buildMeetingBubble(Message m, String selfId) {
+    final id = m.meetingProposalId;
+    if (id == null) return const SizedBox.shrink();
+    final proposals =
+        ref.watch(meetingProposalsProvider(widget.conversationId)).valueOrNull ??
+            const [];
+    for (final p in proposals) {
+      if (p.id == id) {
+        return MeetingCardBubble(proposal: p, viewerId: selfId);
+      }
+    }
+    // Realtime row not yet arrived — render nothing so the list keeps
+    // its layout; an UPDATE on `meeting_proposals` will invalidate the
+    // messages provider and re-trigger the build.
+    return const SizedBox.shrink();
   }
 
   @override
@@ -308,11 +335,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             ),
           ),
           if (isTyping) TypingIndicator(peerName: overview?.peerName),
+          MeetingReviewPrompt(conversationId: widget.conversationId),
           MessageInputBar(
             conversationId: widget.conversationId,
             onSendText: _sendText,
             onPickImage: _pickAndSendImage,
             onRecordVoice: _openVoiceSheet,
+            onProposeMeeting: _openProposeMeetingSheet,
           ),
         ],
       ),

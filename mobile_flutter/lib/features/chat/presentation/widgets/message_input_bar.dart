@@ -25,12 +25,18 @@ class MessageInputBar extends ConsumerStatefulWidget {
     required this.onSendText,
     required this.onPickImage,
     required this.onRecordVoice,
+    this.onProposeMeeting,
   });
 
   final String conversationId;
   final Future<void> Function(String body) onSendText;
   final Future<void> Function() onPickImage;
   final Future<void> Function() onRecordVoice;
+
+  /// Optional — when supplied, renders a calendar-icon button that opens
+  /// the propose-meeting sheet. Phase 7 leaves this null; Phase 8 wires
+  /// it via [ConversationScreen].
+  final Future<void> Function()? onProposeMeeting;
 
   @override
   ConsumerState<MessageInputBar> createState() => _MessageInputBarState();
@@ -107,6 +113,15 @@ class _MessageInputBarState extends ConsumerState<MessageInputBar> {
                 onPressed: _sending ? null : () => widget.onRecordVoice(),
                 disabled: _sending,
               ),
+              if (widget.onProposeMeeting != null)
+                AppIconButton(
+                  key: const ValueKey('chat-propose-meeting'),
+                  icon: LucideIcons.calendar,
+                  label: 'Propose meeting',
+                  size: AppIconButtonSize.md,
+                  onPressed: _sending ? null : () => widget.onProposeMeeting!(),
+                  disabled: _sending,
+                ),
               Expanded(
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 4),
