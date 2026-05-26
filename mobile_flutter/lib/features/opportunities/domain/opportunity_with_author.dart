@@ -29,12 +29,17 @@ class OpportunityWithAuthor with _$OpportunityWithAuthor {
   /// the `author_*` and (optionally) `interested_count` columns onto a
   /// single object.
   ///
-  /// `list_opportunities` does not project `status` or `updated_at` (RLS
-  /// already filters to `status='open'` and the feed never needs the
-  /// update timestamp). We inject sensible defaults at parse time so
-  /// [Opportunity.fromJson] — which marks both as required — succeeds:
-  /// `status='open'` (RLS guarantee) and `updated_at=created_at` (no edit
-  /// has occurred from the feed's perspective).
+  /// Defaults the optional columns at parse time so different RPC
+  /// projections work with the same parser:
+  /// * `list_opportunities` omits `status` + `updated_at` (RLS filters to
+  ///   `status='open'`; the feed never needs the update timestamp).
+  /// * `list_my_opportunities` omits the `author_*` columns since the
+  ///   caller is the author — the consumer enriches with the viewer's
+  ///   profile (see [myOpportunitiesProvider]).
+  ///
+  /// `status` defaults to `'open'`, `updated_at` to `created_at`,
+  /// `author_handle` / `author_name` to empty strings — call sites that
+  /// need real author display must hydrate them.
   factory OpportunityWithAuthor.fromJson(Map<String, dynamic> json) {
     final Map<String, dynamic> patched = <String, dynamic>{
       ...json,
@@ -45,8 +50,8 @@ class OpportunityWithAuthor with _$OpportunityWithAuthor {
     final Object? rawCount = json['interested_count'];
     return OpportunityWithAuthor(
       opportunity: opp,
-      authorHandle: json['author_handle'] as String,
-      authorName: json['author_name'] as String,
+      authorHandle: (json['author_handle'] as String?) ?? '',
+      authorName: (json['author_name'] as String?) ?? '',
       authorPhotoUrl: json['author_photo_url'] as String?,
       authorPrimaryRole: json['author_primary_role'] as String?,
       authorVerifiedGithubUsername:
