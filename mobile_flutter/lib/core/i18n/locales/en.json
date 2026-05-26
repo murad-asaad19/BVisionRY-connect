@@ -556,6 +556,80 @@
       "viewProfile": "View profile"
     }
   },
+  "meetings": {
+    "title": "Meeting",
+    "statusProposed": "Proposed",
+    "statusConfirmed": "Confirmed",
+    "statusDeclined": "Declined",
+    "statusCancelled": "Cancelled",
+    "durationLabel": "{{minutes}} min",
+    "confirm": "Confirm",
+    "decline": "Decline",
+    "cancelProposal": "Cancel proposal",
+    "addToCalendar": "Add to calendar",
+    "openLink": "Open meeting link",
+    "errors": {
+      "actionFailed": "Couldn't update the meeting"
+    },
+    "propose": {
+      "title": "Propose a meeting",
+      "subtitle": "Suggest up to 3 times that work for you.",
+      "slot1Label": "Slot 1 (required)",
+      "slot2Label": "Slot 2 (optional)",
+      "slot3Label": "Slot 3 (optional)",
+      "durationLabel": "Duration",
+      "durationOption": "{{minutes}} min",
+      "urlLabel": "Meeting URL",
+      "urlPlaceholder": "https://meet.google.com/...",
+      "inputTimeZoneHint": "Times will be sent in your timezone ({{tz}})",
+      "cancel": "Cancel",
+      "send": "Send proposal",
+      "errors": {
+        "slotsRange": "Pick 1–3 future time slots.",
+        "duration": "Duration must be 15–240 minutes.",
+        "url": "Meeting URL must start with https://.",
+        "submitFailed": "Couldn't send proposal. Please try again."
+      }
+    },
+    "confirmSheet": {
+      "title": "Confirm a time",
+      "subtitle": "Pick the slot that works best."
+    },
+    "prompt": {
+      "title": "How was your meeting?",
+      "subtitle": "Tap a quick reaction so we can keep matches accurate."
+    },
+    "review": {
+      "title": "How was your meeting?",
+      "subtitle": "Tap a quick reaction so we can keep matches accurate.",
+      "useful": "Useful",
+      "notUseful": "Not useful",
+      "noShow": "No-show",
+      "skip": "Skip",
+      "submitFailed": "Couldn't submit review. Please try again.",
+      "submitted": "Thanks for the feedback!"
+    },
+    "playbook": {
+      "title": "Meeting playbook",
+      "generating": "Generating playbook…",
+      "regenerate": "Regenerate",
+      "regenerateRateLimited": "Try again in 1 hour",
+      "generate": "Generate playbook",
+      "retry": "Retry",
+      "errorBanner": "Couldn't load the playbook. Try again later.",
+      "generatedAt": "Updated {{ago}}",
+      "justNow": "just now",
+      "minutesShort": "m",
+      "hoursShort": "h",
+      "daysShort": "d",
+      "section": {
+        "sharedInterests": "Shared interests",
+        "conversationStarters": "Conversation starters",
+        "do": "Do",
+        "dont": "Don't"
+      }
+    }
+  },
   "network": {
     "title": "Network",
     "empty": {

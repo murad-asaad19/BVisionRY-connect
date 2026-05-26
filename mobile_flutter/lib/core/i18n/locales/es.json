@@ -556,6 +556,80 @@
       "viewProfile": "Ver perfil"
     }
   },
+  "meetings": {
+    "title": "Reunión",
+    "statusProposed": "Propuesta",
+    "statusConfirmed": "Confirmada",
+    "statusDeclined": "Rechazada",
+    "statusCancelled": "Cancelada",
+    "durationLabel": "{{minutes}} min",
+    "confirm": "Confirmar",
+    "decline": "Rechazar",
+    "cancelProposal": "Cancelar propuesta",
+    "addToCalendar": "Añadir al calendario",
+    "openLink": "Abrir enlace de la reunión",
+    "errors": {
+      "actionFailed": "No pudimos actualizar la reunión"
+    },
+    "propose": {
+      "title": "Proponer una reunión",
+      "subtitle": "Sugiere hasta 3 horarios que te funcionen.",
+      "slot1Label": "Horario 1 (obligatorio)",
+      "slot2Label": "Horario 2 (opcional)",
+      "slot3Label": "Horario 3 (opcional)",
+      "durationLabel": "Duración",
+      "durationOption": "{{minutes}} min",
+      "urlLabel": "URL de la reunión",
+      "urlPlaceholder": "https://meet.google.com/...",
+      "inputTimeZoneHint": "Los horarios se enviarán en tu zona horaria ({{tz}})",
+      "cancel": "Cancelar",
+      "send": "Enviar propuesta",
+      "errors": {
+        "slotsRange": "Elige entre 1 y 3 horarios futuros.",
+        "duration": "La duración debe ser de 15 a 240 minutos.",
+        "url": "La URL debe comenzar con https://.",
+        "submitFailed": "No se pudo enviar la propuesta. Inténtalo de nuevo."
+      }
+    },
+    "confirmSheet": {
+      "title": "Confirmar un horario",
+      "subtitle": "Elige el horario que mejor te funcione."
+    },
+    "prompt": {
+      "title": "¿Qué tal la reunión?",
+      "subtitle": "Toca una reacción rápida para mejorar tus recomendaciones."
+    },
+    "review": {
+      "title": "¿Qué tal la reunión?",
+      "subtitle": "Toca una reacción rápida para mejorar tus recomendaciones.",
+      "useful": "Útil",
+      "notUseful": "No útil",
+      "noShow": "No se presentó",
+      "skip": "Omitir",
+      "submitFailed": "No se pudo enviar la reseña. Inténtalo de nuevo.",
+      "submitted": "¡Gracias por tu opinión!"
+    },
+    "playbook": {
+      "title": "Guion de reunión",
+      "generating": "Generando guion…",
+      "regenerate": "Regenerar",
+      "regenerateRateLimited": "Inténtalo de nuevo en 1 hora",
+      "generate": "Generar guion",
+      "retry": "Reintentar",
+      "errorBanner": "No se pudo cargar el guion. Inténtalo más tarde.",
+      "generatedAt": "Actualizado {{ago}}",
+      "justNow": "ahora",
+      "minutesShort": "m",
+      "hoursShort": "h",
+      "daysShort": "d",
+      "section": {
+        "sharedInterests": "Intereses en común",
+        "conversationStarters": "Para empezar la conversación",
+        "do": "Sí",
+        "dont": "No"
+      }
+    }
+  },
   "network": {
     "title": "Red",
     "empty": {
