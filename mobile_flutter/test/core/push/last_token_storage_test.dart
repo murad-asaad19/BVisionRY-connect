@@ -25,6 +25,6 @@ void main() {
     const LastTokenStorage storage = LastTokenStorage();
     await storage.set('fcm-token-xyz');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    expect(prefs.getString('last_fcm_token'), equals('fcm-token-xyz'));
+    expect(prefs.getString('connect.fcm_last_token'), equals('fcm-token-xyz'));
   });
 }

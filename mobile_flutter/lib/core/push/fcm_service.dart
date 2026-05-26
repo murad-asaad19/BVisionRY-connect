@@ -139,6 +139,17 @@ class FcmService {
   Future<void> unregisterToken() async {
     final String? token = await _tokenStorage.get();
     if (token == null || token.isEmpty) return;
+    await unregisterTokenValue(token);
+  }
+
+  /// Server-side deregister for an explicit [token]. Used by [unregisterToken]
+  /// after reading from [LastTokenStorage] AND by [AuthService.signOut] which
+  /// owns its own `FcmTokenStore` (the two storages exist for back-compat with
+  /// Phase 2's pre-FCM scaffold).
+  ///
+  /// Best-effort: errors are logged but never thrown so sign-out never
+  /// blocks on a flaky push backend.
+  Future<void> unregisterTokenValue(String token) async {
     try {
       await _supabase.rpc<dynamic>(
         'unregister_device_token',

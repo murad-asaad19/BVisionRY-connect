@@ -4,10 +4,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// path can call `unregister_device_token` even after the in-memory
 /// FirebaseMessaging instance has rotated.
 ///
-/// Key matches the spec §10.3 contract: `last_fcm_token`.
+/// Key matches `FcmTokenStore` from Phase 2 (`connect.fcm_last_token`) so
+/// the two storages observe the same row - one writer (FcmService), two
+/// readers (FcmService for refresh/foreground, AuthService for sign-out).
 class LastTokenStorage {
   const LastTokenStorage();
-  static const String _key = 'last_fcm_token';
+  static const String _key = 'connect.fcm_last_token';
 
   Future<String?> get() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/supabase/supabase_client.dart';
 import '../../push/data/fcm_token_store.dart';
+import '../../push/providers/fcm_lifecycle_provider.dart';
 import '../../settings/data/persisted_stores.dart';
 import '../data/auth_service.dart';
 import '../data/profile_repository.dart';
@@ -122,25 +123,19 @@ final Provider<PersistedStores> persistedStoresProvider =
   return PersistedStores();
 });
 
-/// Best-effort FCM deregister callback wired through the Supabase RPC
-/// `unregister_device_token`. Phase 12 will replace this with the full
-/// Firebase Messaging integration; for Phase 2 we just need the hook so
-/// [AuthService.signOut] honours its contract.
+/// Best-effort FCM deregister callback. Phase 12 wires this to
+/// `FcmService.unregisterTokenValue` so the same code path that the
+/// foreground / refresh handlers use also runs on sign-out (storage
+/// clearing, breadcrumbs, error swallow).
+///
+/// Spec §10.3: must run BEFORE `supabase.auth.signOut` so the RPC still
+/// has a valid JWT — that ordering is preserved by [AuthService.signOut].
 final Provider<Future<void> Function(String token)?> fcmDeregisterProvider =
     Provider<Future<void> Function(String token)?>((
   Ref<Future<void> Function(String token)?> ref,
 ) {
-  final SupabaseClient client = ref.watch(supabaseClientProvider);
-  return (String token) async {
-    try {
-      await client.rpc<dynamic>(
-        'unregister_device_token',
-        params: <String, dynamic>{'p_token': token},
-      );
-    } catch (_) {
-      // best-effort — sign-out must still proceed even if RPC fails.
-    }
-  };
+  final fcm = ref.watch(fcmServiceProvider);
+  return fcm.unregisterTokenValue;
 });
 
 /// The fully-wired [AuthService] the UI consumes. Tests override this with a

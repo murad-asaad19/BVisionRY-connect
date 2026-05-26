@@ -15,12 +15,18 @@ class ToastItem {
     required this.title,
     required this.intent,
     this.body,
+    this.onTap,
   });
 
   final String id;
   final String title;
   final String? body;
   final AppIntent intent;
+
+  /// Optional tap handler invoked BEFORE dismissal. Phase 12 push toasts
+  /// route via `router.go(...)` from here; other call-sites that just want
+  /// dismiss-on-tap behaviour omit it.
+  final VoidCallback? onTap;
 }
 
 /// Imperative toast handle. Exposes the canonical [showToast] surface
@@ -33,15 +39,25 @@ class ToastService extends StateNotifier<List<ToastItem>> {
   final Map<String, Timer> _timers = {};
 
   /// Pushes a toast onto the queue. Auto-dismisses after 3.5s.
+  ///
+  /// When [onTap] is supplied, the [ToastHost] invokes it before dismissing.
+  /// Phase 12 push handlers pass `router.go(...)` here.
   String showToast({
     required String title,
     String? body,
     AppIntent intent = AppIntent.info,
+    VoidCallback? onTap,
   }) {
     final id = 'toast-${DateTime.now().microsecondsSinceEpoch}';
     state = [
       ...state,
-      ToastItem(id: id, title: title, body: body, intent: intent),
+      ToastItem(
+        id: id,
+        title: title,
+        body: body,
+        intent: intent,
+        onTap: onTap,
+      ),
     ];
     _timers[id] = Timer(_autoDismiss, () => dismiss(id));
     return id;
@@ -114,7 +130,10 @@ class _ToastRow extends ConsumerWidget {
         child: InkWell(
           key: ValueKey('toast-row-${item.id}'),
           borderRadius: BorderRadius.circular(radii.button),
-          onTap: () => ref.read(toastServiceProvider.notifier).dismiss(item.id),
+          onTap: () {
+            item.onTap?.call();
+            ref.read(toastServiceProvider.notifier).dismiss(item.id);
+          },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
