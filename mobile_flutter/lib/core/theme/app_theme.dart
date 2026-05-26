@@ -38,5 +38,14 @@ ThemeData buildAppTheme(Brightness brightness) {
       AppSpacing.standard,
       AppRadii.standard,
     ],
+    // Phase 15: native-feeling page transitions (Cupertino slide on iOS,
+    // fade-upwards on Android).
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: <TargetPlatform, PageTransitionsBuilder>{
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+        TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+      },
+    ),
   );
 }

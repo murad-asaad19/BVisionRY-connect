@@ -51,4 +51,21 @@ void main() {
       expect(pubspec, contains(dep), reason: 'missing $dep');
     }
   });
+
+  test('pubspec declares polish + release dependencies', () {
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+    for (final dep in const [
+      'audio_waveforms:',
+      'shimmer:',
+    ]) {
+      expect(pubspec, contains(dep), reason: 'missing $dep');
+    }
+    for (final dep in const [
+      'flutter_launcher_icons:',
+      'flutter_native_splash:',
+      'sentry_dart_plugin:',
+    ]) {
+      expect(pubspec, contains(dep), reason: 'missing dev dep $dep');
+    }
+  });
 }
