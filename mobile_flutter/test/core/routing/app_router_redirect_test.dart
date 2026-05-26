@@ -1,3 +1,5 @@
+import 'package:connect_mobile/core/i18n/locale_loader.dart';
+import 'package:connect_mobile/core/i18n/locale_notifier.dart';
 import 'package:connect_mobile/core/routing/app_router.dart';
 import 'package:connect_mobile/core/theme/app_theme.dart';
 import 'package:connect_mobile/features/auth/data/profile_repository.dart';
@@ -10,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../helpers/fake_supabase.dart';
+import '../../helpers/pump.dart';
 
 class _Q implements ProfileQueryRunner {
   _Q(this.row);
@@ -20,6 +23,12 @@ class _Q implements ProfileQueryRunner {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  late LocaleLoader loader;
+  setUpAll(() async {
+    loader = await primedLocaleLoader();
+  });
+
   setUp(() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     const MethodChannel secureStorageChannel = MethodChannel(
@@ -40,6 +49,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
+          localeLoaderProvider.overrideWithValue(loader),
           authGatewayProvider.overrideWithValue(auth),
           profileRepositoryProvider.overrideWithValue(
             ProfileRepository(_Q(null)),
@@ -73,6 +83,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
+          localeLoaderProvider.overrideWithValue(loader),
           authGatewayProvider.overrideWithValue(auth),
           profileRepositoryProvider.overrideWithValue(
             ProfileRepository(
@@ -111,6 +122,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: <Override>[
+          localeLoaderProvider.overrideWithValue(loader),
           authGatewayProvider.overrideWithValue(auth),
           profileRepositoryProvider.overrideWithValue(
             ProfileRepository(

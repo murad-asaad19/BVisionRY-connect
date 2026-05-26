@@ -35,6 +35,11 @@ void main() {
       ),
     );
 
+    // The flutter test framework re-throws build errors via the
+    // takeException seam; absorb it so the test isn't marked failed.
+    tester.takeException();
+    // The boundary defers its state change to the next frame, pump once.
+    await tester.pump();
     expect(find.text('boundary-fallback'), findsOneWidget);
     expect(captured, isA<StateError>());
     expect(capturedStack, isNotNull);
@@ -49,6 +54,8 @@ void main() {
         ),
       ),
     );
+    tester.takeException();
+    await tester.pump();
     // Default fallback uses a Material widget for the fallback shell —
     // verify we get a Material rendered.
     expect(find.byType(Material), findsWidgets);
@@ -67,6 +74,8 @@ void main() {
         ),
       ),
     );
+    tester.takeException();
+    await tester.pump();
     expect(captured, isA<FormatException>());
   });
 }

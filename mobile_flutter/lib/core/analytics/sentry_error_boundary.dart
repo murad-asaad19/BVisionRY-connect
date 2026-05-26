@@ -38,9 +38,14 @@ class _SentryErrorBoundaryState extends State<SentryErrorBoundary> {
   void _capture(Object error, StackTrace stack) {
     telemetry.captureException(error, stack);
     widget.onError?.call(error, stack);
-    if (mounted) {
-      setState(() => _captured = (error: error, stack: stack));
-    }
+    // The error fires DURING build (from ErrorWidget.builder) — calling
+    // setState synchronously trips the !dirty assertion. Defer to the
+    // next frame so the boundary repaints with the fallback safely.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() => _captured = (error: error, stack: stack));
+      }
+    });
   }
 
   @override

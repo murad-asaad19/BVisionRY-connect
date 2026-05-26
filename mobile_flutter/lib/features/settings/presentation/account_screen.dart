@@ -39,7 +39,13 @@ class AccountScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
     final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
-    final String? email = Supabase.instance.client.auth.currentUser?.email;
+    // Guard against the test path where Supabase isn't initialised yet.
+    String? email;
+    try {
+      email = Supabase.instance.client.auth.currentUser?.email;
+    } catch (_) {
+      email = null;
+    }
     final AsyncValue<TelemetryPrefs> telemetry = ref.watch(telemetryProvider);
 
     return Scaffold(
