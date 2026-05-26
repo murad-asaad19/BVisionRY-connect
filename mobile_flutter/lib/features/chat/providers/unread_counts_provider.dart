@@ -13,9 +13,9 @@ import '../data/chat_service.dart';
 /// The chats-tab badge consumes `.values.fold(0, (a,b) => a + b)`.
 final FutureProvider<Map<String, int>> unreadCountsProvider =
     FutureProvider<Map<String, int>>((ref) async {
-      final svc = ref.watch(chatServiceProvider);
-      final rows = await svc.listConversationUnread();
-      return <String, int>{
-        for (final r in rows) r.conversationId: r.unreadCount,
-      };
-    });
+  final svc = ref.watch(chatServiceProvider);
+  final rows = await svc.listConversationUnread();
+  return <String, int>{
+    for (final r in rows) r.conversationId: r.unreadCount,
+  };
+});

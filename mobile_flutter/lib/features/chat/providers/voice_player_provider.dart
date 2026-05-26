@@ -76,7 +76,7 @@ class VoicePlayerNotifier extends StateNotifier<VoicePlayerState> {
 /// [FakeVoicePlayerBackend] so widget tests can drive playback without
 /// touching the audio HAL.
 final StateNotifierProvider<VoicePlayerNotifier, VoicePlayerState>
-voicePlayerProvider =
+    voicePlayerProvider =
     StateNotifierProvider<VoicePlayerNotifier, VoicePlayerState>((ref) {
-      return VoicePlayerNotifier(RealVoicePlayerBackend());
-    });
+  return VoicePlayerNotifier(RealVoicePlayerBackend());
+});

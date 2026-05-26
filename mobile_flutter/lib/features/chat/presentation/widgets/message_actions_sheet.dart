@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,18 +64,23 @@ class MessageActionsSheet extends ConsumerWidget {
   ) async {
     final toast = ref.read(toastServiceProvider.notifier);
     final chat = ref.read(chatServiceProvider);
-    final notifier = ref.read(messagesProvider(message.conversationId).notifier);
+    final confirm = ref.read(confirmServiceProvider);
+    final notifier = ref.read(
+      messagesProvider(message.conversationId).notifier,
+    );
+    final navigator = Navigator.of(context);
     switch (action) {
       case MessageAction.reply:
-        Navigator.of(context).maybePop();
+        unawaited(navigator.maybePop());
         toast.showToast(title: 'Coming soon');
       case MessageAction.copy:
-        Navigator.of(context).maybePop();
+        unawaited(navigator.maybePop());
         if (message.body != null) {
           await Clipboard.setData(ClipboardData(text: message.body!));
         }
       case MessageAction.edit:
-        Navigator.of(context).maybePop();
+        unawaited(navigator.maybePop());
+        if (!context.mounted) return;
         final newBody = await _MessageEditSheet.show(
           context,
           initial: message.body ?? '',
@@ -89,17 +96,20 @@ class MessageActionsSheet extends ConsumerWidget {
           );
         }
       case MessageAction.delete:
-        Navigator.of(context).maybePop();
-        final confirmed = await ref
-            .read(confirmServiceProvider)
-            .confirm(
-              context,
-              title: context.t('chat.delete.confirmTitle'),
-              body: context.t('chat.delete.confirmBody'),
-              confirmLabel: context.t('chat.actions.delete'),
-              cancelLabel: context.t('chat.recording.cancel'),
-              destructive: true,
-            );
+        final titleLabel = context.t('chat.delete.confirmTitle');
+        final bodyLabel = context.t('chat.delete.confirmBody');
+        final confirmLabel = context.t('chat.actions.delete');
+        final cancelLabel = context.t('chat.recording.cancel');
+        unawaited(navigator.maybePop());
+        if (!context.mounted) return;
+        final confirmed = await confirm.confirm(
+          context,
+          title: titleLabel,
+          body: bodyLabel,
+          confirmLabel: confirmLabel,
+          cancelLabel: cancelLabel,
+          destructive: true,
+        );
         if (!confirmed) return;
         try {
           final tombstoned = await chat.deleteMessage(message.id);
@@ -111,7 +121,7 @@ class MessageActionsSheet extends ConsumerWidget {
           );
         }
       case MessageAction.report:
-        Navigator.of(context).maybePop();
+        unawaited(navigator.maybePop());
         toast.showToast(title: 'Coming soon');
     }
   }
@@ -236,7 +246,6 @@ class _MessageEditSheetState extends State<_MessageEditSheet> {
             minLines: 3,
             maxLines: 6,
             onChanged: (v) => setState(() => _value = v),
-            autocorrect: true,
             textInputAction: TextInputAction.newline,
           ),
           const SizedBox(height: 16),

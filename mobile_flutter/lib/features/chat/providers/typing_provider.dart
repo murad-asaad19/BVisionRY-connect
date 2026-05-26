@@ -22,23 +22,25 @@ class TypingEvent {
 /// with a controlled stream.
 final StreamProviderFamily<TypingEvent, String> typingChannelProvider =
     StreamProvider.family<TypingEvent, String>((ref, convId) {
-      final client = ref.watch(supabaseClientProvider);
-      final controller = StreamController<TypingEvent>.broadcast();
-      final ch = client.channel('typing:$convId');
-      ch.onBroadcast(
+  final client = ref.watch(supabaseClientProvider);
+  final controller = StreamController<TypingEvent>.broadcast();
+  final ch = client.channel('typing:$convId');
+  ch
+      .onBroadcast(
         event: 'typing',
         callback: (payload) {
           final userId = payload['user_id'] as String?;
           if (userId == null) return;
           controller.add(TypingEvent(userId, DateTime.now().toUtc()));
         },
-      ).subscribe();
-      ref.onDispose(() async {
-        await client.removeChannel(ch);
-        await controller.close();
-      });
-      return controller.stream;
-    });
+      )
+      .subscribe();
+  ref.onDispose(() async {
+    await client.removeChannel(ch);
+    await controller.close();
+  });
+  return controller.stream;
+});
 
 /// Resolves the current authenticated user id so [typingProvider] can
 /// filter out the caller's own pings without re-reading the Supabase
@@ -53,38 +55,38 @@ final Provider<String?> typingSelfIdProvider = Provider<String?>((ref) {
 /// AutoDispose so leaving a thread releases the channel.
 final AutoDisposeStreamProviderFamily<Set<String>, String> typingProvider =
     StreamProvider.autoDispose.family<Set<String>, String>((ref, convId) {
-      final selfId = ref.watch(typingSelfIdProvider);
-      final controller = StreamController<Set<String>>.broadcast();
-      final active = <String, Timer>{};
-      final current = <String>{};
+  final selfId = ref.watch(typingSelfIdProvider);
+  final controller = StreamController<Set<String>>.broadcast();
+  final active = <String, Timer>{};
+  final current = <String>{};
 
-      // Seed with an empty set so listeners see "nobody typing" immediately.
-      Future.microtask(() => controller.add(<String>{}));
+  // Seed with an empty set so listeners see "nobody typing" immediately.
+  Future.microtask(() => controller.add(<String>{}));
 
-      ref.listen<AsyncValue<TypingEvent>>(typingChannelProvider(convId), (
-        _,
-        next,
-      ) {
-        next.whenData((ev) {
-          if (ev.userId == selfId) return;
-          current.add(ev.userId);
-          controller.add(Set<String>.from(current));
-          active[ev.userId]?.cancel();
-          active[ev.userId] = Timer(const Duration(seconds: 2), () {
-            current.remove(ev.userId);
-            controller.add(Set<String>.from(current));
-          });
-        });
+  ref.listen<AsyncValue<TypingEvent>>(typingChannelProvider(convId), (
+    _,
+    next,
+  ) {
+    next.whenData((ev) {
+      if (ev.userId == selfId) return;
+      current.add(ev.userId);
+      controller.add(Set<String>.from(current));
+      active[ev.userId]?.cancel();
+      active[ev.userId] = Timer(const Duration(seconds: 2), () {
+        current.remove(ev.userId);
+        controller.add(Set<String>.from(current));
       });
-
-      ref.onDispose(() {
-        for (final t in active.values) {
-          t.cancel();
-        }
-        controller.close();
-      });
-      return controller.stream;
     });
+  });
+
+  ref.onDispose(() {
+    for (final t in active.values) {
+      t.cancel();
+    }
+    controller.close();
+  });
+  return controller.stream;
+});
 
 /// Debounced broadcaster — call [ping] on every keystroke; pings are
 /// dropped while a 1.5 s cooldown is active so the channel never sees
@@ -119,5 +121,5 @@ class TypingBroadcaster {
 
 final Provider<TypingBroadcaster> typingBroadcasterProvider =
     Provider<TypingBroadcaster>((ref) {
-      return TypingBroadcaster(ref.watch(supabaseClientProvider));
-    });
+  return TypingBroadcaster(ref.watch(supabaseClientProvider));
+});

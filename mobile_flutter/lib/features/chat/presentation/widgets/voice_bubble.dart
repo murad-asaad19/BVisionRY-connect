@@ -74,23 +74,21 @@ class _VoiceBubbleState extends ConsumerState<VoiceBubble> {
     final isMe = widget.variant == BubbleVariant.me;
     final player = ref.watch(voicePlayerProvider);
     final active = player.activeId == widget.messageId;
-    final progress = active && player.totalMs > 0
-        ? player.positionMs / player.totalMs
-        : 0.0;
+    final progress =
+        active && player.totalMs > 0 ? player.positionMs / player.totalMs : 0.0;
     final isReady = widget.transcriptStatus == TranscriptStatus.ready;
     final hasTranscript = isReady && (widget.transcript?.isNotEmpty ?? false);
     final isTranscribing =
         widget.transcriptStatus == TranscriptStatus.pending ||
-        widget.transcriptStatus == TranscriptStatus.processing;
+            widget.transcriptStatus == TranscriptStatus.processing;
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 280),
         child: Column(
-          crossAxisAlignment: isMe
-              ? CrossAxisAlignment.end
-              : CrossAxisAlignment.start,
+          crossAxisAlignment:
+              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             GestureDetector(
@@ -125,9 +123,8 @@ class _VoiceBubbleState extends ConsumerState<VoiceBubble> {
                       child: VoiceWaveform(
                         progress: progress,
                         activeColor: isMe ? colors.gold : colors.navy,
-                        inactiveColor: isMe
-                            ? colors.navyLight
-                            : colors.slate300,
+                        inactiveColor:
+                            isMe ? colors.navyLight : colors.slate300,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -165,8 +162,8 @@ class _VoiceBubbleState extends ConsumerState<VoiceBubble> {
                           isTranscribing
                               ? context.t('media.transcriptPending')
                               : _transcriptOpen
-                              ? context.t('media.hideTranscript')
-                              : context.t('media.showTranscript'),
+                                  ? context.t('media.hideTranscript')
+                                  : context.t('media.showTranscript'),
                           style: typo.displayXs.copyWith(
                             color: colors.muted,
                             letterSpacing: 0.5,

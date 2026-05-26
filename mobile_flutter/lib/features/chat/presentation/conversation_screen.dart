@@ -107,9 +107,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     // Reverse list → top of the visible thread is `extentAfter` (oldest
     // rows haven't been fetched yet). Trigger pagination on approach.
     if (pos.extentAfter < 100) {
-      ref
-          .read(messagesProvider(widget.conversationId).notifier)
-          .loadMore();
+      ref.read(messagesProvider(widget.conversationId).notifier).loadMore();
     }
     // Scrolled back to the newest row → mark read again so the unread
     // badge clears even when new messages stream in via Realtime.
@@ -128,6 +126,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   Future<void> _pickAndSendImage() async {
     final media = ref.read(mediaServiceProvider);
     final toast = ref.read(toastServiceProvider.notifier);
+    final failedTitle = context.t('chat.send.failed');
     try {
       final file = await media.pickImage();
       if (file == null) return;
@@ -149,10 +148,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       );
       ref.invalidate(conversationOverviewProvider);
     } catch (_) {
-      toast.showToast(
-        title: context.t('chat.send.failed'),
-        intent: AppIntent.danger,
-      );
+      toast.showToast(title: failedTitle, intent: AppIntent.danger);
     }
   }
 
@@ -167,25 +163,26 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   Future<void> _toggleMute(ConversationOverview overview) async {
     final svc = ref.read(chatServiceProvider);
     final toast = ref.read(toastServiceProvider.notifier);
+    final muteOk = context.t('chat.mute.muteSuccess');
+    final unmuteOk = context.t('chat.mute.unmuteSuccess');
+    final actionFailed = context.t('chat.mute.actionFailed');
     try {
       if (overview.isMuted) {
         await svc.unmuteConversation(widget.conversationId);
-        toast.showToast(title: context.t('chat.mute.unmuteSuccess'));
+        toast.showToast(title: unmuteOk);
       } else {
         await svc.muteConversation(widget.conversationId);
-        toast.showToast(title: context.t('chat.mute.muteSuccess'));
+        toast.showToast(title: muteOk);
       }
       ref.invalidate(conversationOverviewProvider);
     } catch (_) {
-      toast.showToast(
-        title: context.t('chat.mute.actionFailed'),
-        intent: AppIntent.danger,
-      );
+      toast.showToast(title: actionFailed, intent: AppIntent.danger);
     }
   }
 
   Widget _buildBubble(Message m, String selfId) {
-    final variant = m.senderId == selfId ? BubbleVariant.me : BubbleVariant.them;
+    final variant =
+        m.senderId == selfId ? BubbleVariant.me : BubbleVariant.them;
     if (m.isTombstone) {
       return TombstoneBubble(variant: variant);
     }
@@ -234,9 +231,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final typingSet =
         ref.watch(typingProvider(widget.conversationId)).valueOrNull ??
             const <String>{};
-    final overviews =
-        ref.watch(conversationOverviewProvider).valueOrNull ??
-            const <ConversationOverview>[];
+    final overviews = ref.watch(conversationOverviewProvider).valueOrNull ??
+        const <ConversationOverview>[];
     ConversationOverview? overview;
     for (final o in overviews) {
       if (o.conversationId == widget.conversationId) {
@@ -289,8 +285,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     style: Theme.of(
                       context,
                     ).extension<AppTypography>()!.bodyMd.copyWith(
-                      color: colors.danger,
-                    ),
+                          color: colors.danger,
+                        ),
                   ),
                 ),
               ),

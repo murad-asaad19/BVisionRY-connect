@@ -14,7 +14,12 @@ void main() {
     );
     expect(
       MediaConstants.allowedVoiceMimes,
-      containsAll(<String>['audio/m4a', 'audio/mp4', 'audio/aac', 'audio/webm']),
+      containsAll(<String>[
+        'audio/m4a',
+        'audio/mp4',
+        'audio/aac',
+        'audio/webm',
+      ]),
     );
     expect(MediaConstants.signedUrlTtlSeconds, 60);
   });

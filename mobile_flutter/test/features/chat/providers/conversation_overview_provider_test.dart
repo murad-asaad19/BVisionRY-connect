@@ -11,15 +11,15 @@ import 'package:mocktail/mocktail.dart';
 class _MockSvc extends Mock implements ChatService {}
 
 ConversationOverview _row(String id) => ConversationOverview(
-  conversationId: id,
-  peerId: 'u2',
-  peerName: 'A',
-  peerHandle: 'a',
-  lastMessageKind: MessageKind.text,
-  lastMessageAt: DateTime.utc(2026, 5, 25, 10),
-  unreadCount: 0,
-  isMuted: false,
-);
+      conversationId: id,
+      peerId: 'u2',
+      peerName: 'A',
+      peerHandle: 'a',
+      lastMessageKind: MessageKind.text,
+      lastMessageAt: DateTime.utc(2026, 5, 25, 10),
+      unreadCount: 0,
+      isMuted: false,
+    );
 
 void main() {
   test('returns parsed overviews from RPC', () async {

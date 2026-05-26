@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// `ConversationScreen` sets this on mount and clears it on dispose so
 /// Phase 12 push handlers can suppress in-thread toasts ("Don't show a
 /// banner for a message we're already displaying").
-final StateProvider<String?> activeConversationProvider = StateProvider<String?>(
+final StateProvider<String?> activeConversationProvider =
+    StateProvider<String?>(
   (ref) => null,
 );

@@ -31,52 +31,52 @@ class _MockChatSvc extends Mock implements ChatService {}
 class _MockPeerSvc extends Mock implements PeerProfileService {}
 
 ConversationOverview _overview() => const ConversationOverview(
-  conversationId: 'c1',
-  peerId: 'p1',
-  peerName: 'Ada Lovelace',
-  peerHandle: 'ada',
-  lastMessageKind: MessageKind.text,
-  lastMessageAt: null,
-  unreadCount: 0,
-  isMuted: false,
-);
+      conversationId: 'c1',
+      peerId: 'p1',
+      peerName: 'Ada Lovelace',
+      peerHandle: 'ada',
+      lastMessageKind: MessageKind.text,
+      lastMessageAt: null,
+      unreadCount: 0,
+      isMuted: false,
+    );
 
 List<Message> _mixed() => <Message>[
-  Message(
-    id: 'm-text',
-    conversationId: 'c1',
-    senderId: 'p1',
-    kind: MessageKind.text,
-    createdAt: DateTime.utc(2026, 5, 25, 10, 0),
-    body: 'hello',
-  ),
-  Message(
-    id: 'm-image',
-    conversationId: 'c1',
-    senderId: 'p1',
-    kind: MessageKind.image,
-    createdAt: DateTime.utc(2026, 5, 25, 10, 1),
-    mediaPath: 'c1/m-image/photo.jpg',
-  ),
-  Message(
-    id: 'm-voice',
-    conversationId: 'c1',
-    senderId: 'p1',
-    kind: MessageKind.voice,
-    createdAt: DateTime.utc(2026, 5, 25, 10, 2),
-    mediaPath: 'c1/m-voice/voice.m4a',
-    mediaDurationMs: 30000,
-    transcriptStatus: TranscriptStatus.pending,
-  ),
-  Message(
-    id: 'm-meeting',
-    conversationId: 'c1',
-    senderId: 'p1',
-    kind: MessageKind.meeting,
-    createdAt: DateTime.utc(2026, 5, 25, 10, 3),
-    meetingProposalId: 'mp1',
-  ),
-];
+      Message(
+        id: 'm-text',
+        conversationId: 'c1',
+        senderId: 'p1',
+        kind: MessageKind.text,
+        createdAt: DateTime.utc(2026, 5, 25, 10, 0),
+        body: 'hello',
+      ),
+      Message(
+        id: 'm-image',
+        conversationId: 'c1',
+        senderId: 'p1',
+        kind: MessageKind.image,
+        createdAt: DateTime.utc(2026, 5, 25, 10, 1),
+        mediaPath: 'c1/m-image/photo.jpg',
+      ),
+      Message(
+        id: 'm-voice',
+        conversationId: 'c1',
+        senderId: 'p1',
+        kind: MessageKind.voice,
+        createdAt: DateTime.utc(2026, 5, 25, 10, 2),
+        mediaPath: 'c1/m-voice/voice.m4a',
+        mediaDurationMs: 30000,
+        transcriptStatus: TranscriptStatus.pending,
+      ),
+      Message(
+        id: 'm-meeting',
+        conversationId: 'c1',
+        senderId: 'p1',
+        kind: MessageKind.meeting,
+        createdAt: DateTime.utc(2026, 5, 25, 10, 3),
+        meetingProposalId: 'mp1',
+      ),
+    ];
 
 void main() {
   setUpAll(() {
@@ -97,8 +97,7 @@ void main() {
       (_) async => <ConversationOverview>[_overview()],
     );
     when(() => peerSvc.fetchById('p1')).thenAnswer((_) async => null);
-    final realtimeCtrl =
-        StreamController<MessageRealtimeEvent>.broadcast();
+    final realtimeCtrl = StreamController<MessageRealtimeEvent>.broadcast();
     final typingCtrl = StreamController<TypingEvent>.broadcast();
     addTearDown(() async {
       await realtimeCtrl.close();
@@ -144,8 +143,7 @@ void main() {
       (_) async => <ConversationOverview>[_overview()],
     );
     when(() => peerSvc.fetchById('p1')).thenAnswer((_) async => null);
-    final realtimeCtrl =
-        StreamController<MessageRealtimeEvent>.broadcast();
+    final realtimeCtrl = StreamController<MessageRealtimeEvent>.broadcast();
     final typingCtrl = StreamController<TypingEvent>.broadcast();
     addTearDown(() async {
       await realtimeCtrl.close();

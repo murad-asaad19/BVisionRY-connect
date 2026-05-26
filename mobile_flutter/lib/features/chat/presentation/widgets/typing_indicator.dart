@@ -53,7 +53,8 @@ class _TypingIndicatorState extends State<TypingIndicator>
         children: <Widget>[
           AnimatedBuilder(
             animation: _ctrl,
-            builder: (_, __) => _Dots(progress: _ctrl.value, color: colors.muted),
+            builder: (_, __) =>
+                _Dots(progress: _ctrl.value, color: colors.muted),
           ),
           const SizedBox(width: 8),
           Text(

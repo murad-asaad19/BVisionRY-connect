@@ -85,9 +85,7 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
     final ok = await recorder.hasPermission();
     if (!ok) {
       if (mounted) {
-        ref
-            .read(toastServiceProvider.notifier)
-            .showToast(
+        ref.read(toastServiceProvider.notifier).showToast(
               title: context.t('media.permissionMicTitle'),
               body: context.t('media.permissionMicBody'),
               intent: AppIntent.danger,
@@ -123,11 +121,12 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
   }
 
   Future<void> _cancel() async {
+    final navigator = Navigator.of(context);
     await _sub?.cancel();
     _sub = null;
     final recorder = ref.read(voiceRecorderProvider);
     await recorder.cancel();
-    if (mounted) Navigator.of(context).maybePop();
+    if (mounted) unawaited(navigator.maybePop());
   }
 
   Future<void> _send() async {
@@ -135,6 +134,8 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
     setState(() => _sending = true);
     final media = ref.read(mediaServiceProvider);
     final toast = ref.read(toastServiceProvider.notifier);
+    final failedTitle = context.t('chat.send.failed');
+    final navigator = Navigator.of(context);
     try {
       final file = File(_path!);
       final bytes = await file.readAsBytes();
@@ -159,12 +160,9 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
         mediaSizeBytes: bytes.lengthInBytes,
         durationMs: _durationMs,
       );
-      if (mounted) Navigator.of(context).maybePop();
+      if (mounted) unawaited(navigator.maybePop());
     } catch (_) {
-      toast.showToast(
-        title: context.t('chat.send.failed'),
-        intent: AppIntent.danger,
-      );
+      toast.showToast(title: failedTitle, intent: AppIntent.danger);
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -198,8 +196,8 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
             onTap: _sending
                 ? null
                 : recording
-                ? _stop
-                : (ready ? null : _start),
+                    ? _stop
+                    : (ready ? null : _start),
             child: ScaleTransition(
               scale: recording
                   ? Tween<double>(begin: 0.92, end: 1.08).animate(_pulse)

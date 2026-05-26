@@ -64,14 +64,12 @@ class _MessageInputBarState extends ConsumerState<MessageInputBar> {
     if (body.isEmpty || _sending) return;
     setState(() => _sending = true);
     final toast = ref.read(toastServiceProvider.notifier);
+    final failedTitle = context.t('chat.send.failed');
     try {
       await widget.onSendText(body);
       if (mounted) _controller.clear();
     } catch (_) {
-      toast.showToast(
-        title: context.t('chat.send.failed'),
-        intent: AppIntent.danger,
-      );
+      toast.showToast(title: failedTitle, intent: AppIntent.danger);
     } finally {
       if (mounted) setState(() => _sending = false);
     }

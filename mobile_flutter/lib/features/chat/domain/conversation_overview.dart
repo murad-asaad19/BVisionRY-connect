@@ -44,7 +44,7 @@ class ConversationOverview with _$ConversationOverview {
             : null,
         unreadCount: (row['unread_count'] as num?)?.toInt() ?? 0,
         isMuted: (row['is_muted'] as bool?) ?? false,
-        lastMessageDurationMs: (row['last_message_duration_ms'] as num?)
-            ?.toInt(),
+        lastMessageDurationMs:
+            (row['last_message_duration_ms'] as num?)?.toInt(),
       );
 }

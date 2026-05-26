@@ -63,7 +63,8 @@ class ChatsListScreen extends ConsumerWidget {
                   ),
                   itemBuilder: (_, i) => ConversationOverviewTile(
                     overview: rows[i],
-                    onTap: () => context.push(Routes.chat(rows[i].conversationId)),
+                    onTap: () =>
+                        context.push(Routes.chat(rows[i].conversationId)),
                     onLongPress: () => _showMuteSheet(context, ref, rows[i]),
                   ),
                 ),

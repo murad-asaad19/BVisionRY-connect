@@ -5,7 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../../helpers/pump.dart';
 
 void main() {
-  testWidgets('renders body and gates edited badge by isEdited', (tester) async {
+  testWidgets('renders body and gates edited badge by isEdited',
+      (tester) async {
     await pumpWithI18n(
       tester,
       await wrapWithTheme(

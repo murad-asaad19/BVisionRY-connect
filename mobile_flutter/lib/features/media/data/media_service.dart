@@ -46,9 +46,7 @@ class SupabaseMediaGateway implements MediaGateway {
     required Uint8List bytes,
     required String contentType,
   }) async {
-    await _client.storage
-        .from(bucket)
-        .uploadBinary(
+    await _client.storage.from(bucket).uploadBinary(
           path,
           bytes,
           fileOptions: FileOptions(contentType: contentType, upsert: false),
@@ -80,9 +78,12 @@ class SupabaseMediaGateway implements MediaGateway {
 ///   insert the row + enqueue downstream work (transcript pipeline,
 ///   push fan-out).
 class MediaService {
-  MediaService(this._gateway, {String Function()? idGenerator, ImagePicker? picker})
-    : _idGen = idGenerator ?? (() => const Uuid().v4()),
-      _picker = picker ?? _defaultPicker() {
+  MediaService(
+    this._gateway, {
+    String Function()? idGenerator,
+    ImagePicker? picker,
+  })  : _idGen = idGenerator ?? (() => const Uuid().v4()),
+        _picker = picker ?? _defaultPicker() {
     _signedUrls = SignedUrlCache(
       ttl: const Duration(seconds: MediaConstants.signedUrlTtlSeconds),
       safetyWindow: const Duration(seconds: 5),
@@ -107,7 +108,8 @@ class MediaService {
     required String conversationId,
     required String messageId,
     required String fileName,
-  }) => '$conversationId/$messageId/$fileName';
+  }) =>
+      '$conversationId/$messageId/$fileName';
 
   // --- Picking & resizing ---
   Future<XFile?> pickImage() async {
@@ -254,7 +256,8 @@ class MediaService {
 }
 
 /// Provider that exposes the configured [MediaService] singleton.
-final Provider<MediaService> mediaServiceProvider = Provider<MediaService>((ref) {
+final Provider<MediaService> mediaServiceProvider =
+    Provider<MediaService>((ref) {
   return MediaService(SupabaseMediaGateway(ref.watch(supabaseClientProvider)));
 });
 
@@ -262,7 +265,7 @@ final Provider<MediaService> mediaServiceProvider = Provider<MediaService>((ref)
 /// by `ImageBubble` / `VoiceBubble` to render content from the private
 /// bucket.
 final AutoDisposeFutureProviderFamily<String, String>
-signedChatMediaUrlProvider =
+    signedChatMediaUrlProvider =
     FutureProvider.autoDispose.family<String, String>((ref, path) {
-      return ref.watch(mediaServiceProvider).getSignedUrl(path);
-    });
+  return ref.watch(mediaServiceProvider).getSignedUrl(path);
+});

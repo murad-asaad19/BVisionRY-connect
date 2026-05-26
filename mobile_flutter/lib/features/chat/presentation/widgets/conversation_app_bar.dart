@@ -17,7 +17,8 @@ import '../../../../core/widgets/widgets.dart';
 /// All data comes through props so the widget stays pure — the parent
 /// screen wires it up against `peerProfileProvider`, `typingProvider`, and
 /// `conversationOverviewProvider`.
-class ConversationAppBar extends StatelessWidget implements PreferredSizeWidget {
+class ConversationAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   const ConversationAppBar({
     super.key,
     required this.peerName,
@@ -56,8 +57,8 @@ class ConversationAppBar extends StatelessWidget implements PreferredSizeWidget 
     final subtitle = isTyping
         ? context.t('chat.typing')
         : (peerHeadline?.isNotEmpty ?? false)
-        ? peerHeadline!
-        : '@$peerHandle';
+            ? peerHeadline!
+            : '@$peerHandle';
     return Container(
       padding: EdgeInsets.fromLTRB(4, topInset + 6, 4, 8),
       decoration: BoxDecoration(

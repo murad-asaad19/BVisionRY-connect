@@ -47,10 +47,8 @@ class SupabaseMessagesGateway implements MessagesGateway {
     DateTime? beforeCursor,
     required int limit,
   }) async {
-    var query = _client
-        .from('messages')
-        .select()
-        .eq('conversation_id', conversationId);
+    var query =
+        _client.from('messages').select().eq('conversation_id', conversationId);
     if (beforeCursor != null) {
       query = query.lt('created_at', beforeCursor.toUtc().toIso8601String());
     }
@@ -81,11 +79,8 @@ class SupabaseMessagesGateway implements MessagesGateway {
 
   @override
   Future<Map<String, dynamic>?> selectMessage(String id) async {
-    final row = await _client
-        .from('messages')
-        .select()
-        .eq('id', id)
-        .maybeSingle();
+    final row =
+        await _client.from('messages').select().eq('id', id).maybeSingle();
     if (row == null) return null;
     return Map<String, dynamic>.from(row as Map);
   }
@@ -161,7 +156,7 @@ class MessagesService {
 /// Provider that exposes the configured [MessagesService] singleton.
 final Provider<MessagesService> messagesServiceProvider =
     Provider<MessagesService>((ref) {
-      return MessagesService(
-        SupabaseMessagesGateway(ref.watch(supabaseClientProvider)),
-      );
-    });
+  return MessagesService(
+    SupabaseMessagesGateway(ref.watch(supabaseClientProvider)),
+  );
+});

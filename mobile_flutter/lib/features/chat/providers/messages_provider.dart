@@ -40,51 +40,52 @@ class MessageDelete extends MessageRealtimeEvent {
 ///
 /// Production: opens a Supabase Realtime channel. Tests override this
 /// provider with a controlled stream.
-final StreamProviderFamily<MessageRealtimeEvent, String> messagesRealtimeProvider =
+final StreamProviderFamily<MessageRealtimeEvent, String>
+    messagesRealtimeProvider =
     StreamProvider.family<MessageRealtimeEvent, String>((ref, convId) {
-      final client = ref.watch(supabaseClientProvider);
-      final controller = StreamController<MessageRealtimeEvent>();
-      final ch = client.channel('messages:conv:$convId');
-      final filter = PostgresChangeFilter(
-        type: PostgresChangeFilterType.eq,
-        column: 'conversation_id',
-        value: convId,
-      );
-      ch
-          .onPostgresChanges(
-            event: PostgresChangeEvent.insert,
-            schema: 'public',
-            table: 'messages',
-            filter: filter,
-            callback: (p) => controller.add(
-              MessageRealtimeEvent.insert(Message.fromRow(p.newRecord)),
-            ),
-          )
-          .onPostgresChanges(
-            event: PostgresChangeEvent.update,
-            schema: 'public',
-            table: 'messages',
-            filter: filter,
-            callback: (p) => controller.add(
-              MessageRealtimeEvent.update(Message.fromRow(p.newRecord)),
-            ),
-          )
-          .onPostgresChanges(
-            event: PostgresChangeEvent.delete,
-            schema: 'public',
-            table: 'messages',
-            filter: filter,
-            callback: (p) => controller.add(
-              MessageRealtimeEvent.delete(p.oldRecord['id'] as String),
-            ),
-          )
-          .subscribe();
-      ref.onDispose(() async {
-        await client.removeChannel(ch);
-        await controller.close();
-      });
-      return controller.stream;
-    });
+  final client = ref.watch(supabaseClientProvider);
+  final controller = StreamController<MessageRealtimeEvent>();
+  final ch = client.channel('messages:conv:$convId');
+  final filter = PostgresChangeFilter(
+    type: PostgresChangeFilterType.eq,
+    column: 'conversation_id',
+    value: convId,
+  );
+  ch
+      .onPostgresChanges(
+        event: PostgresChangeEvent.insert,
+        schema: 'public',
+        table: 'messages',
+        filter: filter,
+        callback: (p) => controller.add(
+          MessageRealtimeEvent.insert(Message.fromRow(p.newRecord)),
+        ),
+      )
+      .onPostgresChanges(
+        event: PostgresChangeEvent.update,
+        schema: 'public',
+        table: 'messages',
+        filter: filter,
+        callback: (p) => controller.add(
+          MessageRealtimeEvent.update(Message.fromRow(p.newRecord)),
+        ),
+      )
+      .onPostgresChanges(
+        event: PostgresChangeEvent.delete,
+        schema: 'public',
+        table: 'messages',
+        filter: filter,
+        callback: (p) => controller.add(
+          MessageRealtimeEvent.delete(p.oldRecord['id'] as String),
+        ),
+      )
+      .subscribe();
+  ref.onDispose(() async {
+    await client.removeChannel(ch);
+    await controller.close();
+  });
+  return controller.stream;
+});
 
 /// Paginated, Realtime-driven list of [Message]s for a single
 /// conversation.
@@ -127,7 +128,8 @@ class MessagesNotifier
         state = AsyncData<List<Message>>(<Message>[msg, ...current]);
       case MessageUpdate(:final msg):
         state = AsyncData<List<Message>>(<Message>[
-          for (final m in current) if (m.id == msg.id) msg else m,
+          for (final m in current)
+            if (m.id == msg.id) msg else m,
         ]);
       case MessageDelete(:final id):
         state = AsyncData<List<Message>>(
@@ -168,11 +170,7 @@ class MessagesNotifier
   void mergeUpdated(Message msg) => _apply(MessageRealtimeEvent.update(msg));
 }
 
-final AutoDisposeAsyncNotifierProviderFamily<
-  MessagesNotifier,
-  List<Message>,
-  String
->
-messagesProvider =
+final AutoDisposeAsyncNotifierProviderFamily<MessagesNotifier, List<Message>,
+        String> messagesProvider =
     AsyncNotifierProvider.autoDispose
         .family<MessagesNotifier, List<Message>, String>(MessagesNotifier.new);

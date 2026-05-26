@@ -94,10 +94,10 @@ class VoiceRecorder {
   /// Live recorder bound to the platform `AudioRecorder` and the OS
   /// temp directory.
   factory VoiceRecorder() => VoiceRecorder._(
-    _RealVoiceRecorderBackend(),
-    getTemporaryDirectory,
-    () => DateTime.now(),
-  );
+        _RealVoiceRecorderBackend(),
+        getTemporaryDirectory,
+        () => DateTime.now(),
+      );
 
   /// Test recorder with an injected backend + temp dir + clock. The
   /// fakes never touch the file system or the audio HAL.
@@ -121,8 +121,7 @@ class VoiceRecorder {
   Timer? _ticker;
   DateTime? _startedAt;
   String? _currentPath;
-  final StreamController<int> _durationCtrl =
-      StreamController<int>.broadcast();
+  final StreamController<int> _durationCtrl = StreamController<int>.broadcast();
 
   /// Elapsed-ms ticks emitted every 100 ms while a recording is active.
   Stream<int> get durationStream => _durationCtrl.stream;

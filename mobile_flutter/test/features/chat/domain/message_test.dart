@@ -68,13 +68,13 @@ void main() {
     const userId = 'user-1';
     final now = DateTime.utc(2026, 5, 25, 10);
     Message base() => Message(
-      id: 'm1',
-      conversationId: 'c1',
-      senderId: userId,
-      kind: MessageKind.text,
-      body: 'hi',
-      createdAt: now,
-    );
+          id: 'm1',
+          conversationId: 'c1',
+          senderId: userId,
+          kind: MessageKind.text,
+          body: 'hi',
+          createdAt: now,
+        );
 
     test('own text within 15 min', () {
       expect(

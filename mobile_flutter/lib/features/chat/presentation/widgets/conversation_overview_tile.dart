@@ -77,7 +77,8 @@ class ConversationOverviewTile extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: typo.bodyMd.copyWith(
-                      color: overview.unreadCount > 0 ? colors.body : colors.muted,
+                      color:
+                          overview.unreadCount > 0 ? colors.body : colors.muted,
                       fontWeight: overview.unreadCount > 0
                           ? FontWeight.w600
                           : FontWeight.w400,

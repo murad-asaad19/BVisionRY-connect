@@ -19,12 +19,14 @@ final StreamProvider<void> messageStreamProvider = StreamProvider<void>((ref) {
   final client = ref.watch(supabaseClientProvider);
   final controller = StreamController<void>();
   final ch = client.channel('messages:global');
-  ch.onPostgresChanges(
-    event: PostgresChangeEvent.all,
-    schema: 'public',
-    table: 'messages',
-    callback: (_) => controller.add(null),
-  ).subscribe();
+  ch
+      .onPostgresChanges(
+        event: PostgresChangeEvent.all,
+        schema: 'public',
+        table: 'messages',
+        callback: (_) => controller.add(null),
+      )
+      .subscribe();
   ref.onDispose(() async {
     await client.removeChannel(ch);
     await controller.close();
@@ -40,9 +42,9 @@ final StreamProvider<void> messageStreamProvider = StreamProvider<void>((ref) {
 /// drives the entire chats-tab data layer.
 final FutureProvider<List<ConversationOverview>> conversationOverviewProvider =
     FutureProvider<List<ConversationOverview>>((ref) async {
-      ref.listen(messageStreamProvider, (_, __) {
-        ref.invalidate(unreadCountsProvider);
-        ref.invalidateSelf();
-      });
-      return ref.watch(chatServiceProvider).listConversationOverview();
-    });
+  ref.listen(messageStreamProvider, (_, __) {
+    ref.invalidate(unreadCountsProvider);
+    ref.invalidateSelf();
+  });
+  return ref.watch(chatServiceProvider).listConversationOverview();
+});

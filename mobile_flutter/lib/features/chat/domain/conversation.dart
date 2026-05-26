@@ -22,14 +22,14 @@ class Conversation with _$Conversation {
   }) = _Conversation;
 
   factory Conversation.fromRow(Map<String, dynamic> row) => Conversation(
-    id: row['id'] as String,
-    participantAId: row['participant_a_id'] as String,
-    participantBId: row['participant_b_id'] as String,
-    createdAt: DateTime.parse(row['created_at'] as String).toUtc(),
-    lastMessageAt: row['last_message_at'] != null
-        ? DateTime.parse(row['last_message_at'] as String).toUtc()
-        : null,
-  );
+        id: row['id'] as String,
+        participantAId: row['participant_a_id'] as String,
+        participantBId: row['participant_b_id'] as String,
+        createdAt: DateTime.parse(row['created_at'] as String).toUtc(),
+        lastMessageAt: row['last_message_at'] != null
+            ? DateTime.parse(row['last_message_at'] as String).toUtc()
+            : null,
+      );
 
   /// Returns the other participant's id. Throws [ArgumentError] if
   /// [userId] isn't a participant — that's a programmer error worth

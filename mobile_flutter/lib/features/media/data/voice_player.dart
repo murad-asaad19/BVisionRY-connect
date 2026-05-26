@@ -48,7 +48,7 @@ class RealVoicePlayerBackend implements VoicePlayerBackend {
 /// driven manually via [advancePosition].
 class FakeVoicePlayerBackend implements VoicePlayerBackend {
   FakeVoicePlayerBackend({Duration? totalDuration})
-    : _duration = totalDuration ?? const Duration(seconds: 30);
+      : _duration = totalDuration ?? const Duration(seconds: 30);
 
   final Duration _duration;
   final StreamController<Duration> _positions =
@@ -119,10 +119,11 @@ class VoicePlayerState {
     bool? isPlaying,
     int? positionMs,
     int? totalMs,
-  }) => VoicePlayerState(
-    activeId: activeId ?? this.activeId,
-    isPlaying: isPlaying ?? this.isPlaying,
-    positionMs: positionMs ?? this.positionMs,
-    totalMs: totalMs ?? this.totalMs,
-  );
+  }) =>
+      VoicePlayerState(
+        activeId: activeId ?? this.activeId,
+        isPlaying: isPlaying ?? this.isPlaying,
+        positionMs: positionMs ?? this.positionMs,
+        totalMs: totalMs ?? this.totalMs,
+      );
 }

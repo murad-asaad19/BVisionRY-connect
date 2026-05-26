@@ -11,13 +11,13 @@ import 'package:mocktail/mocktail.dart';
 class _MockSvc extends Mock implements MessagesService {}
 
 Message _msg(String id, DateTime at, {String? body}) => Message(
-  id: id,
-  conversationId: 'c1',
-  senderId: 'u1',
-  kind: MessageKind.text,
-  createdAt: at,
-  body: body ?? 'hi',
-);
+      id: id,
+      conversationId: 'c1',
+      senderId: 'u1',
+      kind: MessageKind.text,
+      createdAt: at,
+      body: body ?? 'hi',
+    );
 
 void main() {
   setUpAll(() {
