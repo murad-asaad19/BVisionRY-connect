@@ -5,12 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'core/env.dart';
+import 'core/i18n/locale_notifier.dart';
 import 'core/push/firebase_init.dart';
 import 'core/routing/app_router.dart';
 import 'core/supabase/supabase_client.dart';
 import 'features/auth/providers/auth_lifecycle.dart';
 import 'features/auth/providers/auth_service_provider.dart';
 import 'features/auth/providers/session_provider.dart';
+import 'features/settings/settings_providers.dart';
 
 /// Top-level FCM background message handler.
 ///
@@ -67,6 +69,13 @@ Future<void> main() async {
   // Boot Supabase. After this completes the supabase singleton is usable
   // and `currentSession` is restored from secure storage.
   await container.read(supabaseInitProvider.future);
+
+  // Restore persisted locale (Phase 13) BEFORE we read the router so the
+  // first frame renders in the user's saved language. Falls back to 'en'
+  // when nothing has been persisted yet (fresh install).
+  final Locale savedLocale =
+      await container.read(languageServiceProvider).load();
+  container.read(localeProvider.notifier).state = savedLocale;
 
   // Install the lifecycle observer (toggles auth auto-refresh on
   // resume/pause). Reading the provider materialises the AuthLifecycle.

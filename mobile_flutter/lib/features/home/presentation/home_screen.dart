@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
@@ -28,6 +29,12 @@ class HomeScreen extends ConsumerWidget {
         child: TopBar(
           title: context.t('home.title'),
           actions: <TopBarAction>[
+            TopBarAction(
+              key: const Key('home.openSettings'),
+              icon: LucideIcons.settings,
+              label: context.t('settings.title'),
+              onPressed: () => context.push(Routes.settings),
+            ),
             TopBarAction(
               icon: Icons.search,
               label: context.t('discovery.openSearch'),
