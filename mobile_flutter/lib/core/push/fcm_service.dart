@@ -21,6 +21,24 @@ abstract class FirebaseMessagingFacade {
   String get platformValue;
 }
 
+/// Test seam over the slice of Supabase the FCM lifecycle touches:
+/// two RPCs (`register_device_token`, `unregister_device_token`).
+/// Tests inject a fake; the production adapter delegates to
+/// `SupabaseClient.rpc(...)`.
+abstract class FcmRpcGateway {
+  Future<void> rpc(String name, {required Map<String, dynamic> params});
+}
+
+class _SupabaseFcmRpcGateway implements FcmRpcGateway {
+  _SupabaseFcmRpcGateway(this._client);
+  final SupabaseClient _client;
+
+  @override
+  Future<void> rpc(String name, {required Map<String, dynamic> params}) async {
+    await _client.rpc<dynamic>(name, params: params);
+  }
+}
+
 class DefaultMessagingFacade implements FirebaseMessagingFacade {
   @override
   Future<bool> requestPermission() async {
@@ -34,7 +52,8 @@ class DefaultMessagingFacade implements FirebaseMessagingFacade {
   Future<String?> getToken() => FirebaseMessaging.instance.getToken();
 
   @override
-  Stream<String> get onTokenRefresh => FirebaseMessaging.instance.onTokenRefresh;
+  Stream<String> get onTokenRefresh =>
+      FirebaseMessaging.instance.onTokenRefresh;
 
   @override
   Stream<RemoteMessage> get onMessage => FirebaseMessaging.onMessage;
@@ -62,16 +81,28 @@ class DefaultMessagingFacade implements FirebaseMessagingFacade {
 /// [Env.firebaseEnabled] is false (Expo Go parity / dev rigs without a
 /// google-services.json).
 class FcmService {
+  /// Production constructor - wraps the supplied [SupabaseClient] with the
+  /// default RPC gateway.
   FcmService({
     FirebaseMessagingFacade? messaging,
     required SupabaseClient supabase,
     LastTokenStorage tokenStorage = const LastTokenStorage(),
   })  : _messaging = messaging ?? DefaultMessagingFacade(),
-        _supabase = supabase,
+        _rpc = _SupabaseFcmRpcGateway(supabase),
+        _tokenStorage = tokenStorage;
+
+  /// Test constructor - inject a fake [FcmRpcGateway] directly.
+  @visibleForTesting
+  FcmService.withGateway({
+    required FirebaseMessagingFacade messaging,
+    required FcmRpcGateway gateway,
+    LastTokenStorage tokenStorage = const LastTokenStorage(),
+  })  : _messaging = messaging,
+        _rpc = gateway,
         _tokenStorage = tokenStorage;
 
   final FirebaseMessagingFacade _messaging;
-  final SupabaseClient _supabase;
+  final FcmRpcGateway _rpc;
   final LastTokenStorage _tokenStorage;
 
   StreamSubscription<String>? _refreshSub;
@@ -107,7 +138,7 @@ class FcmService {
     final String? token = await _messaging.getToken();
     if (token == null || token.isEmpty) return false;
     try {
-      await _supabase.rpc<dynamic>(
+      await _rpc.rpc(
         'register_device_token',
         params: <String, dynamic>{
           'p_token': token,
@@ -151,7 +182,7 @@ class FcmService {
   /// blocks on a flaky push backend.
   Future<void> unregisterTokenValue(String token) async {
     try {
-      await _supabase.rpc<dynamic>(
+      await _rpc.rpc(
         'unregister_device_token',
         params: <String, dynamic>{'p_token': token},
       );
@@ -167,7 +198,7 @@ class FcmService {
     _refreshSub?.cancel();
     _refreshSub = _messaging.onTokenRefresh.listen((String token) async {
       try {
-        await _supabase.rpc<dynamic>(
+        await _rpc.rpc(
           'register_device_token',
           params: <String, dynamic>{
             'p_token': token,

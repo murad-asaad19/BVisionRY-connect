@@ -23,8 +23,7 @@ class SupabaseNotificationPreferencesGateway
 
   @override
   Future<List<Map<String, dynamic>>> listMyPreferences() async {
-    final dynamic raw =
-        await _client.from('notification_preferences').select();
+    final dynamic raw = await _client.from('notification_preferences').select();
     if (raw is! List) return const <Map<String, dynamic>>[];
     return raw
         .map((Object? r) => Map<String, dynamic>.from(r! as Map))
@@ -52,11 +51,8 @@ class NotificationPreferencesService {
   /// combo NOT in the result defaults to enabled=true (matches the
   /// `should_notify` default-open semantics).
   Future<List<NotificationPreference>> listMyPreferences() async {
-    final List<Map<String, dynamic>> rows =
-        await _gateway.listMyPreferences();
-    return rows
-        .map(NotificationPreference.fromJson)
-        .toList(growable: false);
+    final List<Map<String, dynamic>> rows = await _gateway.listMyPreferences();
+    return rows.map(NotificationPreference.fromJson).toList(growable: false);
   }
 
   /// UPSERTs a single `(user_id, kind, channel)` row.

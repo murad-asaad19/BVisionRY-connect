@@ -16,8 +16,11 @@ void main() {
   // integration test in test/app_push_integration_test.dart.
 
   test('lifecycle is a no-op when Env.firebaseEnabled is false', () async {
-    expect(Env.firebaseEnabled, isFalse,
-        reason: 'test runs without FIREBASE_ENABLED=true dart-define');
+    expect(
+      Env.firebaseEnabled,
+      isFalse,
+      reason: 'test runs without FIREBASE_ENABLED=true dart-define',
+    );
     final _MockFcm fcm = _MockFcm();
     final ProviderContainer container = ProviderContainer(
       overrides: <Override>[

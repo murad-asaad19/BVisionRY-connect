@@ -49,8 +49,7 @@ class ForegroundHandler {
 
   void _onMessage(RemoteMessage message) {
     final Map<String, dynamic> data = Map<String, dynamic>.from(message.data);
-    final String? convId =
-        (data['conversation_id'] as Object?)?.toString();
+    final String? convId = (data['conversation_id'] as Object?)?.toString();
     final String? activeConv = _container.read(activeConversationProvider);
     if (convId != null && convId.isNotEmpty && convId == activeConv) {
       // Suppressed - the user is already in this chat.

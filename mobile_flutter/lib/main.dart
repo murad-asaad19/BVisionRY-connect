@@ -117,8 +117,7 @@ Future<void> _dispatchUri(ProviderContainer container, Uri uri) async {
   // (connect-mobile://...). Only dispatch when the host / scheme matches
   // our configured domain to avoid acting on unrelated deep links.
   final bool matchesUniversal = uri.scheme == 'https' &&
-      (uri.host == Env.appLinksHost ||
-          uri.host == 'www.${Env.appLinksHost}');
+      (uri.host == Env.appLinksHost || uri.host == 'www.${Env.appLinksHost}');
   final bool matchesCustomScheme = uri.scheme == Env.appScheme;
   if (!matchesUniversal && !matchesCustomScheme) return;
 

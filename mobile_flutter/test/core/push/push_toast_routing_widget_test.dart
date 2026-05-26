@@ -49,12 +49,12 @@ void main() {
     );
 
     messaging.controller.add(
-      RemoteMessage(
-        data: const <String, String>{
+      const RemoteMessage(
+        data: <String, String>{
           'kind': 'intro_received',
           'entity_id': 'i-7',
         },
-        notification: const RemoteNotification(
+        notification: RemoteNotification(
           title: 'Ada Lovelace',
           body: 'wants to connect',
         ),
@@ -95,12 +95,12 @@ void main() {
     );
 
     messaging.controller.add(
-      RemoteMessage(
-        data: const <String, String>{
+      const RemoteMessage(
+        data: <String, String>{
           'kind': 'message_received',
           'conversation_id': 'conv-active',
         },
-        notification: const RemoteNotification(title: 't', body: 'b'),
+        notification: RemoteNotification(title: 't', body: 'b'),
       ),
     );
     await tester.pump();

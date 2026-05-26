@@ -35,8 +35,8 @@ void main() {
     );
     handler.subscribe();
     messaging.controller.add(
-      RemoteMessage(
-        data: const <String, String>{
+      const RemoteMessage(
+        data: <String, String>{
           'kind': 'intro_received',
           'entity_id': 'intro-warm',
         },
@@ -48,8 +48,8 @@ void main() {
   });
 
   test('cold-start (getInitialMessage) routes once', () async {
-    messaging.initial = RemoteMessage(
-      data: const <String, String>{
+    messaging.initial = const RemoteMessage(
+      data: <String, String>{
         'kind': 'opportunity_interest',
         'entity_id': 'opp-cold',
       },
@@ -63,8 +63,8 @@ void main() {
   });
 
   test('cold-start handler is idempotent (second call is a no-op)', () async {
-    messaging.initial = RemoteMessage(
-      data: const <String, String>{
+    messaging.initial = const RemoteMessage(
+      data: <String, String>{
         'kind': 'opportunity_interest',
         'entity_id': 'opp-cold',
       },
@@ -95,8 +95,8 @@ void main() {
     );
     handler.subscribe();
     messaging.controller.add(
-      RemoteMessage(
-        data: const <String, String>{
+      const RemoteMessage(
+        data: <String, String>{
           'kind': 'experimental',
           'url': '/profile/edit',
         },

@@ -5,9 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('NotificationKind exposes all 10 DB enum values', () {
     expect(
-      NotificationKind.values
-          .map((NotificationKind k) => k.dbValue)
-          .toSet(),
+      NotificationKind.values.map((NotificationKind k) => k.dbValue).toSet(),
       <String>{
         'intro_received',
         'intro_accepted',

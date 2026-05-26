@@ -5,7 +5,10 @@ void main() {
   group('resolvePushRoute - spec section 7.4', () {
     test('intro_received with entity_id -> /intros/<id>', () {
       final String route = resolvePushRoute(
-        const <String, dynamic>{'kind': 'intro_received', 'entity_id': 'intro-1'},
+        const <String, dynamic>{
+          'kind': 'intro_received',
+          'entity_id': 'intro-1',
+        },
         null,
       );
       expect(route, '/intros/intro-1');
@@ -21,7 +24,10 @@ void main() {
 
     test('intro_accepted with entity_id -> /intros/<id>', () {
       final String route = resolvePushRoute(
-        const <String, dynamic>{'kind': 'intro_accepted', 'entity_id': 'intro-2'},
+        const <String, dynamic>{
+          'kind': 'intro_accepted',
+          'entity_id': 'intro-2',
+        },
         null,
       );
       expect(route, '/intros/intro-2');
@@ -127,8 +133,7 @@ void main() {
     });
 
     test('no kind, no payload -> /home', () {
-      final String route =
-          resolvePushRoute(const <String, dynamic>{}, null);
+      final String route = resolvePushRoute(const <String, dynamic>{}, null);
       expect(route, '/home');
     });
 

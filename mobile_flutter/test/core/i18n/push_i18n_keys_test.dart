@@ -1,7 +1,6 @@
 import 'package:connect_mobile/core/i18n/locale_loader.dart';
 import 'package:connect_mobile/features/push/domain/notification_channel.dart';
 import 'package:connect_mobile/features/push/domain/notification_kind.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

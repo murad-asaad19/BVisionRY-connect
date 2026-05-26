@@ -8,8 +8,8 @@ import '../domain/notification_preference.dart';
 
 /// The configured [NotificationPreferencesService] singleton, swappable in
 /// tests via `notificationPrefsServiceProvider.overrideWithValue(fake)`.
-final Provider<NotificationPreferencesService> notificationPrefsServiceProvider =
-    Provider<NotificationPreferencesService>(
+final Provider<NotificationPreferencesService>
+    notificationPrefsServiceProvider = Provider<NotificationPreferencesService>(
   (Ref<NotificationPreferencesService> ref) {
     final client = ref.watch(supabaseClientProvider);
     return NotificationPreferencesService(
@@ -23,32 +23,28 @@ final Provider<NotificationPreferencesService> notificationPrefsServiceProvider 
 /// matrix UI watches this; absent (kind, channel) combos default to
 /// enabled=true via [NotificationPrefsMatrix.isEnabled].
 final FutureProvider<List<NotificationPreference>> notificationPrefsProvider =
-    FutureProvider<List<NotificationPreference>>(
-  (Ref<List<NotificationPreference>> ref) async {
-    final NotificationPreferencesService service =
-        ref.watch(notificationPrefsServiceProvider);
-    return service.listMyPreferences();
-  },
-);
+    FutureProvider<List<NotificationPreference>>((ref) async {
+  final NotificationPreferencesService service =
+      ref.watch(notificationPrefsServiceProvider);
+  return service.listMyPreferences();
+});
 
 /// Matrix view used by Phase 13's settings UI. Wraps the raw list with a
 /// cheap `isEnabled(kind, channel)` lookup that returns `true` for missing
 /// rows (mirrors `should_notify`'s default-open semantics).
 final Provider<AsyncValue<NotificationPrefsMatrix>>
     notificationPrefsMatrixProvider =
-    Provider<AsyncValue<NotificationPrefsMatrix>>(
-  (Ref<AsyncValue<NotificationPrefsMatrix>> ref) {
-    return ref.watch(notificationPrefsProvider).whenData(
-      (List<NotificationPreference> rows) {
-        final Map<String, bool> index = <String, bool>{
-          for (final NotificationPreference r in rows)
-            '${r.kind.dbValue}:${r.channel.dbValue}': r.enabled,
-        };
-        return NotificationPrefsMatrix(index);
-      },
-    );
-  },
-);
+    Provider<AsyncValue<NotificationPrefsMatrix>>((ref) {
+  return ref.watch(notificationPrefsProvider).whenData(
+    (List<NotificationPreference> rows) {
+      final Map<String, bool> index = <String, bool>{
+        for (final NotificationPreference r in rows)
+          '${r.kind.dbValue}:${r.channel.dbValue}': r.enabled,
+      };
+      return NotificationPrefsMatrix(index);
+    },
+  );
+});
 
 /// Read-only matrix exposing the (kind, channel) -> enabled lookup with
 /// default-open semantics. Cheap to construct (~10x10 entries max).

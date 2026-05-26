@@ -21,8 +21,7 @@ void main() {
     expect(await banner.shouldShow(), isTrue);
   });
 
-  test('markShown is idempotent (multiple calls keep it suppressed)',
-      () async {
+  test('markShown is idempotent (multiple calls keep it suppressed)', () async {
     const PushPermissionBanner banner = PushPermissionBanner();
     await banner.markShown();
     await banner.markShown();

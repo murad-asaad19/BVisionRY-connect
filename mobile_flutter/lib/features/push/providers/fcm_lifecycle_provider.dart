@@ -19,9 +19,8 @@ final Provider<FcmService> fcmServiceProvider = Provider<FcmService>((
 ///
 /// Returns void; consumers `await ref.read(fcmLifecycleProvider.future)`
 /// only to surface the work in the current frame (e.g. from `_PushBootstrap`).
-final FutureProvider<void> fcmLifecycleProvider = FutureProvider<void>((
-  Ref<void> ref,
-) async {
+final FutureProvider<void> fcmLifecycleProvider =
+    FutureProvider<void>((ref) async {
   if (!Env.firebaseEnabled) return;
 
   final session = ref.watch(currentSessionProvider);

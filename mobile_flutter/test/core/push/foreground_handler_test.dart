@@ -34,7 +34,8 @@ void main() {
   ProviderContainer makeContainer({String? activeConv}) {
     final ProviderContainer container = ProviderContainer(
       overrides: <Override>[
-        activeConversationProvider.overrideWith((Ref<String?> ref) => activeConv),
+        activeConversationProvider
+            .overrideWith((Ref<String?> ref) => activeConv),
       ],
     );
     addTearDown(container.dispose);
@@ -52,12 +53,12 @@ void main() {
     handler.subscribe();
 
     messaging.controller.add(
-      RemoteMessage(
-        data: const <String, String>{
+      const RemoteMessage(
+        data: <String, String>{
           'kind': 'intro_received',
           'entity_id': 'intro-1',
         },
-        notification: const RemoteNotification(
+        notification: RemoteNotification(
           title: 'New intro',
           body: 'From Ada',
         ),
@@ -84,12 +85,12 @@ void main() {
     );
     handler.subscribe();
     messaging.controller.add(
-      RemoteMessage(
-        data: const <String, String>{
+      const RemoteMessage(
+        data: <String, String>{
           'kind': 'message_received',
           'conversation_id': 'conv-1',
         },
-        notification: const RemoteNotification(title: 't', body: 'b'),
+        notification: RemoteNotification(title: 't', body: 'b'),
       ),
     );
     await Future<void>.delayed(const Duration(milliseconds: 1));
@@ -99,8 +100,7 @@ void main() {
   });
 
   test('different active conversation -> toast still shown', () async {
-    final ProviderContainer container =
-        makeContainer(activeConv: 'conv-OTHER');
+    final ProviderContainer container = makeContainer(activeConv: 'conv-OTHER');
     final ForegroundHandler handler = ForegroundHandler(
       messaging: messaging,
       container: container,
@@ -109,12 +109,12 @@ void main() {
     );
     handler.subscribe();
     messaging.controller.add(
-      RemoteMessage(
-        data: const <String, String>{
+      const RemoteMessage(
+        data: <String, String>{
           'kind': 'message_received',
           'conversation_id': 'conv-1',
         },
-        notification: const RemoteNotification(title: 't', body: 'b'),
+        notification: RemoteNotification(title: 't', body: 'b'),
       ),
     );
     await Future<void>.delayed(const Duration(milliseconds: 1));
@@ -135,8 +135,8 @@ void main() {
     );
     handler.subscribe();
     messaging.controller.add(
-      RemoteMessage(
-        data: const <String, String>{
+      const RemoteMessage(
+        data: <String, String>{
           'kind': 'message_received',
           'conversation_id': 'conv-2',
           'title': 'From payload',
@@ -160,7 +160,7 @@ void main() {
           toasts.add((title: title, body: body, route: route)),
     );
     handler.subscribe();
-    messaging.controller.add(RemoteMessage(data: const <String, String>{}));
+    messaging.controller.add(const RemoteMessage(data: <String, String>{}));
     await Future<void>.delayed(const Duration(milliseconds: 1));
     expect(toasts, isEmpty);
 
@@ -177,12 +177,12 @@ void main() {
     );
     handler.subscribe();
     messaging.controller.add(
-      RemoteMessage(
-        data: const <String, String>{
+      const RemoteMessage(
+        data: <String, String>{
           'kind': 'experimental',
           'url': '/profile/edit',
         },
-        notification: const RemoteNotification(title: 't', body: 'b'),
+        notification: RemoteNotification(title: 't', body: 'b'),
       ),
     );
     await Future<void>.delayed(const Duration(milliseconds: 1));

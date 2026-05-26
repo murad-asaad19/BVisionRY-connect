@@ -1,15 +1,15 @@
 import '../routing/routes.dart';
 
 /// Translates an FCM `data` map (and optional legacy `payload`) into a
-/// go_router path. Spec §7.4 verbatim:
+/// go_router path. Spec section 7.4 verbatim:
 ///
-/// | kind                                            | route                       | fallback           |
-/// |-------------------------------------------------|-----------------------------|--------------------|
-/// | intro_received, intro_accepted                  | /intros/<entity_id>         | /inbox             |
-/// | message_received, image_received, voice_received| /chats/<conversation_id>    | /chats             |
-/// | meeting_proposal, meeting_confirmed             | /chats/<conversation_id>    | /inbox             |
-/// | opportunity_interest                            | /opportunities/<entity_id>  | /opportunities     |
-/// | (unknown)                                       | payload.url                 | /home              |
+/// | kind                                            | route                          | fallback           |
+/// |-------------------------------------------------|--------------------------------|--------------------|
+/// | intro_received, intro_accepted                  | /intros/{entity_id}            | /inbox             |
+/// | message_received, image_received, voice_received| /chats/{conversation_id}       | /chats             |
+/// | meeting_proposal, meeting_confirmed             | /chats/{conversation_id}       | /inbox             |
+/// | opportunity_interest                            | /opportunities/{entity_id}     | /opportunities     |
+/// | (unknown)                                       | payload.url                    | /home              |
 ///
 /// FCM stringifies non-string `data` values on the way to the device, but on
 /// the way IN (e.g. from a unit test that hand-builds the map) we may see a

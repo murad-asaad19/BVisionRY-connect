@@ -76,8 +76,7 @@ class PushToast extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       title,
-                      style: typography.displaySm
-                          .copyWith(color: colors.white),
+                      style: typography.displaySm.copyWith(color: colors.white),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
