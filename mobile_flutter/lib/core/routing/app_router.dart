@@ -30,6 +30,7 @@ import '../../features/opportunities/presentation/my_opportunities_screen.dart';
 import '../../features/opportunities/presentation/new_opportunity_screen.dart';
 import '../../features/opportunities/presentation/opportunities_feed_screen.dart';
 import '../../features/opportunities/presentation/opportunity_detail_screen.dart';
+import '../../features/privacy/presentation/blocked_users_screen.dart';
 import '../../features/profile/presentation/profile_edit_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/profile/presentation/public_profile_screen.dart';
@@ -136,6 +137,10 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
       GoRoute(
         path: Routes.settingsVerification,
         builder: (_, __) => const VerificationScreen(),
+      ),
+      GoRoute(
+        path: Routes.settingsBlocked,
+        builder: (_, __) => const BlockedUsersScreen(),
       ),
       GoRoute(
         path: Routes.settingsOfficeHours,
