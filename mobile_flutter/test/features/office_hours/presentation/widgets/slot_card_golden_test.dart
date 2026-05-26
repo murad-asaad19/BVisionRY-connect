@@ -1,11 +1,9 @@
-import 'package:connect_mobile/core/i18n/locale_loader.dart';
 import 'package:connect_mobile/core/i18n/locale_notifier.dart';
 import 'package:connect_mobile/core/theme/app_theme.dart';
 import 'package:connect_mobile/features/office_hours/domain/office_hours_slot.dart';
 import 'package:connect_mobile/features/office_hours/presentation/widgets/slot_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 
 import '../../../../helpers/pump.dart';
