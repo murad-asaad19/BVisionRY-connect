@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Phase 12: tint applied to the status-bar notification icon by the
+         FCM SDK. Matches AppColors.navy (#0F3460). -->
+    <color name="notification_navy">#0F3460</color>
+</resources>

@@ -1,3 +1,5 @@
+import java.io.File
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -20,11 +22,10 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.bvisionry.connect_mobile"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // Phase 12: firebase_messaging requires minSdk 21; we already target
+        // Flutter's default (currently 21+), but be explicit.
+        minSdk = maxOf(flutter.minSdkVersion, 21)
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -42,3 +43,12 @@ android {
 flutter {
     source = "../.."
 }
+
+// Phase 12: only apply google-services when a real google-services.json is
+// present (Phase 15 EAS pipeline drops the real file in; the .example
+// placeholder we ship is ignored). This keeps `flutter run` working on
+// developer machines without a Firebase project.
+if (File("$projectDir/google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+

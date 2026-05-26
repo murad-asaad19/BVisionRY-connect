@@ -12,3 +12,7 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Phase 12: Real Firebase config is provisioned via EAS secret; the
+# .example placeholder is the only file committed.
+app/google-services.json

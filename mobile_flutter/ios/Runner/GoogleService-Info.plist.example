@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  GoogleService-Info.plist.example - placeholder.
+
+  The real GoogleService-Info.plist is provisioned via EAS secret in
+  Phase 15's release pipeline and is NOT committed to the repo (gitignored).
+
+  To run a debug build with FCM enabled:
+    1. Download GoogleService-Info.plist from Firebase Console
+       -> Project Settings -> iOS app -> Download GoogleService-Info.plist
+    2. Drop it into mobile_flutter/ios/Runner/ (next to this file)
+    3. Add it to the Runner target in Xcode (drag into project navigator,
+       check "Add to targets: Runner")
+    4. Run: flutter run --dart-define=FIREBASE_ENABLED=true
+-->
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>PLACEHOLDER.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.PLACEHOLDER</string>
+	<key>API_KEY</key>
+	<string>PLACEHOLDER</string>
+	<key>GCM_SENDER_ID</key>
+	<string>PLACEHOLDER</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.bvisionry.connect_mobile</string>
+	<key>PROJECT_ID</key>
+	<string>PLACEHOLDER</string>
+	<key>STORAGE_BUCKET</key>
+	<string>PLACEHOLDER.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:PLACEHOLDER:ios:PLACEHOLDER</string>
+</dict>
+</plist>

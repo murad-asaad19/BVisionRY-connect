@@ -21,6 +21,10 @@ plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
     id("com.android.application") version "8.11.1" apply false
     id("org.jetbrains.kotlin.android") version "2.2.20" apply false
+    // Phase 12: google-services plugin loads FCM config from
+    // mobile_flutter/android/app/google-services.json (provisioned via EAS
+    // secret in Phase 15; the .example placeholder is in-tree).
+    id("com.google.gms.google-services") version "4.4.2" apply false
 }
 
 include(":app")
