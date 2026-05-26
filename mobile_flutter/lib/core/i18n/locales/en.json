@@ -837,6 +837,7 @@
       "snoozeA11y": "Snooze this reminder for {{days}} days"
     },
     "settingsA11y": "Open settings",
+    "openOwn": "Open my profile",
     "editAction": "Edit",
     "privateModeTitle": "Private mode is on",
     "privateModeBody": "You're hidden from feed, Daily matches, and search.",

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
+import '../../../core/widgets/avatar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/top_bar.dart';
+import '../../auth/providers/profile_provider.dart';
 import '../../discovery/presentation/widgets/daily_matches_section.dart';
 import '../../discovery/providers/daily_matches_provider.dart';
 import '../../intros/presentation/warm_intro_suggestions_strip.dart';
@@ -14,23 +17,42 @@ import 'widgets/thin_pool_banner.dart';
 import 'widgets/todays_matches_header.dart';
 
 /// Home tab. Renders today's daily matches, optionally a thin-pool banner
-/// (when fewer than 3 picks were returned), and a search affordance in the
-/// top bar. Replaces the Phase 1 stub.
+/// (when fewer than 3 picks were returned), and surfaces the viewer's
+/// avatar (taps → /profile) alongside the search affordance in the top
+/// bar.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncMatches = ref.watch(dailyMatchesProvider);
+    final viewer = ref.watch(profileProvider).asData?.value;
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(56),
         child: TopBar(
           title: context.t('home.title'),
+          leading: viewer == null
+              ? null
+              : Semantics(
+                  label: context.t('profile.openOwn'),
+                  button: true,
+                  child: InkResponse(
+                    key: const Key('home.openProfile'),
+                    onTap: () => context.push(Routes.profile),
+                    radius: 22,
+                    child: Padding(
+                      padding: const EdgeInsets.all(2),
+                      child: Avatar(
+                        name: viewer.name ?? viewer.handle ?? '',
+                        photoUrl: viewer.photoUrl,
+                        size: 32,
+                        tone: AvatarTone.muted,
+                      ),
+                    ),
+                  ),
+                ),
           actions: <TopBarAction>[
-            // Settings has moved to the Profile tab (Settings row) — keeps
-            // the home top-bar focused on discovery (search + future
-            // filter). Tracked in audit doc, improvement #21.
             TopBarAction(
               icon: Icons.search,
               label: context.t('discovery.openSearch'),

@@ -837,6 +837,7 @@
       "snoozeA11y": "Posponer este recordatorio {{days}} días"
     },
     "settingsA11y": "Abrir ajustes",
+    "openOwn": "Abrir mi perfil",
     "editAction": "Editar",
     "privateModeTitle": "Modo privado activado",
     "privateModeBody": "Estás oculto del feed, las coincidencias diarias y la búsqueda.",
