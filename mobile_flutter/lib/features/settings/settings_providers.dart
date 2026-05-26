@@ -10,10 +10,11 @@ export '../push/providers/notification_prefs_provider.dart'
         notificationPrefsProvider,
         notificationPrefsMatrixProvider,
         NotificationPrefsMatrix;
-export '../telemetry/stub_telemetry_store.dart'
-    show TelemetryState, TelemetryStore, telemetryStoreProvider;
 export 'data/language_service.dart';
 export 'data/settings_service.dart' show SettingsService, settingsServiceProvider;
+export 'data/telemetry_store.dart' show TelemetryPrefs, TelemetryStore;
+export 'providers/telemetry_provider.dart'
+    show telemetryProvider, telemetryReadyProvider, telemetryStoreProvider;
 
 /// The configured [LanguageService] singleton. Override in tests via
 /// `languageServiceProvider.overrideWithValue(...)`.

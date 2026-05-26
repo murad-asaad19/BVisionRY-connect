@@ -101,6 +101,7 @@
     "termsOfService": "Terms of Service",
     "version": "Version",
     "telemetry": "Telemetry",
+    "telemetryNote": "Changes take effect the next time you open the app.",
     "analytics": "Analytics",
     "crashReports": "Crash reports",
     "about": "About",
@@ -1094,6 +1095,12 @@
     },
     "badge": {
       "label": "Office hours"
+    }
+  },
+  "errors": {
+    "boundary": {
+      "title": "Something went wrong.",
+      "subtitle": "We've logged the error. Please restart the app."
     }
   }
 }

@@ -14,8 +14,9 @@ import '../../../core/widgets/top_bar.dart';
 import '../../../core/widgets/variants.dart';
 import '../../auth/providers/auth_service_provider.dart';
 import '../../profile/data/profile_service.dart';
-import '../../telemetry/stub_telemetry_store.dart';
 import '../data/settings_service.dart';
+import '../data/telemetry_store.dart';
+import '../providers/telemetry_provider.dart';
 import 'widgets/change_password_sheet.dart';
 import 'widgets/delete_account_sheet.dart';
 import 'widgets/export_data_tile.dart';
@@ -25,7 +26,8 @@ import 'widgets/export_data_tile.dart';
 /// Sections:
 ///   * Email (read-only — sourced from `auth.currentUser?.email`).
 ///   * Change password (opens [ChangePasswordSheet]).
-///   * Telemetry (analytics + crash-reports switches → [TelemetryStore]).
+///   * Telemetry (analytics + crash-reports switches bound to
+///     `telemetryProvider`).
 ///   * Data export ([ExportDataTile]).
 ///   * Delete account (danger row → [DeleteAccountSheet] → `deleteMyAccount`
 ///     edge function → sign-out + storage reset). Router auto-redirects to
@@ -38,9 +40,8 @@ class AccountScreen extends ConsumerWidget {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
     final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     final String? email = Supabase.instance.client.auth.currentUser?.email;
-    final TelemetryState telemetry = ref.watch(telemetryStoreProvider);
-    final TelemetryStore telemetryStore =
-        ref.read(telemetryStoreProvider.notifier);
+    final AsyncValue<TelemetryPrefs> telemetry =
+        ref.watch(telemetryProvider);
 
     return Scaffold(
       appBar: PreferredSize(
@@ -95,27 +96,80 @@ class AccountScreen extends ConsumerWidget {
               ),
             ),
           ),
-          // Telemetry section.
+          // Telemetry section. Bound to the real `telemetryProvider`
+          // (`AsyncNotifier<TelemetryPrefs>`). While the underlying
+          // SharedPreferences rehydration is in flight we render disabled
+          // switches with a small spinner trailing widget.
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: SectionCard(
               title: context.t('settings.telemetry'),
               padding: EdgeInsets.zero,
-              child: Column(
-                children: <Widget>[
-                  SwitchListTile(
-                    key: const Key('account.telemetry.analytics'),
-                    title: Text(context.t('settings.analytics')),
-                    value: telemetry.analyticsEnabled,
-                    onChanged: telemetryStore.setAnalyticsEnabled,
-                  ),
-                  SwitchListTile(
-                    key: const Key('account.telemetry.crashReports'),
-                    title: Text(context.t('settings.crashReports')),
-                    value: telemetry.crashReportsEnabled,
-                    onChanged: telemetryStore.setCrashReportsEnabled,
-                  ),
-                ],
+              child: telemetry.when(
+                loading: () => Column(
+                  children: <Widget>[
+                    SwitchListTile(
+                      key: const Key('account.telemetry.analytics'),
+                      title: Text(context.t('settings.analytics')),
+                      value: false,
+                      onChanged: null,
+                      secondary: const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                    SwitchListTile(
+                      key: const Key('account.telemetry.crashReports'),
+                      title: Text(context.t('settings.crashReports')),
+                      value: false,
+                      onChanged: null,
+                    ),
+                  ],
+                ),
+                error: (_, __) => Column(
+                  children: <Widget>[
+                    SwitchListTile(
+                      key: const Key('account.telemetry.analytics'),
+                      title: Text(context.t('settings.analytics')),
+                      value: false,
+                      onChanged: null,
+                    ),
+                    SwitchListTile(
+                      key: const Key('account.telemetry.crashReports'),
+                      title: Text(context.t('settings.crashReports')),
+                      value: false,
+                      onChanged: null,
+                    ),
+                  ],
+                ),
+                data: (TelemetryPrefs prefs) => Column(
+                  children: <Widget>[
+                    SwitchListTile(
+                      key: const Key('account.telemetry.analytics'),
+                      title: Text(context.t('settings.analytics')),
+                      value: prefs.analyticsEnabled,
+                      onChanged: (bool v) => ref
+                          .read(telemetryProvider.notifier)
+                          .setAnalyticsEnabled(v),
+                    ),
+                    SwitchListTile(
+                      key: const Key('account.telemetry.crashReports'),
+                      title: Text(context.t('settings.crashReports')),
+                      value: prefs.crashReportsEnabled,
+                      onChanged: (bool v) => ref
+                          .read(telemetryProvider.notifier)
+                          .setCrashReportsEnabled(v),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                      child: Text(
+                        context.t('settings.telemetryNote'),
+                        style: typo.bodySm.copyWith(color: colors.muted),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

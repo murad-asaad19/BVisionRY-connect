@@ -101,6 +101,7 @@
     "termsOfService": "Términos de servicio",
     "version": "Versión",
     "telemetry": "Telemetría",
+    "telemetryNote": "Los cambios surten efecto la próxima vez que abras la aplicación.",
     "analytics": "Analítica",
     "crashReports": "Informes de errores",
     "about": "Acerca de",
@@ -1094,6 +1095,12 @@
     },
     "badge": {
       "label": "Horario disponible"
+    }
+  },
+  "errors": {
+    "boundary": {
+      "title": "Algo salió mal.",
+      "subtitle": "Hemos registrado el error. Reinicia la aplicación."
     }
   }
 }
