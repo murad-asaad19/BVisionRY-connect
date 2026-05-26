@@ -1,49 +1,44 @@
 import 'package:flutter/foundation.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
-/// Telemetry surface for the app — wired in Phase 14.
+import 'sentry.dart' as sentry;
+
+/// Lightweight telemetry facade used by Phase 12 push handlers and any
+/// other non-feature code that wants to record a breadcrumb or surface an
+/// error without depending directly on the Sentry SDK.
 ///
-/// Provides no-op stubs so Phase 1+2+3 code can call into the API without
-/// pulling in Sentry / Firebase wiring. Each method becomes the real
-/// integration point in `flutter-rebuild-14-telemetry.md`:
+/// All methods are safe to call regardless of consent / init state:
 ///
-/// - [initSentry]: install `SentryFlutter.init` (skipped in debug builds).
-/// - [initFirebase]: install Firebase + Crashlytics + Analytics; gated by
-///   `Env.firebaseEnabled` so dev rigs without a `google-services.json`
-///   keep booting.
-/// - [recordError]: forward to `Sentry.captureException` (and optionally
-///   `FirebaseCrashlytics.recordError`).
+/// - When Sentry is not initialised (user opted out OR `SENTRY_DSN` empty),
+///   every method is a no-op (with a debug-mode `debugPrint` so devs can
+///   still trace the call locally).
+/// - When Sentry is initialised, [recordBreadcrumb] forwards to
+///   `Sentry.addBreadcrumb` and [recordError] forwards to
+///   [sentry.captureException].
 abstract final class Telemetry {
-  /// Initialise Sentry. No-op in debug builds and in Phase 1 — wired in
-  /// Phase 14.
-  static Future<void> initSentry() async {
-    if (kDebugMode) return;
-    // Implemented in Phase 14.
-  }
-
-  /// Initialise Firebase. No-op until Phase 14, where the call is gated
-  /// by `Env.firebaseEnabled`.
-  static Future<void> initFirebase() async {
-    // Implemented in Phase 14 (gated by Env.firebaseEnabled).
-  }
-
-  /// Surface an error to the telemetry pipeline. Prints to stderr in
-  /// debug builds so the developer can see it; the production
-  /// implementation routes to Sentry + Crashlytics.
-  static void recordError(Object error, StackTrace stack) {
-    if (kDebugMode) {
-      debugPrint('telemetry.recordError: $error\n$stack');
-    }
-  }
-
-  /// Record a breadcrumb for Sentry / Crashlytics. No-op until Phase 14;
-  /// Phase 12 calls this from push foreground + tap handlers so Phase 14
-  /// has nothing extra to wire.
+  /// Records a Sentry breadcrumb. No-op when Sentry is not initialised.
   static void recordBreadcrumb({
     required String category,
     required String message,
   }) {
-    if (kDebugMode) {
-      debugPrint('telemetry.breadcrumb [$category] $message');
+    if (!sentry.isSentryInitialized) {
+      if (kDebugMode) {
+        debugPrint('telemetry.breadcrumb [$category] $message');
+      }
+      return;
     }
+    Sentry.addBreadcrumb(
+      Breadcrumb(category: category, message: message),
+    );
+  }
+
+  /// Surface an error to the telemetry pipeline. Routes to
+  /// [sentry.captureException], which itself is a no-op when Sentry is
+  /// not initialised.
+  static void recordError(Object error, StackTrace stack) {
+    if (kDebugMode && !sentry.isSentryInitialized) {
+      debugPrint('telemetry.recordError: $error\n$stack');
+    }
+    sentry.captureException(error, stack);
   }
 }
