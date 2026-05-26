@@ -10,7 +10,7 @@ import '../../features/auth/providers/profile_provider.dart';
 import '../../features/auth/providers/route_guard_provider.dart';
 import '../../features/auth/providers/session_provider.dart';
 import '../../features/chat/presentation/chats_list_screen.dart';
-import '../../features/chat/presentation/conversation_screen_stub.dart';
+import '../../features/chat/presentation/conversation_screen.dart';
 import '../../features/connections/presentation/connections_screen.dart';
 import '../../features/connections/presentation/network_screen_stub.dart';
 import '../../features/discovery/presentation/search_screen.dart';
@@ -138,6 +138,16 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
         path: Routes.connections,
         builder: (_, __) => const ConnectionsScreen(),
       ),
+      // Conversation thread lives OUTSIDE the StatefulShellRoute so it
+      // takes over the full screen (no bottom-tab chrome) and is
+      // reachable via push from the chats tab, connections list, and
+      // intro acceptance flow.
+      GoRoute(
+        path: '/chats/:id',
+        builder: (_, GoRouterState state) => ConversationScreen(
+          conversationId: state.pathParameters['id']!,
+        ),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (_, __, StatefulNavigationShell shell) =>
             TabShell(navigationShell: shell),
@@ -179,15 +189,6 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
               GoRoute(
                 path: Routes.chats,
                 builder: (_, __) => const ChatsListScreen(),
-                routes: <RouteBase>[
-                  GoRoute(
-                    path: ':id',
-                    builder: (_, GoRouterState state) =>
-                        ConversationScreenStub(
-                          conversationId: state.pathParameters['id']!,
-                        ),
-                  ),
-                ],
               ),
             ],
           ),
