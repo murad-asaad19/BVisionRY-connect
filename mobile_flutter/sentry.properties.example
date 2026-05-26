@@ -1,0 +1,10 @@
+# Phase 15 — Sentry source-map / debug-symbol upload config template.
+#
+# Copy this to `sentry.properties` (gitignored) at the `mobile_flutter/`
+# root, or export the equivalent environment variables in your CI/CD
+# pipeline. The `sentry_dart_plugin` build hook reads these to upload
+# dSYMs (iOS), ProGuard mappings (Android), and Dart source-maps after
+# `flutter build`.
+defaults.org=bvisionry
+defaults.project=connect-flutter
+auth.token=REPLACE_WITH_SENTRY_AUTH_TOKEN

@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>aps-environment</key>
-	<string>development</string>
+	<string>production</string>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>applinks:DOMAIN_PLACEHOLDER</string>
-		<string>applinks:www.DOMAIN_PLACEHOLDER</string>
+		<string>applinks:connect.bvisionry.com</string>
+		<string>applinks:www.connect.bvisionry.com</string>
 	</array>
 </dict>
 </plist>

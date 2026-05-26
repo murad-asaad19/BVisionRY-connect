@@ -1,0 +1,9 @@
+{
+  "SUPABASE_URL": "http://127.0.0.1:54321",
+  "SUPABASE_ANON_KEY": "REPLACE_WITH_LOCAL_ANON_KEY",
+  "SENTRY_DSN": "",
+  "SENTRY_ENV": "ci",
+  "FIREBASE_ENABLED": "false",
+  "APP_LINKS_HOST": "connect.bvisionry.com",
+  "APP_SCHEME": "connect-mobile"
+}

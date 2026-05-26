@@ -1,4 +1,6 @@
 import java.io.File
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -7,8 +9,17 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Phase 15 — pick up release-signing creds from key.properties (gitignored).
+// When the file is missing, release builds fall back to the debug signing
+// config (developer machines that don't have the keystore checked out).
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
+}
+
 android {
-    namespace = "com.bvisionry.connect_mobile"
+    namespace = "com.bvisionry.connect"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,7 +33,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.bvisionry.connect_mobile"
+        applicationId = "com.bvisionry.connect"
         // Phase 12: firebase_messaging requires minSdk 21; we already target
         // Flutter's default (currently 21+), but be explicit.
         minSdk = maxOf(flutter.minSdkVersion, 21)
@@ -31,11 +42,25 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String? ?: ""
+            keyPassword = keystoreProperties["keyPassword"] as String? ?: ""
+            storeFile = (keystoreProperties["storeFile"] as String?)?.let { file(it) }
+            storePassword = keystoreProperties["storePassword"] as String? ?: ""
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Use the release keystore when key.properties is present;
+            // otherwise debug-sign so developer `flutter run --release`
+            // continues to work without a checked-in keystore.
+            signingConfig = if (keystorePropertiesFile.exists()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }
@@ -51,4 +76,3 @@ flutter {
 if (File("$projectDir/google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
 }
-

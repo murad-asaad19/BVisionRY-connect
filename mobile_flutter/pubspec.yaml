@@ -85,15 +85,42 @@ flutter:
     - lib/core/i18n/locales/en.json
     - lib/core/i18n/locales/es.json
 
-# Phase 14 (Task 17) — sentry_dart_plugin config placeholder. The build-
-# time upload of dSYMs (iOS) + ProGuard mappings / Dart source maps
-# (Android) is wired here. `project`, `org`, and `auth_token` resolve from
-# environment variables (SENTRY_ORG / SENTRY_PROJECT / SENTRY_AUTH_TOKEN)
-# OR from `sentry.properties` — both are filled in by Phase 15 release
-# config. Until then, the plugin is present but inert.
+# Phase 15 — launcher icons (run `dart run flutter_launcher_icons`).
+# Source assets MUST be provided in `assets/icon/` (1024x1024 PNG navy +
+# gold logo) before this is invoked — they are intentionally NOT in this
+# repo. See README for design spec.
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  adaptive_icon_background: "#0F3460"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    background_color: "#0F3460"
+    theme_color: "#FFC107"
+
+# Phase 15 — native splash (run `dart run flutter_native_splash:create`).
+# Same prerequisite re: missing assets as launcher_icons.
+flutter_native_splash:
+  color: "#0F3460"
+  image: "assets/splash/splash_logo.png"
+  android_12:
+    image: "assets/splash/splash_logo.png"
+    icon_background_color: "#0F3460"
+  ios_content_mode: center
+  fullscreen: true
+
+# Phase 15 — sentry_dart_plugin config. The build-time upload of dSYMs
+# (iOS) + ProGuard mappings / Dart source maps (Android) is wired here.
+# `project`, `org`, and `auth_token` resolve from environment variables
+# (SENTRY_ORG / SENTRY_PROJECT / SENTRY_AUTH_TOKEN) OR from
+# `sentry.properties` (gitignored — see sentry.properties.example).
 sentry:
   upload_debug_symbols: true
   upload_source_maps: true
-  upload_sources: false
-  # project: bvisionry-connect
-  # org: bvisionry
+  upload_sources: true
+  project: connect-flutter
+  org: bvisionry

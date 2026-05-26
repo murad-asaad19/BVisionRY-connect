@@ -1,0 +1,12 @@
+# Phase 15 — release keystore credentials. Copy to `android/key.properties`
+# (gitignored) and fill in the values. Generate the keystore once with:
+#
+#   keytool -genkey -v -keystore android/keystore/connect-release.jks \
+#     -keyalg RSA -keysize 2048 -validity 10000 -alias connect
+#
+# The build.gradle.kts loads this file automatically. When absent, release
+# builds fall back to the debug signing keys.
+storePassword=REPLACE_WITH_STORE_PASSWORD
+keyPassword=REPLACE_WITH_KEY_PASSWORD
+keyAlias=connect
+storeFile=../keystore/connect-release.jks

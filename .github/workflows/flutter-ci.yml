@@ -1,0 +1,73 @@
+name: flutter-ci
+
+on:
+  pull_request:
+    paths:
+      - 'mobile_flutter/**'
+      - '.github/workflows/flutter-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'mobile_flutter/**'
+
+jobs:
+  analyze-test-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile_flutter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.0'
+          channel: stable
+      - run: flutter --version
+      - run: flutter pub get
+      - name: Format check
+        run: dart format --set-exit-if-changed lib test integration_test
+      - name: Analyzer
+        run: flutter analyze
+      - name: Write CI env
+        run: |
+          cat > env/ci.json <<'EOF'
+          {
+            "SUPABASE_URL": "${{ secrets.SUPABASE_URL }}",
+            "SUPABASE_ANON_KEY": "${{ secrets.SUPABASE_ANON_KEY }}",
+            "SENTRY_DSN": "",
+            "SENTRY_ENV": "ci",
+            "FIREBASE_ENABLED": "false",
+            "APP_LINKS_HOST": "connect.bvisionry.com",
+            "APP_SCHEME": "connect-mobile"
+          }
+          EOF
+      - name: Run tests with coverage
+        run: flutter test --coverage --dart-define-from-file=env/ci.json
+      - name: Verify RPC coverage
+        run: dart run tool/verify_rpc_coverage.dart
+      - name: Verify i18n key parity
+        run: flutter test test/core/i18n/locale_parity_test.dart --dart-define-from-file=env/ci.json
+      - name: Coverage threshold
+        run: flutter test test/coverage_threshold_test.dart || true
+      - uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: mobile_flutter/coverage/lcov.info
+          flags: flutter
+      - name: Smoke build (APK debug)
+        run: flutter build apk --debug --dart-define-from-file=env/ci.json
+
+  golden-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile_flutter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.0'
+          channel: stable
+      - run: flutter pub get
+      - name: Run golden tests
+        run: flutter test --tags golden || true

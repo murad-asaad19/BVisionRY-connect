@@ -62,4 +62,11 @@ mobile_flutter/ios/Flutter/Flutter.framework/
 mobile_flutter/ios/Flutter/Flutter.podspec
 mobile_flutter/env/*.json
 !mobile_flutter/env/*.json.example
+# Phase 15 — release secrets (real configs, keystore, entitlements overrides)
+mobile_flutter/android/key.properties
+mobile_flutter/android/keystore/
+mobile_flutter/android/app/google-services.json
+mobile_flutter/ios/Runner/GoogleService-Info.plist
+mobile_flutter/ios/Runner/Runner.entitlements.local
+mobile_flutter/sentry.properties
 

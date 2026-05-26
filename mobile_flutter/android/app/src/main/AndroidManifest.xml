@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="connect_mobile"
+        android:label="Connect"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -34,14 +34,14 @@
             </intent-filter>
 
             <!-- Phase 12: universal link (auto-verified) for
-                 https://DOMAIN_PLACEHOLDER/p/*. Phase 15 release pipeline
-                 swaps DOMAIN_PLACEHOLDER with the real APP_LINKS_HOST. -->
+                 https://connect.bvisionry.com/p/*. Phase 15 release pipeline
+                 swaps connect.bvisionry.com with the real APP_LINKS_HOST. -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="https"
-                      android:host="DOMAIN_PLACEHOLDER"
+                      android:host="connect.bvisionry.com"
                       android:pathPrefix="/p/"/>
             </intent-filter>
         </activity>
