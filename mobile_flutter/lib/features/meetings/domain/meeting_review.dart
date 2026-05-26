@@ -45,7 +45,8 @@ class MeetingReview with _$MeetingReview {
     required DateTime createdAt,
   }) = _MeetingReview;
 
-  factory MeetingReview.fromJson(Map<String, dynamic> json) => MeetingReview(
+  /// Construct from an RPC row. Hand-rolled — snake_case wire format.
+  static MeetingReview fromJson(Map<String, dynamic> json) => MeetingReview(
         id: json['id'] as String,
         meetingId: json['meeting_id'] as String,
         reviewerId: json['reviewer_id'] as String,

@@ -14,10 +14,6 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-MeetingProposal _$MeetingProposalFromJson(Map<String, dynamic> json) {
-  return _MeetingProposal.fromJson(json);
-}
-
 /// @nodoc
 mixin _$MeetingProposal {
   String get id => throw _privateConstructorUsedError;
@@ -31,9 +27,6 @@ mixin _$MeetingProposal {
   MeetingState get state => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
-
-  /// Serializes this MeetingProposal to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of MeetingProposal
   /// with the given fields replaced by the non-null parameter values.
@@ -235,7 +228,7 @@ class __$$MeetingProposalImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$MeetingProposalImpl extends _MeetingProposal {
   const _$MeetingProposalImpl(
       {required this.id,
@@ -251,9 +244,6 @@ class _$MeetingProposalImpl extends _MeetingProposal {
       required this.updatedAt})
       : _slots = slots,
         super._();
-
-  factory _$MeetingProposalImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MeetingProposalImplFromJson(json);
 
   @override
   final String id;
@@ -315,7 +305,6 @@ class _$MeetingProposalImpl extends _MeetingProposal {
                 other.updatedAt == updatedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -339,13 +328,6 @@ class _$MeetingProposalImpl extends _MeetingProposal {
   _$$MeetingProposalImplCopyWith<_$MeetingProposalImpl> get copyWith =>
       __$$MeetingProposalImplCopyWithImpl<_$MeetingProposalImpl>(
           this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$MeetingProposalImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _MeetingProposal extends MeetingProposal {
@@ -362,9 +344,6 @@ abstract class _MeetingProposal extends MeetingProposal {
       required final DateTime createdAt,
       required final DateTime updatedAt}) = _$MeetingProposalImpl;
   const _MeetingProposal._() : super._();
-
-  factory _MeetingProposal.fromJson(Map<String, dynamic> json) =
-      _$MeetingProposalImpl.fromJson;
 
   @override
   String get id;

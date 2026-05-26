@@ -26,7 +26,7 @@ void main() {
     );
     final tree = await wrapWithTheme(
       overrides: [meetingsServiceProvider.overrideWithValue(svc)],
-      child: ConfirmMeetingSheet(proposal: proposal),
+      child: Scaffold(body: ConfirmMeetingSheet(proposal: proposal)),
     );
     await pumpWithI18n(tester, tree);
     // ignore: deprecated_member_use_from_same_package, deprecated_member_use
@@ -41,10 +41,9 @@ void main() {
     when(() => svc.confirmMeeting(any(), any())).thenAnswer(
       (_) async => proposal.copyWith(state: MeetingState.confirmed),
     );
-    // Trailing-comma guard for any inserted future text.
     final tree = await wrapWithTheme(
       overrides: [meetingsServiceProvider.overrideWithValue(svc)],
-      child: ConfirmMeetingSheet(proposal: proposal),
+      child: Scaffold(body: ConfirmMeetingSheet(proposal: proposal)),
     );
     await pumpWithI18n(tester, tree);
     await tester.tap(find.byKey(const Key('confirm-submit')));

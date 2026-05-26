@@ -1,0 +1,33 @@
+appId: com.bvisionry.connect_mobile
+tags:
+  - meetings
+  - smoke
+---
+# Open the chats tab and select the first conversation.
+- launchApp:
+    clearState: false
+- tapOn:
+    text: "Chats"
+- tapOn:
+    index: 0
+    text: ".*"
+# The propose-meeting button lives in the chat composer next to the
+# voice / image attach buttons. Phase 8 surfaces it inline.
+- assertVisible:
+    id: "chat-propose-meeting"
+- tapOn:
+    id: "chat-propose-meeting"
+# Propose sheet opens — slot 1 row is keyed so we can target it.
+- assertVisible: "Propose a meeting"
+- tapOn:
+    id: "propose-slot-0"
+# Date / time pickers — accept defaults; OS-native dialogs vary across
+# platforms so we tap their primary affordance text.
+- tapOn: "OK"
+- tapOn: "OK"
+# Submit. The sheet auto-dismisses on success and a MeetingCardBubble
+# should appear in the thread.
+- tapOn:
+    id: "propose-submit"
+- assertVisible: "Proposed"
+- takeScreenshot: meetings_propose_confirm

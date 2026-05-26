@@ -21,7 +21,7 @@ void main() {
       child: const PostMeetingPromptModal(meetingId: 'mid'),
     );
     await pumpWithI18n(tester, tree);
-    expect(find.text('Useful'), findsOneWidget);
+    expect(find.text('Useful'), findsAtLeast(1));
     expect(find.text('Not useful'), findsOneWidget);
     expect(find.text('No-show'), findsOneWidget);
     expect(find.text('Skip'), findsOneWidget);

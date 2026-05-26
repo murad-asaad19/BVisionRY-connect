@@ -19,7 +19,7 @@ void main() {
     final svc = _MockSvc();
     final tree = await wrapWithTheme(
       overrides: [meetingsServiceProvider.overrideWithValue(svc)],
-      child: const ProposeMeetingSheet(conversationId: 'c'),
+      child: const Scaffold(body: ProposeMeetingSheet(conversationId: 'c')),
     );
     await pumpWithI18n(tester, tree);
     expect(find.byKey(const Key('propose-slot-0')), findsOneWidget);
@@ -34,12 +34,12 @@ void main() {
     final svc = _MockSvc();
     final tree = await wrapWithTheme(
       overrides: [meetingsServiceProvider.overrideWithValue(svc)],
-      child: const ProposeMeetingSheet(conversationId: 'c'),
+      child: const Scaffold(body: ProposeMeetingSheet(conversationId: 'c')),
     );
     await pumpWithI18n(tester, tree);
     // Default 30, after one plus tap should be 45.
     await tester.tap(find.byKey(const Key('propose-duration-plus')));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('45 min'), findsOneWidget);
   });
 }

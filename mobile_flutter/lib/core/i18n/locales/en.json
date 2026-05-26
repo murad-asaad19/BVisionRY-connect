@@ -556,80 +556,6 @@
       "viewProfile": "View profile"
     }
   },
-  "meetings": {
-    "title": "Meeting",
-    "statusProposed": "Proposed",
-    "statusConfirmed": "Confirmed",
-    "statusDeclined": "Declined",
-    "statusCancelled": "Cancelled",
-    "durationLabel": "{{minutes}} min",
-    "confirm": "Confirm",
-    "decline": "Decline",
-    "cancelProposal": "Cancel proposal",
-    "addToCalendar": "Add to calendar",
-    "openLink": "Open meeting link",
-    "errors": {
-      "actionFailed": "Couldn't update the meeting"
-    },
-    "propose": {
-      "title": "Propose a meeting",
-      "subtitle": "Suggest up to 3 times that work for you.",
-      "slot1Label": "Slot 1 (required)",
-      "slot2Label": "Slot 2 (optional)",
-      "slot3Label": "Slot 3 (optional)",
-      "durationLabel": "Duration",
-      "durationOption": "{{minutes}} min",
-      "urlLabel": "Meeting URL",
-      "urlPlaceholder": "https://meet.google.com/...",
-      "inputTimeZoneHint": "Times will be sent in your timezone ({{tz}})",
-      "cancel": "Cancel",
-      "send": "Send proposal",
-      "errors": {
-        "slotsRange": "Pick 1–3 future time slots.",
-        "duration": "Duration must be 15–240 minutes.",
-        "url": "Meeting URL must start with https://.",
-        "submitFailed": "Couldn't send proposal. Please try again."
-      }
-    },
-    "confirmSheet": {
-      "title": "Confirm a time",
-      "subtitle": "Pick the slot that works best."
-    },
-    "prompt": {
-      "title": "How was your meeting?",
-      "subtitle": "Tap a quick reaction so we can keep matches accurate."
-    },
-    "review": {
-      "title": "How was your meeting?",
-      "subtitle": "Tap a quick reaction so we can keep matches accurate.",
-      "useful": "Useful",
-      "notUseful": "Not useful",
-      "noShow": "No-show",
-      "skip": "Skip",
-      "submitFailed": "Couldn't submit review. Please try again.",
-      "submitted": "Thanks for the feedback!"
-    },
-    "playbook": {
-      "title": "Meeting playbook",
-      "generating": "Generating playbook…",
-      "regenerate": "Regenerate",
-      "regenerateRateLimited": "Try again in 1 hour",
-      "generate": "Generate playbook",
-      "retry": "Retry",
-      "errorBanner": "Couldn't load the playbook. Try again later.",
-      "generatedAt": "Updated {{ago}}",
-      "justNow": "just now",
-      "minutesShort": "m",
-      "hoursShort": "h",
-      "daysShort": "d",
-      "section": {
-        "sharedInterests": "Shared interests",
-        "conversationStarters": "Conversation starters",
-        "do": "Do",
-        "dont": "Don't"
-      }
-    }
-  },
   "network": {
     "title": "Network",
     "empty": {
@@ -925,34 +851,43 @@
     "icsSavedTo": "Calendar file saved to {{path}}",
     "title": "Meeting",
     "titleWith": "Meeting with @{{handle}}",
-    "statusConfirmed": "Meeting confirmed",
-    "statusProposed": "Meeting proposed",
-    "statusDeclined": "Meeting declined",
-    "statusCancelled": "Meeting cancelled",
-    "durationLabel": "Duration: {{minutes}} min",
+    "statusConfirmed": "Confirmed",
+    "statusProposed": "Proposed",
+    "statusDeclined": "Declined",
+    "statusCancelled": "Cancelled",
+    "durationLabel": "{{minutes}} min",
     "durationHeader": "Meeting proposed · {{minutes}} min",
     "decline": "Decline",
     "confirm": "Confirm",
     "cancelProposal": "Cancel proposal",
     "proposeAnother": "Propose another",
+    "openLink": "Open meeting link",
     "inputTimeZoneHint": "in {{tz}}",
+    "errors": {
+      "actionFailed": "Couldn't update the meeting"
+    },
+    "confirmSheet": {
+      "title": "Confirm a time",
+      "subtitle": "Pick the slot that works best."
+    },
     "prompt": {
-      "title": "Did this meeting happen?",
-      "subtitle": "Tell us so we can improve your matches.",
+      "title": "How was your meeting?",
+      "subtitle": "Tap a quick reaction so we can keep matches accurate.",
       "yes": "Yes — it happened",
       "rescheduled": "Rescheduled to a new time",
       "noShow": "No — they didn't show",
       "fallback": "If we don't hear back within 48 hours, we'll skip this prompt and ask later."
     },
     "review": {
-      "title": "How was the meeting?",
-      "subtitle": "Your answer helps us improve match quality. Optional note for your records.",
+      "title": "How was your meeting?",
+      "subtitle": "Tap a quick reaction so we can keep matches accurate.",
       "useful": "Useful",
       "notUseful": "Not useful",
       "noShow": "No-show",
       "notePlaceholder": "Optional note…",
       "pickOutcome": "Pick an outcome.",
       "submitFailed": "Submit failed",
+      "submitted": "Thanks for the feedback!",
       "skip": "Skip",
       "submit": "Submit"
     },
@@ -966,6 +901,7 @@
       "durationOption": "{{minutes}} min",
       "urlLabel": "Meeting URL (optional)",
       "urlPlaceholder": "https://meet.google.com/abc-defg-hij",
+      "inputTimeZoneHint": "Times will be sent in your timezone ({{tz}})",
       "cancel": "Cancel",
       "send": "Send",
       "errors": {
@@ -978,7 +914,8 @@
     "playbook": {
       "title": "Meeting playbook",
       "regenerate": "Regenerate",
-      "regenerateRateLimited": "Available again in an hour",
+      "regenerateRateLimited": "Try again in 1 hour",
+      "generate": "Generate playbook",
       "generating": "Generating your meeting prep…",
       "errorBanner": "Couldn't generate prep",
       "retry": "Tap to retry",

@@ -70,4 +70,36 @@ void main() {
     final AppException mapped = mapPostgrestError(ex);
     expect(mapped, isA<IntroNoteRangeException>());
   });
+
+  test('maps 22023 with "duration" detail to meetings.propose.errors.duration',
+      () {
+    const PostgrestException ex = PostgrestException(
+      message: 'duration must be 15-240',
+      code: '22023',
+    );
+    final AppException mapped = mapPostgrestError(ex);
+    expect(mapped, isA<ValidationException>());
+    expect(mapped.i18nKey, 'meetings.propose.errors.duration');
+  });
+
+  test('maps 22023 with "slots" detail to meetings.propose.errors.slotsRange',
+      () {
+    const PostgrestException ex = PostgrestException(
+      message: 'slots: 1-3 future timestamps required',
+      code: '22023',
+    );
+    final AppException mapped = mapPostgrestError(ex);
+    expect(mapped, isA<ValidationException>());
+    expect(mapped.i18nKey, 'meetings.propose.errors.slotsRange');
+  });
+
+  test('maps 22023 with "https" detail to meetings.propose.errors.url', () {
+    const PostgrestException ex = PostgrestException(
+      message: 'meeting_url must start with https://',
+      code: '22023',
+    );
+    final AppException mapped = mapPostgrestError(ex);
+    expect(mapped, isA<ValidationException>());
+    expect(mapped.i18nKey, 'meetings.propose.errors.url');
+  });
 }

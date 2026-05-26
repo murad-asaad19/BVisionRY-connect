@@ -28,7 +28,9 @@ class MeetingPlaybook with _$MeetingPlaybook {
     required DateTime generatedAt,
   }) = _MeetingPlaybook;
 
-  factory MeetingPlaybook.fromJson(Map<String, dynamic> json) => MeetingPlaybook(
+  /// Construct from a cached `get_meeting_playbook` row or the edge
+  /// function's JSON response. Hand-rolled — wire format uses snake_case.
+  static MeetingPlaybook fromJson(Map<String, dynamic> json) => MeetingPlaybook(
         meetingId: json['meeting_id'] as String,
         viewerId: json['viewer_id'] as String,
         targetId: json['target_id'] as String,

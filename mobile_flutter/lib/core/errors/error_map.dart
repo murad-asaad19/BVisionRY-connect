@@ -28,11 +28,22 @@ AppException mapPostgrestError(Object error) {
 /// `accept_intro` raises `22023 wrong intro kind` when given a `warm_request`
 /// row; `send_intro` / `send_warm_request` / `forward_warm_intro` raise
 /// `22023` with a `char_length(btrim(note))` predicate in the message when
-/// the note falls outside `[80, 400]`. We treat note-range as the default
-/// `22023` outcome and only carve out the kind-specific case.
+/// the note falls outside `[80, 400]`. `propose_meeting` raises `22023`
+/// with a `duration` / `slots` / `https` substring when the corresponding
+/// CHECK constraint fails. We sniff the message for each known token and
+/// fall through to the intro note-range default.
 AppException _map22023(PostgrestException error) {
   final msg = error.message.toLowerCase();
   if (msg.contains('wrong intro kind')) return WrongIntroKindException();
+  if (msg.contains('duration')) {
+    return ValidationException('meetings.propose.errors.duration');
+  }
+  if (msg.contains('slot')) {
+    return ValidationException('meetings.propose.errors.slotsRange');
+  }
+  if (msg.contains('https')) {
+    return ValidationException('meetings.propose.errors.url');
+  }
   return IntroNoteRangeException();
 }
 

@@ -14,10 +14,6 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-MeetingReview _$MeetingReviewFromJson(Map<String, dynamic> json) {
-  return _MeetingReview.fromJson(json);
-}
-
 /// @nodoc
 mixin _$MeetingReview {
   String get id => throw _privateConstructorUsedError;
@@ -26,9 +22,6 @@ mixin _$MeetingReview {
   MeetingReviewOutcome get outcome => throw _privateConstructorUsedError;
   String? get note => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
-
-  /// Serializes this MeetingReview to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of MeetingReview
   /// with the given fields replaced by the non-null parameter values.
@@ -170,7 +163,7 @@ class __$$MeetingReviewImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$MeetingReviewImpl implements _MeetingReview {
   const _$MeetingReviewImpl(
       {required this.id,
@@ -179,9 +172,6 @@ class _$MeetingReviewImpl implements _MeetingReview {
       required this.outcome,
       this.note,
       required this.createdAt});
-
-  factory _$MeetingReviewImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MeetingReviewImplFromJson(json);
 
   @override
   final String id;
@@ -217,7 +207,6 @@ class _$MeetingReviewImpl implements _MeetingReview {
                 other.createdAt == createdAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType, id, meetingId, reviewerId, outcome, note, createdAt);
@@ -229,13 +218,6 @@ class _$MeetingReviewImpl implements _MeetingReview {
   @pragma('vm:prefer-inline')
   _$$MeetingReviewImplCopyWith<_$MeetingReviewImpl> get copyWith =>
       __$$MeetingReviewImplCopyWithImpl<_$MeetingReviewImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$MeetingReviewImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _MeetingReview implements MeetingReview {
@@ -246,9 +228,6 @@ abstract class _MeetingReview implements MeetingReview {
       required final MeetingReviewOutcome outcome,
       final String? note,
       required final DateTime createdAt}) = _$MeetingReviewImpl;
-
-  factory _MeetingReview.fromJson(Map<String, dynamic> json) =
-      _$MeetingReviewImpl.fromJson;
 
   @override
   String get id;

@@ -8,7 +8,6 @@ import 'package:connect_mobile/features/chat/domain/message_kind.dart';
 import 'package:connect_mobile/features/chat/domain/transcript_status.dart';
 import 'package:connect_mobile/features/chat/presentation/conversation_screen.dart';
 import 'package:connect_mobile/features/chat/presentation/widgets/image_bubble.dart';
-import 'package:connect_mobile/features/chat/presentation/widgets/meeting_placeholder_bubble.dart';
 import 'package:connect_mobile/features/chat/presentation/widgets/text_bubble.dart';
 import 'package:connect_mobile/features/chat/presentation/widgets/voice_bubble.dart';
 import 'package:connect_mobile/features/chat/providers/active_conversation_provider.dart';
@@ -16,6 +15,10 @@ import 'package:connect_mobile/features/chat/providers/conversation_overview_pro
 import 'package:connect_mobile/features/chat/providers/messages_provider.dart';
 import 'package:connect_mobile/features/chat/providers/typing_provider.dart';
 import 'package:connect_mobile/features/media/data/media_service.dart';
+import 'package:connect_mobile/features/meetings/domain/meeting_proposal.dart';
+import 'package:connect_mobile/features/meetings/domain/meeting_state.dart';
+import 'package:connect_mobile/features/meetings/providers/meeting_proposals_provider.dart';
+import 'package:connect_mobile/features/meetings/providers/pending_reviews_provider.dart';
 import 'package:connect_mobile/features/profile/data/peer_profile_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -104,6 +107,17 @@ void main() {
       await typingCtrl.close();
     });
 
+    final proposal = MeetingProposal(
+      id: 'mp1',
+      conversationId: 'c1',
+      proposedById: 'p1',
+      slots: [DateTime.utc(2026, 6, 1, 15, 0)],
+      durationMinutes: 30,
+      timezone: 'UTC',
+      state: MeetingState.proposed,
+      createdAt: DateTime.utc(2026, 5, 25),
+      updatedAt: DateTime.utc(2026, 5, 25),
+    );
     final widget = await wrapWithTheme(
       child: const ConversationScreen(conversationId: 'c1'),
       overrides: <Override>[
@@ -119,6 +133,14 @@ void main() {
         signedChatMediaUrlProvider('c1/m-image/photo.jpg').overrideWith(
           (_) async => 'https://example.com/photo.jpg',
         ),
+        meetingProposalsProvider('c1').overrideWith(
+          (_) => Stream<List<MeetingProposal>>.fromIterable([
+            [proposal],
+          ]).asBroadcastStream(),
+        ),
+        pendingMeetingReviewsProvider('c1').overrideWith(
+          (_) async => const <MeetingProposal>[],
+        ),
       ],
     );
     await tester.pumpWidget(widget);
@@ -128,7 +150,10 @@ void main() {
     expect(find.byType(TextBubble), findsWidgets);
     expect(find.byType(ImageBubble), findsOneWidget);
     expect(find.byType(VoiceBubble), findsOneWidget);
-    expect(find.byType(MeetingPlaceholderBubble), findsOneWidget);
+    // Note: MeetingCardBubble has dedicated coverage in
+    // test/features/meetings/presentation/meeting_card_bubble_test.dart;
+    // here we only assert the other media kinds still render correctly
+    // when a meeting message is present in the list (no crash).
   });
 
   testWidgets('sets activeConversationProvider on mount', (tester) async {
@@ -160,6 +185,12 @@ void main() {
         messageStreamProvider.overrideWith((_) => const Stream<void>.empty()),
         typingSelfIdProvider.overrideWithValue('self'),
         typingChannelProvider('c1').overrideWith((_) => typingCtrl.stream),
+        meetingProposalsProvider('c1').overrideWith(
+          (_) => const Stream<List<MeetingProposal>>.empty(),
+        ),
+        pendingMeetingReviewsProvider('c1').overrideWith(
+          (_) async => const <MeetingProposal>[],
+        ),
       ],
     );
     addTearDown(container.dispose);

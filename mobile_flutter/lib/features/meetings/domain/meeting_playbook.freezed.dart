@@ -14,10 +14,6 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-MeetingPlaybook _$MeetingPlaybookFromJson(Map<String, dynamic> json) {
-  return _MeetingPlaybook.fromJson(json);
-}
-
 /// @nodoc
 mixin _$MeetingPlaybook {
   String get meetingId => throw _privateConstructorUsedError;
@@ -29,9 +25,6 @@ mixin _$MeetingPlaybook {
   List<String> get doNotes => throw _privateConstructorUsedError;
   List<String> get dontNotes => throw _privateConstructorUsedError;
   DateTime get generatedAt => throw _privateConstructorUsedError;
-
-  /// Serializes this MeetingPlaybook to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of MeetingPlaybook
   /// with the given fields replaced by the non-null parameter values.
@@ -209,7 +202,7 @@ class __$$MeetingPlaybookImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$MeetingPlaybookImpl extends _MeetingPlaybook {
   const _$MeetingPlaybookImpl(
       {required this.meetingId,
@@ -226,9 +219,6 @@ class _$MeetingPlaybookImpl extends _MeetingPlaybook {
         _doNotes = doNotes,
         _dontNotes = dontNotes,
         super._();
-
-  factory _$MeetingPlaybookImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MeetingPlaybookImplFromJson(json);
 
   @override
   final String meetingId;
@@ -302,7 +292,6 @@ class _$MeetingPlaybookImpl extends _MeetingPlaybook {
                 other.generatedAt == generatedAt));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
       runtimeType,
@@ -324,13 +313,6 @@ class _$MeetingPlaybookImpl extends _MeetingPlaybook {
   _$$MeetingPlaybookImplCopyWith<_$MeetingPlaybookImpl> get copyWith =>
       __$$MeetingPlaybookImplCopyWithImpl<_$MeetingPlaybookImpl>(
           this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$MeetingPlaybookImplToJson(
-      this,
-    );
-  }
 }
 
 abstract class _MeetingPlaybook extends MeetingPlaybook {
@@ -345,9 +327,6 @@ abstract class _MeetingPlaybook extends MeetingPlaybook {
       required final List<String> dontNotes,
       required final DateTime generatedAt}) = _$MeetingPlaybookImpl;
   const _MeetingPlaybook._() : super._();
-
-  factory _MeetingPlaybook.fromJson(Map<String, dynamic> json) =
-      _$MeetingPlaybookImpl.fromJson;
 
   @override
   String get meetingId;
