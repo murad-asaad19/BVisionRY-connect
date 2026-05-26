@@ -24,7 +24,7 @@ void main() {
   // tests require that flag at compile time, otherwise registerToken()
   // and unregisterToken() short-circuit to `false`. Skip when the suite
   // is invoked without FIREBASE_ENABLED=true.
-  final firebaseGate = Env.firebaseEnabled
+  const firebaseGate = Env.firebaseEnabled
       ? null
       : 'FcmService tests require --dart-define=FIREBASE_ENABLED=true';
 
