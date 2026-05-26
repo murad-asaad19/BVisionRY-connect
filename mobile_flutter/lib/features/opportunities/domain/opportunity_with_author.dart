@@ -28,8 +28,20 @@ class OpportunityWithAuthor with _$OpportunityWithAuthor {
   /// Parses a flat join row — the RPC unnests all opportunity columns plus
   /// the `author_*` and (optionally) `interested_count` columns onto a
   /// single object.
+  ///
+  /// `list_opportunities` does not project `status` or `updated_at` (RLS
+  /// already filters to `status='open'` and the feed never needs the
+  /// update timestamp). We inject sensible defaults at parse time so
+  /// [Opportunity.fromJson] — which marks both as required — succeeds:
+  /// `status='open'` (RLS guarantee) and `updated_at=created_at` (no edit
+  /// has occurred from the feed's perspective).
   factory OpportunityWithAuthor.fromJson(Map<String, dynamic> json) {
-    final Opportunity opp = Opportunity.fromJson(json);
+    final Map<String, dynamic> patched = <String, dynamic>{
+      ...json,
+      'status': json['status'] ?? 'open',
+      'updated_at': json['updated_at'] ?? json['created_at'],
+    };
+    final Opportunity opp = Opportunity.fromJson(patched);
     final Object? rawCount = json['interested_count'];
     return OpportunityWithAuthor(
       opportunity: opp,
