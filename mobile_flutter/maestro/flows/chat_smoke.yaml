@@ -1,0 +1,25 @@
+appId: com.bvisionry.connect_mobile
+tags:
+  - chat
+  - smoke
+---
+- launchApp:
+    clearState: false
+- tapOn:
+    text: "Chats"
+# Pick the first conversation overview tile. Maestro defaults to the
+# first match when no index is supplied — explicit index for clarity.
+- tapOn:
+    index: 0
+    text: ".*"
+# The thread should now be rendered (TopBar back chevron is the most
+# stable affordance to assert on across mixed-media threads).
+- assertVisible:
+    id: "app-icon-button-frame"
+# Send a quick text message.
+- tapOn:
+    id: "chat-input-field"
+- inputText: "hello flutter"
+- tapOn:
+    id: "chat-send-button"
+- assertVisible: "hello flutter"
