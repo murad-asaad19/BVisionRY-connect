@@ -34,4 +34,16 @@ abstract final class Telemetry {
       debugPrint('telemetry.recordError: $error\n$stack');
     }
   }
+
+  /// Record a breadcrumb for Sentry / Crashlytics. No-op until Phase 14;
+  /// Phase 12 calls this from push foreground + tap handlers so Phase 14
+  /// has nothing extra to wire.
+  static void recordBreadcrumb({
+    required String category,
+    required String message,
+  }) {
+    if (kDebugMode) {
+      debugPrint('telemetry.breadcrumb [$category] $message');
+    }
+  }
 }
