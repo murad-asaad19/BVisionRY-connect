@@ -523,6 +523,37 @@
       "title": "Delete message?",
       "body": "This message will be removed from the conversation.",
       "confirm": "Delete"
+    },
+    "actions": {
+      "reply": "Reply",
+      "edit": "Edit",
+      "delete": "Delete",
+      "copy": "Copy text",
+      "report": "Report"
+    },
+    "edit": {
+      "title": "Edit message",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "delete": {
+      "confirmTitle": "Delete message?",
+      "confirmBody": "This message will be removed from the conversation."
+    },
+    "send": {
+      "failed": "Couldn't send message"
+    },
+    "recording": {
+      "title": "Record voice message",
+      "send": "Send",
+      "cancel": "Cancel"
+    },
+    "transcript": {
+      "label": "Transcript",
+      "pending": "Transcribing…"
+    },
+    "menu": {
+      "viewProfile": "View profile"
     }
   },
   "network": {

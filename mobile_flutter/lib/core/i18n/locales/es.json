@@ -523,6 +523,37 @@
       "title": "¿Eliminar mensaje?",
       "body": "Este mensaje se quitará de la conversación.",
       "confirm": "Eliminar"
+    },
+    "actions": {
+      "reply": "Responder",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "copy": "Copiar texto",
+      "report": "Reportar"
+    },
+    "edit": {
+      "title": "Editar mensaje",
+      "save": "Guardar",
+      "cancel": "Cancelar"
+    },
+    "delete": {
+      "confirmTitle": "¿Eliminar mensaje?",
+      "confirmBody": "Este mensaje se quitará de la conversación."
+    },
+    "send": {
+      "failed": "No se pudo enviar el mensaje"
+    },
+    "recording": {
+      "title": "Grabar mensaje de voz",
+      "send": "Enviar",
+      "cancel": "Cancelar"
+    },
+    "transcript": {
+      "label": "Transcripción",
+      "pending": "Transcribiendo…"
+    },
+    "menu": {
+      "viewProfile": "Ver perfil"
     }
   },
   "network": {
