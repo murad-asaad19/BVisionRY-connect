@@ -133,7 +133,8 @@
         "meeting_confirmed": "Meeting confirmed",
         "meeting_reminder": "Meeting reminder",
         "daily_matches_ready": "Daily matches ready",
-        "goal_staleness": "Goal-staleness nudge"
+        "goal_staleness": "Goal-staleness nudge",
+        "opportunity_interest": "Opportunity interest"
       },
       "channel": {
         "push": "Push",

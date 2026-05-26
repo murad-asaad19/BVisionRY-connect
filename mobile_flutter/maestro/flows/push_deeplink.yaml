@@ -1,0 +1,32 @@
+appId: com.bvisionry.connect_mobile
+tags:
+  - push
+  - deeplink
+  - smoke
+---
+# Phase 12 deep-link routing smoke. Since CI cannot easily synthesise a real
+# FCM push, this flow exercises the same router code path via the custom
+# scheme. `resolvePushRoute` -> `router.go(...)` is the canonical wire and
+# is exercised by the unit + widget tests; this flow proves it round-trips
+# on a real device.
+- launchApp:
+    clearState: false
+
+# Custom-scheme: bare /home should land on the Home tab.
+- openLink: connect-mobile://home
+- assertVisible: "Home"
+
+# Custom-scheme: intro detail (spec section 7.4 row 1).
+- openLink: connect-mobile:///intros/test-intro-id
+- assertVisible:
+    id: "intro-detail-screen"
+
+# Custom-scheme: chat thread (spec section 7.4 row 3).
+- openLink: connect-mobile:///chats/test-conv-id
+- assertVisible:
+    id: "chat-screen"
+
+# Custom-scheme: opportunity detail (spec section 7.4 row 5).
+- openLink: connect-mobile:///opportunities/test-opp-id
+- assertVisible:
+    id: "opportunity-detail-screen"

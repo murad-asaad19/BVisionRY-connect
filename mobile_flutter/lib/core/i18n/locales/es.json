@@ -133,7 +133,8 @@
         "meeting_confirmed": "Reunión confirmada",
         "meeting_reminder": "Recordatorio de reunión",
         "daily_matches_ready": "Coincidencias del día listas",
-        "goal_staleness": "Recordatorio de objetivo"
+        "goal_staleness": "Recordatorio de objetivo",
+        "opportunity_interest": "Interés en oportunidad"
       },
       "channel": {
         "push": "Push",
