@@ -40,4 +40,15 @@ void main() {
       expect(pubspec, contains(dep), reason: 'missing $dep');
     }
   });
+
+  test('pubspec declares meetings-phase dependencies', () {
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+    for (final dep in const [
+      'share_plus:',
+      'path_provider:',
+      'flutter_timezone:',
+    ]) {
+      expect(pubspec, contains(dep), reason: 'missing $dep');
+    }
+  });
 }
