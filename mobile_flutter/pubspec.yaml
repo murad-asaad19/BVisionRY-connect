@@ -60,6 +60,10 @@ dev_dependencies:
   mocktail: ^1.0.4
   riverpod_generator: ^2.6.3
   riverpod_lint: ^2.6.3
+  # Phase 14 (Task 17): build-time symbol upload for Sentry. The actual
+  # `sentry.properties` (org / project / auth_token) is wired in Phase 15
+  # release config.
+  sentry_dart_plugin: ^2.4.0
 
 # custom_lint 0.7.3 / riverpod_lint 2.6.4 pin analyzer_plugin to 0.12.0, which
 # only compiles against analyzer 6.x. Our toolchain resolves analyzer 7.6.0
@@ -74,3 +78,16 @@ flutter:
   assets:
     - lib/core/i18n/locales/en.json
     - lib/core/i18n/locales/es.json
+
+# Phase 14 (Task 17) — sentry_dart_plugin config placeholder. The build-
+# time upload of dSYMs (iOS) + ProGuard mappings / Dart source maps
+# (Android) is wired here. `project`, `org`, and `auth_token` resolve from
+# environment variables (SENTRY_ORG / SENTRY_PROJECT / SENTRY_AUTH_TOKEN)
+# OR from `sentry.properties` — both are filled in by Phase 15 release
+# config. Until then, the plugin is present but inert.
+sentry:
+  upload_debug_symbols: true
+  upload_source_maps: true
+  upload_sources: false
+  # project: bvisionry-connect
+  # org: bvisionry
