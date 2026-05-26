@@ -48,14 +48,12 @@ void main() {
 
   testWidgets('renders "Block {name}" when not blocked', (tester) async {
     final svc = _FakePrivacyService();
-    when(svc.listBlockedUsers)
-        .thenAnswer((_) async => const <BlockedUser>[]);
+    when(svc.listBlockedUsers).thenAnswer((_) async => const <BlockedUser>[]);
     await _pump(tester, privacy: svc);
     expect(find.text('Block Alice'), findsOneWidget);
   });
 
-  testWidgets('renders "Unblock {name}" when already blocked',
-      (tester) async {
+  testWidgets('renders "Unblock {name}" when already blocked', (tester) async {
     final svc = _FakePrivacyService();
     when(svc.listBlockedUsers).thenAnswer(
       (_) async => <BlockedUser>[
@@ -75,8 +73,7 @@ void main() {
       'block flow opens destructive confirm + calls blockUser on accept',
       (tester) async {
     final svc = _FakePrivacyService();
-    when(svc.listBlockedUsers)
-        .thenAnswer((_) async => const <BlockedUser>[]);
+    when(svc.listBlockedUsers).thenAnswer((_) async => const <BlockedUser>[]);
     when(() => svc.blockUser('u1')).thenAnswer((_) async {});
 
     final intros = _FakeIntrosService();
@@ -104,8 +101,7 @@ void main() {
   testWidgets('cancelling the block confirm does NOT call blockUser',
       (tester) async {
     final svc = _FakePrivacyService();
-    when(svc.listBlockedUsers)
-        .thenAnswer((_) async => const <BlockedUser>[]);
+    when(svc.listBlockedUsers).thenAnswer((_) async => const <BlockedUser>[]);
     await _pump(tester, privacy: svc);
 
     await tester.tap(find.text('Block Alice'));
@@ -141,12 +137,10 @@ void main() {
     verify(() => svc.unblockUser('u1')).called(1);
   });
 
-  testWidgets(
-      'successful block invalidates received + sent intros providers',
+  testWidgets('successful block invalidates received + sent intros providers',
       (tester) async {
     final svc = _FakePrivacyService();
-    when(svc.listBlockedUsers)
-        .thenAnswer((_) async => const <BlockedUser>[]);
+    when(svc.listBlockedUsers).thenAnswer((_) async => const <BlockedUser>[]);
     when(() => svc.blockUser('u1')).thenAnswer((_) async {});
 
     int receivedCalls = 0;

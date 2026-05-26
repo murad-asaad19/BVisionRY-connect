@@ -47,9 +47,8 @@ class BlockButton extends ConsumerWidget {
       label: blocked
           ? '${context.t('privacy.unblock')} $name'
           : '${context.t('privacy.block')} $name',
-      variant: blocked
-          ? AppButtonVariant.outline
-          : AppButtonVariant.outlineDanger,
+      variant:
+          blocked ? AppButtonVariant.outline : AppButtonVariant.outlineDanger,
       size: size,
       fullWidth: fullWidth,
       onPressed: () => _onTap(context, ref, blocked),

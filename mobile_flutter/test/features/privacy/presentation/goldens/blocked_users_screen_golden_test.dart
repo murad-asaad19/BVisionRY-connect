@@ -19,8 +19,7 @@ void main() {
 
   testGoldens('BlockedUsersScreen — empty', (tester) async {
     final _FakeService svc = _FakeService();
-    when(svc.listBlockedUsers)
-        .thenAnswer((_) async => const <BlockedUser>[]);
+    when(svc.listBlockedUsers).thenAnswer((_) async => const <BlockedUser>[]);
     final loader = await primedLocaleLoader();
     await tester.pumpWidgetBuilder(
       ProviderScope(

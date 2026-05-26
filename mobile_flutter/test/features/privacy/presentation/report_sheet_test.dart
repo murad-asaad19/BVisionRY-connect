@@ -251,8 +251,7 @@ void main() {
     ).called(1);
   });
 
-  testWidgets(
-      'no quoted preview rendered when quotedBodyPreview is null',
+  testWidgets('no quoted preview rendered when quotedBodyPreview is null',
       (tester) async {
     final _FakeService svc = _FakeService();
     await _pumpSheetOpener(

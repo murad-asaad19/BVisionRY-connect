@@ -96,8 +96,7 @@ class _ReportSheetBodyState extends ConsumerState<_ReportSheetBody> {
   @override
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
-    final AppTypography typo =
-        Theme.of(context).extension<AppTypography>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         16,
@@ -134,7 +133,8 @@ class _ReportSheetBodyState extends ConsumerState<_ReportSheetBody> {
                       ? null
                       : () => setState(() {
                             _reason = r;
-                            if (_errorKey == 'privacy.reportModal.pickReasonBody') {
+                            if (_errorKey ==
+                                'privacy.reportModal.pickReasonBody') {
                               _errorKey = null;
                             }
                           }),
@@ -182,8 +182,7 @@ class _QuotedPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
-    final AppTypography typo =
-        Theme.of(context).extension<AppTypography>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
       decoration: BoxDecoration(

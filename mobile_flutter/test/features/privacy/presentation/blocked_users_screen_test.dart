@@ -1,7 +1,6 @@
 import 'package:connect_mobile/features/privacy/data/privacy_service.dart';
 import 'package:connect_mobile/features/privacy/domain/blocked_user.dart';
 import 'package:connect_mobile/features/privacy/presentation/blocked_users_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -45,8 +44,7 @@ void main() {
 
   testWidgets('shows empty state when no blocks', (tester) async {
     final _FakeService svc = _FakeService();
-    when(svc.listBlockedUsers)
-        .thenAnswer((_) async => const <BlockedUser>[]);
+    when(svc.listBlockedUsers).thenAnswer((_) async => const <BlockedUser>[]);
     await _pump(tester, service: svc);
     expect(find.textContaining("haven't blocked"), findsOneWidget);
     // The forward-intent hint also appears as the EmptyState body.

@@ -88,8 +88,7 @@ class _BlockedRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
-    final AppTypography typo =
-        Theme.of(context).extension<AppTypography>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
     return AppCard(
       child: Row(
@@ -143,13 +142,12 @@ class _BlockedRow extends ConsumerWidget {
   }
 
   Future<void> _onUnblock(BuildContext context, WidgetRef ref) async {
-    final bool confirmed =
-        await ref.read(confirmServiceProvider).confirm(
-              context,
-              title: context.t('privacy.unblock'),
-              body: context.t('privacy.blockedListHint'),
-              confirmLabel: context.t('privacy.unblock'),
-            );
+    final bool confirmed = await ref.read(confirmServiceProvider).confirm(
+          context,
+          title: context.t('privacy.unblock'),
+          body: context.t('privacy.blockedListHint'),
+          confirmLabel: context.t('privacy.unblock'),
+        );
     if (!confirmed) return;
     await ref.read(privacyServiceProvider).unblockUser(user.blockedId);
     ref.invalidate(blocksProvider);
