@@ -90,7 +90,11 @@
     "profile": "Perfil",
     "profileDesc": "Editar nombre, alias, biografía, foto",
     "legal": "Legal",
-    "language": "Idioma",
+    "language": {
+      "title": "Idioma",
+      "en": "Ingles",
+      "es": "Espanol"
+    },
     "exportData": "Exportar mis datos (JSON)",
     "deleteAccount": "Eliminar cuenta",
     "privacyPolicy": "Política de privacidad",
@@ -105,7 +109,9 @@
       "title": "¿Eliminar la cuenta?",
       "body": "Esto eliminará permanentemente tu perfil y tus datos. Esta acción no se puede deshacer.",
       "action": "Eliminar",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "typeWord": "Escribe DELETE para confirmar",
+      "typedMismatch": "El texto de confirmacion debe ser exactamente DELETE."
     },
     "exportFailed": "Error al exportar",
     "exportReady": "Exportación lista",
@@ -142,7 +148,25 @@
         "in_app": "En la app"
       },
       "header": "Notificación",
-      "decayBanner": "Los recordatorios por inactividad no están disponibles."
+      "decayBanner": "Los recordatorios por inactividad no están disponibles.",
+      "emailUnavailable": "El envio por email aun no esta disponible (se activara cuando lance el correo)."
+    },
+    "publicInvestorPage": {
+      "title": "Pagina publica de inversor",
+      "subtitle": "Muestra tu GitHub verificado en connect.bvisionry.com/u/{{handle}}.",
+      "comingSoon": "Proximamente: el switch en servidor llega en la proxima version."
+    },
+    "changePassword": {
+      "title": "Cambiar contrasena",
+      "newPassword": "Nueva contrasena",
+      "confirm": "Actualizar contrasena",
+      "tooShort": "Usa al menos 8 caracteres.",
+      "success": "Contrasena actualizada."
+    },
+    "tabs": {
+      "networkRecentlyActive": "Activos recientemente",
+      "networkEmptyTitle": "Hay poco movimiento por aqui",
+      "networkEmptyBody": "Abre la busqueda para encontrar gente con quien conectar."
     }
   },
   "legal": {
@@ -486,8 +510,15 @@
     "muteCta": "Silenciar",
     "unmuteCta": "Reactivar",
     "muted": "Silenciado",
-    "edit": "Editar",
-    "delete": "Eliminar",
+    "edit": {
+      "title": "Editar mensaje",
+      "save": "Guardar",
+      "cancel": "Cancelar"
+    },
+    "delete": {
+      "confirmTitle": "¿Eliminar mensaje?",
+      "confirmBody": "Este mensaje se quitará de la conversación."
+    },
     "save": "Guardar",
     "cancel": "Cancelar",
     "newMessages": "Nuevos mensajes",
@@ -532,15 +563,6 @@
       "delete": "Eliminar",
       "copy": "Copiar texto",
       "report": "Reportar"
-    },
-    "edit": {
-      "title": "Editar mensaje",
-      "save": "Guardar",
-      "cancel": "Cancelar"
-    },
-    "delete": {
-      "confirmTitle": "¿Eliminar mensaje?",
-      "confirmBody": "Este mensaje se quitará de la conversación."
     },
     "send": {
       "failed": "No se pudo enviar el mensaje"

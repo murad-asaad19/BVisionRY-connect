@@ -63,6 +63,7 @@ abstract final class Routes {
   static const String settingsBlocked = '/settings/blocked-users';
   static const String settingsOfficeHours = '/settings/office-hours';
   static const String settingsHelp = '/settings/help';
+  static const String settingsLanguage = '/settings/language';
 
   // Legal
   static const String legalPrivacy = '/legal/privacy';

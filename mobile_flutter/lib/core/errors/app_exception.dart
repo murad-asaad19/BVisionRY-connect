@@ -120,3 +120,20 @@ class BlockedException extends AppException {
 class BadMeetingUrlException extends AppException {
   BadMeetingUrlException() : super('officeHours.book.errorBadMeetingUrl');
 }
+
+// ---------------------------------------------------------------------------
+// Settings (Phase 13) — flagged when a planned server-side RPC has not yet
+// shipped. The UI surfaces a `ComingSoonCard` next to the toggle instead of
+// failing silently or pretending the write succeeded.
+// ---------------------------------------------------------------------------
+
+/// A required server RPC has not yet been implemented (spec §17.2).
+/// Carries the RPC name on the exception so the surfaced UI banner can
+/// indicate which toggle is still server-blocked.
+class UnimplementedRpcException extends AppException {
+  UnimplementedRpcException(this.rpcName)
+      : super('settings.publicInvestorPage.comingSoon');
+  final String rpcName;
+  @override
+  String toString() => 'UnimplementedRpcException(rpc=$rpcName)';
+}

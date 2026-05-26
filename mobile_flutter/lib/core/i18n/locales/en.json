@@ -90,7 +90,11 @@
     "profile": "Profile",
     "profileDesc": "Edit name, handle, bio, photo",
     "legal": "Legal",
-    "language": "Language",
+    "language": {
+      "title": "Language",
+      "en": "English",
+      "es": "Espanol"
+    },
     "exportData": "Export my data (JSON)",
     "deleteAccount": "Delete account",
     "privacyPolicy": "Privacy Policy",
@@ -105,7 +109,9 @@
       "title": "Delete account?",
       "body": "This permanently removes your profile and data. This action cannot be undone.",
       "action": "Delete",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "typeWord": "Type DELETE to confirm",
+      "typedMismatch": "Confirmation text must match DELETE exactly."
     },
     "exportFailed": "Export failed",
     "exportReady": "Export ready",
@@ -142,7 +148,25 @@
         "in_app": "In-app"
       },
       "header": "Notification",
-      "decayBanner": "Activity-decay guilt nudges are not available."
+      "decayBanner": "Activity-decay guilt nudges are not available.",
+      "emailUnavailable": "Email delivery isn't enabled yet (will activate once the mailer ships)."
+    },
+    "publicInvestorPage": {
+      "title": "Public investor page",
+      "subtitle": "Expose your verified GitHub on connect.bvisionry.com/u/{{handle}}.",
+      "comingSoon": "Coming soon - the server-side toggle ships next release."
+    },
+    "changePassword": {
+      "title": "Change password",
+      "newPassword": "New password",
+      "confirm": "Update password",
+      "tooShort": "Use at least 8 characters.",
+      "success": "Password updated."
+    },
+    "tabs": {
+      "networkRecentlyActive": "Recently active",
+      "networkEmptyTitle": "Quiet around here",
+      "networkEmptyBody": "Open search to find people to connect with."
     }
   },
   "legal": {
@@ -486,8 +510,15 @@
     "muteCta": "Mute",
     "unmuteCta": "Unmute",
     "muted": "Muted",
-    "edit": "Edit",
-    "delete": "Delete",
+    "edit": {
+      "title": "Edit message",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "delete": {
+      "confirmTitle": "Delete message?",
+      "confirmBody": "This message will be removed from the conversation."
+    },
     "save": "Save",
     "cancel": "Cancel",
     "newMessages": "New messages",
@@ -532,15 +563,6 @@
       "delete": "Delete",
       "copy": "Copy text",
       "report": "Report"
-    },
-    "edit": {
-      "title": "Edit message",
-      "save": "Save",
-      "cancel": "Cancel"
-    },
-    "delete": {
-      "confirmTitle": "Delete message?",
-      "confirmBody": "This message will be removed from the conversation."
     },
     "send": {
       "failed": "Couldn't send message"
