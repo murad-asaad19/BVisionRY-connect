@@ -73,6 +73,8 @@ void main() {
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
     expect(
-        find.byKey(const ValueKey('app-bottom-sheet-handle')), findsOneWidget,);
+      find.byKey(const ValueKey('app-bottom-sheet-handle')),
+      findsOneWidget,
+    );
   });
 }

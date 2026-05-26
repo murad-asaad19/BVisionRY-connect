@@ -181,4 +181,5 @@ class OpportunitiesFeedNotifier extends AsyncNotifier<OpportunitiesFeedState> {
 final AsyncNotifierProvider<OpportunitiesFeedNotifier, OpportunitiesFeedState>
     opportunitiesFeedProvider =
     AsyncNotifierProvider<OpportunitiesFeedNotifier, OpportunitiesFeedState>(
-        OpportunitiesFeedNotifier.new,);
+  OpportunitiesFeedNotifier.new,
+);

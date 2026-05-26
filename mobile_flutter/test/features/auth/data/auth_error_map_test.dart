@@ -39,8 +39,10 @@ void main() {
       'Too many requests',
     ]) {
       expect(
-        mapAuthError(AuthException(m),
-            AuthMode.signIn,), // ignore: prefer_const_constructors
+        mapAuthError(
+          AuthException(m),
+          AuthMode.signIn,
+        ), // ignore: prefer_const_constructors
         'auth.errors.rateLimited',
         reason: m,
       );

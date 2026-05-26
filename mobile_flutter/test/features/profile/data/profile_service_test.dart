@@ -104,7 +104,9 @@ void main() {
       );
       expect(g.capturedUpdateId, 'u-1');
       expect(
-          g.capturedUpdatePatch, <String, dynamic>{'headline': 'New headline'},);
+        g.capturedUpdatePatch,
+        <String, dynamic>{'headline': 'New headline'},
+      );
       expect(p.headline, 'New headline');
     });
 

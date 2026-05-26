@@ -363,7 +363,8 @@ void main() {
       when(
         () => gateway.rpc('list_interested', params: any(named: 'params')),
       ).thenThrow(
-          const PostgrestException(message: 'forbidden', code: '42501'),);
+        const PostgrestException(message: 'forbidden', code: '42501'),
+      );
       expect(
         () => service.listInterested('oid'),
         throwsA(isA<ForbiddenException>()),

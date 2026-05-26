@@ -30,15 +30,17 @@ void main() {
   testWidgets('ConnectBottomNavBar renders 5 Lucide tab icons',
       (WidgetTester tester) async {
     final LocaleLoader loader = await primedLocaleLoader();
-    await tester.pumpWidget(await host(
-      ConnectBottomNavBar(
-        currentIndex: 0,
-        onTap: (_) {},
-        inboxUnread: 0,
-        chatsUnread: 0,
+    await tester.pumpWidget(
+      await host(
+        ConnectBottomNavBar(
+          currentIndex: 0,
+          onTap: (_) {},
+          inboxUnread: 0,
+          chatsUnread: 0,
+        ),
+        loader: loader,
       ),
-      loader: loader,
-    ),);
+    );
     await tester.pumpAndSettle();
     expect(find.byIcon(LucideIcons.house), findsOneWidget);
     expect(find.byIcon(LucideIcons.inbox), findsOneWidget);
@@ -50,15 +52,17 @@ void main() {
   testWidgets('Badges render on inbox + chats when unread > 0',
       (WidgetTester tester) async {
     final LocaleLoader loader = await primedLocaleLoader();
-    await tester.pumpWidget(await host(
-      ConnectBottomNavBar(
-        currentIndex: 0,
-        onTap: (_) {},
-        inboxUnread: 4,
-        chatsUnread: 12,
+    await tester.pumpWidget(
+      await host(
+        ConnectBottomNavBar(
+          currentIndex: 0,
+          onTap: (_) {},
+          inboxUnread: 4,
+          chatsUnread: 12,
+        ),
+        loader: loader,
       ),
-      loader: loader,
-    ),);
+    );
     await tester.pumpAndSettle();
     expect(find.text('4'), findsOneWidget);
     expect(find.text('12'), findsOneWidget);
@@ -67,15 +71,17 @@ void main() {
   testWidgets('Badge labels cap at 99+ when count > 99',
       (WidgetTester tester) async {
     final LocaleLoader loader = await primedLocaleLoader();
-    await tester.pumpWidget(await host(
-      ConnectBottomNavBar(
-        currentIndex: 0,
-        onTap: (_) {},
-        inboxUnread: 250,
-        chatsUnread: 100,
+    await tester.pumpWidget(
+      await host(
+        ConnectBottomNavBar(
+          currentIndex: 0,
+          onTap: (_) {},
+          inboxUnread: 250,
+          chatsUnread: 100,
+        ),
+        loader: loader,
       ),
-      loader: loader,
-    ),);
+    );
     await tester.pumpAndSettle();
     expect(find.text('99+'), findsNWidgets(2));
   });
@@ -83,15 +89,17 @@ void main() {
   testWidgets('onTap fires with tapped index', (WidgetTester tester) async {
     final LocaleLoader loader = await primedLocaleLoader();
     int lastTapped = -1;
-    await tester.pumpWidget(await host(
-      ConnectBottomNavBar(
-        currentIndex: 0,
-        onTap: (int i) => lastTapped = i,
-        inboxUnread: 0,
-        chatsUnread: 0,
+    await tester.pumpWidget(
+      await host(
+        ConnectBottomNavBar(
+          currentIndex: 0,
+          onTap: (int i) => lastTapped = i,
+          inboxUnread: 0,
+          chatsUnread: 0,
+        ),
+        loader: loader,
       ),
-      loader: loader,
-    ),);
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(LucideIcons.users));
     await tester.pumpAndSettle();

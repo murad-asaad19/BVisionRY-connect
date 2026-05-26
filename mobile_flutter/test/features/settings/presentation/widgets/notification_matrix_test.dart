@@ -122,6 +122,8 @@ void main() {
       ),
     );
     expect(
-        find.byKey(const Key('matrix.emailUnavailableNote')), findsOneWidget,);
+      find.byKey(const Key('matrix.emailUnavailableNote')),
+      findsOneWidget,
+    );
   });
 }

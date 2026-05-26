@@ -11,7 +11,9 @@ void main() {
       ..addScenario(
         'vertical',
         const SizedBox(
-            height: 40, child: AppDivider(orientation: Axis.vertical),),
+          height: 40,
+          child: AppDivider(orientation: Axis.vertical),
+        ),
       );
     await tester.pumpWidgetBuilder(
       builder.build(),

@@ -107,8 +107,7 @@ class _RowBody extends StatelessWidget {
                             peerName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style:
-                                typo.displaySm.copyWith(color: colors.navy),
+                            style: typo.displaySm.copyWith(color: colors.navy),
                           ),
                         ),
                         const SizedBox(width: 8),

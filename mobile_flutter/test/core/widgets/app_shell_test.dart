@@ -55,8 +55,9 @@ void main() {
           unreadIntrosCountProvider
               .overrideWith((Ref<AsyncValue<int>> _) async => 3),
           unreadCountsProvider.overrideWith(
-              (Ref<AsyncValue<Map<String, int>>> _) async =>
-                  <String, int>{'c1': 4, 'c2': 5},),
+            (Ref<AsyncValue<Map<String, int>>> _) async =>
+                <String, int>{'c1': 4, 'c2': 5},
+          ),
         ],
         child: MaterialApp.router(
           theme: buildAppTheme(Brightness.light),

@@ -56,7 +56,8 @@ void main() {
     expect(sp.getBool('telemetry.analyticsEnabled'), isTrue);
   });
 
-  testWidgets('shows spinner while loading', skip: true, (WidgetTester tester) async {
+  testWidgets('shows spinner while loading', skip: true,
+      (WidgetTester tester) async {
     // Skipped Phase 15: flaky on fast platforms — the AsyncNotifier
     // resolves before the first pump on Windows so the spinner has
     // already been replaced by the data view.
