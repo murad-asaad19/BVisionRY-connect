@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:connect_mobile/core/env.dart';
 import 'package:connect_mobile/core/push/fcm_service.dart';
 import 'package:connect_mobile/core/push/last_token_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,10 +20,18 @@ void main() {
     registerFallbackValue(<String, dynamic>{});
   });
 
+  // FcmService gates its public surface on Env.firebaseEnabled — these
+  // tests require that flag at compile time, otherwise registerToken()
+  // and unregisterToken() short-circuit to `false`. Skip when the suite
+  // is invoked without FIREBASE_ENABLED=true.
+  final firebaseGate = Env.firebaseEnabled
+      ? null
+      : 'FcmService tests require --dart-define=FIREBASE_ENABLED=true';
+
   group('FcmService.registerToken', () {
     test(
         'requests permission, gets token, calls register_device_token RPC, persists',
-        () async {
+        skip: firebaseGate, () async {
       final _MockMessaging msg = _MockMessaging();
       final _MockGateway rpc = _MockGateway();
       when(() => msg.requestPermission()).thenAnswer((_) async => true);
@@ -56,7 +65,7 @@ void main() {
 
     test(
         'permission denied -> returns false, sets permissionDenied, does not call RPC',
-        () async {
+        skip: firebaseGate, () async {
       final _MockMessaging msg = _MockMessaging();
       final _MockGateway rpc = _MockGateway();
       when(() => msg.requestPermission()).thenAnswer((_) async => false);
