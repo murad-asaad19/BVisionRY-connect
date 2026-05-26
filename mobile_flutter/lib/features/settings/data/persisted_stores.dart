@@ -1,5 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'telemetry_store.dart';
+
 /// Common surface for the SharedPreferences-backed Zustand-equivalent stores
 /// that must be cleared when the user signs out. Implementations live in
 /// the feature phases that own them; Phase 2 ships placeholder stubs.
@@ -13,7 +15,7 @@ class FeedFiltersStore implements PersistedStore {
   static const String _key = 'connect.feed_filters';
   @override
   Future<void> reset() async {
-    final p = await SharedPreferences.getInstance();
+    final SharedPreferences p = await SharedPreferences.getInstance();
     await p.remove(_key);
   }
 }
@@ -24,7 +26,7 @@ class ProfileNudgeStore implements PersistedStore {
   static const String _key = 'connect.profile_nudge';
   @override
   Future<void> reset() async {
-    final p = await SharedPreferences.getInstance();
+    final SharedPreferences p = await SharedPreferences.getInstance();
     await p.remove(_key);
   }
 }
@@ -34,21 +36,33 @@ class OnboardingDraftStore implements PersistedStore {
   static const String _key = 'connect.onboarding_draft';
   @override
   Future<void> reset() async {
-    final p = await SharedPreferences.getInstance();
+    final SharedPreferences p = await SharedPreferences.getInstance();
     await p.remove(_key);
   }
 }
 
-/// Telemetry consent must be FORCED to opt-out on sign-out per GDPR
-/// (spec §5.1). The Phase 14 telemetry controller will subscribe to this
-/// key; here we just persist the boolean.
+/// Telemetry consent must be FORCED to opt-out on sign-out per spec §11.3
+/// (GDPR).
+///
+/// Delegates to [TelemetryStore.signOutReset] so the canonical keys
+/// (`telemetry.analyticsEnabled`, `telemetry.crashReportsEnabled`) are
+/// written. Also clears the legacy `connect.telemetry_consent` key for
+/// upgrade paths from Phase 2's placeholder implementation.
 class TelemetryConsentStore implements PersistedStore {
-  static const String _key = 'connect.telemetry_consent';
+  TelemetryConsentStore({TelemetryStore? store})
+      : _store = store ?? TelemetryStore();
 
-  /// Set the consent flag to `false` (the canonical sign-out behaviour).
+  /// Legacy SharedPreferences key from Phase 2's placeholder. We wipe it
+  /// on sign-out so an upgraded install doesn't carry stale consent state.
+  static const String _legacyKey = 'connect.telemetry_consent';
+
+  final TelemetryStore _store;
+
+  /// Force both telemetry flags to `false` and clear the legacy key.
   Future<void> forceOptOut() async {
-    final p = await SharedPreferences.getInstance();
-    await p.setBool(_key, false);
+    await _store.signOutReset();
+    final SharedPreferences p = await SharedPreferences.getInstance();
+    await p.remove(_legacyKey);
   }
 
   @override
@@ -77,7 +91,7 @@ class PersistedStores {
   /// Reset every persisted store in parallel and force telemetry opt-out.
   /// Tolerates individual failures — never blocks sign-out.
   Future<void> resetAllOnSignOut() async {
-    await Future.wait(<Future<void>>[
+    await Future.wait<void>(<Future<void>>[
       feedFilters.reset(),
       profileNudge.reset(),
       onboardingDraft.reset(),

@@ -286,6 +286,9 @@ void main() {
         'connect.feed_filters': 'x',
         'connect.profile_nudge': 'x',
         'connect.onboarding_draft': 'x',
+        'telemetry.analyticsEnabled': true,
+        'telemetry.crashReportsEnabled': true,
+        // Legacy Phase 2 key seeded to verify it's wiped on sign-out.
         'connect.telemetry_consent': true,
       });
 
@@ -319,7 +322,11 @@ void main() {
       expect(prefs.getString('connect.feed_filters'), isNull);
       expect(prefs.getString('connect.profile_nudge'), isNull);
       expect(prefs.getString('connect.onboarding_draft'), isNull);
-      expect(prefs.getBool('connect.telemetry_consent'), isFalse);
+      // Canonical telemetry keys forced to false:
+      expect(prefs.getBool('telemetry.analyticsEnabled'), isFalse);
+      expect(prefs.getBool('telemetry.crashReportsEnabled'), isFalse);
+      // Legacy key cleared:
+      expect(prefs.getBool('connect.telemetry_consent'), isNull);
     });
 
     test('proceeds when no token stored and no deregister callback', () async {
@@ -352,6 +359,41 @@ void main() {
       );
       await svc.signOut();
       expect(called, isTrue);
+    });
+
+    test('signOut calls resetTelemetry after store reset', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final order = <String>[];
+      final auth = FakeAuthGateway();
+      auth.onSignOut = ({SignOutScope scope = SignOutScope.local}) async {
+        order.add('auth.signOut');
+      };
+      final svc = AuthService(
+        auth: auth,
+        functions: FakeFunctionsGateway(),
+        tokens: FcmTokenStore(),
+        stores: PersistedStores(),
+        resetTelemetry: () async {
+          order.add('telemetry.reset');
+        },
+      );
+      await svc.signOut();
+      // Telemetry reset MUST run AFTER auth.signOut.
+      expect(order, <String>['auth.signOut', 'telemetry.reset']);
+    });
+
+    test('signOut swallows resetTelemetry errors', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final auth = FakeAuthGateway();
+      auth.onSignOut = ({SignOutScope scope = SignOutScope.local}) async {};
+      final svc = AuthService(
+        auth: auth,
+        functions: FakeFunctionsGateway(),
+        tokens: FcmTokenStore(),
+        stores: PersistedStores(),
+        resetTelemetry: () async => throw Exception('boom'),
+      );
+      await svc.signOut(); // must complete without throwing
     });
   });
 }

@@ -5,6 +5,7 @@ import '../../../core/supabase/supabase_client.dart';
 import '../../push/data/fcm_token_store.dart';
 import '../../push/providers/fcm_lifecycle_provider.dart';
 import '../../settings/data/persisted_stores.dart';
+import '../../settings/providers/telemetry_provider.dart';
 import '../data/auth_service.dart';
 import '../data/profile_repository.dart';
 import '../data/social_auth_service.dart';
@@ -149,7 +150,11 @@ final Provider<AuthService> authServiceProvider = Provider<AuthService>((
     tokens: ref.watch(fcmTokenStoreProvider),
     stores: ref.watch(persistedStoresProvider),
     deregisterFcm: ref.watch(fcmDeregisterProvider),
-    // resetTelemetry wired in Phase 14.
+    // Phase 14: refresh the in-memory telemetry notifier after the persisted
+    // store reset so any subscribed UI reflects the opt-out immediately
+    // without waiting for the next rebuild.
+    resetTelemetry: () =>
+        ref.read(telemetryProvider.notifier).signOutReset(),
   );
 });
 
