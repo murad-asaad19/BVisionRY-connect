@@ -2,7 +2,7 @@ import 'package:connect_mobile/features/meetings/domain/meeting_review.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('MeetingReviewOutcome.fromJson maps the three DB values', () {
+  test('MeetingReviewOutcome.fromJson maps the four DB values', () {
     expect(
       MeetingReviewOutcome.fromJson('useful'),
       MeetingReviewOutcome.useful,
@@ -15,7 +15,18 @@ void main() {
       MeetingReviewOutcome.fromJson('no_show'),
       MeetingReviewOutcome.noShow,
     );
+    expect(
+      MeetingReviewOutcome.fromJson('rescheduled'),
+      MeetingReviewOutcome.rescheduled,
+    );
     expect(() => MeetingReviewOutcome.fromJson('bad'), throwsArgumentError);
+  });
+
+  test('MeetingReviewOutcome.toJson round-trips the four DB values', () {
+    expect(MeetingReviewOutcome.useful.toJson(), 'useful');
+    expect(MeetingReviewOutcome.notUseful.toJson(), 'not_useful');
+    expect(MeetingReviewOutcome.noShow.toJson(), 'no_show');
+    expect(MeetingReviewOutcome.rescheduled.toJson(), 'rescheduled');
   });
 
   test('MeetingReviewOutcome.ratingScore matches get_profile_signals mapping',
@@ -23,6 +34,7 @@ void main() {
     expect(MeetingReviewOutcome.useful.ratingScore, 5);
     expect(MeetingReviewOutcome.notUseful.ratingScore, 2);
     expect(MeetingReviewOutcome.noShow.ratingScore, 1);
+    expect(MeetingReviewOutcome.rescheduled.ratingScore, 3);
   });
 
   test('MeetingReview.fromJson parses RPC row', () {

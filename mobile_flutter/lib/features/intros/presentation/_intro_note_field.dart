@@ -26,22 +26,28 @@ bool isIntroNoteInRange(String value) {
 }
 
 /// Composer field used by the three intro sheets (direct, warm-request,
-/// warm-forward) — wraps [AppInput] in multiline mode with the X / max
-/// (min) counter line beneath, turning red when the trimmed length
-/// falls outside `[80, 400]`. Stays purely presentational so callers
-/// hold the controller state.
+/// warm-forward) — wraps [AppInput] in multiline mode with the gallery's
+/// label row (`Your note    160/400`) above the textarea and the
+/// safety-check / 80-char-min hint as a small-note beneath. Stays purely
+/// presentational so callers hold the controller state.
 class IntroNoteField extends StatelessWidget {
   const IntroNoteField({
     super.key,
     required this.value,
     required this.onChanged,
     this.placeholderKey = 'intros.compose.placeholder',
+    this.labelKey = 'intros.compose.noteLabel',
+    this.hintKey = 'intros.compose.noteHint',
+    this.showHint = true,
     this.enabled = true,
   });
 
   final String value;
   final ValueChanged<String> onChanged;
   final String placeholderKey;
+  final String labelKey;
+  final String hintKey;
+  final bool showHint;
   final bool enabled;
 
   @override
@@ -53,6 +59,35 @@ class IntroNoteField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
+        // Label row: "Your note            160/400" (counter right-aligned
+        // inline with the label, gold-text colour per the gallery).
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: Text(
+                context.t(labelKey),
+                style: typo.displayXs.copyWith(
+                  color: colors.navy,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                ),
+              ),
+            ),
+            Text(
+              context.t(
+                'intros.compose.counterShort',
+                vars: <String, Object>{
+                  'count': trimmed,
+                  'max': kIntroNoteMax,
+                },
+              ),
+              style: typo.bodyXs.copyWith(
+                color: inRange ? colors.gold : colors.danger,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
         AppInput(
           key: const ValueKey('intro-note-field'),
           value: value,
@@ -69,23 +104,13 @@ class IntroNoteField extends StatelessWidget {
           maxLines: 6,
           enabled: enabled,
         ),
-        const SizedBox(height: 4),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Text(
-            context.t(
-              'intros.compose.counter',
-              vars: <String, Object>{
-                'count': trimmed,
-                'max': kIntroNoteMax,
-                'min': kIntroNoteMin,
-              },
-            ),
-            style: typo.bodyXs.copyWith(
-              color: inRange ? colors.muted : colors.danger,
-            ),
+        if (showHint) ...<Widget>[
+          const SizedBox(height: 6),
+          Text(
+            context.t(hintKey),
+            style: typo.bodyXs.copyWith(color: colors.muted),
           ),
-        ),
+        ],
       ],
     );
   }

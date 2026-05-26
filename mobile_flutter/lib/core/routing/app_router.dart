@@ -17,10 +17,12 @@ import '../../features/discovery/presentation/search_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/intros/presentation/inbox_screen.dart';
 import '../../features/intros/presentation/intro_detail_screen.dart';
+import '../../features/meetings/presentation/meeting_review_screen.dart';
 import '../../features/meetings/presentation/post_meeting_prompt_modal.dart';
 import '../../features/office_hours/presentation/my_bookings_screen.dart';
 import '../../features/office_hours/presentation/office_hours_settings_screen.dart';
 import '../../features/onboarding/presentation/about_step.dart';
+import '../../features/onboarding/presentation/bio_draft_step.dart';
 import '../../features/onboarding/presentation/goal_step.dart';
 import '../../features/onboarding/presentation/identity_step.dart';
 import '../../features/onboarding/presentation/roles_step.dart';
@@ -31,6 +33,7 @@ import '../../features/opportunities/presentation/new_opportunity_screen.dart';
 import '../../features/opportunities/presentation/opportunities_feed_screen.dart';
 import '../../features/opportunities/presentation/opportunity_detail_screen.dart';
 import '../../features/privacy/presentation/blocked_users_screen.dart';
+import '../../features/privacy/presentation/reports_history_screen.dart';
 import '../../features/profile/presentation/profile_edit_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/profile/presentation/public_profile_screen.dart';
@@ -95,6 +98,28 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
           state.matchedLocation.startsWith('/onboarding/')) {
         return null;
       }
+      // Same carve-out for the unauthed auth family: when the guard says
+      // /sign-in, let the user move freely between /sign-in, /sign-up,
+      // /auth, and /suspended without bouncing them back.
+      if (next == Routes.signIn &&
+          (state.matchedLocation == Routes.signUp ||
+              state.matchedLocation == Routes.authCallback ||
+              state.matchedLocation == Routes.suspended)) {
+        return null;
+      }
+      // Once the guard decided the user is fully ready (default landing
+      // is /home), let them push to any feature route freely. Only force
+      // a redirect when they're stuck on an auth / onboarding / suspended
+      // gate that no longer applies.
+      if (next == Routes.home &&
+          state.matchedLocation != Routes.splash &&
+          state.matchedLocation != Routes.signIn &&
+          state.matchedLocation != Routes.signUp &&
+          state.matchedLocation != Routes.authCallback &&
+          state.matchedLocation != Routes.suspended &&
+          !state.matchedLocation.startsWith('/onboarding/')) {
+        return null;
+      }
       return next;
     },
     routes: <RouteBase>[
@@ -119,6 +144,10 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
       GoRoute(
         path: Routes.onboardingRoles,
         builder: (_, __) => const RolesStep(),
+      ),
+      GoRoute(
+        path: Routes.onboardingBio,
+        builder: (_, __) => const BioDraftStep(),
       ),
       GoRoute(
         path: Routes.onboardingAbout,
@@ -148,6 +177,10 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
       GoRoute(
         path: Routes.settingsBlocked,
         builder: (_, __) => const BlockedUsersScreen(),
+      ),
+      GoRoute(
+        path: Routes.reportsHistory,
+        builder: (_, __) => const ReportsHistoryScreen(),
       ),
       GoRoute(
         path: Routes.settingsOfficeHours,
@@ -208,13 +241,23 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
         ),
       ),
       // Push deep link from a `meeting_review_pending` notification.
-      // Opens the full-screen review modal pre-bound to the meeting id.
+      // G2 "Did this meeting happen?" prompt — on Yes the modal pushes to
+      // the G3 full-screen review (`/review/full`).
       GoRoute(
         path: '/meetings/:meetingId/review',
         builder: (_, GoRouterState state) => PostMeetingPromptModal(
           meetingId: state.pathParameters['meetingId']!,
           peerHandle: state.uri.queryParameters['handle'],
           whenLabel: state.uri.queryParameters['when'],
+        ),
+      ),
+      // G3 — full-screen post-connection review. Reached from the G2 prompt
+      // (Yes-it-happened) or as a stand-alone deep-link target.
+      GoRoute(
+        path: '/meetings/:meetingId/review/full',
+        builder: (_, GoRouterState state) => MeetingReviewScreen(
+          meetingId: state.pathParameters['meetingId']!,
+          peerHandle: state.uri.queryParameters['handle'],
         ),
       ),
       // Settings, Legal & Language — outside the StatefulShellRoute so the

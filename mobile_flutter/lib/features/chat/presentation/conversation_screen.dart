@@ -168,10 +168,19 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     ref.invalidate(conversationOverviewProvider);
   }
 
-  Future<void> _openProposeMeetingSheet() async {
+  Future<void> _openProposeMeetingSheet({
+    String? peerName,
+    String? peerHandle,
+    String? peerPhotoUrl,
+  }) async {
     await showAppBottomSheet<void>(
       context: context,
-      child: ProposeMeetingSheet(conversationId: widget.conversationId),
+      child: ProposeMeetingSheet(
+        conversationId: widget.conversationId,
+        peerName: peerName,
+        peerHandle: peerHandle,
+        peerPhotoUrl: peerPhotoUrl,
+      ),
     );
   }
 
@@ -289,6 +298,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         peerHeadline: peer?.headline,
         isMuted: overview?.isMuted ?? false,
         isVerified: peer?.isVerified ?? false,
+        peerRole: peer?.primaryRole,
         isTyping: isTyping,
         onTapProfile: () {
           final handle = overview?.peerHandle ?? peer?.handle;
@@ -347,7 +357,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             onSendText: _sendText,
             onPickImage: _pickAndSendImage,
             onRecordVoice: _openVoiceSheet,
-            onProposeMeeting: _openProposeMeetingSheet,
+            onProposeMeeting: () => _openProposeMeetingSheet(
+              peerName: overview?.peerName ?? peer?.name,
+              peerHandle: overview?.peerHandle ?? peer?.handle,
+              peerPhotoUrl: overview?.peerPhotoUrl ?? peer?.photoUrl,
+            ),
           ),
         ],
       ),

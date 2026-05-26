@@ -10,8 +10,10 @@ import '../data/intros_service.dart';
 import '../providers/intros_providers.dart';
 import '_intro_note_field.dart';
 
-/// Hard daily cap surfaced by `intros_today_count()` — the sender-side
-/// limit kicks in at 20 and is enforced server-side via P0001/daily_cap.
+/// Hard daily cap surfaced by `intros_today_count()` for the *recipient*
+/// inbound flow — server-side P0001 fires at 20 inbound intros per day.
+/// The sender-side cap is tier-aware; see
+/// [introsDailyCapForTier] in `providers/intros_providers.dart`.
 const int kIntrosDailyCapHard = 20;
 
 /// Recipient preview shape passed into [showSendIntroSheet]. Keeping this
@@ -105,6 +107,8 @@ class _SendIntroSheetState extends ConsumerState<SendIntroSheet> {
   @override
   Widget build(BuildContext context) {
     final bool valid = isIntroNoteInRange(_note);
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final typo = Theme.of(context).extension<AppTypography>()!;
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
         16,
@@ -116,16 +120,22 @@ class _SendIntroSheetState extends ConsumerState<SendIntroSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          // Sheet title — mirrors the gallery's "Send intro to Omar" header.
+          Text(
+            context.t(
+              'intros.compose.sheetTitle',
+              vars: <String, Object>{'name': widget.recipient.name},
+            ),
+            style: typo.displayLg.copyWith(color: colors.navy, fontSize: 17),
+          ),
+          const SizedBox(height: 10),
           _RecipientPreview(recipient: widget.recipient),
-          const SizedBox(height: 16),
-          _ComposeHint(),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           IntroNoteField(
             value: _note,
             onChanged: (v) => setState(() => _note = v),
             enabled: !_sending,
           ),
-          const _TodayStatusLine(),
           if (_errorKey != null) ...[
             const SizedBox(height: 12),
             AppBanner(
@@ -133,43 +143,19 @@ class _SendIntroSheetState extends ConsumerState<SendIntroSheet> {
               child: Text(context.t(_errorKey!)),
             ),
           ],
-          const SizedBox(height: 16),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: AppButton(
-                  label: context.t('intros.compose.cancel'),
-                  variant: AppButtonVariant.outline,
-                  onPressed: _sending
-                      ? null
-                      : () => Navigator.of(context).maybePop(false),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: AppButton(
-                  key: const ValueKey('send-intro-sheet-send'),
-                  label: context.t('intros.compose.send'),
-                  loading: _sending,
-                  onPressed: (valid && !_sending) ? _send : null,
-                ),
-              ),
-            ],
+          const SizedBox(height: 14),
+          AppButton(
+            key: const ValueKey('send-intro-sheet-send'),
+            label: context.t('intros.compose.sendIntro'),
+            loading: _sending,
+            onPressed: (valid && !_sending) ? _send : null,
+          ),
+          const Padding(
+            padding: EdgeInsets.only(top: 8),
+            child: _TodayStatusLine(),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ComposeHint extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    final typo = Theme.of(context).extension<AppTypography>()!;
-    return Text(
-      context.t('intros.compose.hint'),
-      style: typo.bodyMd.copyWith(color: colors.muted),
     );
   }
 }
@@ -184,53 +170,66 @@ class _RecipientPreview extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColors>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
     final handle = recipient.handle;
-    return Row(
-      children: <Widget>[
-        Avatar(
-          name: recipient.name,
-          photoUrl: recipient.photoUrl,
-          size: 32,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Flexible(
-                    child: Text(
-                      recipient.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: typo.displaySm.copyWith(color: colors.navy),
-                    ),
-                  ),
-                  if (recipient.verified) ...[
-                    const SizedBox(width: 6),
-                    Icon(
-                      Icons.verified,
-                      size: 16,
-                      color: colors.gold,
-                    ),
-                  ],
-                ],
-              ),
-              if (handle != null && handle.isNotEmpty)
-                Text(
-                  '@$handle',
-                  style: typo.bodyMd.copyWith(color: colors.muted),
-                ),
-            ],
+    // Gold-pale rounded rectangle chrome mirrors `.ucard.featured` from the
+    // gallery so the recipient block reads as a quick-reference card rather
+    // than a bare name.
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+      decoration: BoxDecoration(
+        color: colors.goldPale,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: <Widget>[
+          Avatar(
+            name: recipient.name,
+            photoUrl: recipient.photoUrl,
+            size: 32,
           ),
-        ),
-      ],
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Flexible(
+                      child: Text(
+                        recipient.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style:
+                            typo.displaySm.copyWith(color: colors.navy),
+                      ),
+                    ),
+                    if (recipient.verified) ...[
+                      const SizedBox(width: 6),
+                      Icon(
+                        Icons.verified,
+                        size: 16,
+                        color: colors.gold,
+                      ),
+                    ],
+                  ],
+                ),
+                if (handle != null && handle.isNotEmpty)
+                  Text(
+                    '@$handle',
+                    style: typo.bodyMd.copyWith(color: colors.muted),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-/// `Today's intros: X/20` heads-up line shown beneath the field. Hidden
-/// while the count is loading so the layout doesn't jitter.
+/// `Today's intros: X / cap` heads-up line shown beneath the field. Hidden
+/// while the count is loading so the layout doesn't jitter. The cap is
+/// tier-aware via [dailyIntroCapProvider].
 class _TodayStatusLine extends ConsumerWidget {
   const _TodayStatusLine();
 
@@ -239,22 +238,21 @@ class _TodayStatusLine extends ConsumerWidget {
     final colors = Theme.of(context).extension<AppColors>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
     final asyncCount = ref.watch(todayCountProvider);
+    final int cap = ref.watch(dailyIntroCapProvider);
     return asyncCount.maybeWhen(
       data: (int count) {
-        final atCap = count >= kIntrosDailyCapHard;
-        return Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(
-            context.t(
-              'intros.compose.todaysIntros',
-              vars: <String, Object>{
-                'count': count,
-                'cap': kIntrosDailyCapHard,
-              },
-            ),
-            style: typo.bodyXs.copyWith(
-              color: atCap ? colors.danger : colors.muted,
-            ),
+        final atCap = count >= cap;
+        return Text(
+          context.t(
+            'intros.compose.todaysIntros',
+            vars: <String, Object>{
+              'count': count,
+              'cap': cap,
+            },
+          ),
+          textAlign: TextAlign.center,
+          style: typo.bodyXs.copyWith(
+            color: atCap ? colors.danger : colors.muted,
           ),
         );
       },

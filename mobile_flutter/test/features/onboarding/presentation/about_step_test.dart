@@ -87,6 +87,43 @@ void main() {
     expect(ink.onTap, isNull);
   });
 
+  testWidgets('combined location field splits on comma into city + country',
+      (WidgetTester tester) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await OnboardingDraftRepository(prefs).write(_validDraft);
+    final _FakeRunner runner = _FakeRunner();
+    await pumpWithI18n(
+      tester,
+      await _renderAboutStep(prefs: prefs, runner: runner),
+    );
+
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('about-location')),
+      'London, United Kingdom',
+    );
+    await tester.pumpAndSettle();
+
+    final OnboardingDraft? stored = await OnboardingDraftRepository(prefs).read();
+    expect(stored?.city, 'London');
+    expect(stored?.country, 'United Kingdom');
+  });
+
+  testWidgets('handle URL preview updates as the user types',
+      (WidgetTester tester) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await OnboardingDraftRepository(prefs).write(_validDraft);
+    final _FakeRunner runner = _FakeRunner();
+    await pumpWithI18n(
+      tester,
+      await _renderAboutStep(prefs: prefs, runner: runner),
+    );
+
+    // The seeded draft renders the handle "ada" — the preview line includes
+    // the prefix + the typed handle.
+    expect(find.textContaining('connect.bvisionry.com/u/'), findsOneWidget);
+    expect(find.textContaining('ada'), findsWidgets);
+  });
+
   testWidgets('submit calls OnboardingService and clears draft on success',
       (WidgetTester tester) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();

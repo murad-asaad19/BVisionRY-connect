@@ -16,6 +16,7 @@ import '../../onboarding/domain/onboarding_schemas.dart';
 import '../domain/profile.dart';
 import '../providers/own_profile_controller.dart';
 import 'avatar_picker_field.dart';
+import 'goal_refresh_card.dart';
 
 /// Role kinds the form chip-selects from. Mirrors Phase-3's `RolesStep`
 /// catalog — kept local here so this screen does not depend on Phase-3
@@ -49,6 +50,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
   // Local form state — initialised lazily inside the QueryState data builder
   // so we never have to branch on a null profile inside the form widgets.
   late String _name;
+  late String _handle;
+  late String _originalHandle;
   late String _headline;
   late String _bio;
   late String _goalText;
@@ -69,6 +72,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     if (_bound) return;
     _bound = true;
     _name = p.name ?? '';
+    _handle = p.handle ?? '';
+    _originalHandle = p.handle ?? '';
     _headline = p.headline ?? '';
     _bio = p.bio ?? '';
     _goalText = p.goalText ?? '';
@@ -118,6 +123,12 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     if (NameInput.dirty(_name).error != null) {
       return 'profile.errors.nameLen';
     }
+    // Handle: re-use the same regex enforced by the citext CHECK constraint
+    // on `profiles.handle` (spec §3.1) so the form errors mirror the DB.
+    final String handle = _handle.trim();
+    if (HandleInput.dirty(handle).error != null) {
+      return 'profile.errors.handleInvalid';
+    }
     final String h = _headline.trim();
     if (h.isNotEmpty && (h.length < 5 || h.length > 120)) {
       return 'profile.errors.headlineLen';
@@ -154,6 +165,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       _saveError = null;
     });
     try {
+      final String nextHandle = _handle.trim();
       await ref
           .read(ownProfileControllerProvider.notifier)
           .updateOwnProfile(<String, dynamic>{
@@ -167,6 +179,10 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
         'city': _city.trim(),
         'country': _country.trim(),
         if (_photoUrl != null) 'photo_url': _photoUrl,
+        // Only send the handle when it actually changed — keeps the patch
+        // smaller and avoids the 90-day redirect trigger on no-op edits.
+        if (nextHandle.isNotEmpty && nextHandle != _originalHandle)
+          'handle': nextHandle,
       });
       if (!mounted) return;
       ref.read(toastServiceProvider.notifier).showToast(
@@ -207,6 +223,14 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
               context.go('/profile');
             }
           },
+          actions: <TopBarAction>[
+            TopBarAction(
+              key: const Key('profileEdit.topBarSave'),
+              icon: Icons.check,
+              label: context.t('profile.edit.save'),
+              onPressed: _saving ? () {} : _save,
+            ),
+          ],
         ),
       ),
       body: QueryState<Profile?>(
@@ -219,6 +243,17 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
           return ListView(
             padding: EdgeInsets.fromLTRB(14, spacing.card, 14, 32),
             children: <Widget>[
+              if (profile.isGoalStale) ...<Widget>[
+                GoalRefreshCard(
+                  key: const Key('profileEdit.goalRefresh'),
+                  profile: profile,
+                  // Already on the edit screen — surface a passive cue by
+                  // focusing the goal field is overkill; the banner copy is
+                  // enough. Tapping "Update" is effectively a no-op confirm.
+                  onUpdate: () {},
+                ),
+                SizedBox(height: spacing.card),
+              ],
               Center(
                 child: AvatarPickerField(
                   name: _name,
@@ -245,22 +280,14 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
               AppInput(
                 key: const Key('profileEdit.handle'),
                 label: context.t('profile.fields.handle'),
-                value: '@${profile.handle ?? ''}',
-                enabled: false,
+                value: _handle,
+                onChanged: (String v) => setState(() => _handle = v),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 4),
-                child: Row(
-                  children: <Widget>[
-                    Icon(Icons.lock_outline, size: 12, color: colors.muted),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        context.t('profile.handleLocked'),
-                        style: typo.bodyXs.copyWith(color: colors.muted),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  context.t('profile.handleRedirectNote'),
+                  style: typo.bodyXs.copyWith(color: colors.muted),
                 ),
               ),
               SizedBox(height: spacing.card),

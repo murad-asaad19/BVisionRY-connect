@@ -41,6 +41,9 @@ void main() {
       overrides: <Override>[
         introsServiceProvider.overrideWithValue(introsService),
         currentUserIdProvider.overrideWithValue('me'),
+        // Bypass the profileProvider → sessionProvider → Supabase chain — the
+        // cap value is irrelevant for these tests.
+        dailyIntroCapProvider.overrideWith((_) => 5),
       ],
     );
     await pumpWithI18n(tester, widget);

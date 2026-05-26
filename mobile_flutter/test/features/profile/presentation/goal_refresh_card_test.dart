@@ -36,7 +36,7 @@ void main() {
       expect(updateTapped, isTrue);
     });
 
-    testWidgets('collapses when goal is fresh (< 56 days)', (
+    testWidgets('collapses when goal is fresh (< 28 days)', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(

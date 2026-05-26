@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/i18n/i18n.dart';
-import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/widgets.dart';
@@ -12,20 +10,23 @@ import '../providers/auth_service_provider.dart';
 import 'auth_shell.dart';
 import 'social_sign_in_buttons.dart';
 
-/// Identifier-or-email + password sign-in form.
+/// Email + password sign-in form, aligned with gallery A3.
 ///
 /// Three auth paths converge here:
 ///
 /// 1. Tap **Sign in** → `authService.signInWithIdentifier(...)` (routes to
 ///    `signInWithPassword` for emails, or the `auth-handle-login` edge
-///    function for `@handle`).
-/// 2. Tap **Send magic link** → `authService.sendMagicLink(...)`, only if
-///    the identifier looks like a full email (`a@b.c` shape).
+///    function for `@handle`). The visible label is "Email" — the
+///    controller still accepts a handle if a user types one, but the
+///    gallery surface promises email only.
+/// 2. Tap **Forgot password?** → `authService.sendMagicLink(...)`. This is
+///    the only entry point for the magic-link path now that the standalone
+///    button is gone (gallery has no separate "Send magic link" CTA).
 /// 3. Tap an SSO button → `SocialAuthService.signInWithApple|Google`.
 ///
 /// On success, the session changes propagate through `sessionProvider` and
 /// `routeGuardProvider` triggers the navigator to redirect — this screen
-/// never calls `context.go(...)` itself except for the SignUp link.
+/// never calls `context.go(...)` itself.
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
 
@@ -85,10 +86,35 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     );
   }
 
-  Future<void> _onMagicLink() async {
+  Future<void> _onApple() => _runGuard(
+        () async => ref.read(socialAuthServiceProvider).signInWithApple(),
+        AuthMode.signIn,
+      );
+
+  Future<void> _onGoogle() => _runGuard(
+        () async => ref.read(socialAuthServiceProvider).signInWithGoogle(),
+        AuthMode.signIn,
+      );
+
+  /// Forgot-password tap → sends a magic link to the entered email. If the
+  /// field is empty or doesn't look like an email, surfaces an inline
+  /// instruction dialog instead of firing the request.
+  Future<void> _onForgot() async {
     final String email = _identifier.trim();
     if (email.isEmpty || !_looksLikeEmail) {
-      setState(() => _error = context.t('auth.errors.magicLinkNeedsEmail'));
+      await showDialog<void>(
+        context: context,
+        builder: (BuildContext ctx) => AlertDialog(
+          title: Text(ctx.t('auth.forgotPassword')),
+          content: Text(ctx.t('auth.forgotPwdInstructions')),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
       return;
     }
     await _runGuard(
@@ -101,32 +127,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             );
       },
       AuthMode.signIn,
-    );
-  }
-
-  Future<void> _onApple() => _runGuard(
-        () async => ref.read(socialAuthServiceProvider).signInWithApple(),
-        AuthMode.signIn,
-      );
-
-  Future<void> _onGoogle() => _runGuard(
-        () async => ref.read(socialAuthServiceProvider).signInWithGoogle(),
-        AuthMode.signIn,
-      );
-
-  Future<void> _onForgot() async {
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext ctx) => AlertDialog(
-        title: Text(ctx.t('auth.forgotPassword')),
-        content: Text(ctx.t('auth.forgotPwdInstructions')),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -143,18 +143,18 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             context.t('auth.signInTitle'),
             style: Theme.of(context).textTheme.displayMedium,
           ),
-          const SizedBox(height: 6),
-          Text(
-            context.t('auth.signInTagline'),
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: colors.muted),
-          ),
           SizedBox(height: spacing.section),
+          SocialSignInButtons(
+            onApple: _busy ? null : _onApple,
+            onGoogle: _busy ? null : _onGoogle,
+          ),
+          SizedBox(height: spacing.gutter),
+          AppDivider(label: context.t('signIn.or')),
+          SizedBox(height: spacing.gutter),
           AppInput(
             key: const Key('identifier-input'),
-            label: context.t('auth.emailOrUsername'),
-            placeholder: context.t('auth.identifierPlaceholder'),
+            label: context.t('auth.email'),
+            placeholder: context.t('auth.emailPlaceholder'),
             value: _identifier,
             onChanged: (String v) => setState(() => _identifier = v),
             keyboardType: TextInputType.emailAddress,
@@ -197,33 +197,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             label: context.t('auth.submitSignIn'),
             onPressed: _busy ? null : _onSubmit,
             loading: _busy,
-          ),
-          const SizedBox(height: 8),
-          AppButton(
-            key: const Key('magic-link-button'),
-            label: context.t('auth.magicLinkSubmit'),
-            onPressed: _busy ? null : _onMagicLink,
-            variant: AppButtonVariant.outline,
-          ),
-          SizedBox(height: spacing.section),
-          AppDivider(label: context.t('signIn.or')),
-          SizedBox(height: spacing.gutter),
-          SocialSignInButtons(
-            onApple: _busy ? null : _onApple,
-            onGoogle: _busy ? null : _onGoogle,
-          ),
-          SizedBox(height: spacing.section),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(context.t('auth.noAccount')),
-              const SizedBox(width: 6),
-              TextButton(
-                key: const Key('go-to-sign-up'),
-                onPressed: _busy ? null : () => context.push(Routes.signUp),
-                child: Text(context.t('auth.signUpCta')),
-              ),
-            ],
           ),
         ],
       ),

@@ -157,7 +157,7 @@ Future<Widget> _renderEditScreen({
 
 void main() {
   group('ProfileEditScreen', () {
-    testWidgets('handle field is rendered read-only per spec §17.5', (
+    testWidgets('handle field is editable with redirect note (D3)', (
       WidgetTester tester,
     ) async {
       final _RecordingProfileService svc = _RecordingProfileService();
@@ -165,13 +165,16 @@ void main() {
         await _renderEditScreen(profile: _baseProfile(), svc: svc),
       );
       await tester.pumpAndSettle();
+      // Gallery D3 (lines 1698-1700): handle is editable and a muted helper
+      // line explains the 90-day redirect side effect.
       final TextField handleField = tester.widget<TextField>(
         find.descendant(
           of: find.byKey(const Key('profileEdit.handle')),
           matching: find.byType(TextField),
         ),
       );
-      expect(handleField.enabled, isFalse);
+      expect(handleField.enabled, isTrue);
+      expect(find.textContaining('90 days'), findsOneWidget);
     });
 
     testWidgets('Save sends a patch via ProfileService.updateProfile', (
@@ -229,6 +232,15 @@ void main() {
     testWidgets(
       'debounced infer-goal-type re-runs on goal_text edit (≥20 chars)',
       (WidgetTester tester) async {
+        // The edit screen is longer than the default test viewport now that
+        // it surfaces a Save TopBar action + goal-refresh banner; widen the
+        // viewport so the goal_text field is in the rendered tree.
+        tester.view.physicalSize = const Size(420, 2400);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
         final _FakeInferService infer = _FakeInferService();
         final _RecordingProfileService svc = _RecordingProfileService();
         await tester.pumpWidget(

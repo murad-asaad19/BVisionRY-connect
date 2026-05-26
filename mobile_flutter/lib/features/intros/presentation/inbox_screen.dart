@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/i18n/i18n.dart';
+import '../../../core/routing/routes.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../connections/presentation/connection_row.dart';
 import '../../connections/providers/connections_provider.dart';
@@ -38,6 +40,28 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Live counts power the gallery's `Received (N) / Sent (N)` tab labels.
+    // We read these as AsyncValues and fall back to the bare label while a
+    // fetch is in flight so the tab strip never collapses to a different
+    // height between states.
+    final AsyncValue<List<Intro>> receivedAsync =
+        ref.watch(receivedIntrosProvider);
+    final AsyncValue<List<Intro>> sentAsync = ref.watch(sentIntrosProvider);
+    final String receivedLabel = receivedAsync.maybeWhen(
+      data: (List<Intro> list) => context.t(
+        'intros.tab.receivedCount',
+        vars: <String, Object>{'count': list.length},
+      ),
+      orElse: () => context.t('intros.tab.received'),
+    );
+    final String sentLabel = sentAsync.maybeWhen(
+      data: (List<Intro> list) => context.t(
+        'intros.tab.sentCount',
+        vars: <String, Object>{'count': list.length},
+      ),
+      orElse: () => context.t('intros.tab.sent'),
+    );
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(56),
@@ -54,11 +78,11 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
               options: <SegmentedOption<_InboxTab>>[
                 SegmentedOption<_InboxTab>(
                   value: _InboxTab.received,
-                  label: context.t('intros.tab.received'),
+                  label: receivedLabel,
                 ),
                 SegmentedOption<_InboxTab>(
                   value: _InboxTab.sent,
-                  label: context.t('intros.tab.sent'),
+                  label: sentLabel,
                 ),
                 SegmentedOption<_InboxTab>(
                   value: _InboxTab.connections,
@@ -128,6 +152,7 @@ class _ReceivedTab extends ConsumerWidget {
             return const _EmptyInbox(
               icon: LucideIcons.mailOpen,
               bodyKey: 'intros.empty.received',
+              showBrowseCta: true,
             );
           }
           return _IntroListView(intros: list, viewerIsRecipient: true);
@@ -156,6 +181,7 @@ class _SentTab extends ConsumerWidget {
             return const _EmptyInbox(
               icon: LucideIcons.send,
               bodyKey: 'intros.empty.sent',
+              showBrowseCta: true,
             );
           }
           return _IntroListView(intros: list, viewerIsRecipient: false);
@@ -221,10 +247,18 @@ class _IntroListView extends StatelessWidget {
 }
 
 class _EmptyInbox extends StatelessWidget {
-  const _EmptyInbox({required this.icon, required this.bodyKey});
+  const _EmptyInbox({
+    required this.icon,
+    required this.bodyKey,
+    this.showBrowseCta = false,
+  });
 
   final IconData icon;
   final String bodyKey;
+
+  /// When true, surfaces the gallery's E4 "Browse today's matches" gold
+  /// button so the empty state isn't a dead end. Routes to `/home`.
+  final bool showBrowseCta;
 
   @override
   Widget build(BuildContext context) {
@@ -236,6 +270,12 @@ class _EmptyInbox extends StatelessWidget {
           icon: icon,
           title: context.t('intros.empty.title'),
           body: context.t(bodyKey),
+          action: showBrowseCta
+              ? EmptyStateAction(
+                  label: context.t('intros.empty.browse'),
+                  onPressed: () => context.go(Routes.home),
+                )
+              : null,
         ),
       ],
     );

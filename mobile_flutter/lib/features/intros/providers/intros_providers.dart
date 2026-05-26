@@ -1,9 +1,46 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../auth/providers/profile_provider.dart';
 import '../../auth/providers/session_provider.dart';
 import '../data/intros_service.dart';
 import '../domain/intro.dart';
 import '../domain/intro_enums.dart';
+
+/// Account tier surfaced by the gallery's "free 5 / verified 15 / Pro 40"
+/// note. Today we only have a verified flag (`Profile.isVerified`); Pro will
+/// land when the subscription provider exists.
+enum IntrosTier { free, verified, pro }
+
+/// Lookup table the send sheet renders as `Today's intros: count / cap`.
+/// Centralised so the send sheet, profile gating, and any future settings
+/// surface all agree on the cap.
+const Map<IntrosTier, int> introsDailyCapForTier = <IntrosTier, int>{
+  IntrosTier.free: 5,
+  IntrosTier.verified: 15,
+  IntrosTier.pro: 40,
+};
+
+/// Resolves the caller's intro tier off the existing [profileProvider] read.
+/// Falls back to [IntrosTier.free] while the profile is loading so we never
+/// over-promise a verified cap to an unverified user.
+///
+/// Tests should override this with `accountTierProvider.overrideWith((_) => …)`
+/// rather than stub the whole profile chain.
+final AutoDisposeProvider<IntrosTier> accountTierProvider =
+    Provider.autoDispose<IntrosTier>((ref) {
+  final profile = ref.watch(profileProvider).asData?.value;
+  if (profile == null) return IntrosTier.free;
+  if (profile.isVerified) return IntrosTier.verified;
+  return IntrosTier.free;
+});
+
+/// Convenience derivative — returns the int cap straight away, so widgets
+/// don't need to know the [IntrosTier] enum.
+final AutoDisposeProvider<int> dailyIntroCapProvider =
+    Provider.autoDispose<int>((ref) {
+  final tier = ref.watch(accountTierProvider);
+  return introsDailyCapForTier[tier] ?? introsDailyCapForTier[IntrosTier.free]!;
+});
 
 /// Convenience accessor that flattens [currentSessionProvider] to the
 /// caller's user id. Returns `null` for signed-out users so list /

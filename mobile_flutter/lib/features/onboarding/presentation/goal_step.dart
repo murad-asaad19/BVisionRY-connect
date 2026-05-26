@@ -92,6 +92,11 @@ class _GoalStepState extends ConsumerState<GoalStep> {
             context.t('onboarding.goal.title'),
             style: typo.displayLg.copyWith(color: colors.navy),
           ),
+          SizedBox(height: spacing.card / 2),
+          Text(
+            context.t('onboarding.goal.helper'),
+            style: typo.bodyMd.copyWith(color: colors.muted),
+          ),
           SizedBox(height: spacing.card),
           AppInput(
             label: context.t('onboarding.goal.label'),
@@ -111,6 +116,11 @@ class _GoalStepState extends ConsumerState<GoalStep> {
             errorText: (!goalValid && draft.goalText.isNotEmpty)
                 ? context.t('onboarding.goal.errorRange')
                 : null,
+          ),
+          SizedBox(height: spacing.card / 2),
+          Text(
+            context.t('onboarding.goal.examplesNote'),
+            style: typo.bodySm.copyWith(color: colors.muted),
           ),
           SizedBox(height: spacing.card),
           _InferStatus(state: inferState),

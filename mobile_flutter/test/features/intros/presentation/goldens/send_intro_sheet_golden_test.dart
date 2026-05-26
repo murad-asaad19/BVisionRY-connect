@@ -31,6 +31,7 @@ void main() {
           localeLoaderProvider.overrideWithValue(loader),
           introsServiceProvider.overrideWithValue(stub()),
           currentUserIdProvider.overrideWithValue('me'),
+          dailyIntroCapProvider.overrideWith((_) => 5),
         ],
         child: const Scaffold(
           body: SendIntroSheet(

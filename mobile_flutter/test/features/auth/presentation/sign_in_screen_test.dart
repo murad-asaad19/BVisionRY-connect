@@ -82,7 +82,7 @@ void main() {
     expect(capPwd, 'pw345678');
   });
 
-  testWidgets('magic-link refuses non-email identifier', (
+  testWidgets('forgot-password refuses non-email identifier', (
     WidgetTester tester,
   ) async {
     final FakeAuthGateway auth = FakeAuthGateway();
@@ -96,12 +96,14 @@ void main() {
       find.byKey(const Key('identifier-input')),
       '@murad',
     );
-    await tester.tap(find.byKey(const Key('magic-link-button')));
+    await tester.tap(find.byKey(const Key('forgot-password-link')));
     await tester.pumpAndSettle();
+    // Non-email input: dialog opens with instructions, magic link never fires.
     expect(called, isFalse);
+    expect(find.text('OK'), findsOneWidget);
   });
 
-  testWidgets('magic-link sent on real email identifier', (
+  testWidgets('forgot-password sends magic link on real email identifier', (
     WidgetTester tester,
   ) async {
     final FakeAuthGateway auth = FakeAuthGateway();
@@ -115,12 +117,12 @@ void main() {
       find.byKey(const Key('identifier-input')),
       'a@b.com',
     );
-    await tester.tap(find.byKey(const Key('magic-link-button')));
+    await tester.tap(find.byKey(const Key('forgot-password-link')));
     await tester.pumpAndSettle();
     expect(capEmail, 'a@b.com');
   });
 
-  testWidgets('forgot password opens dialog with OK button', (
+  testWidgets('forgot password with empty identifier opens dialog', (
     WidgetTester tester,
   ) async {
     await pumpScreen(

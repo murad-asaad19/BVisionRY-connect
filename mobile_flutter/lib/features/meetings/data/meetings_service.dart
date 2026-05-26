@@ -37,13 +37,20 @@ class MeetingsService {
   final MeetingsGateway _gateway;
 
   /// `propose_meeting(p_conversation_id, p_slots, p_duration_minutes,
-  /// p_meeting_url, p_timezone)` returns the inserted row.
+  /// p_meeting_url, p_timezone, p_preferred_slot_index, p_note)` returns
+  /// the inserted row.
+  ///
+  /// [preferredSlotIndex] / [note] are forwarded only when set so older
+  /// server versions that don't expose the new params keep working — the
+  /// server ignores unknown named args.
   Future<MeetingProposal> proposeMeeting({
     required String conversationId,
     required List<DateTime> slots,
     required int durationMinutes,
     required String? meetingUrl,
     required String timezone,
+    int? preferredSlotIndex,
+    String? note,
   }) async {
     _validatePropose(
       slots: slots,
@@ -59,6 +66,9 @@ class MeetingsService {
           'p_duration_minutes': durationMinutes,
           'p_meeting_url': meetingUrl,
           'p_timezone': timezone,
+          if (preferredSlotIndex != null)
+            'p_preferred_slot_index': preferredSlotIndex,
+          if (note != null && note.isNotEmpty) 'p_note': note,
         },
       );
       return MeetingProposal.fromJson(_normaliseRow(raw));

@@ -7,11 +7,11 @@ import '../../../core/theme/app_spacing.dart';
 
 /// Navy/gold gradient wrapper for every auth screen.
 ///
-/// Visual reference: gallery sections A1–A3. The top is a full-width hero
-/// painted with `LinearGradient(navy → navyLight)`, holding the BVisionRY
-/// wordmark (Dosis 700, white) above the smaller "Connect" subtitle (Dosis
-/// 500, gold). Underneath, a rounded-top white card hosts the [child] —
-/// usually a form scrolled inside [SingleChildScrollView].
+/// Visual reference: gallery sections A2–A3. The full background paints a
+/// `LinearGradient(navy → navyLight)` (the hero stays visible even when the
+/// content scrolls). The wordmark + tagline sit at the top in white/gold,
+/// and the form is rendered as a distinct white card with rounded corners
+/// and a subtle shadow, inset by [AppSpacing.gutter] from each side.
 class AuthShell extends StatelessWidget {
   const AuthShell({super.key, required this.child, this.tagline});
 
@@ -29,82 +29,79 @@ class AuthShell extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colors.navy,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: <Widget>[
-            Container(
-              key: const Key('auth-shell-hero'),
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(
-                horizontal: spacing.gutter,
-                vertical: spacing.section,
-              ),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[colors.navy, colors.navyLight],
+      body: Container(
+        key: const Key('auth-shell-hero'),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: <Color>[colors.navy, colors.navyLight],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              spacing.gutter,
+              spacing.section,
+              spacing.gutter,
+              spacing.section,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Text(
+                  'BVisionRY',
+                  style: GoogleFonts.dosis(
+                    fontSize: 32,
+                    height: 36 / 32,
+                    color: colors.white,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
+                  ),
                 ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
+                const SizedBox(height: 2),
+                Text(
+                  'Connect',
+                  style: GoogleFonts.dosis(
+                    fontSize: 22,
+                    height: 26 / 22,
+                    color: colors.gold,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                if (tagline != null) ...<Widget>[
+                  const SizedBox(height: 10),
                   Text(
-                    'BVisionRY',
-                    style: GoogleFonts.dosis(
-                      fontSize: 32,
-                      height: 36 / 32,
-                      color: colors.white,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.2,
+                    tagline!,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      height: 20 / 14,
+                      color: colors.white.withValues(alpha: 0.85),
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Connect',
-                    style: GoogleFonts.dosis(
-                      fontSize: 22,
-                      height: 26 / 22,
-                      color: colors.gold,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.8,
-                    ),
-                  ),
-                  if (tagline != null) ...<Widget>[
-                    const SizedBox(height: 10),
-                    Text(
-                      tagline!,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        height: 20 / 14,
-                        color: colors.white.withValues(alpha: 0.85),
-                      ),
-                    ),
-                  ],
                 ],
-              ),
-            ),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(radii.modalTop),
-                    topRight: Radius.circular(radii.modalTop),
+                SizedBox(height: spacing.section),
+                Container(
+                  key: const Key('auth-shell-card'),
+                  decoration: BoxDecoration(
+                    color: colors.white,
+                    borderRadius: BorderRadius.circular(radii.card),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 24,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
+                  padding: EdgeInsets.all(spacing.gutter),
+                  child: child,
                 ),
-                child: SafeArea(
-                  top: false,
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(spacing.gutter),
-                    child: child,
-                  ),
-                ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

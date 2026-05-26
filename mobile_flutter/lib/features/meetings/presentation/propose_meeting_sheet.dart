@@ -15,18 +15,32 @@ import '../data/meetings_service.dart';
 /// Bottom-sheet used by the proposer to draft + send a meeting offer.
 ///
 /// Layout (gallery G1):
+/// - Chat-context header: peer avatar + name pinned to the top so the
+///   proposer always sees who they're proposing to.
 /// - 3 slot rows (slot 1 required, 2/3 optional). Each row launches a
-///   date + time picker; the result is shown formatted in the row label.
+///   date + time picker and exposes a leading ★/☆ that toggles the slot
+///   as the proposer's preferred time (mutually exclusive across rows).
 /// - Duration stepper: default 30, ±15, range 15–240.
 /// - Meeting URL `AppInput` (https-only — server enforces; client also
-///   blocks non-https before round-trip).
+///   blocks non-https before round-trip) + a muted ".ics handoff" hint.
+/// - Optional multi-line "Note (optional)" text field for context.
 /// - Timezone hint: auto-detected via [FlutterTimezone.getLocalTimezone];
 ///   user can't override in v1 (the value is sent to the server so it can
 ///   render times in the proposer's tz for the recipient).
+/// - Submit label: "Send proposal".
 class ProposeMeetingSheet extends ConsumerStatefulWidget {
-  const ProposeMeetingSheet({super.key, required this.conversationId});
+  const ProposeMeetingSheet({
+    super.key,
+    required this.conversationId,
+    this.peerName,
+    this.peerHandle,
+    this.peerPhotoUrl,
+  });
 
   final String conversationId;
+  final String? peerName;
+  final String? peerHandle;
+  final String? peerPhotoUrl;
 
   @override
   ConsumerState<ProposeMeetingSheet> createState() =>
@@ -37,7 +51,9 @@ class _ProposeMeetingSheetState extends ConsumerState<ProposeMeetingSheet> {
   final List<DateTime?> _slots = [null, null, null];
   int _duration = 30;
   String _url = '';
+  String _note = '';
   String _tz = 'UTC';
+  int? _preferredSlot;
   String? _error;
   bool _busy = false;
 
@@ -81,6 +97,12 @@ class _ProposeMeetingSheetState extends ConsumerState<ProposeMeetingSheet> {
     });
   }
 
+  void _togglePreferred(int index) {
+    setState(() {
+      _preferredSlot = _preferredSlot == index ? null : index;
+    });
+  }
+
   Future<void> _submit() async {
     if (_busy) return;
     setState(() {
@@ -89,6 +111,15 @@ class _ProposeMeetingSheetState extends ConsumerState<ProposeMeetingSheet> {
     });
     final navigator = Navigator.of(context);
     final selected = _slots.whereType<DateTime>().toList();
+    // The preferred-slot index references the full _slots array; remap it
+    // to the compacted [selected] list (skip rows the user left empty).
+    int? preferredCompactIndex;
+    if (_preferredSlot != null && _slots[_preferredSlot!] != null) {
+      preferredCompactIndex = 0;
+      for (var i = 0; i < _preferredSlot!; i++) {
+        if (_slots[i] != null) preferredCompactIndex = preferredCompactIndex! + 1;
+      }
+    }
     try {
       await ref.read(meetingsServiceProvider).proposeMeeting(
             conversationId: widget.conversationId,
@@ -96,6 +127,8 @@ class _ProposeMeetingSheetState extends ConsumerState<ProposeMeetingSheet> {
             durationMinutes: _duration,
             meetingUrl: _url.isEmpty ? null : _url,
             timezone: _tz,
+            preferredSlotIndex: preferredCompactIndex,
+            note: _note.isEmpty ? null : _note,
           );
       navigator.pop();
     } on AppException catch (e) {
@@ -117,6 +150,10 @@ class _ProposeMeetingSheetState extends ConsumerState<ProposeMeetingSheet> {
     final typo = Theme.of(context).extension<AppTypography>()!;
     final radii = Theme.of(context).extension<AppRadii>()!;
     final fmt = DateFormat.MMMd().add_jm();
+    final peerDisplay = (widget.peerName != null && widget.peerName!.isNotEmpty)
+        ? widget.peerName!
+        : (widget.peerHandle ?? '');
+    final hasPeer = peerDisplay.isNotEmpty;
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.viewInsetsOf(context).bottom,
@@ -128,6 +165,42 @@ class _ProposeMeetingSheetState extends ConsumerState<ProposeMeetingSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (hasPeer) ...[
+                Row(
+                  children: [
+                    Avatar(
+                      name: peerDisplay,
+                      photoUrl: widget.peerPhotoUrl,
+                      size: 38,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            peerDisplay,
+                            style:
+                                typo.displayMd.copyWith(color: colors.navy),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (widget.peerHandle != null &&
+                              widget.peerHandle!.isNotEmpty &&
+                              widget.peerHandle != peerDisplay)
+                            Text(
+                              '@${widget.peerHandle}',
+                              style: typo.bodySm
+                                  .copyWith(color: colors.muted),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+              ],
               Text(
                 context.t('meetings.propose.title'),
                 style: typo.displayMd.copyWith(color: colors.navy),
@@ -144,7 +217,10 @@ class _ProposeMeetingSheetState extends ConsumerState<ProposeMeetingSheet> {
                   index: i,
                   value: _slots[i],
                   fmt: fmt,
+                  isPreferred: _preferredSlot == i,
                   onTap: _busy ? null : () => _pickSlot(i),
+                  onTogglePreferred:
+                      (_busy || _slots[i] == null) ? null : () => _togglePreferred(i),
                 ),
                 const SizedBox(height: 8),
               ],
@@ -190,6 +266,23 @@ class _ProposeMeetingSheetState extends ConsumerState<ProposeMeetingSheet> {
                 autocorrect: false,
                 enabled: !_busy,
                 onChanged: (v) => _url = v,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                context.t('meetings.propose.icsHelper'),
+                style: typo.bodyXs.copyWith(color: colors.muted),
+              ),
+              const SizedBox(height: 12),
+              AppInput(
+                key: const Key('propose-note'),
+                value: _note,
+                label: context.t('meetings.propose.noteLabel'),
+                placeholder: context.t('meetings.propose.notePlaceholder'),
+                multiline: true,
+                minLines: 2,
+                maxLines: 4,
+                enabled: !_busy,
+                onChanged: (v) => _note = v,
               ),
               const SizedBox(height: 8),
               Container(
@@ -240,7 +333,7 @@ class _ProposeMeetingSheetState extends ConsumerState<ProposeMeetingSheet> {
                   const SizedBox(width: 8),
                   AppButton(
                     key: const Key('propose-submit'),
-                    label: context.t('meetings.propose.send'),
+                    label: context.t('meetings.propose.sendProposal'),
                     fullWidth: false,
                     size: AppButtonSize.small,
                     loading: _busy,
@@ -262,13 +355,17 @@ class _SlotRow extends StatelessWidget {
     required this.index,
     required this.value,
     required this.fmt,
+    required this.isPreferred,
     required this.onTap,
+    required this.onTogglePreferred,
   });
 
   final int index;
   final DateTime? value;
   final DateFormat fmt;
+  final bool isPreferred;
   final VoidCallback? onTap;
+  final VoidCallback? onTogglePreferred;
 
   @override
   Widget build(BuildContext context) {
@@ -276,6 +373,11 @@ class _SlotRow extends StatelessWidget {
     final typo = Theme.of(context).extension<AppTypography>()!;
     final radii = Theme.of(context).extension<AppRadii>()!;
     final defaultLabel = context.t('meetings.propose.slot${index + 1}Label');
+    final starLabel = context.t(
+      isPreferred
+          ? 'meetings.propose.preferredSlotOn'
+          : 'meetings.propose.preferredSlot',
+    );
     return Material(
       color: colors.white,
       borderRadius: BorderRadius.circular(radii.button),
@@ -283,13 +385,26 @@ class _SlotRow extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(radii.button),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(radii.button),
             border: Border.all(color: colors.border, width: 1.5),
           ),
           child: Row(
             children: [
+              // Leading preferred-slot star toggle. Disabled until the row
+              // has a value picked.
+              IconButton(
+                key: Key('propose-slot-$index-star'),
+                tooltip: starLabel,
+                onPressed: onTogglePreferred,
+                icon: Icon(
+                  isPreferred ? Icons.star : Icons.star_border,
+                  color: isPreferred ? colors.gold : colors.muted,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 4),
               Icon(LucideIcons.calendar, size: 18, color: colors.navy),
               const SizedBox(width: 10),
               Expanded(
@@ -301,6 +416,7 @@ class _SlotRow extends StatelessWidget {
                 ),
               ),
               Icon(LucideIcons.chevronRight, size: 16, color: colors.muted),
+              const SizedBox(width: 4),
             ],
           ),
         ),

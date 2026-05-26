@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
+import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_radii.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../data/meetings_service.dart';
 import '../domain/meeting_review.dart';
 
-/// Full-screen variant of the review prompt (gallery G2). Opened by
-/// `/meetings/:id/review` deep link (Phase 12 will dispatch this from a
-/// `meeting_review_pending` push tap).
+/// G2 — full-screen "Did this meeting happen?" prompt.
 ///
-/// Same outcomes as [MeetingReviewPrompt] but rendered as three large
-/// outcome cards + a Skip CTA at the bottom — useful when the user
-/// hasn't yet seen the conversation context.
+/// Three actions:
+///  - "Yes — it happened"  → pushes the G3 [MeetingReviewScreen] for the
+///    same meeting (no review submitted yet).
+///  - "Rescheduled to a new time" → submits a review with
+///    [MeetingReviewOutcome.rescheduled] and pops.
+///  - "No-show" → submits a review with [MeetingReviewOutcome.noShow]
+///    and pops.
+///
+/// Triggered 30 min after a confirmed meeting's scheduled end via a
+/// `meeting_review_pending` push (spec §16) — the navigator lands here
+/// from `/meetings/:id/review`.
 class PostMeetingPromptModal extends ConsumerStatefulWidget {
   const PostMeetingPromptModal({
     super.key,
@@ -39,7 +45,7 @@ class _PostMeetingPromptModalState
     extends ConsumerState<PostMeetingPromptModal> {
   bool _busy = false;
 
-  Future<void> _submit(MeetingReviewOutcome outcome) async {
+  Future<void> _submitOutcome(MeetingReviewOutcome outcome) async {
     if (_busy) return;
     setState(() => _busy = true);
     final toast = ref.read(toastServiceProvider.notifier);
@@ -64,115 +70,100 @@ class _PostMeetingPromptModalState
     }
   }
 
+  void _openReviewScreen() {
+    if (_busy) return;
+    final uri = Uri(
+      path: Routes.meetingReviewFull(widget.meetingId),
+      queryParameters: <String, String>{
+        if (widget.peerHandle != null) 'handle': widget.peerHandle!,
+        if (widget.whenLabel != null) 'when': widget.whenLabel!,
+      },
+    );
+    // Replace this screen so the user lands on G3 with a back-stack that
+    // doesn't include the "Did it happen?" prompt (they answered yes —
+    // bouncing back to it would be confusing).
+    context.pushReplacement(uri.toString());
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
+    final peerName = widget.peerHandle ?? '';
     return Scaffold(
-      backgroundColor: colors.surface,
-      appBar: AppBar(
-        backgroundColor: colors.white,
-        elevation: 0,
-        title: Text(context.t('meetings.review.title')),
-      ),
+      backgroundColor: colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(22, 50, 22, 22),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // 64px centered gold avatar + peer name row.
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Avatar(
+                    name: peerName,
+                    size: 48,
+                    tone: AvatarTone.featured,
+                  ),
+                  const SizedBox(width: 10),
+                  if (peerName.isNotEmpty)
+                    Flexible(
+                      child: Text(
+                        peerName,
+                        style: typo.displayMd.copyWith(color: colors.navy),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 18),
               Text(
-                context.t('meetings.review.subtitle'),
-                style: typo.bodyLg.copyWith(color: colors.body),
-              ),
-              if (widget.whenLabel != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  widget.whenLabel!,
-                  style: typo.bodyMd.copyWith(color: colors.muted),
-                ),
-              ],
-              const SizedBox(height: 24),
-              _OutcomeCard(
-                key: const Key('post-review-useful'),
-                icon: LucideIcons.thumbsUp,
-                label: context.t('meetings.review.useful'),
-                onTap:
-                    _busy ? null : () => _submit(MeetingReviewOutcome.useful),
+                context.t('meetings.prompt.title'),
+                textAlign: TextAlign.center,
+                style: typo.displayLg.copyWith(color: colors.navy),
               ),
               const SizedBox(height: 8),
-              _OutcomeCard(
-                key: const Key('post-review-not-useful'),
-                icon: LucideIcons.thumbsDown,
-                label: context.t('meetings.review.notUseful'),
-                onTap: _busy
-                    ? null
-                    : () => _submit(MeetingReviewOutcome.notUseful),
+              Text(
+                widget.whenLabel != null
+                    ? '${widget.whenLabel}. ${context.t('meetings.prompt.subtitle')}'
+                    : context.t('meetings.prompt.subtitle'),
+                textAlign: TextAlign.center,
+                style: typo.bodyMd.copyWith(color: colors.muted),
               ),
-              const SizedBox(height: 8),
-              _OutcomeCard(
-                key: const Key('post-review-no-show'),
-                icon: LucideIcons.userX,
-                label: context.t('meetings.review.noShow'),
-                onTap:
-                    _busy ? null : () => _submit(MeetingReviewOutcome.noShow),
-              ),
-              const Spacer(),
+              const SizedBox(height: 30),
               AppButton(
-                key: const Key('post-review-skip'),
-                label: context.t('meetings.review.skip'),
+                key: const Key('post-prompt-yes'),
+                label: context.t('meetings.prompt.yes'),
+                variant: AppButtonVariant.gold,
+                onPressed: _busy ? null : _openReviewScreen,
+              ),
+              const SizedBox(height: 10),
+              AppButton(
+                key: const Key('post-prompt-rescheduled'),
+                label: context.t('meetings.prompt.rescheduled'),
                 variant: AppButtonVariant.outline,
-                onPressed:
-                    _busy ? null : () => Navigator.of(context).maybePop(),
+                onPressed: _busy
+                    ? null
+                    : () => _submitOutcome(MeetingReviewOutcome.rescheduled),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OutcomeCard extends StatelessWidget {
-  const _OutcomeCard({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    final typo = Theme.of(context).extension<AppTypography>()!;
-    final radii = Theme.of(context).extension<AppRadii>()!;
-    return Material(
-      color: colors.white,
-      borderRadius: BorderRadius.circular(radii.card),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(radii.card),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(radii.card),
-            border: Border.all(color: colors.border),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: colors.navy, size: 22),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: typo.bodyLg.copyWith(color: colors.body),
-                ),
+              const SizedBox(height: 10),
+              AppButton(
+                key: const Key('post-prompt-no-show'),
+                label: context.t('meetings.prompt.noShow'),
+                variant: AppButtonVariant.outlineDanger,
+                onPressed: _busy
+                    ? null
+                    : () => _submitOutcome(MeetingReviewOutcome.noShow),
               ),
-              Icon(LucideIcons.chevronRight, color: colors.muted, size: 20),
+              const SizedBox(height: 16),
+              Text(
+                context.t('meetings.prompt.fallback'),
+                textAlign: TextAlign.center,
+                style: typo.bodyXs.copyWith(color: colors.muted, height: 1.5),
+              ),
             ],
           ),
         ),

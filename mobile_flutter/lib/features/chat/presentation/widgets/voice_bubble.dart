@@ -147,34 +147,21 @@ class _VoiceBubbleState extends ConsumerState<VoiceBubble> {
                       : null,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Icon(
-                          _transcriptOpen
-                              ? LucideIcons.chevronUp
-                              : LucideIcons.chevronDown,
-                          size: 12,
-                          color: colors.muted,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          isTranscribing
-                              ? context.t('media.transcriptPending')
-                              : _transcriptOpen
-                                  ? context.t('media.hideTranscript')
-                                  : context.t('media.showTranscript'),
-                          style: typo.displayXs.copyWith(
-                            color: colors.muted,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      isTranscribing
+                          ? context.t('media.transcriptPending')
+                          : _transcriptOpen
+                              ? context.t('media.hideTranscript')
+                              : context.t('media.showTranscript'),
+                      style: typo.bodyXs.copyWith(
+                        color: isTranscribing ? colors.muted : colors.navy,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
               ),
-            if (_transcriptOpen && hasTranscript)
+            if (_transcriptOpen && hasTranscript) ...<Widget>[
               Container(
                 margin: const EdgeInsets.fromLTRB(12, 4, 12, 4),
                 padding: const EdgeInsets.all(12),
@@ -203,6 +190,17 @@ class _VoiceBubbleState extends ConsumerState<VoiceBubble> {
                   ],
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 0, 14, 4),
+                child: Text(
+                  context.t('chat.transcriptPrivacyFooter'),
+                  style: typo.bodyXs.copyWith(
+                    color: colors.muted,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

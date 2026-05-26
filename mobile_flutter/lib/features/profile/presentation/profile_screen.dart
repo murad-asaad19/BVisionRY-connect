@@ -89,6 +89,16 @@ class _ProfileBody extends ConsumerWidget {
     return ListView(
       padding: EdgeInsets.zero,
       children: <Widget>[
+        if (profile.privateMode)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+            child: AppBanner(
+              key: const ValueKey<String>('profile.privateModeBanner'),
+              intent: AppIntent.neutral,
+              title: context.t('profile.privateModeBannerTitle'),
+              child: Text(context.t('profile.privateModeBannerBody')),
+            ),
+          ),
         ProfileHero(
           data: ProfileHeroData(
             name: profile.name,
@@ -99,6 +109,7 @@ class _ProfileBody extends ConsumerWidget {
             primaryRole: profile.primaryRole,
             photoUrl: profile.photoUrl,
             verified: profile.isVerified,
+            activeThisWeek: profile.isActiveThisWeek,
           ),
         ),
         if (profile.isGoalStale)
@@ -168,6 +179,7 @@ class _ProfileBody extends ConsumerWidget {
             ),
           ),
         ),
+        _RoleDetailsCard(profile: profile),
         asyncSignals.maybeWhen(
           data: (ProfileSignals signals) => Padding(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
@@ -260,6 +272,134 @@ class _GoldSection extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Role-specific structured detail card — gallery section D1 (lines
+/// 1646-1652). Renders the "Builder details" / "Founder details" /
+/// "Investor details" SectionCard with key-value rows tailored to the
+/// caller's primary role. Rows with null/empty values are skipped so a
+/// partially-populated profile collapses gracefully.
+///
+/// Returns an empty SizedBox when [profile.primaryRole] doesn't match a
+/// supported role or every row resolves to empty.
+class _RoleDetailsCard extends StatelessWidget {
+  const _RoleDetailsCard({required this.profile});
+  final Profile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    final String? role = profile.primaryRole;
+    if (role == null) return const SizedBox.shrink();
+    final List<_RoleDetailRow> rows;
+    final String titleKey;
+    switch (role) {
+      case 'builder':
+        titleKey = 'profile.roleDetails.builderTitle';
+        rows = <_RoleDetailRow>[
+          _RoleDetailRow(
+            label: context.t('profile.roleDetails.discipline'),
+            value: profile.builderDiscipline,
+          ),
+          _RoleDetailRow(
+            label: context.t('profile.roleDetails.seniority'),
+            value: profile.builderSeniority,
+          ),
+          _RoleDetailRow(
+            label: context.t('profile.roleDetails.skills'),
+            value: profile.builderSkills.isEmpty
+                ? null
+                : profile.builderSkills.join(', '),
+          ),
+          _RoleDetailRow(
+            label: context.t('profile.roleDetails.openTo'),
+            value: profile.builderOpenTo.isEmpty
+                ? null
+                : profile.builderOpenTo.join(', '),
+          ),
+          _RoleDetailRow(
+            label: context.t('profile.roleDetails.rateBand'),
+            value: profile.builderRateBand,
+          ),
+        ];
+      case 'founder':
+        titleKey = 'profile.roleDetails.founderTitle';
+        rows = <_RoleDetailRow>[
+          _RoleDetailRow(
+            label: context.t('profile.roleDetails.stage'),
+            value: profile.founderStage,
+          ),
+          _RoleDetailRow(
+            label: context.t('profile.roleDetails.sector'),
+            value: profile.founderSector,
+          ),
+          _RoleDetailRow(
+            label: context.t('profile.roleDetails.funding'),
+            value: profile.founderFunding,
+          ),
+          _RoleDetailRow(
+            label: context.t('profile.roleDetails.hiring'),
+            value: profile.founderHiring == null
+                ? null
+                : context.t(
+                    profile.founderHiring!
+                        ? 'profile.roleDetails.hiringYes'
+                        : 'profile.roleDetails.hiringNo',
+                  ),
+          ),
+        ];
+      case 'investor':
+        titleKey = 'profile.roleDetails.investorTitle';
+        rows = <_RoleDetailRow>[
+          _RoleDetailRow(
+            label: context.t('profile.roleDetails.type'),
+            value: profile.investorType,
+          ),
+          _RoleDetailRow(
+            label: context.t('profile.roleDetails.checkSize'),
+            value: profile.investorCheckSize,
+          ),
+          _RoleDetailRow(
+            label: context.t('profile.roleDetails.sectors'),
+            value: profile.investorSectors.isEmpty
+                ? null
+                : profile.investorSectors.join(', '),
+          ),
+          _RoleDetailRow(
+            label: context.t('profile.roleDetails.stage'),
+            value: profile.investorStage,
+          ),
+        ];
+      default:
+        return const SizedBox.shrink();
+    }
+
+    final List<_RoleDetailRow> visible = rows
+        .where((_RoleDetailRow r) => r.value != null && r.value!.isNotEmpty)
+        .toList(growable: false);
+    if (visible.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+      child: SectionCard(
+        key: const ValueKey<String>('profile-role-details'),
+        title: context.t(titleKey),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            for (final _RoleDetailRow r in visible)
+              _DetailRow(label: r.label, value: r.value!),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+@immutable
+class _RoleDetailRow {
+  const _RoleDetailRow({required this.label, required this.value});
+  final String label;
+  final String? value;
 }
 
 class _DetailRow extends StatelessWidget {

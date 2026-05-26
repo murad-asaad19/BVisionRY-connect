@@ -14,20 +14,21 @@ void main() {
     registerFallbackValue(MeetingReviewOutcome.useful);
   });
 
-  testWidgets('renders three outcome cards + Skip', (tester) async {
+  testWidgets('renders three G2 prompt buttons + fallback note',
+      (tester) async {
     final svc = _MockSvc();
     final tree = await wrapWithTheme(
       overrides: [meetingsServiceProvider.overrideWithValue(svc)],
       child: const PostMeetingPromptModal(meetingId: 'mid'),
     );
     await pumpWithI18n(tester, tree);
-    expect(find.text('Useful'), findsAtLeast(1));
-    expect(find.text('Not useful'), findsOneWidget);
-    expect(find.text('No-show'), findsOneWidget);
-    expect(find.text('Skip'), findsOneWidget);
+    expect(find.byKey(const Key('post-prompt-yes')), findsOneWidget);
+    expect(find.byKey(const Key('post-prompt-rescheduled')), findsOneWidget);
+    expect(find.byKey(const Key('post-prompt-no-show')), findsOneWidget);
+    expect(find.text('Did this meeting happen?'), findsOneWidget);
   });
 
-  testWidgets('Useful tap calls submitMeetingReview', (tester) async {
+  testWidgets('Rescheduled tap submits rescheduled outcome', (tester) async {
     final svc = _MockSvc();
     when(
       () => svc.submitMeetingReview(
@@ -40,7 +41,7 @@ void main() {
         id: 'r',
         meetingId: 'mid',
         reviewerId: 'me',
-        outcome: MeetingReviewOutcome.useful,
+        outcome: MeetingReviewOutcome.rescheduled,
         createdAt: DateTime.now().toUtc(),
       ),
     );
@@ -49,12 +50,45 @@ void main() {
       child: const PostMeetingPromptModal(meetingId: 'mid'),
     );
     await pumpWithI18n(tester, tree);
-    await tester.tap(find.byKey(const Key('post-review-useful')));
+    await tester.tap(find.byKey(const Key('post-prompt-rescheduled')));
     await tester.pump();
     verify(
       () => svc.submitMeetingReview(
         meetingId: 'mid',
-        outcome: MeetingReviewOutcome.useful,
+        outcome: MeetingReviewOutcome.rescheduled,
+        note: null,
+      ),
+    ).called(1);
+  });
+
+  testWidgets('No-show tap submits no-show outcome', (tester) async {
+    final svc = _MockSvc();
+    when(
+      () => svc.submitMeetingReview(
+        meetingId: any(named: 'meetingId'),
+        outcome: any(named: 'outcome'),
+        note: any(named: 'note'),
+      ),
+    ).thenAnswer(
+      (_) async => MeetingReview(
+        id: 'r',
+        meetingId: 'mid',
+        reviewerId: 'me',
+        outcome: MeetingReviewOutcome.noShow,
+        createdAt: DateTime.now().toUtc(),
+      ),
+    );
+    final tree = await wrapWithTheme(
+      overrides: [meetingsServiceProvider.overrideWithValue(svc)],
+      child: const PostMeetingPromptModal(meetingId: 'mid'),
+    );
+    await pumpWithI18n(tester, tree);
+    await tester.tap(find.byKey(const Key('post-prompt-no-show')));
+    await tester.pump();
+    verify(
+      () => svc.submitMeetingReview(
+        meetingId: 'mid',
+        outcome: MeetingReviewOutcome.noShow,
         note: null,
       ),
     ).called(1);

@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
+import '../domain/goal_type.dart';
 import '../domain/onboarding_draft.dart';
 import '../providers/onboarding_draft_notifier.dart';
 import 'stepper_layout.dart';
@@ -21,7 +22,34 @@ const List<String> _kRoles = <String>[
   'investor',
 ];
 
-/// Step 3 of 4 — Roles.
+/// Maps a confirmed [GoalType] to the role the gallery's banner copy
+/// surfaces ("Based on your goal, you might be a Founder").
+///
+/// The mapping mirrors the matching algorithm's heuristic: the goal you
+/// declare is a strong prior for the role you hold (someone hiring or
+/// raising is almost always a founder; someone investing is an investor;
+/// etc.). Returns `null` when no obvious role applies (e.g. peer-connect).
+String? _roleHintFromGoal(GoalType? gt) {
+  switch (gt) {
+    case GoalType.hire:
+    case GoalType.coFound:
+    case GoalType.takeInvestment:
+      return 'founder';
+    case GoalType.beHired:
+      return 'builder';
+    case GoalType.invest:
+      return 'investor';
+    case GoalType.advise:
+      return 'leader';
+    case GoalType.findAdvisor:
+      return 'founder';
+    case GoalType.peerConnect:
+    case null:
+      return null;
+  }
+}
+
+/// Step 3 of 5 — Roles.
 ///
 /// Multi-select chip row + primary-role pill row. Tapping a role chip
 /// toggles membership in `draft.roles`; the [OnboardingDraftNotifier]
@@ -50,6 +78,13 @@ class RolesStep extends ConsumerWidget {
 
     final bool canProceed = draft.roles.isNotEmpty && draft.primaryRole != null;
 
+    // Surface the role-inference banner only when the user's goal implies
+    // a role they haven't already picked. Confirming the chip dismisses
+    // the banner naturally.
+    final String? inferredRole = _roleHintFromGoal(draft.goalType);
+    final bool showInferBanner = inferredRole != null &&
+        !draft.roles.contains(inferredRole);
+
     return StepperLayout(
       stepIndex: 2,
       stepNameKey: 'onboarding.stepName.roles',
@@ -57,7 +92,7 @@ class RolesStep extends ConsumerWidget {
       footer: AppButton(
         key: const ValueKey<String>('roles-next'),
         label: context.t('onboarding.roles.next'),
-        onPressed: canProceed ? () => context.go(Routes.onboardingAbout) : null,
+        onPressed: canProceed ? () => context.go(Routes.onboardingBio) : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,6 +101,26 @@ class RolesStep extends ConsumerWidget {
             context.t('onboarding.roles.title'),
             style: typo.displayLg.copyWith(color: colors.navy),
           ),
+          SizedBox(height: spacing.card / 2),
+          Text(
+            context.t('onboarding.roles.subtitle'),
+            style: typo.bodyMd.copyWith(color: colors.muted),
+          ),
+          if (showInferBanner) ...<Widget>[
+            SizedBox(height: spacing.card),
+            AppBanner(
+              key: const ValueKey<String>('roles-infer-banner'),
+              intent: AppIntent.info,
+              child: Text(
+                context.t(
+                  'onboarding.roles.inferBanner',
+                  vars: <String, Object>{
+                    'label': context.t('onboarding.roles.$inferredRole'),
+                  },
+                ),
+              ),
+            ),
+          ],
           SizedBox(height: spacing.card),
           Wrap(
             spacing: 8,
@@ -74,7 +129,11 @@ class RolesStep extends ConsumerWidget {
               for (final String r in _kRoles)
                 AppFilterChip(
                   key: ValueKey<String>('role-chip-$r'),
-                  label: context.t('onboarding.roles.$r'),
+                  // Render a check glyph inline next to the label when the
+                  // role is selected (matches the gallery's "Founder ✓").
+                  label: draft.roles.contains(r)
+                      ? '${context.t('onboarding.roles.$r')} ✓'
+                      : context.t('onboarding.roles.$r'),
                   active: draft.roles.contains(r),
                   onTap: () {
                     final List<String> next = List<String>.from(draft.roles);
@@ -89,6 +148,11 @@ class RolesStep extends ConsumerWidget {
                   },
                 ),
             ],
+          ),
+          SizedBox(height: spacing.card / 2),
+          Text(
+            context.t('onboarding.roles.footerNote'),
+            style: typo.bodySm.copyWith(color: colors.muted),
           ),
           SizedBox(height: spacing.section),
           if (draft.roles.isNotEmpty) ...<Widget>[

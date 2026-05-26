@@ -55,10 +55,14 @@
   },
   "suspended": {
     "title": "Tu cuenta está en revisión",
-    "body": "Nuestro equipo está revisando tu cuenta. Te enviaremos un correo cuando se resuelva.",
+    "titleStrong": "Cuenta suspendida",
+    "body": "Tu cuenta está suspendida pendiente de revisión por nuestro equipo de confianza y seguridad. Recibimos un reporte sobre un mensaje reciente que podría infringir nuestras políticas.",
     "submitAppeal": "Enviar apelación",
     "signOut": "Cerrar sesión",
-    "contactBody": "Para apelar, contacta a support@bvisionry.com."
+    "contactBody": "Para apelar, contacta a support@bvisionry.com.",
+    "whatHappensNext": "Qué sigue",
+    "sla": "Revisaremos en un plazo de 48 horas hábiles.",
+    "emailNotice": "Te enviaremos un correo a {{email}} cuando se resuelva."
   },
   "home": {
     "title": "Hoy",
@@ -149,13 +153,39 @@
         "in_app": "En la app"
       },
       "header": "Notificación",
-      "decayBanner": "Los recordatorios por inactividad no están disponibles.",
+      "decayBanner": "Los empujones por inactividad no están disponibles — por diseño.",
+      "decayFooter": "Los empujones por inactividad no están disponibles — por diseño.",
       "emailUnavailable": "El envio por email aun no esta disponible (se activara cuando lance el correo)."
     },
     "publicInvestorPage": {
       "title": "Pagina publica de inversor",
       "subtitle": "Muestra tu GitHub verificado en connect.bvisionry.com/u/{{handle}}.",
       "comingSoon": "Proximamente: el switch en servidor llega en la proxima version."
+    },
+    "privateMode": {
+      "title": "Modo privado",
+      "subtitle": "Oculto del feed, las coincidencias diarias, la búsqueda y la página pública."
+    },
+    "readReceipts": {
+      "title": "Confirmaciones de lectura",
+      "subtitle": "Si lo activas, otros podrán ver cuando hayas leído un mensaje — simétrico."
+    },
+    "publicPage": {
+      "title": "Página web pública",
+      "subtitle": "connect.bvisionry.com/u/{{handle}}. Los perfiles de Inversor verificado están desactivados por defecto."
+    },
+    "groups": {
+      "discovery": "Descubrimiento",
+      "chat": "Chat",
+      "safety": "Seguridad"
+    },
+    "reportedByYou": {
+      "title": "Reportado por ti",
+      "subtitle": "Ver historial",
+      "empty": {
+        "title": "Sin reportes",
+        "body": "Los reportes que envíes aparecerán aquí."
+      }
     },
     "changePassword": {
       "title": "Cambiar contrasena",
@@ -187,10 +217,13 @@
       "goal": "Objetivo",
       "identity": "Identidad",
       "roles": "Roles",
+      "bio": "Perfil",
       "about": "Acerca de"
     },
     "goal": {
-      "title": "¿Cuál es tu objetivo?",
+      "title": "¿Qué estás buscando ahora mismo?",
+      "helper": "Una frase — te ayudaremos a afinarla.",
+      "examplesNote": "Ejemplos: \"Contratando a una diseñadora fraccional\", \"Levantando pre-semilla para una idea de healthtech\", \"Abierto a roles de asesor en fintech\"",
       "label": "Objetivo",
       "placeholder": "Estoy buscando...",
       "counter": "{{count}} / {{max}}",
@@ -221,7 +254,10 @@
       "errorHandleCheck": "Error al verificar"
     },
     "roles": {
-      "title": "¿A qué te dedicas?",
+      "title": "¿Qué roles desempeñas?",
+      "subtitle": "Elige todos los que apliquen — los roles secundarios ayudan a emparejar mejor.",
+      "footerNote": "Un fundador que también invierte como ángel con $25K es una combinación real — lo tendremos en cuenta.",
+      "inferBanner": "Por tu objetivo, podrías ser {{label}}. Confirma o cambia.",
       "primaryQuestion": "¿Cuál es tu rol principal?",
       "next": "Siguiente",
       "errorPickOne": "Selecciona al menos un rol.",
@@ -231,12 +267,34 @@
       "builder": "Constructor",
       "investor": "Inversor"
     },
+    "bio": {
+      "title": "Afinemos tu perfil",
+      "subtitle": "Te ayudaré a escribir un buen titular y biografía \"Soy\".",
+      "aiBubble": "Aquí tienes un borrador con lo que me contaste. Edítalo a tu manera, o pulsa \"Se ve bien\" para usarlo.",
+      "headlineLabel": "Titular",
+      "bioLabel": "Soy",
+      "edit": "Editar",
+      "looksGood": "Se ve bien →",
+      "fallbackHeadline": "Abierto a oportunidades",
+      "fallbackBio": "Cuéntale a la gente quién eres y en qué estás trabajando."
+    },
     "about": {
-      "title": "Un poco sobre ti",
+      "title": "Unos últimos detalles",
+      "subtitle": "Para que la gente pueda encontrarte.",
+      "photoLabel": "Foto",
+      "photoHint": "Toca para subir. JPG o PNG, ≥400px cuadrado.",
+      "photoComingSoonTitle": "Subir foto: próximamente",
+      "photoComingSoonBody": "Podrás añadir una foto de perfil en una próxima actualización.",
+      "location": "Ubicación",
+      "locationPlaceholder": "Ciudad, País",
       "city": "Ciudad",
       "cityPlaceholder": "San Francisco",
       "country": "País",
       "countryPlaceholder": "España",
+      "handle": "Usuario",
+      "handlePlaceholder": "ada-lovelace",
+      "handlePreviewPrefix": "connect.bvisionry.com/u/",
+      "handleRedirectNote": "Si lo cambias luego, la URL antigua redirige durante 90 días.",
       "headline": "Titular (opcional, 5-120 caracteres)",
       "headlinePlaceholder": "Construyendo herramientas de IA para creadores",
       "bio": "Biografía (opcional, 10-1000 caracteres)",
@@ -309,7 +367,7 @@
     "builderSection": "Constructor",
     "founderSection": "Fundador",
     "investorSection": "Inversor",
-    "rankingBoost": "Los roles verificados obtienen un +15% de impulso en el ranking que crece durante 14 días.",
+    "rankingBoost": "Los roles verificados obtienen un +15% de impulso en el ranking — crece durante 14 días.",
     "verifiedPill": "Verificado",
     "comingSoon": "Próximamente",
     "comingSoonBody": "Llegará en una próxima versión.",
@@ -349,11 +407,11 @@
         },
         "crunchbase": {
           "label": "Perfil de Crunchbase",
-          "description": "Vincula un perfil público de Crunchbase."
+          "description": "OAuth o revisión manual."
         },
         "portfolio": {
-          "label": "Listados de portfolio",
-          "description": "Portfolio público que te incluya."
+          "label": "Empresas del portfolio",
+          "description": "2+ listados públicos que te nombren."
         }
       },
       "builder": {
@@ -394,7 +452,9 @@
     "sentTitle": "Enviados",
     "tab": {
       "received": "Recibidos",
+      "receivedCount": "Recibidos ({{count}})",
       "sent": "Enviados",
+      "sentCount": "Enviados ({{count}})",
       "connections": "Conexiones"
     },
     "tabs": {
@@ -423,12 +483,17 @@
     },
     "compose": {
       "hint": "Cuenta por qué quieres conectar. Mínimo 80 caracteres. Tu mensaje pasa por una verificación rápida de seguridad antes de entregarse.",
+      "noteHint": "Mínimo 80 caracteres. Tu mensaje pasa por una verificación rápida de seguridad antes de entregarse.",
       "placeholder": "Te escribo porque...",
       "counter": "{{count}} / {{max}} (mín. {{min}})",
+      "counterShort": "{{count}}/{{max}}",
       "charsLabel": "{{count}} caracteres",
-      "todaysIntros": "Intros de hoy: {{count}}/{{cap}}",
+      "todaysIntros": "Intros de hoy: {{count}} / {{cap}}",
+      "sheetTitle": "Enviar intro a {{name}}",
+      "noteLabel": "Tu nota",
       "cancel": "Cancelar",
       "send": "Enviar",
+      "sendIntro": "Enviar intro",
       "errorRange": "La nota debe tener entre 80 y 400 caracteres.",
       "errorDuplicate": "Ya tienes una intro pendiente con esta persona.",
       "errorCooldown": "No puedes enviar otra intro a esta persona durante 30 días tras su rechazo.",
@@ -454,7 +519,9 @@
       "accepted": "Aceptada",
       "declined": "Rechazada",
       "expired": "Caducada",
+      "expiredNoResponse": "Caducada · 14 días, sin respuesta",
       "connected": "Conectado",
+      "connectedAgo": "Conectado · {{ago}}",
       "awaitingResponse": "Entregada, esperando respuesta"
     },
     "detail": {
@@ -465,6 +532,9 @@
       "declined": "Intro rechazada.",
       "expiredHint": "Esta intro ha caducado y ya no puede gestionarse.",
       "declineSilent": "Rechazar es silencioso — el remitente no será notificado.",
+      "report": "Reportar",
+      "mutualConnections_one": "{{count}} conexión en común",
+      "mutualConnections_other": "{{count}} conexiones en común",
       "to": "Para",
       "from": "De",
       "note": "NOTA",
@@ -573,6 +643,8 @@
       "send": "Enviar",
       "cancel": "Cancelar"
     },
+    "recorderDisclosure": "Máx 2 minutos — los mensajes de voz se transcriben por accesibilidad y seguridad.",
+    "transcriptPrivacyFooter": "Las transcripciones no se utilizan como índice de búsqueda de terceros.",
     "transcript": {
       "label": "Transcripción",
       "pending": "Transcribiendo…"
@@ -751,8 +823,9 @@
       "bodyInfo": "Las personas con las que coincides dependen de esto. Manténlo al día.",
       "titleWarn": "Tu objetivo empieza a quedarse anticuado",
       "bodyWarn": "Una actualización breve mantendrá tus coincidencias relevantes.",
-      "titleStale": "Tu objetivo no ha cambiado en más de 8 semanas",
-      "bodyStale": "Una actualización breve mantiene relevantes tus coincidencias. Te enviaremos un correo si sigue así de antiguo.",
+      "titleStale": "¿Sigues buscando lo mismo?",
+      "bodyStale": "Lo configuraste hace 4 semanas. Una actualización breve mantendrá tus coincidencias relevantes.",
+      "stillAccurate": "Sí, sigue siendo correcto",
       "update": "Actualizar",
       "snooze": "Posponer {{days}} días",
       "snoozeA11y": "Posponer este recordatorio {{days}} días"
@@ -761,6 +834,12 @@
     "editAction": "Editar",
     "privateModeTitle": "Modo privado activado",
     "privateModeBody": "Estás oculto del feed, las coincidencias diarias y la búsqueda.",
+    "privateModeBannerTitle": "Modo privado activado",
+    "privateModeBannerBody": "Estás oculto del feed, las coincidencias diarias, la búsqueda y tu página pública.",
+    "cooldown": {
+      "buttonAvailableDate": "Enviar intro · disponible {{date}}",
+      "buttonAvailableSoon": "Enviar intro · disponible pronto"
+    },
     "section": {
       "headline": "Titular",
       "bio": "Biografía",
@@ -777,6 +856,29 @@
     "noUserWithHandle": "Sin usuario con alias @{{handle}}.",
     "notFoundTitle": "No encontrado",
     "notFoundBody": "Este perfil puede ser privado, estar suspendido o ya no existir.",
+    "privateTitle": "Este perfil es privado",
+    "privateBody": "Esta persona ha ocultado su perfil. Inicia sesión y solicita una intro si quieres conectar.",
+    "activeThisWeek": "Activo esta semana",
+    "handleRedirectNote": "Si lo cambias, la URL antigua redirige durante 90 días.",
+    "roleDetails": {
+      "builderTitle": "Detalles de constructor",
+      "founderTitle": "Detalles de fundador",
+      "investorTitle": "Detalles de inversor",
+      "discipline": "Disciplina",
+      "seniority": "Seniority",
+      "skills": "Habilidades",
+      "openTo": "Abierto a",
+      "rateBand": "Tarifa",
+      "stage": "Etapa",
+      "sector": "Sector",
+      "funding": "Financiación",
+      "hiring": "Contratando",
+      "hiringYes": "Sí",
+      "hiringNo": "No",
+      "type": "Tipo",
+      "checkSize": "Tamaño de cheque",
+      "sectors": "Sectores"
+    },
     "title": "Perfil",
     "editAction2": "Editar",
     "signOut": "Cerrar sesión",
@@ -812,11 +914,14 @@
       "rolesRequired": "Selecciona al menos un rol.",
       "primaryRoleInRoles": "El rol principal debe estar entre los roles seleccionados.",
       "cityRequired": "La ciudad es obligatoria.",
-      "countryRequired": "El país es obligatorio."
+      "countryRequired": "El país es obligatorio.",
+      "handleInvalid": "El alias debe tener 2-30 caracteres en minúsculas, dígitos o guiones simples."
     },
     "signals": {
       "mutual_one": "1 en común",
       "mutual_other": "{{count}} en común",
+      "mutualPlus_one": "+1 más",
+      "mutualPlus_other": "+{{count}} más",
       "rating": "{{rating}}",
       "reviews_one": "({{count}} reseña)",
       "reviews_other": "({{count}} reseñas)",
@@ -914,25 +1019,28 @@
       "subtitle": "Elige el horario que mejor te funcione."
     },
     "prompt": {
-      "title": "¿Qué tal la reunión?",
-      "subtitle": "Toca una reacción rápida para mejorar tus recomendaciones.",
+      "title": "¿Se realizó esta reunión?",
+      "subtitle": "Tu respuesta sincera nos ayuda a mejorar las recomendaciones.",
       "yes": "Sí — se realizó",
       "rescheduled": "Reprogramada para otro momento",
       "noShow": "No — no se presentaron",
-      "fallback": "Si no recibimos respuesta en 48 horas, omitiremos este mensaje y preguntaremos más tarde."
+      "fallback": "Si no respondes en 48 horas, la marcaremos como ausencia."
     },
     "review": {
       "title": "¿Qué tal la reunión?",
+      "titleWithName": "¿Qué tal tu reunión con {{name}}?",
       "subtitle": "Toca una reacción rápida para mejorar tus recomendaciones.",
       "useful": "Útil",
       "notUseful": "No útil",
       "noShow": "No se presentó",
+      "rescheduled": "Reprogramada",
       "notePlaceholder": "Nota opcional…",
       "pickOutcome": "Selecciona un resultado.",
       "submitFailed": "Error al enviar",
       "submitted": "¡Gracias por tu opinión!",
       "skip": "Omitir",
-      "submit": "Enviar"
+      "submit": "Enviar",
+      "aggregateNote": "Agregadas con ≥5 reseñas distintas · visibles solo para T&S"
     },
     "propose": {
       "title": "Proponer una reunión",
@@ -940,13 +1048,19 @@
       "slot1Label": "Horario 1 (obligatorio)",
       "slot2Label": "Horario 2 (opcional)",
       "slot3Label": "Horario 3 (opcional)",
+      "preferredSlot": "Marcar como horario preferido",
+      "preferredSlotOn": "Horario preferido",
       "durationLabel": "Duración",
       "durationOption": "{{minutes}} min",
       "urlLabel": "URL de la reunión (opcional)",
       "urlPlaceholder": "https://meet.google.com/abc-defg-hij",
+      "noteLabel": "Nota (opcional)",
+      "notePlaceholder": "Tengo ganas de charlar.",
+      "icsHelper": "Generaremos un archivo .ics que ambos podrán añadir a su calendario.",
       "inputTimeZoneHint": "Los horarios se enviarán en tu zona horaria ({{tz}})",
       "cancel": "Cancelar",
       "send": "Enviar",
+      "sendProposal": "Enviar propuesta",
       "errors": {
         "slotsRange": "Elige 1-3 fechas/horas futuras.",
         "duration": "La duración debe ser de 15-240 minutos.",
@@ -1011,6 +1125,9 @@
   "push": {
     "permissionDeniedTitle": "Notificaciones desactivadas",
     "permissionDeniedBody": "Activa las notificaciones en Ajustes para recibir intros, mensajes y actualizaciones de reuniones.",
+    "permissionBannerTitle": "Recibe notificaciones",
+    "permissionBannerBody": "Activa las notificaciones para enterarte de nuevas intros y conexiones.",
+    "permissionBannerEnable": "Activar",
     "toastOpenA11y": "Abrir notificación",
     "toastDismissA11y": "Descartar notificación"
   },

@@ -43,6 +43,31 @@ _$ProfileImpl _$$ProfileImplFromJson(Map<String, dynamic> json) =>
       updatedAt: json['updated_at'] == null
           ? null
           : DateTime.parse(json['updated_at'] as String),
+      lastActiveAt: json['last_active_at'] == null
+          ? null
+          : DateTime.parse(json['last_active_at'] as String),
+      builderDiscipline: json['builder_discipline'] as String?,
+      builderSeniority: json['builder_seniority'] as String?,
+      builderSkills: (json['builder_skills'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
+      builderOpenTo: (json['builder_open_to'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
+      builderRateBand: json['builder_rate_band'] as String?,
+      founderStage: json['founder_stage'] as String?,
+      founderSector: json['founder_sector'] as String?,
+      founderFunding: json['founder_funding'] as String?,
+      founderHiring: json['founder_hiring'] as bool?,
+      investorType: json['investor_type'] as String?,
+      investorCheckSize: json['investor_check_size'] as String?,
+      investorSectors: (json['investor_sectors'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
+      investorStage: json['investor_stage'] as String?,
     );
 
 Map<String, dynamic> _$$ProfileImplToJson(_$ProfileImpl instance) =>
@@ -70,4 +95,18 @@ Map<String, dynamic> _$$ProfileImplToJson(_$ProfileImpl instance) =>
       'public_investor_page': instance.publicInvestorPage,
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),
+      'last_active_at': instance.lastActiveAt?.toIso8601String(),
+      'builder_discipline': instance.builderDiscipline,
+      'builder_seniority': instance.builderSeniority,
+      'builder_skills': instance.builderSkills,
+      'builder_open_to': instance.builderOpenTo,
+      'builder_rate_band': instance.builderRateBand,
+      'founder_stage': instance.founderStage,
+      'founder_sector': instance.founderSector,
+      'founder_funding': instance.founderFunding,
+      'founder_hiring': instance.founderHiring,
+      'investor_type': instance.investorType,
+      'investor_check_size': instance.investorCheckSize,
+      'investor_sectors': instance.investorSectors,
+      'investor_stage': instance.investorStage,
     };

@@ -10,6 +10,7 @@ import '../../../core/widgets/top_bar.dart';
 import '../../discovery/presentation/widgets/daily_matches_section.dart';
 import '../../discovery/providers/daily_matches_provider.dart';
 import '../../intros/presentation/warm_intro_suggestions_strip.dart';
+import '../../push/presentation/push_permission_banner.dart';
 import 'widgets/home_skeleton.dart';
 import 'widgets/thin_pool_banner.dart';
 import 'widgets/todays_matches_header.dart';
@@ -62,6 +63,7 @@ class HomeScreen extends ConsumerWidget {
             onRefresh: () => ref.read(dailyMatchesProvider.notifier).refresh(),
             child: ListView(
               children: <Widget>[
+                const PushPermissionBannerWidget(),
                 if (matches.length < 3) ThinPoolBanner(count: matches.length),
                 TodaysMatchesHeader(
                   count: matches.length,

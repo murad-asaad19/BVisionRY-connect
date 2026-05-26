@@ -10,7 +10,8 @@ part 'meeting_review.freezed.dart';
 enum MeetingReviewOutcome {
   useful('useful', 5),
   notUseful('not_useful', 2),
-  noShow('no_show', 1);
+  noShow('no_show', 1),
+  rescheduled('rescheduled', 3);
 
   const MeetingReviewOutcome(this.dbValue, this.ratingScore);
 
@@ -24,6 +25,7 @@ enum MeetingReviewOutcome {
         'useful' => MeetingReviewOutcome.useful,
         'not_useful' => MeetingReviewOutcome.notUseful,
         'no_show' => MeetingReviewOutcome.noShow,
+        'rescheduled' => MeetingReviewOutcome.rescheduled,
         _ => throw ArgumentError('Unknown outcome: $v'),
       };
 

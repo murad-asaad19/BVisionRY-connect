@@ -8,12 +8,12 @@ import 'match_reason_chip.dart';
 
 /// Discovery card surfaced on the Home screen for each daily pick.
 ///
-/// Wraps the foundation [UserCard] so the card chrome (avatar, name, role
-/// pill, headline, location) stays consistent with search/intro lists, and
-/// stacks a [MatchReasonChip] in the top-right corner.
+/// Wraps the foundation [UserCard] and passes the [MatchReasonChip] into
+/// its `reason` slot so the chip renders inline below the headline
+/// (gallery `.ucard .reason`).
 ///
-/// View-tracking: when [onSeen] is provided AND the underlying match has not
-/// yet been seen (`match.viewedAt == null`), wraps the card in a
+/// View-tracking: when [onSeen] is provided AND the underlying match has
+/// not yet been seen (`match.viewedAt == null`), wraps the card in a
 /// [VisibilityDetector] that fires `onSeen` exactly once at ≥ 50% visible.
 class MatchCard extends StatefulWidget {
   const MatchCard({
@@ -40,24 +40,16 @@ class _MatchCardState extends State<MatchCard> {
   Widget build(BuildContext context) {
     final reason = MatchReason.fromServer(widget.match.matchReason);
     final profile = widget.match.profile;
-    final card = Stack(
-      children: <Widget>[
-        UserCard(
-          name: profile.name ?? '@${profile.handle}',
-          primaryRole: profile.primaryRole ?? '',
-          photoUrl: profile.photoUrl,
-          headline: profile.headline,
-          city: profile.city,
-          country: profile.country,
-          featured: widget.featured,
-          onTap: widget.onTap,
-        ),
-        Positioned(
-          top: 8,
-          right: 8,
-          child: MatchReasonChip(reason: reason, featured: widget.featured),
-        ),
-      ],
+    final card = UserCard(
+      name: profile.name ?? '@${profile.handle}',
+      primaryRole: profile.primaryRole ?? '',
+      photoUrl: profile.photoUrl,
+      headline: profile.headline,
+      city: profile.city,
+      country: profile.country,
+      featured: widget.featured,
+      reason: MatchReasonChip(reason: reason, featured: widget.featured),
+      onTap: widget.onTap,
     );
 
     if (widget.onSeen == null || widget.match.viewedAt != null) {

@@ -118,10 +118,10 @@ void main() {
       );
     });
 
-    test('isGoalStale returns true when goal_updated_at > 56 days ago', () {
+    test('isGoalStale returns true when goal_updated_at > 28 days ago', () {
       final Profile stale = Profile.empty('u').copyWith(
         goalUpdatedAt:
-            DateTime.now().toUtc().subtract(const Duration(days: 57)),
+            DateTime.now().toUtc().subtract(const Duration(days: 30)),
       );
       final Profile fresh = Profile.empty('u').copyWith(
         goalUpdatedAt:

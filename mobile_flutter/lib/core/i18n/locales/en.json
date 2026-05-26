@@ -20,7 +20,7 @@
     "emailPlaceholder": "you@example.com",
     "identifierPlaceholder": "you@example.com or @handle",
     "password": "Password",
-    "passwordPlaceholder": "••••••••",
+    "passwordPlaceholder": "At least 8 characters",
     "passwordHint8": "8+ characters",
     "passwordHint8Met": "Looks good",
     "submitSignIn": "Sign in",
@@ -28,7 +28,7 @@
     "magicLinkSubmit": "Send magic link",
     "magicLinkSubmitAlt": "Or send me a magic link",
     "magicLinkSent": "Check your email for the magic link.",
-    "haveAccount": "Have an account?",
+    "haveAccount": "Already have an account?",
     "noAccount": "Don't have an account?",
     "signUpCta": "Sign up",
     "signInCta": "Sign in",
@@ -55,13 +55,17 @@
   },
   "suspended": {
     "title": "Your account is under review",
-    "body": "Our team is reviewing your account. We'll email you when this is resolved.",
+    "titleStrong": "Account suspended",
+    "body": "Your account is suspended pending review by our trust & safety team. We received a report concerning a recent message that may violate our policies.",
     "submitAppeal": "Submit appeal",
     "signOut": "Sign out",
-    "contactBody": "To appeal, please contact support@bvisionry.com."
+    "contactBody": "To appeal, please contact support@bvisionry.com.",
+    "whatHappensNext": "What happens next",
+    "sla": "We'll review within 48 business hours.",
+    "emailNotice": "We'll email you at {{email}} when this is resolved."
   },
   "home": {
-    "title": "Today",
+    "title": "Today's matches",
     "picks": "Today's picks",
     "discover": "Discover",
     "picksHeader_one": "{{count}} pick for you",
@@ -149,13 +153,39 @@
         "in_app": "In-app"
       },
       "header": "Notification",
-      "decayBanner": "Activity-decay guilt nudges are not available.",
+      "decayBanner": "Activity-decay guilt nudges are not available — by design.",
+      "decayFooter": "Activity-decay guilt nudges are not available — by design.",
       "emailUnavailable": "Email delivery isn't enabled yet (will activate once the mailer ships)."
     },
     "publicInvestorPage": {
       "title": "Public investor page",
       "subtitle": "Expose your verified GitHub on connect.bvisionry.com/u/{{handle}}.",
       "comingSoon": "Coming soon - the server-side toggle ships next release."
+    },
+    "privateMode": {
+      "title": "Private mode",
+      "subtitle": "Hidden from feed, Daily matches, search & public page."
+    },
+    "readReceipts": {
+      "title": "Read receipts",
+      "subtitle": "If you turn this on, others can see when you've read a message — symmetric."
+    },
+    "publicPage": {
+      "title": "Public web page",
+      "subtitle": "connect.bvisionry.com/u/{{handle}}. Verified Investor profiles default to OFF."
+    },
+    "groups": {
+      "discovery": "Discovery",
+      "chat": "Chat",
+      "safety": "Safety"
+    },
+    "reportedByYou": {
+      "title": "Reported by you",
+      "subtitle": "View history",
+      "empty": {
+        "title": "No reports filed",
+        "body": "Reports you submit will appear here."
+      }
     },
     "changePassword": {
       "title": "Change password",
@@ -187,10 +217,13 @@
       "goal": "Goal",
       "identity": "Identity",
       "roles": "Roles",
+      "bio": "Bio",
       "about": "About"
     },
     "goal": {
-      "title": "What's your goal?",
+      "title": "What are you looking for right now?",
+      "helper": "One sentence — we'll help you sharpen it.",
+      "examplesNote": "Examples: \"Hiring a fractional designer\", \"Raising pre-seed for a healthtech idea\", \"Open to advisor roles in fintech\"",
       "label": "Goal",
       "placeholder": "I'm looking to...",
       "counter": "{{count}} / {{max}}",
@@ -221,7 +254,10 @@
       "errorHandleCheck": "Check failed"
     },
     "roles": {
-      "title": "What do you do?",
+      "title": "What roles do you hold?",
+      "subtitle": "Pick all that apply — secondary roles help us match better.",
+      "footerNote": "A founder who also angels at $25K is a real combination — we'll account for that.",
+      "inferBanner": "Based on your goal, you might be a {{label}}. Confirm or change.",
       "primaryQuestion": "Which is your primary role?",
       "next": "Next",
       "errorPickOne": "Select at least one role.",
@@ -231,12 +267,34 @@
       "builder": "Builder",
       "investor": "Investor"
     },
+    "bio": {
+      "title": "Let's sharpen your profile",
+      "subtitle": "I'll help you write a strong headline & \"I am\" bio.",
+      "aiBubble": "Here's a draft based on what you told me. Edit it your way, or tap \"Looks good\" to use it.",
+      "headlineLabel": "Headline",
+      "bioLabel": "I am",
+      "edit": "Edit",
+      "looksGood": "Looks good →",
+      "fallbackHeadline": "Open to opportunities",
+      "fallbackBio": "Tell people who you are and what you're working on."
+    },
     "about": {
-      "title": "A bit about you",
+      "title": "A few last details",
+      "subtitle": "So people can find you.",
+      "photoLabel": "Photo",
+      "photoHint": "Tap to upload. JPG or PNG, ≥400px square.",
+      "photoComingSoonTitle": "Photo upload coming soon",
+      "photoComingSoonBody": "You'll be able to add a profile photo in a future update.",
+      "location": "Location",
+      "locationPlaceholder": "City, Country",
       "city": "City",
       "cityPlaceholder": "San Francisco",
       "country": "Country",
       "countryPlaceholder": "USA",
+      "handle": "Handle",
+      "handlePlaceholder": "ada-lovelace",
+      "handlePreviewPrefix": "connect.bvisionry.com/u/",
+      "handleRedirectNote": "If you change this later, the old URL redirects for 90 days.",
       "headline": "Headline (optional, 5-120 chars)",
       "headlinePlaceholder": "Building AI tools for makers",
       "bio": "Bio (optional, 10-1000 chars)",
@@ -309,7 +367,7 @@
     "builderSection": "Builder",
     "founderSection": "Founder",
     "investorSection": "Investor",
-    "rankingBoost": "Verified roles earn a +15% ranking boost that ramps over 14 days.",
+    "rankingBoost": "Verified roles get a +15% ranking boost — ramps over 14 days.",
     "verifiedPill": "Verified",
     "comingSoon": "Coming soon",
     "comingSoonBody": "Coming in a future release.",
@@ -349,11 +407,11 @@
         },
         "crunchbase": {
           "label": "Crunchbase profile",
-          "description": "Link a public Crunchbase profile."
+          "description": "OAuth or manual review."
         },
         "portfolio": {
-          "label": "Portfolio listings",
-          "description": "Public portfolio that lists you."
+          "label": "Portfolio companies",
+          "description": "2+ public listings naming you."
         }
       },
       "builder": {
@@ -394,7 +452,9 @@
     "sentTitle": "Sent",
     "tab": {
       "received": "Received",
+      "receivedCount": "Received ({{count}})",
       "sent": "Sent",
+      "sentCount": "Sent ({{count}})",
       "connections": "Connections"
     },
     "tabs": {
@@ -423,12 +483,17 @@
     },
     "compose": {
       "hint": "Say why you want to connect. Min 80 characters. Your message goes through a quick safety check before delivery.",
+      "noteHint": "Min 80 characters. Your message goes through a quick safety check before delivery.",
       "placeholder": "I'm reaching out because...",
       "counter": "{{count}} / {{max}} (min {{min}})",
+      "counterShort": "{{count}}/{{max}}",
       "charsLabel": "{{count}} characters",
-      "todaysIntros": "Today's intros: {{count}}/{{cap}}",
+      "todaysIntros": "Today's intros: {{count}} / {{cap}}",
+      "sheetTitle": "Send intro to {{name}}",
+      "noteLabel": "Your note",
       "cancel": "Cancel",
       "send": "Send",
+      "sendIntro": "Send intro",
       "errorRange": "Note must be 80-400 characters.",
       "errorDuplicate": "You already have a pending intro to this user.",
       "errorCooldown": "You can't send another intro to this person for 30 days after they declined.",
@@ -454,7 +519,9 @@
       "accepted": "Accepted",
       "declined": "Declined",
       "expired": "Expired",
+      "expiredNoResponse": "Expired · 14 days, no response",
       "connected": "Connected",
+      "connectedAgo": "Connected · {{ago}}",
       "awaitingResponse": "Delivered, awaiting response"
     },
     "detail": {
@@ -465,6 +532,9 @@
       "declined": "Intro declined.",
       "expiredHint": "This intro has expired and can no longer be acted on.",
       "declineSilent": "Decline is silent — the sender won't be notified.",
+      "report": "Report",
+      "mutualConnections_one": "{{count}} mutual connection",
+      "mutualConnections_other": "{{count}} mutual connections",
       "to": "To",
       "from": "From",
       "note": "NOTE",
@@ -573,6 +643,8 @@
       "send": "Send",
       "cancel": "Cancel"
     },
+    "recorderDisclosure": "Max 2 minutes — voice notes are transcribed for accessibility & safety.",
+    "transcriptPrivacyFooter": "Transcripts are not used as a third-party search index.",
     "transcript": {
       "label": "Transcript",
       "pending": "Transcribing…"
@@ -751,8 +823,9 @@
       "bodyInfo": "People you match with rely on this. Keep it current.",
       "titleWarn": "Your goal is starting to feel old",
       "bodyWarn": "A short refresh will keep your matches relevant.",
-      "titleStale": "Your goal hasn't changed in 8+ weeks",
-      "bodyStale": "A short refresh keeps your matches relevant. We'll email a reminder if it stays this old.",
+      "titleStale": "Still looking for the same thing?",
+      "bodyStale": "You set this 4 weeks ago. A short refresh keeps your matches relevant.",
+      "stillAccurate": "Yes, still accurate",
       "update": "Update",
       "snooze": "Snooze {{days}} days",
       "snoozeA11y": "Snooze this reminder for {{days}} days"
@@ -761,6 +834,12 @@
     "editAction": "Edit",
     "privateModeTitle": "Private mode is on",
     "privateModeBody": "You're hidden from feed, Daily matches, and search.",
+    "privateModeBannerTitle": "Private mode is on",
+    "privateModeBannerBody": "You're hidden from feed, Daily matches, search, and your public page.",
+    "cooldown": {
+      "buttonAvailableDate": "Send intro · available {{date}}",
+      "buttonAvailableSoon": "Send intro · available soon"
+    },
     "section": {
       "headline": "Headline",
       "bio": "Bio",
@@ -777,6 +856,29 @@
     "noUserWithHandle": "No user with handle @{{handle}}.",
     "notFoundTitle": "Not found",
     "notFoundBody": "This profile may be private, suspended, or no longer exists.",
+    "privateTitle": "This profile is private",
+    "privateBody": "The owner has hidden this profile. You can sign in and request an intro if you'd like to connect.",
+    "activeThisWeek": "Active this week",
+    "handleRedirectNote": "If you change this, the old URL redirects for 90 days.",
+    "roleDetails": {
+      "builderTitle": "Builder details",
+      "founderTitle": "Founder details",
+      "investorTitle": "Investor details",
+      "discipline": "Discipline",
+      "seniority": "Seniority",
+      "skills": "Skills",
+      "openTo": "Open to",
+      "rateBand": "Rate band",
+      "stage": "Stage",
+      "sector": "Sector",
+      "funding": "Funding",
+      "hiring": "Hiring",
+      "hiringYes": "Yes",
+      "hiringNo": "No",
+      "type": "Type",
+      "checkSize": "Check size",
+      "sectors": "Sectors"
+    },
     "title": "Profile",
     "editAction2": "Edit",
     "signOut": "Sign out",
@@ -812,11 +914,14 @@
       "rolesRequired": "Pick at least one role.",
       "primaryRoleInRoles": "Primary role must be one of your selected roles.",
       "cityRequired": "City is required.",
-      "countryRequired": "Country is required."
+      "countryRequired": "Country is required.",
+      "handleInvalid": "Handle must be 2-30 lowercase letters, digits, or single hyphens."
     },
     "signals": {
       "mutual_one": "1 mutual",
       "mutual_other": "{{count}} mutual",
+      "mutualPlus_one": "+1 more",
+      "mutualPlus_other": "+{{count}} more",
       "rating": "{{rating}}",
       "reviews_one": "({{count}} review)",
       "reviews_other": "({{count}} reviews)",
@@ -914,25 +1019,28 @@
       "subtitle": "Pick the slot that works best."
     },
     "prompt": {
-      "title": "How was your meeting?",
-      "subtitle": "Tap a quick reaction so we can keep matches accurate.",
+      "title": "Did this meeting happen?",
+      "subtitle": "Your honest answer helps us improve matches.",
       "yes": "Yes — it happened",
       "rescheduled": "Rescheduled to a new time",
       "noShow": "No — they didn't show",
-      "fallback": "If we don't hear back within 48 hours, we'll skip this prompt and ask later."
+      "fallback": "If you don't respond within 48 hours we'll mark this as no-show."
     },
     "review": {
       "title": "How was your meeting?",
+      "titleWithName": "How was your meeting with {{name}}?",
       "subtitle": "Tap a quick reaction so we can keep matches accurate.",
       "useful": "Useful",
       "notUseful": "Not useful",
       "noShow": "No-show",
+      "rescheduled": "Rescheduled",
       "notePlaceholder": "Optional note…",
       "pickOutcome": "Pick an outcome.",
       "submitFailed": "Submit failed",
       "submitted": "Thanks for the feedback!",
       "skip": "Skip",
-      "submit": "Submit"
+      "submit": "Submit",
+      "aggregateNote": "Aggregated once ≥5 distinct reviewers · visible to T&S only"
     },
     "propose": {
       "title": "Propose a meeting",
@@ -940,13 +1048,19 @@
       "slot1Label": "Slot 1 (required)",
       "slot2Label": "Slot 2 (optional)",
       "slot3Label": "Slot 3 (optional)",
+      "preferredSlot": "Mark as preferred slot",
+      "preferredSlotOn": "Preferred slot",
       "durationLabel": "Duration",
       "durationOption": "{{minutes}} min",
       "urlLabel": "Meeting URL (optional)",
       "urlPlaceholder": "https://meet.google.com/abc-defg-hij",
+      "noteLabel": "Note (optional)",
+      "notePlaceholder": "Looking forward to the chat.",
+      "icsHelper": "We'll generate an .ics file you both can add to your calendar.",
       "inputTimeZoneHint": "Times will be sent in your timezone ({{tz}})",
       "cancel": "Cancel",
       "send": "Send",
+      "sendProposal": "Send proposal",
       "errors": {
         "slotsRange": "Pick 1-3 future date/times.",
         "duration": "Duration must be 15-240 minutes.",
@@ -1011,6 +1125,9 @@
   "push": {
     "permissionDeniedTitle": "Notifications disabled",
     "permissionDeniedBody": "Enable notifications in Settings to receive intros, messages, and meeting updates.",
+    "permissionBannerTitle": "Get notified",
+    "permissionBannerBody": "Enable notifications to hear about new intros and connections.",
+    "permissionBannerEnable": "Enable",
     "toastOpenA11y": "Open notification",
     "toastDismissA11y": "Dismiss notification"
   },

@@ -10,8 +10,9 @@ import '../match_card.dart';
 /// Renders the up-to-5 daily matches on the home screen.
 ///
 /// Top 3 picks render as featured full-width cards (gold gradient via
-/// [MatchCard]'s `featured: true` flag). Picks 4–5 (if present) overflow
-/// into a horizontal scroller below.
+/// [MatchCard]'s `featured: true` flag). Picks 4–5 (if present) stack
+/// vertically below as regular (non-featured) cards — matches gallery C1
+/// where the long-tail picks sit under "BROWSE ALL".
 class DailyMatchesSection extends ConsumerWidget {
   const DailyMatchesSection({super.key, required this.matches});
 
@@ -22,47 +23,21 @@ class DailyMatchesSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final featured = matches.take(kFeaturedCount).toList();
-    final rest = matches.length > kFeaturedCount
-        ? matches.sublist(kFeaturedCount)
-        : <DailyMatch>[];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        for (final m in featured)
+        for (var i = 0; i < matches.length; i++)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             child: MatchCard(
-              match: m,
-              featured: true,
-              onTap: () => context.push(Routes.publicProfile(m.profile.handle)),
-              onSeen: () =>
-                  ref.read(dailyMatchesProvider.notifier).markViewed(m.id),
-            ),
-          ),
-        if (rest.isNotEmpty)
-          SizedBox(
-            height: 132,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: rest.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (_, i) {
-                final m = rest[i];
-                return SizedBox(
-                  width: 280,
-                  child: MatchCard(
-                    match: m,
-                    onTap: () =>
-                        context.push(Routes.publicProfile(m.profile.handle)),
-                    onSeen: () => ref
-                        .read(dailyMatchesProvider.notifier)
-                        .markViewed(m.id),
-                  ),
-                );
-              },
+              match: matches[i],
+              featured: i < kFeaturedCount,
+              onTap: () => context.push(
+                Routes.publicProfile(matches[i].profile.handle),
+              ),
+              onSeen: () => ref
+                  .read(dailyMatchesProvider.notifier)
+                  .markViewed(matches[i].id),
             ),
           ),
       ],

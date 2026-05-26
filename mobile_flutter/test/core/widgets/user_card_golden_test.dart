@@ -8,13 +8,13 @@ void main() {
     final builder = GoldenBuilder.column(wrap: _wrap)
       ..addScenario(
         'minimal',
-        const UserCard(name: 'Ada Lovelace', primaryRole: 'Founder'),
+        const UserCard(name: 'Ada Lovelace', primaryRole: 'founder'),
       )
       ..addScenario(
         'full row',
         UserCard(
           name: 'Ada Lovelace',
-          primaryRole: 'Founder',
+          primaryRole: 'founder',
           headline:
               'Building rails for autonomous agents. Hiring eng + design.',
           city: 'London',
@@ -24,15 +24,19 @@ void main() {
         ),
       )
       ..addScenario(
-        'featured',
+        'featured + reason',
         const UserCard(
           name: 'Grace Hopper',
-          primaryRole: 'Engineer',
+          primaryRole: 'builder',
           headline: 'Compiler theory + naval comms.',
           city: 'New York',
           country: 'USA',
           verified: true,
           featured: true,
+          reason: Text(
+            'Match: compiler-systems overlap',
+            style: TextStyle(fontSize: 10),
+          ),
         ),
       );
     await tester.pumpWidgetBuilder(

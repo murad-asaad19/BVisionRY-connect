@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/i18n/i18n.dart';
+import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -31,6 +33,7 @@ class ConversationAppBar extends StatelessWidget
     required this.onTapProfile,
     required this.onToggleMute,
     required this.onReport,
+    this.peerRole,
   });
 
   final String peerName;
@@ -43,6 +46,11 @@ class ConversationAppBar extends StatelessWidget
   final VoidCallback onTapProfile;
   final VoidCallback onToggleMute;
   final VoidCallback onReport;
+
+  /// Peer's primary role (e.g. "builder", "founder") — used to label the
+  /// inline verified pill next to their name. When null, the verified
+  /// state falls back to the gold-check icon used by [Avatar].
+  final String? peerRole;
 
   static const double _height = 64;
 
@@ -72,7 +80,16 @@ class ConversationAppBar extends StatelessWidget
             icon: Icons.chevron_left,
             label: 'Back',
             size: AppIconButtonSize.md,
-            onPressed: () => Navigator.of(context).maybePop(),
+            onPressed: () {
+              // The conversation screen can be reached via context.push (back
+              // stack present) OR context.go after accept_intro / deep-link
+              // (stack empty). Try pop first; fall back to the chats tab.
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go(Routes.chats);
+              }
+            },
           ),
           InkWell(
             onTap: onTapProfile,
@@ -101,12 +118,19 @@ class ConversationAppBar extends StatelessWidget
                         ),
                       ),
                       if (isVerified) ...<Widget>[
-                        const SizedBox(width: 4),
-                        Icon(
-                          LucideIcons.badgeCheck,
-                          size: 14,
-                          color: colors.gold,
-                        ),
+                        const SizedBox(width: 6),
+                        if (peerRole != null && peerRole!.isNotEmpty)
+                          Pill(
+                            label: context.t('onboarding.roles.$peerRole'),
+                            variant: PillVariant.success,
+                            icon: Icons.check,
+                          )
+                        else
+                          Icon(
+                            LucideIcons.badgeCheck,
+                            size: 14,
+                            color: colors.gold,
+                          ),
                       ],
                       if (isMuted) ...<Widget>[
                         const SizedBox(width: 4),

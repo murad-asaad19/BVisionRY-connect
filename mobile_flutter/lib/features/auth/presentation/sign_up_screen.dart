@@ -9,8 +9,14 @@ import '../../../core/widgets/widgets.dart';
 import '../data/auth_error_map.dart';
 import '../providers/auth_service_provider.dart';
 import 'auth_shell.dart';
+import 'social_sign_in_buttons.dart';
 
 /// Email + password sign-up form with a live 8-character hint indicator.
+///
+/// Gallery reference: A2. The card stacks SSO buttons (Google then Apple)
+/// at the top, then an "or" divider, then the email + password fields, then
+/// the primary Sign-up button, and finally an "Already have an account?"
+/// link.
 ///
 /// Submitting calls [AuthService.signUpWithPassword]; the underlying
 /// service throws an [ArgumentError] when the password is shorter than 8
@@ -34,6 +40,22 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   bool get _passwordOk => _password.length >= 8;
   bool get _emailLooksValid => _email.contains('@') && _email.contains('.');
 
+  Future<void> _runGuard(Future<void> Function() body, AuthMode mode) async {
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await body();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = context.t(mapAuthError(e, mode)));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _submit() async {
     if (_busy) return;
     setState(() => _error = null);
@@ -49,23 +71,30 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       setState(() => _error = context.t('auth.errors.passwordTooShort'));
       return;
     }
-    setState(() => _busy = true);
-    try {
-      await ref
-          .read(authServiceProvider)
-          .signUpWithPassword(email: _email, password: _password);
-      if (!mounted) return;
-      ref.read(toastServiceProvider.notifier).showToast(
-            title: context.t('auth.magicLinkSent'),
-            intent: AppIntent.success,
-          );
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _error = context.t(mapAuthError(e, AuthMode.signUp)));
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+    await _runGuard(
+      () async {
+        await ref
+            .read(authServiceProvider)
+            .signUpWithPassword(email: _email, password: _password);
+        if (!mounted) return;
+        ref.read(toastServiceProvider.notifier).showToast(
+              title: context.t('auth.magicLinkSent'),
+              intent: AppIntent.success,
+            );
+      },
+      AuthMode.signUp,
+    );
   }
+
+  Future<void> _onApple() => _runGuard(
+        () async => ref.read(socialAuthServiceProvider).signInWithApple(),
+        AuthMode.signUp,
+      );
+
+  Future<void> _onGoogle() => _runGuard(
+        () async => ref.read(socialAuthServiceProvider).signInWithGoogle(),
+        AuthMode.signUp,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -81,14 +110,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             context.t('auth.signUpTitle'),
             style: Theme.of(context).textTheme.displayMedium,
           ),
-          const SizedBox(height: 6),
-          Text(
-            context.t('auth.signUpTagline'),
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: colors.muted),
-          ),
           SizedBox(height: spacing.section),
+          SocialSignInButtons(
+            onApple: _busy ? null : _onApple,
+            onGoogle: _busy ? null : _onGoogle,
+          ),
+          SizedBox(height: spacing.gutter),
+          AppDivider(label: context.t('signIn.or')),
+          SizedBox(height: spacing.gutter),
           AppInput(
             key: const Key('email-input'),
             label: context.t('auth.email'),

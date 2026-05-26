@@ -50,6 +50,7 @@ class IntroListRow extends ConsumerWidget {
         peerHandle: _peerId,
         peerPhotoUrl: null,
         snippetMaxChars: _snippetMaxChars,
+        viewerIsRecipient: viewerIsRecipient,
       ),
       data: (Profile? profile) => _RowBody(
         intro: intro,
@@ -57,6 +58,7 @@ class IntroListRow extends ConsumerWidget {
         peerHandle: profile?.handle ?? _peerId,
         peerPhotoUrl: profile?.photoUrl,
         snippetMaxChars: _snippetMaxChars,
+        viewerIsRecipient: viewerIsRecipient,
       ),
     );
   }
@@ -69,6 +71,7 @@ class _RowBody extends StatelessWidget {
     required this.peerHandle,
     required this.peerPhotoUrl,
     required this.snippetMaxChars,
+    required this.viewerIsRecipient,
   });
 
   final Intro intro;
@@ -76,6 +79,7 @@ class _RowBody extends StatelessWidget {
   final String peerHandle;
   final String? peerPhotoUrl;
   final int snippetMaxChars;
+  final bool viewerIsRecipient;
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +115,11 @@ class _RowBody extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        IntroStateBadge(state: intro.state),
+                        IntroStateBadge(
+                          state: intro.state,
+                          fromSender: !viewerIsRecipient,
+                          connectedAt: intro.createdAt,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 4),

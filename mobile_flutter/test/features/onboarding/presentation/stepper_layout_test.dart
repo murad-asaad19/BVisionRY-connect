@@ -19,9 +19,9 @@ void main() {
     );
 
     expect(find.text('inner-body'), findsOneWidget);
-    // Step counter contains "Step 2 of 4" pattern.
+    // Step counter contains "Step 2 of 5" pattern.
     expect(find.textContaining('2'), findsWidgets);
-    expect(find.textContaining('4'), findsWidgets);
+    expect(find.textContaining('5'), findsWidgets);
   });
 
   testWidgets('back button calls onBack when provided',
@@ -58,7 +58,8 @@ void main() {
     expect(find.byTooltip('Back'), findsNothing);
   });
 
-  testWidgets('progress dots render 4 bars', (WidgetTester tester) async {
+  testWidgets('progress dots render one pip per step',
+      (WidgetTester tester) async {
     await pumpWithI18n(
       tester,
       await wrapWithTheme(

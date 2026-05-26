@@ -8,10 +8,10 @@ import 'pill.dart';
 
 /// Pressable user-cell used by discovery / search / suggested-intro lists.
 ///
-/// Layout: 38px [Avatar] on the left + a tight column of name (with
-/// optional verified badge), primary-role [Pill], headline (max 2 lines),
-/// and "city · country" meta. Wrapped in [AppCard] so it picks up the
-/// gallery's 14-radius / 1px-border surface and ripples on press.
+/// Layout mirrors the gallery `.ucard` rule: 38px [Avatar] + a column of
+/// name (with optional inline ✓ verified pill), a muted role-line
+/// (`"Role · City · Country"`), an optional 2-line headline, and an
+/// optional inline [reason] chip rendered below.
 class UserCard extends StatelessWidget {
   const UserCard({
     super.key,
@@ -23,6 +23,7 @@ class UserCard extends StatelessWidget {
     this.country,
     this.verified = false,
     this.featured = false,
+    this.reason,
     this.onTap,
   });
 
@@ -33,12 +34,17 @@ class UserCard extends StatelessWidget {
   final String? city;
   final String? country;
 
-  /// Renders a gold BadgeCheck beside the name. Wire to
+  /// Renders the inline green ✓ pill beside the name, labelled with the
+  /// capitalized [primaryRole] (gallery's `.verified-badge`). Wire to
   /// `profile.verified_github_username != null`.
   final bool verified;
 
   /// Promotes the card to the featured (gold-gradient) variant.
   final bool featured;
+
+  /// Optional widget rendered inline below the headline — used by
+  /// [MatchCard] to display the gallery's `.reason` chip.
+  final Widget? reason;
 
   final VoidCallback? onTap;
 
@@ -46,7 +52,7 @@ class UserCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Theme.of(context).extension<AppColors>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
-    final location = _location(city, country);
+    final roleLine = _roleLine(primaryRole, city, country);
 
     return AppCard(
       variant:
@@ -68,6 +74,7 @@ class UserCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Flexible(
                       child: Text(
@@ -77,25 +84,27 @@ class UserCard extends StatelessWidget {
                         style: typo.displaySm.copyWith(color: c.navy),
                       ),
                     ),
-                    if (verified) ...[
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.verified,
-                        size: 14,
-                        color: c.gold,
-                        semanticLabel: 'Verified',
+                    if (verified && primaryRole.isNotEmpty) ...[
+                      const SizedBox(width: 6),
+                      Pill(
+                        label: _capitalize(primaryRole),
+                        variant: PillVariant.success,
+                        icon: Icons.check,
                       ),
                     ],
                   ],
                 ),
-                const SizedBox(height: 4),
-                Pill(
-                  label: primaryRole,
-                  variant:
-                      featured ? PillVariant.solid : PillVariant.defaultVariant,
-                ),
-                if (headline != null) ...[
-                  const SizedBox(height: 6),
+                if (roleLine != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    roleLine,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: typo.bodySm.copyWith(color: c.muted),
+                  ),
+                ],
+                if (headline != null && headline!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
                   Text(
                     headline!,
                     maxLines: 2,
@@ -103,14 +112,9 @@ class UserCard extends StatelessWidget {
                     style: typo.bodyMd.copyWith(color: c.body),
                   ),
                 ],
-                if (location != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    location,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: typo.bodySm.copyWith(color: c.muted),
-                  ),
+                if (reason != null) ...[
+                  const SizedBox(height: 6),
+                  Align(alignment: Alignment.centerLeft, child: reason!),
                 ],
               ],
             ),
@@ -121,10 +125,18 @@ class UserCard extends StatelessWidget {
   }
 }
 
-String? _location(String? city, String? country) {
+/// Composes the gallery's `.role` line: `"Role · City · Country"`. Empty
+/// parts are skipped; returns null when every part is missing.
+String? _roleLine(String primaryRole, String? city, String? country) {
   final parts = <String>[];
+  if (primaryRole.isNotEmpty) parts.add(_capitalize(primaryRole));
   if (city != null && city.isNotEmpty) parts.add(city);
   if (country != null && country.isNotEmpty) parts.add(country);
   if (parts.isEmpty) return null;
   return parts.join(' · ');
+}
+
+String _capitalize(String s) {
+  if (s.isEmpty) return s;
+  return s[0].toUpperCase() + s.substring(1);
 }

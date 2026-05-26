@@ -4,9 +4,10 @@ import '../theme/app_colors.dart';
 
 /// Onboarding / wizard progress indicator.
 ///
-/// Renders [total] horizontal bars; bars before [current] are painted navy,
-/// the bar at [current] is gold, and remaining bars use the muted [border]
-/// colour. This matches the audit P3-4 update of the gallery treatment.
+/// Renders [total] round dots (8px circles) in three states matching the
+/// gallery's `.step-dots`: past dots (i < current) paint navy, the current
+/// dot (i == current) paints gold, pending dots (i > current) use the
+/// muted border colour. See `connect-full-app-gallery.html:1229`.
 class ProgressDots extends StatelessWidget {
   const ProgressDots({
     super.key,
@@ -15,12 +16,18 @@ class ProgressDots extends StatelessWidget {
   })  : assert(total > 0, 'total must be > 0'),
         assert(current >= 0, 'current must be >= 0');
 
-  /// Total number of segments.
+  /// Total number of dots.
   final int total;
 
-  /// 0-indexed position of the active segment. Values >= [total] paint
-  /// every bar navy (all-complete state).
+  /// 0-indexed position of the active dot. Values >= [total] paint every
+  /// dot navy (all-complete state).
   final int current;
+
+  /// Visual diameter of each dot.
+  static const double _dotSize = 8;
+
+  /// Horizontal spacing between adjacent dots.
+  static const double _gap = 6;
 
   @override
   Widget build(BuildContext context) {
@@ -30,23 +37,26 @@ class ProgressDots extends StatelessWidget {
       value: '${(current + 1).clamp(1, total)} of $total',
       child: Row(
         key: const ValueKey('progress-dots-frame'),
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: List.generate(total, (i) {
-          final Color bg;
+          final Color color;
           if (i < current) {
-            bg = c.navy;
+            color = c.navy;
           } else if (i == current) {
-            bg = c.gold;
+            color = c.gold;
           } else {
-            bg = c.border;
+            color = c.border;
           }
-          return Expanded(
+          return Padding(
+            padding: EdgeInsets.only(left: i == 0 ? 0 : _gap),
             child: Container(
               key: ValueKey('progress-dot-$i'),
-              margin: EdgeInsets.only(left: i == 0 ? 0 : 6),
-              height: 4,
+              width: _dotSize,
+              height: _dotSize,
               decoration: BoxDecoration(
-                color: bg,
-                borderRadius: BorderRadius.circular(2),
+                color: color,
+                shape: BoxShape.circle,
               ),
             ),
           );

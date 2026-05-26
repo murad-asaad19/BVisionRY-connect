@@ -9,16 +9,16 @@ import '../../../core/widgets/widgets.dart';
 /// Shared chrome for every step in the onboarding wizard.
 ///
 /// Renders, top-to-bottom:
-///   1. A back button + step counter ("Step 2 of 4 · Identity") + optional
+///   1. A back button + step counter ("Step 2 of 5 · Identity") + optional
 ///      Skip action.
-///   2. Four-segment [ProgressDots] showing the current position.
+///   2. Five-segment [ProgressDots] showing the current position.
 ///   3. A scrollable [child] slot for the step's main content.
 ///   4. An optional [footer] (typically the Next / Submit button).
 ///
-/// Step screens (`GoalStep`, `IdentityStep`, `RolesStep`, `AboutStep`) hand
-/// over their `stepIndex` (0..3) and the i18n key for the step name; the
-/// layout assembles the visible step label via `t('onboarding.stepLabel',
-/// vars: {current, total, stepName})`.
+/// Step screens (`GoalStep`, `IdentityStep`, `RolesStep`, `BioDraftStep`,
+/// `AboutStep`) hand over their `stepIndex` (0..4) and the i18n key for the
+/// step name; the layout assembles the visible step label via
+/// `t('onboarding.stepLabel', vars: {current, total, stepName})`.
 class StepperLayout extends StatelessWidget {
   const StepperLayout({
     super.key,
@@ -34,9 +34,9 @@ class StepperLayout extends StatelessWidget {
         );
 
   /// Number of wizard steps. Fixed by the spec (goal → identity → roles →
-  /// about); exposed as a constant so step screens can reference it without
-  /// re-declaring the value.
-  static const int totalSteps = 4;
+  /// bio → about); exposed as a constant so step screens can reference it
+  /// without re-declaring the value.
+  static const int totalSteps = 5;
 
   /// Zero-indexed position of the active step.
   final int stepIndex;

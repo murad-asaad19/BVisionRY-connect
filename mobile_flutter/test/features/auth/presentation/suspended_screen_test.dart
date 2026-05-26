@@ -40,7 +40,10 @@ void main() {
     );
     await tester.pumpWidget(
       ProviderScope(
-        overrides: <Override>[authServiceProvider.overrideWithValue(svc)],
+        overrides: <Override>[
+          authServiceProvider.overrideWithValue(svc),
+          authGatewayProvider.overrideWithValue(auth),
+        ],
         child: MaterialApp(
           theme: buildAppTheme(Brightness.light),
           home: const SuspendedScreen(),
@@ -68,7 +71,10 @@ void main() {
     );
     await tester.pumpWidget(
       ProviderScope(
-        overrides: <Override>[authServiceProvider.overrideWithValue(svc)],
+        overrides: <Override>[
+          authServiceProvider.overrideWithValue(svc),
+          authGatewayProvider.overrideWithValue(auth),
+        ],
         child: MaterialApp(
           theme: buildAppTheme(Brightness.light),
           home: const SuspendedScreen(),

@@ -133,13 +133,17 @@ void main() {
       expect(find.textContaining('Sign in to connect'), findsWidgets);
     });
 
-    testWidgets('shows not-found state when the RPC returns null', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(await _renderPublicProfile(data: null));
-      await tester.pumpAndSettle();
-      expect(find.byKey(const Key('publicProfile.notFound')), findsOneWidget);
-    });
+    testWidgets(
+      'shows private-profile state when the RPC returns null for a valid handle',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(await _renderPublicProfile(data: null));
+        await tester.pumpAndSettle();
+        // `get_public_profile` collapses suspended/private/missing rows into
+        // a single null response; when the requested handle is non-empty we
+        // treat that as "private" per spec §17.2 (hide-rather-than-leak).
+        expect(find.byKey(const Key('publicProfile.private')), findsOneWidget);
+      },
+    );
 
     testWidgets(
       'mounts OfficeHoursSectionOnProfile for an authed viewer',

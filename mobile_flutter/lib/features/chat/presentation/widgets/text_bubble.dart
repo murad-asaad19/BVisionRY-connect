@@ -15,8 +15,12 @@ enum BubbleVariant { me, them }
 /// One text message bubble (gallery F1/F3).
 ///
 /// Visual:
-/// - `me`: navy fill, white text, tail bottom-right (4dp corner)
+/// - `me`: gold-pale fill, navy text, tail bottom-right (4dp corner)
 /// - `them`: white fill, body text, 1px border, tail bottom-left
+///
+/// The "me" bubble uses the gallery's gold-pale fill with navy text — this
+/// is the brand convention for outgoing chat content (gold = self, white
+/// = peer). Edited copy stays muted-tone on both variants.
 ///
 /// When [isEdited] is `true` a small "(edited)" suffix is rendered on a
 /// second line in a muted tone. Long-press fires [onLongPress] so the
@@ -52,7 +56,7 @@ class TextBubble extends StatelessWidget {
             margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
             padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
             decoration: BoxDecoration(
-              color: isMe ? colors.navy : colors.white,
+              color: isMe ? colors.goldPale : colors.white,
               borderRadius: BorderRadius.only(
                 topLeft: const Radius.circular(14),
                 topRight: const Radius.circular(14),
@@ -68,16 +72,14 @@ class TextBubble extends StatelessWidget {
                 Text(
                   body,
                   style: typo.bodyLg.copyWith(
-                    color: isMe ? colors.white : colors.body,
+                    color: isMe ? colors.navy : colors.body,
                   ),
                 ),
                 if (isEdited) ...[
                   const SizedBox(height: 2),
                   Text(
                     '(${context.t('chat.edited')})',
-                    style: typo.bodyXs.copyWith(
-                      color: isMe ? colors.goldLight : colors.muted,
-                    ),
+                    style: typo.bodyXs.copyWith(color: colors.muted),
                   ),
                 ],
               ],

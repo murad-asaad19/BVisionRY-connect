@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../routing/routes.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import 'app_icon_button.dart';
@@ -81,7 +83,7 @@ class TopBar extends StatelessWidget {
               icon: Icons.chevron_left,
               label: 'Back',
               size: AppIconButtonSize.md,
-              onPressed: onBack ?? () => Navigator.of(context).maybePop(),
+              onPressed: onBack ?? () => _defaultBack(context),
             ),
           if (leading != null) ...[
             if (!back) const SizedBox(width: 4),
@@ -124,5 +126,20 @@ class TopBar extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Fallback back-button handler.
+  ///
+  /// A screen reached via `context.push` has Navigator history → `pop()`
+  /// succeeds. A screen reached via `context.go` (route replacement, common
+  /// after auth/intro-accept/deep-link) has none → `pop()` is a no-op. In
+  /// the latter case we land the user on `/home` which the route guard
+  /// then resolves appropriately for their auth/onboarding state.
+  static void _defaultBack(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(Routes.home);
+    }
   }
 }

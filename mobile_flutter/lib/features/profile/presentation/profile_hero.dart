@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
@@ -18,6 +19,7 @@ class ProfileHeroData {
     required this.primaryRole,
     required this.photoUrl,
     required this.verified,
+    this.activeThisWeek = false,
   });
 
   final String? name;
@@ -28,9 +30,16 @@ class ProfileHeroData {
   final String? primaryRole;
   final String? photoUrl;
 
-  /// When `true` the hero renders the gold verified-badge halo on the avatar.
-  /// MUST be `false` for the anon `/p/:handle` view per spec §17.2.
+  /// When `true` the hero renders the gold verified-badge halo on the avatar
+  /// AND a green ✓ verified-badge pill inline beside the name, labelled with
+  /// the primary role. MUST be `false` for the anon `/p/:handle` view per
+  /// spec §17.2 — the badge is hidden anon to disincentivise scraping.
   final bool verified;
+
+  /// When `true` the hero renders a small green "Active this week" recency
+  /// pill alongside the location meta. Driven by [Profile.isActiveThisWeek];
+  /// gracefully skipped when the data isn't available.
+  final bool activeThisWeek;
 }
 
 /// Profile hero band — gallery section D1.
@@ -52,6 +61,10 @@ class ProfileHero extends StatelessWidget {
         .where((String? v) => v != null && v.isNotEmpty)
         .cast<String>()
         .join(' · ');
+    final String? primaryRoleLabel =
+        (data.primaryRole == null || data.primaryRole!.isEmpty)
+            ? null
+            : _capitalize(data.primaryRole!);
 
     return Container(
       key: const ValueKey<String>('profile-hero-frame'),
@@ -97,12 +110,29 @@ class ProfileHero extends StatelessWidget {
                       : AvatarTone.defaultTone,
                 ),
                 const SizedBox(height: 14),
-                Text(
-                  data.name ?? '',
-                  style: typo.displayLg.copyWith(
-                    color: colors.white,
-                    fontSize: 18,
-                  ),
+                Wrap(
+                  key: const ValueKey<String>('profile-hero-name-row'),
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: <Widget>[
+                    Text(
+                      data.name ?? '',
+                      style: typo.displayLg.copyWith(
+                        color: colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                    if (data.verified && primaryRoleLabel != null)
+                      Pill(
+                        key: const ValueKey<String>(
+                          'profile-hero-verified-badge',
+                        ),
+                        label: primaryRoleLabel,
+                        icon: Icons.check,
+                        variant: PillVariant.success,
+                      ),
+                  ],
                 ),
                 if (data.headline != null &&
                     data.headline!.isNotEmpty) ...<Widget>[
@@ -112,11 +142,29 @@ class ProfileHero extends StatelessWidget {
                     style: typo.bodyMd.copyWith(color: colors.goldLight),
                   ),
                 ],
-                if (location.isNotEmpty) ...<Widget>[
+                if (location.isNotEmpty || data.activeThisWeek) ...<Widget>[
                   const SizedBox(height: 10),
-                  Text(
-                    location,
-                    style: typo.bodySm.copyWith(color: colors.goldLight),
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: <Widget>[
+                      if (location.isNotEmpty)
+                        Text(
+                          location,
+                          style:
+                              typo.bodySm.copyWith(color: colors.goldLight),
+                        ),
+                      if (data.activeThisWeek)
+                        Pill(
+                          key: const ValueKey<String>(
+                            'profile-hero-active-pill',
+                          ),
+                          label: context.t('profile.activeThisWeek'),
+                          icon: Icons.star,
+                          variant: PillVariant.success,
+                        ),
+                    ],
                   ),
                 ],
                 if (data.roles.isNotEmpty) ...<Widget>[

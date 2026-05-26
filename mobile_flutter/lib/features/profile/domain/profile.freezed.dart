@@ -57,6 +57,39 @@ mixin _$Profile {
   DateTime? get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'last_active_at')
+  DateTime? get lastActiveAt =>
+      throw _privateConstructorUsedError; // Role-specific structured details (spec §3a). All optional; the profile
+// screen renders only the rows that resolve to a non-null value.
+// Builder details
+  @JsonKey(name: 'builder_discipline')
+  String? get builderDiscipline => throw _privateConstructorUsedError;
+  @JsonKey(name: 'builder_seniority')
+  String? get builderSeniority => throw _privateConstructorUsedError;
+  @JsonKey(name: 'builder_skills')
+  List<String> get builderSkills => throw _privateConstructorUsedError;
+  @JsonKey(name: 'builder_open_to')
+  List<String> get builderOpenTo => throw _privateConstructorUsedError;
+  @JsonKey(name: 'builder_rate_band')
+  String? get builderRateBand =>
+      throw _privateConstructorUsedError; // Founder details
+  @JsonKey(name: 'founder_stage')
+  String? get founderStage => throw _privateConstructorUsedError;
+  @JsonKey(name: 'founder_sector')
+  String? get founderSector => throw _privateConstructorUsedError;
+  @JsonKey(name: 'founder_funding')
+  String? get founderFunding => throw _privateConstructorUsedError;
+  @JsonKey(name: 'founder_hiring')
+  bool? get founderHiring =>
+      throw _privateConstructorUsedError; // Investor details
+  @JsonKey(name: 'investor_type')
+  String? get investorType => throw _privateConstructorUsedError;
+  @JsonKey(name: 'investor_check_size')
+  String? get investorCheckSize => throw _privateConstructorUsedError;
+  @JsonKey(name: 'investor_sectors')
+  List<String> get investorSectors => throw _privateConstructorUsedError;
+  @JsonKey(name: 'investor_stage')
+  String? get investorStage => throw _privateConstructorUsedError;
 
   /// Serializes this Profile to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -95,7 +128,21 @@ abstract class $ProfileCopyWith<$Res> {
       @JsonKey(name: 'read_receipts_enabled') bool readReceiptsEnabled,
       @JsonKey(name: 'public_investor_page') bool publicInvestorPage,
       @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt});
+      @JsonKey(name: 'updated_at') DateTime? updatedAt,
+      @JsonKey(name: 'last_active_at') DateTime? lastActiveAt,
+      @JsonKey(name: 'builder_discipline') String? builderDiscipline,
+      @JsonKey(name: 'builder_seniority') String? builderSeniority,
+      @JsonKey(name: 'builder_skills') List<String> builderSkills,
+      @JsonKey(name: 'builder_open_to') List<String> builderOpenTo,
+      @JsonKey(name: 'builder_rate_band') String? builderRateBand,
+      @JsonKey(name: 'founder_stage') String? founderStage,
+      @JsonKey(name: 'founder_sector') String? founderSector,
+      @JsonKey(name: 'founder_funding') String? founderFunding,
+      @JsonKey(name: 'founder_hiring') bool? founderHiring,
+      @JsonKey(name: 'investor_type') String? investorType,
+      @JsonKey(name: 'investor_check_size') String? investorCheckSize,
+      @JsonKey(name: 'investor_sectors') List<String> investorSectors,
+      @JsonKey(name: 'investor_stage') String? investorStage});
 }
 
 /// @nodoc
@@ -136,6 +183,20 @@ class _$ProfileCopyWithImpl<$Res, $Val extends Profile>
     Object? publicInvestorPage = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
+    Object? lastActiveAt = freezed,
+    Object? builderDiscipline = freezed,
+    Object? builderSeniority = freezed,
+    Object? builderSkills = null,
+    Object? builderOpenTo = null,
+    Object? builderRateBand = freezed,
+    Object? founderStage = freezed,
+    Object? founderSector = freezed,
+    Object? founderFunding = freezed,
+    Object? founderHiring = freezed,
+    Object? investorType = freezed,
+    Object? investorCheckSize = freezed,
+    Object? investorSectors = null,
+    Object? investorStage = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -230,6 +291,62 @@ class _$ProfileCopyWithImpl<$Res, $Val extends Profile>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      lastActiveAt: freezed == lastActiveAt
+          ? _value.lastActiveAt
+          : lastActiveAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      builderDiscipline: freezed == builderDiscipline
+          ? _value.builderDiscipline
+          : builderDiscipline // ignore: cast_nullable_to_non_nullable
+              as String?,
+      builderSeniority: freezed == builderSeniority
+          ? _value.builderSeniority
+          : builderSeniority // ignore: cast_nullable_to_non_nullable
+              as String?,
+      builderSkills: null == builderSkills
+          ? _value.builderSkills
+          : builderSkills // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      builderOpenTo: null == builderOpenTo
+          ? _value.builderOpenTo
+          : builderOpenTo // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      builderRateBand: freezed == builderRateBand
+          ? _value.builderRateBand
+          : builderRateBand // ignore: cast_nullable_to_non_nullable
+              as String?,
+      founderStage: freezed == founderStage
+          ? _value.founderStage
+          : founderStage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      founderSector: freezed == founderSector
+          ? _value.founderSector
+          : founderSector // ignore: cast_nullable_to_non_nullable
+              as String?,
+      founderFunding: freezed == founderFunding
+          ? _value.founderFunding
+          : founderFunding // ignore: cast_nullable_to_non_nullable
+              as String?,
+      founderHiring: freezed == founderHiring
+          ? _value.founderHiring
+          : founderHiring // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      investorType: freezed == investorType
+          ? _value.investorType
+          : investorType // ignore: cast_nullable_to_non_nullable
+              as String?,
+      investorCheckSize: freezed == investorCheckSize
+          ? _value.investorCheckSize
+          : investorCheckSize // ignore: cast_nullable_to_non_nullable
+              as String?,
+      investorSectors: null == investorSectors
+          ? _value.investorSectors
+          : investorSectors // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      investorStage: freezed == investorStage
+          ? _value.investorStage
+          : investorStage // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -264,7 +381,21 @@ abstract class _$$ProfileImplCopyWith<$Res> implements $ProfileCopyWith<$Res> {
       @JsonKey(name: 'read_receipts_enabled') bool readReceiptsEnabled,
       @JsonKey(name: 'public_investor_page') bool publicInvestorPage,
       @JsonKey(name: 'created_at') DateTime? createdAt,
-      @JsonKey(name: 'updated_at') DateTime? updatedAt});
+      @JsonKey(name: 'updated_at') DateTime? updatedAt,
+      @JsonKey(name: 'last_active_at') DateTime? lastActiveAt,
+      @JsonKey(name: 'builder_discipline') String? builderDiscipline,
+      @JsonKey(name: 'builder_seniority') String? builderSeniority,
+      @JsonKey(name: 'builder_skills') List<String> builderSkills,
+      @JsonKey(name: 'builder_open_to') List<String> builderOpenTo,
+      @JsonKey(name: 'builder_rate_band') String? builderRateBand,
+      @JsonKey(name: 'founder_stage') String? founderStage,
+      @JsonKey(name: 'founder_sector') String? founderSector,
+      @JsonKey(name: 'founder_funding') String? founderFunding,
+      @JsonKey(name: 'founder_hiring') bool? founderHiring,
+      @JsonKey(name: 'investor_type') String? investorType,
+      @JsonKey(name: 'investor_check_size') String? investorCheckSize,
+      @JsonKey(name: 'investor_sectors') List<String> investorSectors,
+      @JsonKey(name: 'investor_stage') String? investorStage});
 }
 
 /// @nodoc
@@ -303,6 +434,20 @@ class __$$ProfileImplCopyWithImpl<$Res>
     Object? publicInvestorPage = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
+    Object? lastActiveAt = freezed,
+    Object? builderDiscipline = freezed,
+    Object? builderSeniority = freezed,
+    Object? builderSkills = null,
+    Object? builderOpenTo = null,
+    Object? builderRateBand = freezed,
+    Object? founderStage = freezed,
+    Object? founderSector = freezed,
+    Object? founderFunding = freezed,
+    Object? founderHiring = freezed,
+    Object? investorType = freezed,
+    Object? investorCheckSize = freezed,
+    Object? investorSectors = null,
+    Object? investorStage = freezed,
   }) {
     return _then(_$ProfileImpl(
       id: null == id
@@ -397,6 +542,62 @@ class __$$ProfileImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      lastActiveAt: freezed == lastActiveAt
+          ? _value.lastActiveAt
+          : lastActiveAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      builderDiscipline: freezed == builderDiscipline
+          ? _value.builderDiscipline
+          : builderDiscipline // ignore: cast_nullable_to_non_nullable
+              as String?,
+      builderSeniority: freezed == builderSeniority
+          ? _value.builderSeniority
+          : builderSeniority // ignore: cast_nullable_to_non_nullable
+              as String?,
+      builderSkills: null == builderSkills
+          ? _value._builderSkills
+          : builderSkills // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      builderOpenTo: null == builderOpenTo
+          ? _value._builderOpenTo
+          : builderOpenTo // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      builderRateBand: freezed == builderRateBand
+          ? _value.builderRateBand
+          : builderRateBand // ignore: cast_nullable_to_non_nullable
+              as String?,
+      founderStage: freezed == founderStage
+          ? _value.founderStage
+          : founderStage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      founderSector: freezed == founderSector
+          ? _value.founderSector
+          : founderSector // ignore: cast_nullable_to_non_nullable
+              as String?,
+      founderFunding: freezed == founderFunding
+          ? _value.founderFunding
+          : founderFunding // ignore: cast_nullable_to_non_nullable
+              as String?,
+      founderHiring: freezed == founderHiring
+          ? _value.founderHiring
+          : founderHiring // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      investorType: freezed == investorType
+          ? _value.investorType
+          : investorType // ignore: cast_nullable_to_non_nullable
+              as String?,
+      investorCheckSize: freezed == investorCheckSize
+          ? _value.investorCheckSize
+          : investorCheckSize // ignore: cast_nullable_to_non_nullable
+              as String?,
+      investorSectors: null == investorSectors
+          ? _value._investorSectors
+          : investorSectors // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      investorStage: freezed == investorStage
+          ? _value.investorStage
+          : investorStage // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -427,8 +628,28 @@ class _$ProfileImpl extends _Profile {
       @JsonKey(name: 'read_receipts_enabled') this.readReceiptsEnabled = false,
       @JsonKey(name: 'public_investor_page') this.publicInvestorPage = false,
       @JsonKey(name: 'created_at') this.createdAt,
-      @JsonKey(name: 'updated_at') this.updatedAt})
+      @JsonKey(name: 'updated_at') this.updatedAt,
+      @JsonKey(name: 'last_active_at') this.lastActiveAt,
+      @JsonKey(name: 'builder_discipline') this.builderDiscipline,
+      @JsonKey(name: 'builder_seniority') this.builderSeniority,
+      @JsonKey(name: 'builder_skills')
+      final List<String> builderSkills = const <String>[],
+      @JsonKey(name: 'builder_open_to')
+      final List<String> builderOpenTo = const <String>[],
+      @JsonKey(name: 'builder_rate_band') this.builderRateBand,
+      @JsonKey(name: 'founder_stage') this.founderStage,
+      @JsonKey(name: 'founder_sector') this.founderSector,
+      @JsonKey(name: 'founder_funding') this.founderFunding,
+      @JsonKey(name: 'founder_hiring') this.founderHiring,
+      @JsonKey(name: 'investor_type') this.investorType,
+      @JsonKey(name: 'investor_check_size') this.investorCheckSize,
+      @JsonKey(name: 'investor_sectors')
+      final List<String> investorSectors = const <String>[],
+      @JsonKey(name: 'investor_stage') this.investorStage})
       : _roles = roles,
+        _builderSkills = builderSkills,
+        _builderOpenTo = builderOpenTo,
+        _investorSectors = investorSectors,
         super._();
 
   factory _$ProfileImpl.fromJson(Map<String, dynamic> json) =>
@@ -502,10 +723,75 @@ class _$ProfileImpl extends _Profile {
   @override
   @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
+  @override
+  @JsonKey(name: 'last_active_at')
+  final DateTime? lastActiveAt;
+// Role-specific structured details (spec §3a). All optional; the profile
+// screen renders only the rows that resolve to a non-null value.
+// Builder details
+  @override
+  @JsonKey(name: 'builder_discipline')
+  final String? builderDiscipline;
+  @override
+  @JsonKey(name: 'builder_seniority')
+  final String? builderSeniority;
+  final List<String> _builderSkills;
+  @override
+  @JsonKey(name: 'builder_skills')
+  List<String> get builderSkills {
+    if (_builderSkills is EqualUnmodifiableListView) return _builderSkills;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_builderSkills);
+  }
+
+  final List<String> _builderOpenTo;
+  @override
+  @JsonKey(name: 'builder_open_to')
+  List<String> get builderOpenTo {
+    if (_builderOpenTo is EqualUnmodifiableListView) return _builderOpenTo;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_builderOpenTo);
+  }
+
+  @override
+  @JsonKey(name: 'builder_rate_band')
+  final String? builderRateBand;
+// Founder details
+  @override
+  @JsonKey(name: 'founder_stage')
+  final String? founderStage;
+  @override
+  @JsonKey(name: 'founder_sector')
+  final String? founderSector;
+  @override
+  @JsonKey(name: 'founder_funding')
+  final String? founderFunding;
+  @override
+  @JsonKey(name: 'founder_hiring')
+  final bool? founderHiring;
+// Investor details
+  @override
+  @JsonKey(name: 'investor_type')
+  final String? investorType;
+  @override
+  @JsonKey(name: 'investor_check_size')
+  final String? investorCheckSize;
+  final List<String> _investorSectors;
+  @override
+  @JsonKey(name: 'investor_sectors')
+  List<String> get investorSectors {
+    if (_investorSectors is EqualUnmodifiableListView) return _investorSectors;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_investorSectors);
+  }
+
+  @override
+  @JsonKey(name: 'investor_stage')
+  final String? investorStage;
 
   @override
   String toString() {
-    return 'Profile(id: $id, handle: $handle, name: $name, headline: $headline, bio: $bio, roles: $roles, primaryRole: $primaryRole, city: $city, country: $country, goalType: $goalType, goalText: $goalText, goalUpdatedAt: $goalUpdatedAt, photoUrl: $photoUrl, onboarded: $onboarded, verifiedGithubUsername: $verifiedGithubUsername, verifiedGithubId: $verifiedGithubId, verifiedAt: $verifiedAt, suspendedAt: $suspendedAt, privateMode: $privateMode, readReceiptsEnabled: $readReceiptsEnabled, publicInvestorPage: $publicInvestorPage, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Profile(id: $id, handle: $handle, name: $name, headline: $headline, bio: $bio, roles: $roles, primaryRole: $primaryRole, city: $city, country: $country, goalType: $goalType, goalText: $goalText, goalUpdatedAt: $goalUpdatedAt, photoUrl: $photoUrl, onboarded: $onboarded, verifiedGithubUsername: $verifiedGithubUsername, verifiedGithubId: $verifiedGithubId, verifiedAt: $verifiedAt, suspendedAt: $suspendedAt, privateMode: $privateMode, readReceiptsEnabled: $readReceiptsEnabled, publicInvestorPage: $publicInvestorPage, createdAt: $createdAt, updatedAt: $updatedAt, lastActiveAt: $lastActiveAt, builderDiscipline: $builderDiscipline, builderSeniority: $builderSeniority, builderSkills: $builderSkills, builderOpenTo: $builderOpenTo, builderRateBand: $builderRateBand, founderStage: $founderStage, founderSector: $founderSector, founderFunding: $founderFunding, founderHiring: $founderHiring, investorType: $investorType, investorCheckSize: $investorCheckSize, investorSectors: $investorSectors, investorStage: $investorStage)';
   }
 
   @override
@@ -551,7 +837,35 @@ class _$ProfileImpl extends _Profile {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.lastActiveAt, lastActiveAt) ||
+                other.lastActiveAt == lastActiveAt) &&
+            (identical(other.builderDiscipline, builderDiscipline) ||
+                other.builderDiscipline == builderDiscipline) &&
+            (identical(other.builderSeniority, builderSeniority) ||
+                other.builderSeniority == builderSeniority) &&
+            const DeepCollectionEquality()
+                .equals(other._builderSkills, _builderSkills) &&
+            const DeepCollectionEquality()
+                .equals(other._builderOpenTo, _builderOpenTo) &&
+            (identical(other.builderRateBand, builderRateBand) ||
+                other.builderRateBand == builderRateBand) &&
+            (identical(other.founderStage, founderStage) ||
+                other.founderStage == founderStage) &&
+            (identical(other.founderSector, founderSector) ||
+                other.founderSector == founderSector) &&
+            (identical(other.founderFunding, founderFunding) ||
+                other.founderFunding == founderFunding) &&
+            (identical(other.founderHiring, founderHiring) ||
+                other.founderHiring == founderHiring) &&
+            (identical(other.investorType, investorType) ||
+                other.investorType == investorType) &&
+            (identical(other.investorCheckSize, investorCheckSize) ||
+                other.investorCheckSize == investorCheckSize) &&
+            const DeepCollectionEquality()
+                .equals(other._investorSectors, _investorSectors) &&
+            (identical(other.investorStage, investorStage) ||
+                other.investorStage == investorStage));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -580,7 +894,21 @@ class _$ProfileImpl extends _Profile {
         readReceiptsEnabled,
         publicInvestorPage,
         createdAt,
-        updatedAt
+        updatedAt,
+        lastActiveAt,
+        builderDiscipline,
+        builderSeniority,
+        const DeepCollectionEquality().hash(_builderSkills),
+        const DeepCollectionEquality().hash(_builderOpenTo),
+        builderRateBand,
+        founderStage,
+        founderSector,
+        founderFunding,
+        founderHiring,
+        investorType,
+        investorCheckSize,
+        const DeepCollectionEquality().hash(_investorSectors),
+        investorStage
       ]);
 
   /// Create a copy of Profile
@@ -624,7 +952,22 @@ abstract class _Profile extends Profile {
       @JsonKey(name: 'read_receipts_enabled') final bool readReceiptsEnabled,
       @JsonKey(name: 'public_investor_page') final bool publicInvestorPage,
       @JsonKey(name: 'created_at') final DateTime? createdAt,
-      @JsonKey(name: 'updated_at') final DateTime? updatedAt}) = _$ProfileImpl;
+      @JsonKey(name: 'updated_at') final DateTime? updatedAt,
+      @JsonKey(name: 'last_active_at') final DateTime? lastActiveAt,
+      @JsonKey(name: 'builder_discipline') final String? builderDiscipline,
+      @JsonKey(name: 'builder_seniority') final String? builderSeniority,
+      @JsonKey(name: 'builder_skills') final List<String> builderSkills,
+      @JsonKey(name: 'builder_open_to') final List<String> builderOpenTo,
+      @JsonKey(name: 'builder_rate_band') final String? builderRateBand,
+      @JsonKey(name: 'founder_stage') final String? founderStage,
+      @JsonKey(name: 'founder_sector') final String? founderSector,
+      @JsonKey(name: 'founder_funding') final String? founderFunding,
+      @JsonKey(name: 'founder_hiring') final bool? founderHiring,
+      @JsonKey(name: 'investor_type') final String? investorType,
+      @JsonKey(name: 'investor_check_size') final String? investorCheckSize,
+      @JsonKey(name: 'investor_sectors') final List<String> investorSectors,
+      @JsonKey(name: 'investor_stage')
+      final String? investorStage}) = _$ProfileImpl;
   const _Profile._() : super._();
 
   factory _Profile.fromJson(Map<String, dynamic> json) = _$ProfileImpl.fromJson;
@@ -689,6 +1032,51 @@ abstract class _Profile extends Profile {
   @override
   @JsonKey(name: 'updated_at')
   DateTime? get updatedAt;
+  @override
+  @JsonKey(name: 'last_active_at')
+  DateTime?
+      get lastActiveAt; // Role-specific structured details (spec §3a). All optional; the profile
+// screen renders only the rows that resolve to a non-null value.
+// Builder details
+  @override
+  @JsonKey(name: 'builder_discipline')
+  String? get builderDiscipline;
+  @override
+  @JsonKey(name: 'builder_seniority')
+  String? get builderSeniority;
+  @override
+  @JsonKey(name: 'builder_skills')
+  List<String> get builderSkills;
+  @override
+  @JsonKey(name: 'builder_open_to')
+  List<String> get builderOpenTo;
+  @override
+  @JsonKey(name: 'builder_rate_band')
+  String? get builderRateBand; // Founder details
+  @override
+  @JsonKey(name: 'founder_stage')
+  String? get founderStage;
+  @override
+  @JsonKey(name: 'founder_sector')
+  String? get founderSector;
+  @override
+  @JsonKey(name: 'founder_funding')
+  String? get founderFunding;
+  @override
+  @JsonKey(name: 'founder_hiring')
+  bool? get founderHiring; // Investor details
+  @override
+  @JsonKey(name: 'investor_type')
+  String? get investorType;
+  @override
+  @JsonKey(name: 'investor_check_size')
+  String? get investorCheckSize;
+  @override
+  @JsonKey(name: 'investor_sectors')
+  List<String> get investorSectors;
+  @override
+  @JsonKey(name: 'investor_stage')
+  String? get investorStage;
 
   /// Create a copy of Profile
   /// with the given fields replaced by the non-null parameter values.

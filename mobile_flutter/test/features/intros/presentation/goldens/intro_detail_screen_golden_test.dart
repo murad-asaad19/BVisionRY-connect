@@ -6,7 +6,9 @@ import 'package:connect_mobile/features/intros/domain/intro_enums.dart';
 import 'package:connect_mobile/features/intros/presentation/intro_detail_screen.dart';
 import 'package:connect_mobile/features/intros/providers/intros_providers.dart';
 import 'package:connect_mobile/features/profile/data/peer_profile_service.dart';
+import 'package:connect_mobile/features/profile/data/profile_signals_service.dart';
 import 'package:connect_mobile/features/profile/domain/profile.dart';
+import 'package:connect_mobile/features/profile/domain/profile_signals.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,6 +21,12 @@ import '../../../../helpers/pump.dart';
 class _FakeIntrosService extends Mock implements IntrosService {}
 
 class _FakePeerProfileService extends Mock implements PeerProfileService {}
+
+class _EmptySignalsService implements ProfileSignalsService {
+  @override
+  Future<ProfileSignals> fetchSignals(String targetUserId) async =>
+      ProfileSignals.empty;
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -58,6 +66,9 @@ void main() {
           introsServiceProvider
               .overrideWithValue(stub(received: <Intro>[intro])),
           peerProfileServiceProvider.overrideWithValue(stubPeer()),
+          profileSignalsServiceProvider.overrideWithValue(
+            _EmptySignalsService(),
+          ),
           currentUserIdProvider.overrideWithValue('me'),
         ],
         child: const IntroDetailScreen(introId: 'intro-1'),

@@ -85,7 +85,7 @@ void main() {
   });
 
   testWidgets(
-    'full onboarding flow: goal → identity → roles → about → submit',
+    'full onboarding flow: goal → identity → roles → bio → about → submit',
     (WidgetTester tester) async {
       // Signed in but not onboarded → route guard sends us to /onboarding/goal.
       final FakeAuthGateway auth = FakeAuthGateway();
@@ -180,14 +180,15 @@ void main() {
       await tester.tap(find.byKey(const ValueKey<String>('roles-next')));
       await tester.pumpAndSettle();
 
-      // STEP 4 — About + submit.
+      // STEP 4 — Bio draft (UI shell). "Looks good" pre-fills headline + bio
+      // from the deterministic template and advances to the About step.
+      await tester.tap(find.byKey(const ValueKey<String>('bio-looks-good')));
+      await tester.pumpAndSettle();
+
+      // STEP 5 — About + submit. Use the combined location field.
       await tester.enterText(
-        find.byKey(const ValueKey<String>('about-city')),
-        'Berlin',
-      );
-      await tester.enterText(
-        find.byKey(const ValueKey<String>('about-country')),
-        'Germany',
+        find.byKey(const ValueKey<String>('about-location')),
+        'Berlin, Germany',
       );
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey<String>('about-submit')));

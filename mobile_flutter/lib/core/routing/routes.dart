@@ -16,6 +16,7 @@ abstract final class Routes {
   static const String onboardingGoal = '/onboarding/goal';
   static const String onboardingIdentity = '/onboarding/identity';
   static const String onboardingRoles = '/onboarding/roles';
+  static const String onboardingBio = '/onboarding/bio';
   static const String onboardingAbout = '/onboarding/about';
 
   // App shell tabs
@@ -38,6 +39,10 @@ abstract final class Routes {
   static String publicProfile(String handle) => '/p/$handle';
   static String meetingReview(String meetingId) =>
       '/meetings/$meetingId/review';
+  // G3 — full-screen post-connection review (Useful / Not useful / No-show).
+  // The G2 "Did this meeting happen?" prompt pushes here on "Yes".
+  static String meetingReviewFull(String meetingId) =>
+      '/meetings/$meetingId/review/full';
 
   // Opportunities sub-routes (composer / edit / interested-list / my list).
   // The opportunity detail route is exposed by [opportunity] above.
@@ -61,6 +66,7 @@ abstract final class Routes {
   static const String settingsNotifications = '/settings/notifications';
   static const String settingsVerification = '/settings/verification';
   static const String settingsBlocked = '/settings/blocked-users';
+  static const String reportsHistory = '/settings/reports';
   static const String settingsOfficeHours = '/settings/office-hours';
   static const String settingsHelp = '/settings/help';
   static const String settingsLanguage = '/settings/language';

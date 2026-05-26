@@ -109,7 +109,8 @@ void main() {
     await pumpWithI18n(tester, widget);
     expect(find.text('Daily limit reached'), findsOneWidget);
 
-    await tester.tap(find.text('Sent'));
+    // Tab label is now "Sent (0)" with a live count suffix per the gallery.
+    await tester.tap(find.textContaining('Sent'));
     await tester.pumpAndSettle();
     expect(find.text('Daily limit reached'), findsNothing);
   });

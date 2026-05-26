@@ -22,8 +22,9 @@ typedef NotificationPrefChanged = void Function(
 ///      whose kind has `hasEmitter == false` (spec §17.4) render a
 ///      "coming soon" chip below the label so users understand toggling
 ///      is purely declarative until the server-side emitter ships.
-///   3. Footer: muted `settings.notif.emailUnavailable` note (spec §17.1)
-///      because the email channel has no mailer yet.
+///   3. Footer: muted `settings.notif.decayFooter` note (gallery H3 /
+///      spec §14) — "Activity-decay guilt nudges are not available — by
+///      design." Replaces the previous mailer-status placeholder copy.
 ///
 /// Switch values resolve through [prefs] — a `kind:channel` keyed map.
 /// Absent entries default to enabled=true to mirror the `should_notify`
@@ -89,7 +90,7 @@ class NotificationMatrix extends StatelessWidget {
           key: const Key('matrix.emailUnavailableNote'),
           padding: const EdgeInsets.all(12),
           child: Text(
-            context.t('settings.notif.emailUnavailable'),
+            context.t('settings.notif.decayFooter'),
             style: typo.bodySm.copyWith(color: colors.muted),
           ),
         ),

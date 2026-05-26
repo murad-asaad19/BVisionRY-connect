@@ -45,6 +45,28 @@ class Profile with _$Profile {
     bool publicInvestorPage,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    @JsonKey(name: 'last_active_at') DateTime? lastActiveAt,
+    // Role-specific structured details (spec §3a). All optional; the profile
+    // screen renders only the rows that resolve to a non-null value.
+    // Builder details
+    @JsonKey(name: 'builder_discipline') String? builderDiscipline,
+    @JsonKey(name: 'builder_seniority') String? builderSeniority,
+    @JsonKey(name: 'builder_skills') @Default(<String>[]) List<String>
+        builderSkills,
+    @JsonKey(name: 'builder_open_to') @Default(<String>[]) List<String>
+        builderOpenTo,
+    @JsonKey(name: 'builder_rate_band') String? builderRateBand,
+    // Founder details
+    @JsonKey(name: 'founder_stage') String? founderStage,
+    @JsonKey(name: 'founder_sector') String? founderSector,
+    @JsonKey(name: 'founder_funding') String? founderFunding,
+    @JsonKey(name: 'founder_hiring') bool? founderHiring,
+    // Investor details
+    @JsonKey(name: 'investor_type') String? investorType,
+    @JsonKey(name: 'investor_check_size') String? investorCheckSize,
+    @JsonKey(name: 'investor_sectors') @Default(<String>[]) List<String>
+        investorSectors,
+    @JsonKey(name: 'investor_stage') String? investorStage,
   }) = _Profile;
 
   factory Profile.fromJson(Map<String, dynamic> json) =>
@@ -83,7 +105,31 @@ class Profile with _$Profile {
       'public_investor_page': map['public_investor_page'] ?? false,
       'created_at': map['created_at'],
       'updated_at': map['updated_at'],
+      'last_active_at': map['last_active_at'],
+      'builder_discipline': map['builder_discipline'],
+      'builder_seniority': map['builder_seniority'],
+      'builder_skills': map['builder_skills'] ?? const <String>[],
+      'builder_open_to': map['builder_open_to'] ?? const <String>[],
+      'builder_rate_band': map['builder_rate_band'],
+      'founder_stage': map['founder_stage'],
+      'founder_sector': map['founder_sector'],
+      'founder_funding': map['founder_funding'],
+      'founder_hiring': map['founder_hiring'],
+      'investor_type': map['investor_type'],
+      'investor_check_size': map['investor_check_size'],
+      'investor_sectors': map['investor_sectors'] ?? const <String>[],
+      'investor_stage': map['investor_stage'],
     });
+  }
+
+  /// True when the profile recorded an activity timestamp within the last
+  /// 7 days — drives the gallery's green "Active this week" recency pill
+  /// on the profile hero. Returns false when [lastActiveAt] is null so we
+  /// gracefully skip the pill when the data isn't available.
+  bool get isActiveThisWeek {
+    final DateTime? t = lastActiveAt;
+    if (t == null) return false;
+    return t.isAfter(DateTime.now().toUtc().subtract(const Duration(days: 7)));
   }
 
   /// Default profile carrying just the id — handy for tests and copyWith
@@ -98,11 +144,13 @@ class Profile with _$Profile {
   /// Mirrors spec §5.3 — suspension is a soft-state flag, not a deletion.
   bool get isSuspended => suspendedAt != null;
 
-  /// True when the most recent goal change is older than 56 days (spec
-  /// §17.5). The Profile screen uses this to render the goal-refresh
-  /// banner; the threshold matches `GoalRefreshCard._staleDays`.
+  /// True when the most recent goal change is older than 28 days / 4 weeks
+  /// (gallery section I1 — "First nudge per §3. Decay starts at week 4, hits
+  /// 50% at week 12."). The Profile screen uses this to render the
+  /// goal-refresh banner; the server-side decay pipeline (Phase 13 nag
+  /// cadence) still owns the email/push nudges.
   bool get isGoalStale =>
       goalUpdatedAt != null &&
       goalUpdatedAt!
-          .isBefore(DateTime.now().toUtc().subtract(const Duration(days: 56)));
+          .isBefore(DateTime.now().toUtc().subtract(const Duration(days: 28)));
 }
