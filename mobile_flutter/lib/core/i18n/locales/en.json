@@ -579,7 +579,25 @@
       "title": "Opportunities",
       "emptyTitle": "No opportunities yet",
       "empty": "Be the first to post — share what you're hiring for, raising, or looking for.",
+      "newCta": "Post opportunity",
+      "myOpportunities": "My opportunities"
+    },
+    "mine": {
+      "title": "My opportunities",
+      "emptyTitle": "You haven't posted yet",
+      "empty": "Post an opportunity so others can express interest.",
       "newCta": "Post opportunity"
+    },
+    "edit": {
+      "title": "Edit opportunity",
+      "submit": "Save changes",
+      "submitting": "Saving…",
+      "submitSuccess": "Saved"
+    },
+    "interestedScreen": {
+      "title": "Interested",
+      "forbiddenTitle": "Not allowed",
+      "forbiddenBody": "Only the author can see this list."
     },
     "kind": {
       "hiring": "Hiring",

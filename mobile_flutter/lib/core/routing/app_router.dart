@@ -24,7 +24,12 @@ import '../../features/onboarding/presentation/about_step.dart';
 import '../../features/onboarding/presentation/goal_step.dart';
 import '../../features/onboarding/presentation/identity_step.dart';
 import '../../features/onboarding/presentation/roles_step.dart';
-import '../../features/opportunities/presentation/opportunities_screen_stub.dart';
+import '../../features/opportunities/presentation/edit_opportunity_screen.dart';
+import '../../features/opportunities/presentation/interested_list_screen.dart';
+import '../../features/opportunities/presentation/my_opportunities_screen.dart';
+import '../../features/opportunities/presentation/new_opportunity_screen.dart';
+import '../../features/opportunities/presentation/opportunities_feed_screen.dart';
+import '../../features/opportunities/presentation/opportunity_detail_screen.dart';
 import '../../features/profile/presentation/profile_edit_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/profile/presentation/public_profile_screen.dart';
@@ -145,6 +150,37 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
         builder: (_, GoRouterState state) =>
             IntroDetailScreen(introId: state.pathParameters['id']!),
       ),
+      // Opportunities composer + my-list routes (outside the tab shell so
+      // they take over the full screen with a back button).
+      GoRoute(
+        path: Routes.opportunityNew,
+        builder: (_, __) => const NewOpportunityScreen(),
+      ),
+      GoRoute(
+        path: Routes.myOpportunities,
+        builder: (_, __) => const MyOpportunitiesScreen(),
+      ),
+      // /opportunities/:id (detail) + nested /edit + /interested.
+      GoRoute(
+        path: '/opportunities/:id',
+        builder: (_, GoRouterState state) => OpportunityDetailScreen(
+          opportunityId: state.pathParameters['id']!,
+        ),
+        routes: <RouteBase>[
+          GoRoute(
+            path: 'edit',
+            builder: (_, GoRouterState state) => EditOpportunityScreen(
+              opportunityId: state.pathParameters['id']!,
+            ),
+          ),
+          GoRoute(
+            path: 'interested',
+            builder: (_, GoRouterState state) => InterestedListScreen(
+              opportunityId: state.pathParameters['id']!,
+            ),
+          ),
+        ],
+      ),
       GoRoute(
         path: Routes.connections,
         builder: (_, __) => const ConnectionsScreen(),
@@ -201,7 +237,7 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
             routes: <RouteBase>[
               GoRoute(
                 path: Routes.opportunities,
-                builder: (_, __) => const OpportunitiesScreenStub(),
+                builder: (_, __) => const OpportunitiesFeedScreen(),
               ),
             ],
           ),

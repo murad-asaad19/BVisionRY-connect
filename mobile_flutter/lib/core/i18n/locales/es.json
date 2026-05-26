@@ -579,7 +579,25 @@
       "title": "Oportunidades",
       "emptyTitle": "Aún no hay oportunidades",
       "empty": "Sé el primero en publicar — comparte qué buscas contratar, recaudar o encontrar.",
+      "newCta": "Publicar oportunidad",
+      "myOpportunities": "Mis oportunidades"
+    },
+    "mine": {
+      "title": "Mis oportunidades",
+      "emptyTitle": "Aún no has publicado",
+      "empty": "Publica una oportunidad para que otros muestren interés.",
       "newCta": "Publicar oportunidad"
+    },
+    "edit": {
+      "title": "Editar oportunidad",
+      "submit": "Guardar cambios",
+      "submitting": "Guardando…",
+      "submitSuccess": "Guardado"
+    },
+    "interestedScreen": {
+      "title": "Interesados",
+      "forbiddenTitle": "No permitido",
+      "forbiddenBody": "Solo el autor puede ver esta lista."
     },
     "kind": {
       "hiring": "Contratando",

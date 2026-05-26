@@ -39,6 +39,14 @@ abstract final class Routes {
   static String meetingReview(String meetingId) =>
       '/meetings/$meetingId/review';
 
+  // Opportunities sub-routes (composer / edit / interested-list / my list).
+  // The opportunity detail route is exposed by [opportunity] above.
+  static const String opportunityNew = '/opportunities/new';
+  static const String myOpportunities = '/opportunities/mine';
+  static String opportunityEdit(String id) => '/opportunities/$id/edit';
+  static String opportunityInterested(String id) =>
+      '/opportunities/$id/interested';
+
   // Profile
   static const String profile = '/profile';
   static const String profileEdit = '/profile/edit';
