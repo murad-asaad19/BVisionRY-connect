@@ -1,0 +1,9 @@
+appId: com.bvisionry.connect
+tags:
+  - smoke
+---
+- launchApp
+- assertVisible:
+    id: "sign-in-google"
+- assertVisible:
+    id: "sign-in-apple"

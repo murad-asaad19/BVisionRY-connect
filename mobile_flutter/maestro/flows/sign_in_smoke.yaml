@@ -1,0 +1,18 @@
+appId: com.bvisionry.connect
+tags:
+  - smoke
+env:
+  EMAIL: "ana@test.local"
+  PASSWORD: "TestPass!123"
+---
+- launchApp
+- tapOn:
+    id: "sign-in-email"
+- inputText: ${EMAIL}
+- tapOn:
+    id: "sign-in-password"
+- inputText: ${PASSWORD}
+- tapOn:
+    id: "sign-in-submit"
+- assertVisible:
+    text: "Home"

@@ -1,0 +1,7 @@
+appId: com.bvisionry.connect
+tags:
+  - smoke
+---
+- launchApp
+- assertVisible:
+    text: "Sign in"
