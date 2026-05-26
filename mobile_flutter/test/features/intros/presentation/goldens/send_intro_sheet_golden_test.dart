@@ -32,6 +32,7 @@ void main() {
           introsServiceProvider.overrideWithValue(stub()),
           currentUserIdProvider.overrideWithValue('me'),
           dailyIntroCapProvider.overrideWith((_) => 5),
+          accountTierProvider.overrideWith((_) => IntrosTier.free),
         ],
         child: const Scaffold(
           body: SendIntroSheet(

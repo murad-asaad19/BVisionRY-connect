@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:record/record.dart' as r;
 
 import '../../../../core/i18n/i18n.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -24,9 +26,9 @@ enum _RecState { idle, recording, ready }
 /// Visual structure (matches the gallery):
 /// - Pulsing red dot at the top with animated opacity.
 /// - Timer rendered as `m:ss / 2:00` (current / max).
-/// - Static waveform strip — a row of small vertical bars; deliberately
-///   not driven by real audio analysis since the gallery uses a fixed
-///   visual.
+/// - Live waveform strip — a fixed-width row of 30 navy bars driven by
+///   the `record` package's `onAmplitudeChanged` stream (~10 Hz). The
+///   newest sample pushes onto the right; older samples scroll left.
 /// - Disclosure line: "Max 2 minutes — voice notes are transcribed for
 ///   accessibility & safety." (`chat.recorderDisclosure`).
 /// - Side-by-side Cancel (outline) + Send (gold solid) buttons that are
@@ -67,8 +69,17 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
   String? _path;
   String _mime = 'audio/m4a';
   StreamSubscription<int>? _sub;
+  StreamSubscription<r.Amplitude>? _ampSub;
   late final AnimationController _pulse;
   bool _sending = false;
+
+  /// Rolling buffer of the last [_LiveWaveformStrip.barCount] normalized
+  /// (0..1) amplitude samples. Owned by the state so we can cancel the
+  /// subscription on dispose / cancel / send and so the painter repaints
+  /// without rebuilding the whole sheet.
+  final ValueNotifier<List<double>> _levels = ValueNotifier<List<double>>(
+    List<double>.filled(_LiveWaveformStrip.barCount, 0),
+  );
 
   @override
   void initState() {
@@ -85,8 +96,28 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
   @override
   void dispose() {
     _sub?.cancel();
+    _ampSub?.cancel();
+    _levels.dispose();
     _pulse.dispose();
     super.dispose();
+  }
+
+  /// Convert a dBFS sample (typically -50..0) to a 0..1 magnitude. Values
+  /// below the floor clamp to 0 (silence); 0 dBFS clamps to 1 (clipping).
+  static double _dbfsToLevel(double dbfs) {
+    const minDb = -50.0;
+    if (dbfs.isNaN || dbfs.isInfinite) return 0;
+    final clamped = dbfs.clamp(minDb, 0.0);
+    return (clamped - minDb) / -minDb;
+  }
+
+  void _pushLevel(double level) {
+    final next = List<double>.from(_levels.value);
+    // Drop the oldest sample on the left, push the newest onto the right
+    // so the strip scrolls left-to-right while recording.
+    next.removeAt(0);
+    next.add(level.clamp(0.0, 1.0));
+    _levels.value = next;
   }
 
   Future<void> _start() async {
@@ -115,14 +146,23 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
       setState(() => _durationMs = ms);
       if (ms >= MediaConstants.maxVoiceMs) await _stop();
     });
+    _ampSub = recorder.amplitudeStream.listen((amp) {
+      if (!mounted) return;
+      _pushLevel(_dbfsToLevel(amp.current));
+    });
   }
 
   Future<void> _stop() async {
     await _sub?.cancel();
     _sub = null;
+    await _ampSub?.cancel();
+    _ampSub = null;
     final recorder = ref.read(voiceRecorderProvider);
     final result = await recorder.stop();
     if (!mounted) return;
+    // Drain the live buffer so the strip falls back to its idle visual
+    // (all bars at the minimum height).
+    _levels.value = List<double>.filled(_LiveWaveformStrip.barCount, 0);
     setState(() {
       _path = result.path;
       _durationMs = result.durationMs;
@@ -135,6 +175,8 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
     final navigator = Navigator.of(context);
     await _sub?.cancel();
     _sub = null;
+    await _ampSub?.cancel();
+    _ampSub = null;
     final recorder = ref.read(voiceRecorderProvider);
     await recorder.cancel();
     if (mounted) unawaited(navigator.maybePop());
@@ -239,9 +281,16 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
             ),
           ),
           const SizedBox(height: 12),
-          // Static decorative waveform (no audio analysis — matches the
-          // gallery's fixed bar strip).
-          const _StaticWaveformStrip(),
+          // Live amplitude-driven waveform — bars scroll left-to-right
+          // while recording; falls back to all-minimum bars otherwise.
+          Center(
+            child: RepaintBoundary(
+              child: _LiveWaveformStrip(
+                levels: _levels,
+                color: colors.navy,
+              ),
+            ),
+          ),
           const SizedBox(height: 12),
           Text(
             context.t('chat.recorderDisclosure'),
@@ -275,38 +324,105 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
   }
 }
 
-/// Decorative bar strip — 13 fixed-height bars per the gallery's
-/// `.wave-strip`. We deliberately do NOT drive these from live audio
-/// because the gallery itself uses a static visual.
-class _StaticWaveformStrip extends StatelessWidget {
-  const _StaticWaveformStrip();
+/// Live amplitude strip — 30 navy bars driven by [levels]. Each entry is
+/// a 0..1 magnitude (silence..clipping). The painter maps that magnitude
+/// to a bar height in [_minBarHeight].._maxBarHeight].
+///
+/// Repaints are triggered by the [ValueNotifier], so the parent sheet
+/// only rebuilds for state-machine changes (timer, cancel/send affordance).
+class _LiveWaveformStrip extends StatelessWidget {
+  const _LiveWaveformStrip({required this.levels, required this.color});
 
-  static const _heights = <double>[
-    8, 14, 22, 18, 26, 12, 20, 16, 24, 10, 18, 22, 14,
-  ];
+  /// Number of bars in the strip. ~30 gives ~3 s of history at 10 Hz which
+  /// matches the gallery proportions while staying readable.
+  static const int barCount = 30;
+  static const double _barWidth = 2;
+  static const double _barGap = 2;
+  static const double _minBarHeight = 4;
+  static const double _maxBarHeight = 24;
+  static const double _stripHeight = 28;
+  static double get _stripWidth =>
+      barCount * _barWidth + (barCount - 1) * _barGap;
+
+  final ValueListenable<List<double>> levels;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
     return SizedBox(
-      height: 28,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          for (final h in _heights) ...<Widget>[
-            Container(
-              width: 3,
-              height: h,
-              decoration: BoxDecoration(
-                color: colors.navy,
-                borderRadius: BorderRadius.circular(2),
-              ),
+      width: _stripWidth,
+      height: _stripHeight,
+      child: ValueListenableBuilder<List<double>>(
+        valueListenable: levels,
+        builder: (context, value, _) {
+          return CustomPaint(
+            painter: _WaveformPainter(
+              levels: value,
+              color: color,
+              barWidth: _barWidth,
+              barGap: _barGap,
+              minBarHeight: _minBarHeight,
+              maxBarHeight: _maxBarHeight,
             ),
-            const SizedBox(width: 4),
-          ],
-        ],
+            size: Size(_stripWidth, _stripHeight),
+          );
+        },
       ),
     );
+  }
+}
+
+class _WaveformPainter extends CustomPainter {
+  _WaveformPainter({
+    required this.levels,
+    required this.color,
+    required this.barWidth,
+    required this.barGap,
+    required this.minBarHeight,
+    required this.maxBarHeight,
+  });
+
+  final List<double> levels;
+  final Color color;
+  final double barWidth;
+  final double barGap;
+  final double minBarHeight;
+  final double maxBarHeight;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    final radius = Radius.circular(barWidth);
+    final centerY = size.height / 2;
+    for (var i = 0; i < levels.length; i++) {
+      final level = levels[i].clamp(0.0, 1.0);
+      final height = minBarHeight + (maxBarHeight - minBarHeight) * level;
+      final x = i * (barWidth + barGap);
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(x, centerY - height / 2, barWidth, height),
+        radius,
+      );
+      canvas.drawRRect(rect, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _WaveformPainter old) =>
+      old.color != color ||
+      old.barWidth != barWidth ||
+      old.barGap != barGap ||
+      old.minBarHeight != minBarHeight ||
+      old.maxBarHeight != maxBarHeight ||
+      !_listEquals(old.levels, levels);
+
+  static bool _listEquals(List<double> a, List<double> b) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 }

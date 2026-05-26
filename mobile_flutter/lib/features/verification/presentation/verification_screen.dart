@@ -45,17 +45,10 @@ class VerificationScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 32),
         children: <Widget>[
-          Padding(
-            key: const Key('verification.rankingBoost'),
-            padding: const EdgeInsets.fromLTRB(2, 0, 2, 12),
-            child: Text(
-              context.t('verification.rankingBoost'),
-              style: Theme.of(context)
-                  .extension<AppTypography>()!
-                  .bodySm
-                  .copyWith(color: colors.muted, height: 1.5),
-            ),
-          ),
+          // The "+15% ranking boost" intro paragraph (en.json
+          // `verification.rankingBoost`) was hidden until Founder/Investor
+          // proof types ship — surfacing it while only Builder can verify
+          // creates an unfair tilt in the discovery feed.
           SectionCard(
             title: context.t('verification.builderSection'),
             padding: EdgeInsets.zero,

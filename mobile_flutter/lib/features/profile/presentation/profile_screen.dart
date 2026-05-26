@@ -44,6 +44,12 @@ class ProfileScreen extends ConsumerWidget {
           title: context.t('profile.title'),
           actions: <TopBarAction>[
             TopBarAction(
+              key: const Key('profile.openSettings'),
+              icon: Icons.settings_outlined,
+              label: context.t('settings.title'),
+              onPressed: () => context.push(Routes.settings),
+            ),
+            TopBarAction(
               icon: Icons.edit_outlined,
               label: context.t('profile.edit.title'),
               onPressed: () => context.go(Routes.profileEdit),

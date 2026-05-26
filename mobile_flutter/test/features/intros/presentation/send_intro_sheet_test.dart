@@ -44,6 +44,9 @@ void main() {
         // Bypass the profileProvider → sessionProvider → Supabase chain — the
         // cap value is irrelevant for these tests.
         dailyIntroCapProvider.overrideWith((_) => 5),
+        // Same reason for the tier provider — the upgrade pill predicate
+        // reads it directly.
+        accountTierProvider.overrideWith((_) => IntrosTier.free),
       ],
     );
     await pumpWithI18n(tester, widget);

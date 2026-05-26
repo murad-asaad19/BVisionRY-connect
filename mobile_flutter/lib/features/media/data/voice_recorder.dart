@@ -15,6 +15,11 @@ abstract class VoiceRecorderBackend {
   Future<void> start(String path, r.RecordConfig config);
   Future<String?> stop();
   Future<void> cancel();
+
+  /// Mic dBFS samples emitted at the requested [interval]. The real
+  /// backend forwards `AudioRecorder.onAmplitudeChanged`; the fake emits
+  /// nothing so widget tests stay quiet.
+  Stream<r.Amplitude> onAmplitudeChanged(Duration interval);
   void dispose();
 }
 
@@ -29,6 +34,9 @@ class _RealVoiceRecorderBackend implements VoiceRecorderBackend {
   Future<String?> stop() => _recorder.stop();
   @override
   Future<void> cancel() => _recorder.cancel();
+  @override
+  Stream<r.Amplitude> onAmplitudeChanged(Duration interval) =>
+      _recorder.onAmplitudeChanged(interval);
   @override
   void dispose() => _recorder.dispose();
 }
@@ -60,6 +68,10 @@ class FakeVoiceRecorderBackend implements VoiceRecorderBackend {
     cancelled = true;
     _path = null;
   }
+
+  @override
+  Stream<r.Amplitude> onAmplitudeChanged(Duration interval) =>
+      const Stream<r.Amplitude>.empty();
 
   @override
   void dispose() {}
@@ -125,6 +137,12 @@ class VoiceRecorder {
 
   /// Elapsed-ms ticks emitted every 100 ms while a recording is active.
   Stream<int> get durationStream => _durationCtrl.stream;
+
+  /// Live mic dBFS samples at ~10 Hz. Forwarded straight from the
+  /// underlying `AudioRecorder.onAmplitudeChanged` so consumers (e.g. the
+  /// recorder sheet's live waveform) don't take a second dependency.
+  Stream<r.Amplitude> get amplitudeStream =>
+      _backend.onAmplitudeChanged(const Duration(milliseconds: 100));
 
   Future<bool> hasPermission() => _backend.hasPermission();
 

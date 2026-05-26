@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/i18n/i18n.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../domain/profile.dart';
 
-/// Stale-goal banner — surfaces when [Profile.isGoalStale] is true (>28 days
-/// / 4 weeks since the user last changed their goal_text, per the gallery
-/// section I1 spec). The Phase-13 decay model (50% at week 12) still owns
-/// the *server*-side staleness pipeline; this is the client-side first nudge.
+/// Stale-goal nudge — two-tier visual model:
 ///
-/// Renders nothing when the profile's goal is fresh. Two inline actions:
-///   - "Yes, still accurate" (outline) — calls [onDismiss] to hide the
-///     banner. Replaces the prior tiny X icon to match the gallery affordance
-///     (gallery section I1, lines 2295–2298).
-///   - "Update" (gold solid) — calls [onUpdate], typically routes to
-///     `/profile/edit`.
+/// * **Soft** (≥28d, <56d): a muted inline reminder with a single "Update"
+///   text-link affordance. Low-friction, dismissible.
+/// * **Hard** (≥56d): the full warning [AppBanner] with "Yes, still
+///   accurate" + "Update" buttons. This is the original spec card.
+///
+/// Renders [SizedBox.shrink] when the goal is fresh. The two thresholds
+/// live on the [Profile] model as [Profile.isGoalStale] /
+/// [Profile.isGoalVeryStale].
 class GoalRefreshCard extends StatelessWidget {
   const GoalRefreshCard({
     super.key,
@@ -33,6 +34,9 @@ class GoalRefreshCard extends StatelessWidget {
       return const SizedBox.shrink(
         key: ValueKey<String>('goal-refresh-card-fresh'),
       );
+    }
+    if (!profile.isGoalVeryStale) {
+      return _SoftNudge(onUpdate: onUpdate, onDismiss: onDismiss);
     }
     return AppBanner(
       key: const ValueKey<String>('goal-refresh-card'),
@@ -64,6 +68,48 @@ class GoalRefreshCard extends StatelessWidget {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SoftNudge extends StatelessWidget {
+  const _SoftNudge({required this.onUpdate, this.onDismiss});
+
+  final VoidCallback onUpdate;
+  final VoidCallback? onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Theme.of(context).extension<AppColors>()!;
+    final t = Theme.of(context).extension<AppTypography>()!;
+    return Padding(
+      key: const ValueKey<String>('goal-refresh-card-soft'),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Text(
+              context.t('profile.goalRefresh.softNudge'),
+              style: t.bodySm.copyWith(color: c.muted),
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            key: const Key('goalRefresh.softUpdate'),
+            onPressed: onUpdate,
+            child: Text(context.t('profile.goalRefresh.update')),
+          ),
+          if (onDismiss != null)
+            IconButton(
+              key: const Key('goalRefresh.softDismiss'),
+              icon: const Icon(Icons.close, size: 16),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+              onPressed: onDismiss,
+              tooltip: context.t('profile.goalRefresh.stillAccurate'),
+            ),
         ],
       ),
     );

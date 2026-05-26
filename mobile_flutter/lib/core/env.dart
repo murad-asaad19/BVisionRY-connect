@@ -22,6 +22,12 @@ abstract final class Env {
     defaultValue: 'PROJECT_ID_PLACEHOLDER',
   );
 
+  /// Anthropic API key for the onboarding bio drafter (claude-haiku-4-5).
+  /// Optional — when empty the bio draft step falls back to a local
+  /// deterministic template. Inject via `--dart-define=ANTHROPIC_API_KEY=...`.
+  static const anthropicApiKey =
+      String.fromEnvironment('ANTHROPIC_API_KEY');
+
   static void requireProdInvariants() {
     validateProdConfig(
       sentryEnv: sentryEnv,

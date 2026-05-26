@@ -144,13 +144,20 @@ class Profile with _$Profile {
   /// Mirrors spec §5.3 — suspension is a soft-state flag, not a deletion.
   bool get isSuspended => suspendedAt != null;
 
-  /// True when the most recent goal change is older than 28 days / 4 weeks
-  /// (gallery section I1 — "First nudge per §3. Decay starts at week 4, hits
-  /// 50% at week 12."). The Profile screen uses this to render the
-  /// goal-refresh banner; the server-side decay pipeline (Phase 13 nag
-  /// cadence) still owns the email/push nudges.
+  /// True when the most recent goal change is older than 28 days / 4 weeks —
+  /// the *soft* threshold. Pairs with [GoalRefreshCard]'s muted inline
+  /// nudge.
   bool get isGoalStale =>
       goalUpdatedAt != null &&
       goalUpdatedAt!
           .isBefore(DateTime.now().toUtc().subtract(const Duration(days: 28)));
+
+  /// True once the goal change is older than 56 days / 8 weeks — the *hard*
+  /// threshold that promotes the inline nudge to a full warning card with
+  /// dismiss + update actions. Two-tier model avoids the "stop pestering
+  /// me" reflex while still surfacing genuinely stale goals.
+  bool get isGoalVeryStale =>
+      goalUpdatedAt != null &&
+      goalUpdatedAt!
+          .isBefore(DateTime.now().toUtc().subtract(const Duration(days: 56)));
 }

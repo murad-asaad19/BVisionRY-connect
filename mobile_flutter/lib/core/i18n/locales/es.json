@@ -276,7 +276,11 @@
       "edit": "Editar",
       "looksGood": "Se ve bien →",
       "fallbackHeadline": "Abierto a oportunidades",
-      "fallbackBio": "Cuéntale a la gente quién eres y en qué estás trabajando."
+      "fallbackBio": "Cuéntale a la gente quién eres y en qué estás trabajando.",
+      "drafting": "Redactando sugerencias…",
+      "variantsHeading": "Elige la que más se parezca a ti",
+      "writeMyOwn": "Escribir la mía →",
+      "privacyNote": "Generado por IA. No guardamos el prompt ni la respuesta."
     },
     "about": {
       "title": "Unos últimos detalles",
@@ -489,6 +493,7 @@
       "counterShort": "{{count}}/{{max}}",
       "charsLabel": "{{count}} caracteres",
       "todaysIntros": "Intros de hoy: {{count}} / {{cap}}",
+      "upgradeForMore": "Mejora tu plan",
       "sheetTitle": "Enviar intro a {{name}}",
       "noteLabel": "Tu nota",
       "cancel": "Cancelar",
@@ -827,6 +832,7 @@
       "bodyStale": "Lo configuraste hace 4 semanas. Una actualización breve mantendrá tus coincidencias relevantes.",
       "stillAccurate": "Sí, sigue siendo correcto",
       "update": "Actualizar",
+      "softNudge": "¿Vale la pena actualizar tu objetivo?",
       "snooze": "Posponer {{days}} días",
       "snoozeA11y": "Posponer este recordatorio {{days}} días"
     },

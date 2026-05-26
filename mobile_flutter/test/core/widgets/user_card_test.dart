@@ -1,5 +1,4 @@
 import 'package:connect_mobile/core/theme/app_theme.dart';
-import 'package:connect_mobile/core/widgets/pill.dart';
 import 'package:connect_mobile/core/widgets/user_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,11 +38,11 @@ void main() {
         ),
       ),
     );
-    expect(find.byType(Pill), findsOneWidget);
+    // Verified now renders as a compact green ✓ dot beside the name; the
+    // role label only appears once, in the muted role line below.
     expect(find.byIcon(Icons.check), findsOneWidget);
-    // "Builder" appears twice: once in the verified pill, once at the
-    // start of the muted role line.
-    expect(find.text('Builder'), findsNWidgets(2));
+    expect(find.text('Builder · '), findsNothing);
+    expect(find.textContaining('Builder'), findsOneWidget);
   });
 
   testWidgets('UserCard omits verified pill when verified=false',

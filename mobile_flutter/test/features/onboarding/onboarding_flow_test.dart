@@ -180,8 +180,11 @@ void main() {
       await tester.tap(find.byKey(const ValueKey<String>('roles-next')));
       await tester.pumpAndSettle();
 
-      // STEP 4 — Bio draft (UI shell). "Looks good" pre-fills headline + bio
-      // from the deterministic template and advances to the About step.
+      // STEP 4 — Bio draft. With no ANTHROPIC_API_KEY in the test env the
+      // step renders a single deterministic-template variant card. Tap it to
+      // enable "Looks good →", then advance to the About step.
+      await tester.tap(find.byKey(const ValueKey<String>('bio-variant-0')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey<String>('bio-looks-good')));
       await tester.pumpAndSettle();
 

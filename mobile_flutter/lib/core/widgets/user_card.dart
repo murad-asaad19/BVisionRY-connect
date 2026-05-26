@@ -4,7 +4,6 @@ import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import 'app_card.dart';
 import 'avatar.dart';
-import 'pill.dart';
 
 /// Pressable user-cell used by discovery / search / suggested-intro lists.
 ///
@@ -84,13 +83,9 @@ class UserCard extends StatelessWidget {
                         style: typo.displaySm.copyWith(color: c.navy),
                       ),
                     ),
-                    if (verified && primaryRole.isNotEmpty) ...[
+                    if (verified) ...[
                       const SizedBox(width: 6),
-                      Pill(
-                        label: _capitalize(primaryRole),
-                        variant: PillVariant.success,
-                        icon: Icons.check,
-                      ),
+                      _VerifiedDot(color: c.success, bg: c.successBg),
                     ],
                   ],
                 ),
@@ -139,4 +134,28 @@ String? _roleLine(String primaryRole, String? city, String? country) {
 String _capitalize(String s) {
   if (s.isEmpty) return s;
   return s[0].toUpperCase() + s.substring(1);
+}
+
+/// Compact 14px verified dot rendered inline next to the user name. The
+/// role line directly below already names the role, so we drop the label
+/// the gallery shows inside `.verified-badge` — bare ✓ glyph reads cleaner.
+class _VerifiedDot extends StatelessWidget {
+  const _VerifiedDot({required this.color, required this.bg});
+
+  final Color color;
+  final Color bg;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Verified',
+      child: Container(
+        width: 14,
+        height: 14,
+        decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+        alignment: Alignment.center,
+        child: Icon(Icons.check, size: 10, color: color),
+      ),
+    );
+  }
 }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
+import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
@@ -239,21 +241,45 @@ class _TodayStatusLine extends ConsumerWidget {
     final typo = Theme.of(context).extension<AppTypography>()!;
     final asyncCount = ref.watch(todayCountProvider);
     final int cap = ref.watch(dailyIntroCapProvider);
+    final IntrosTier tier = ref.watch(accountTierProvider);
     return asyncCount.maybeWhen(
       data: (int count) {
         final atCap = count >= cap;
-        return Text(
-          context.t(
-            'intros.compose.todaysIntros',
-            vars: <String, Object>{
-              'count': count,
-              'cap': cap,
-            },
-          ),
-          textAlign: TextAlign.center,
-          style: typo.bodyXs.copyWith(
-            color: atCap ? colors.danger : colors.muted,
-          ),
+        // Surface an upgrade affordance when the user is within 1 of the
+        // cap *and* still has headroom on the next tier. Pro users have
+        // no higher tier, so no nudge is shown.
+        final nearCap = count >= cap - 1;
+        final canUpgrade = tier != IntrosTier.pro;
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Flexible(
+              child: Text(
+                context.t(
+                  'intros.compose.todaysIntros',
+                  vars: <String, Object>{
+                    'count': count,
+                    'cap': cap,
+                  },
+                ),
+                textAlign: TextAlign.center,
+                style: typo.bodyXs.copyWith(
+                  color: atCap ? colors.danger : colors.muted,
+                ),
+              ),
+            ),
+            if (nearCap && canUpgrade) ...[
+              const SizedBox(width: 8),
+              GestureDetector(
+                key: const Key('intros.compose.upgradePill'),
+                onTap: () => context.push(Routes.settingsVerification),
+                child: Pill(
+                  label: context.t('intros.compose.upgradeForMore'),
+                  variant: PillVariant.solid,
+                ),
+              ),
+            ],
+          ],
         );
       },
       orElse: () => const SizedBox.shrink(),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
-
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/widgets/empty_state.dart';
@@ -30,12 +28,9 @@ class HomeScreen extends ConsumerWidget {
         child: TopBar(
           title: context.t('home.title'),
           actions: <TopBarAction>[
-            TopBarAction(
-              key: const Key('home.openSettings'),
-              icon: LucideIcons.settings,
-              label: context.t('settings.title'),
-              onPressed: () => context.push(Routes.settings),
-            ),
+            // Settings has moved to the Profile tab (Settings row) — keeps
+            // the home top-bar focused on discovery (search + future
+            // filter). Tracked in audit doc, improvement #21.
             TopBarAction(
               icon: Icons.search,
               label: context.t('discovery.openSearch'),
