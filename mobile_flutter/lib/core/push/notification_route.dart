@@ -1,33 +1,57 @@
-/// Maps a push-notification payload `kind` to an in-app deep-link path.
+import '../routing/routes.dart';
+
+/// Translates an FCM `data` map (and optional legacy `payload`) into a
+/// go_router path. Spec §7.4 verbatim:
 ///
-/// Phase 12 wires the FCM tap handler; this file is the canonical lookup it
-/// consults. Each feature phase appends its own kinds — Phase 10 adds
-/// `opportunity_interest`.
+/// | kind                                            | route                       | fallback           |
+/// |-------------------------------------------------|-----------------------------|--------------------|
+/// | intro_received, intro_accepted                  | /intros/<entity_id>         | /inbox             |
+/// | message_received, image_received, voice_received| /chats/<conversation_id>    | /chats             |
+/// | meeting_proposal, meeting_confirmed             | /chats/<conversation_id>    | /inbox             |
+/// | opportunity_interest                            | /opportunities/<entity_id>  | /opportunities     |
+/// | (unknown)                                       | payload.url                 | /home              |
 ///
-/// Returns `null` when the kind is unrecognised or when the payload is
-/// missing fields required to resolve the route (e.g. `entityId` for an
-/// opportunity-scoped kind). Callers should fall back to the relevant tab
-/// root (`/opportunities` for opportunity kinds, `/inbox` for intros, etc.).
-String? resolveNotificationRoute({
-  required String kind,
-  String? entityId,
-  String? conversationId,
-}) {
+/// FCM stringifies non-string `data` values on the way to the device, but on
+/// the way IN (e.g. from a unit test that hand-builds the map) we may see a
+/// raw `int`. `.toString()` covers both cases without forcing every caller to
+/// pre-stringify.
+String resolvePushRoute(
+  Map<String, dynamic> data,
+  Map<String, dynamic>? payload,
+) {
+  final String? kind = (data['kind'] as Object?)?.toString();
+  final String? entityId = (data['entity_id'] as Object?)?.toString();
+  final String? conversationId =
+      (data['conversation_id'] as Object?)?.toString();
+
   switch (kind) {
-    case 'opportunity_interest':
-      return entityId != null ? '/opportunities/$entityId' : '/opportunities';
     case 'intro_received':
     case 'intro_accepted':
-    case 'intro_expired':
-      return entityId != null ? '/intros/$entityId' : '/inbox';
-    case 'chat_message':
+      return (entityId != null && entityId.isNotEmpty)
+          ? Routes.intro(entityId)
+          : Routes.inbox;
+
+    case 'message_received':
+    case 'image_received':
+    case 'voice_received':
+      return (conversationId != null && conversationId.isNotEmpty)
+          ? Routes.chat(conversationId)
+          : Routes.chats;
+
+    case 'meeting_proposal':
     case 'meeting_confirmed':
-    case 'meeting_proposed':
-    case 'meeting_declined':
-      return conversationId != null ? '/chats/$conversationId' : '/chats';
-    case 'meeting_review_pending':
-      return entityId != null ? '/meetings/$entityId/review' : '/chats';
+      return (conversationId != null && conversationId.isNotEmpty)
+          ? Routes.chat(conversationId)
+          : Routes.inbox;
+
+    case 'opportunity_interest':
+      return (entityId != null && entityId.isNotEmpty)
+          ? Routes.opportunity(entityId)
+          : Routes.opportunities;
+
     default:
-      return null;
+      final String? legacy = (payload?['url'] as Object?)?.toString();
+      if (legacy != null && legacy.isNotEmpty) return legacy;
+      return Routes.home;
   }
 }
