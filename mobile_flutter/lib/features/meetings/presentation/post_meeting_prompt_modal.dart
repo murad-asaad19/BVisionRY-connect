@@ -97,9 +97,8 @@ class _PostMeetingPromptModalState
                 key: const Key('post-review-useful'),
                 icon: LucideIcons.thumbsUp,
                 label: context.t('meetings.review.useful'),
-                onTap: _busy
-                    ? null
-                    : () => _submit(MeetingReviewOutcome.useful),
+                onTap:
+                    _busy ? null : () => _submit(MeetingReviewOutcome.useful),
               ),
               const SizedBox(height: 8),
               _OutcomeCard(
@@ -115,18 +114,16 @@ class _PostMeetingPromptModalState
                 key: const Key('post-review-no-show'),
                 icon: LucideIcons.userX,
                 label: context.t('meetings.review.noShow'),
-                onTap: _busy
-                    ? null
-                    : () => _submit(MeetingReviewOutcome.noShow),
+                onTap:
+                    _busy ? null : () => _submit(MeetingReviewOutcome.noShow),
               ),
               const Spacer(),
               AppButton(
                 key: const Key('post-review-skip'),
                 label: context.t('meetings.review.skip'),
                 variant: AppButtonVariant.outline,
-                onPressed: _busy
-                    ? null
-                    : () => Navigator.of(context).maybePop(),
+                onPressed:
+                    _busy ? null : () => Navigator.of(context).maybePop(),
               ),
             ],
           ),

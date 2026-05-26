@@ -40,8 +40,7 @@ void main() {
     expect(p!.meetingId, 'mid');
   });
 
-  test('regeneratePlaybook invokes meeting-playbook with force flag',
-      () async {
+  test('regeneratePlaybook invokes meeting-playbook with force flag', () async {
     when(
       () => gateway.invokeFunction(
         'meeting-playbook',

@@ -13,8 +13,7 @@ void main() {
     registerFallbackValue(<DateTime>[]);
   });
 
-  testWidgets(
-      'ProposeMeetingSheet shows three slot rows + duration + URL',
+  testWidgets('ProposeMeetingSheet shows three slot rows + duration + URL',
       (tester) async {
     final svc = _MockSvc();
     final tree = await wrapWithTheme(

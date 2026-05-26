@@ -8,7 +8,8 @@ import 'package:path_provider_platform_interface/path_provider_platform_interfac
 // ignore: depend_on_referenced_packages
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-class _FakePathProvider extends PathProviderPlatform with MockPlatformInterfaceMixin {
+class _FakePathProvider extends PathProviderPlatform
+    with MockPlatformInterfaceMixin {
   _FakePathProvider(this.dir);
   final Directory dir;
   @override
@@ -51,7 +52,8 @@ void main() {
       expect(foldLine(ascii), ascii);
     });
 
-    test('folds ASCII line >75 octets at 75-byte boundary with " " continuation',
+    test(
+        'folds ASCII line >75 octets at 75-byte boundary with " " continuation',
         () {
       final long = 'X' * 100;
       final folded = foldLine(long);
@@ -76,13 +78,11 @@ void main() {
       expect(() => utf8.decode(firstBytes), returnsNormally);
       expect(lines[1].startsWith(' '), isTrue);
       // Concatenating dropped-space continuation re-yields the original.
-      final joined =
-          lines[0] + lines.skip(1).map((l) => l.substring(1)).join();
+      final joined = lines[0] + lines.skip(1).map((l) => l.substring(1)).join();
       expect(joined, input);
     });
 
-    test('folds a very long UTF-8 line into multiple continuation lines',
-        () {
+    test('folds a very long UTF-8 line into multiple continuation lines', () {
       final input = '☃' * 60; // 60 snowmen = 180 bytes
       final folded = foldLine(input);
       final lines = folded.split('\r\n');
@@ -90,8 +90,7 @@ void main() {
       for (final l in lines) {
         expect(utf8.encode(l).length, lessThanOrEqualTo(75));
       }
-      final joined =
-          lines[0] + lines.skip(1).map((l) => l.substring(1)).join();
+      final joined = lines[0] + lines.skip(1).map((l) => l.substring(1)).join();
       expect(joined, input);
     });
   });
@@ -109,8 +108,7 @@ void main() {
       await tmp.delete(recursive: true);
     });
 
-    test('produces a well-formed VCALENDAR with required properties',
-        () async {
+    test('produces a well-formed VCALENDAR with required properties', () async {
       final svc = IcsService();
       final file = await svc.generateIcsFile(
         meetingId: '11111111-2222-3333-4444-555555555555',
@@ -128,12 +126,14 @@ void main() {
       expect(body, contains('PRODID:-//BVisionry//Connect//EN'));
       expect(
         body,
-        contains('UID:meeting-11111111-2222-3333-4444-555555555555@bvisionry.com'),
+        contains(
+            'UID:meeting-11111111-2222-3333-4444-555555555555@bvisionry.com'),
       );
       expect(body, contains('DTSTART:20260601T150000Z'));
       expect(body, contains('DTEND:20260601T153000Z'));
       expect(body, contains('SUMMARY:Coffee with Tara'));
-      expect(body, contains(r'DESCRIPTION:Catch-up\; talk about design systems'));
+      expect(
+          body, contains(r'DESCRIPTION:Catch-up\; talk about design systems'));
       expect(body, contains('LOCATION:https://meet.google.com/abc-defg-hij'));
       expect(body, contains('ATTENDEE;CN=a@b.com:mailto:a@b.com'));
       expect(body, contains('ATTENDEE;CN=c@d.com:mailto:c@d.com'));

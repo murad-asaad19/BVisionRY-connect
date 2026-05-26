@@ -36,8 +36,7 @@ class MeetingProposal with _$MeetingProposal {
   /// Construct from an RPC row / postgres_changes payload. Hand-rolled
   /// rather than using `json_serializable` because the wire format uses
   /// snake_case and a few of the fields need explicit UTC normalisation.
-  static MeetingProposal fromJson(Map<String, dynamic> json) =>
-      MeetingProposal(
+  static MeetingProposal fromJson(Map<String, dynamic> json) => MeetingProposal(
         id: json['id'] as String,
         conversationId: json['conversation_id'] as String,
         proposedById: json['proposed_by_id'] as String,

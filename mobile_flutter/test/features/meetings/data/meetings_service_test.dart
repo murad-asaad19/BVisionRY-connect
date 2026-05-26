@@ -169,10 +169,7 @@ Map<String, dynamic> _proposalRow({required String state}) => {
       'conversation_id': 'cid',
       'proposed_by_id': 'p',
       'slots': [
-        DateTime.now()
-            .toUtc()
-            .add(const Duration(days: 1))
-            .toIso8601String(),
+        DateTime.now().toUtc().add(const Duration(days: 1)).toIso8601String(),
       ],
       'duration_minutes': 30,
       'timezone': 'UTC',

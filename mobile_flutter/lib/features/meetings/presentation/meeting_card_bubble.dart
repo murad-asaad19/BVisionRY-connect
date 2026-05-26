@@ -219,8 +219,7 @@ class _Slots extends StatelessWidget {
                         confirmed != null && s.isAtSameMomentAs(confirmed)
                             ? FontWeight.w700
                             : FontWeight.w400,
-                    decoration:
-                        crossedOut ? TextDecoration.lineThrough : null,
+                    decoration: crossedOut ? TextDecoration.lineThrough : null,
                   ),
                 ),
               ],

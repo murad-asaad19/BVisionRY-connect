@@ -50,8 +50,8 @@ void main() {
 
   testWidgets('declined: shows status pill only, no action buttons',
       (tester) async {
-    final p = _proposed(proposedBy: 'me')
-        .copyWith(state: MeetingState.declined);
+    final p =
+        _proposed(proposedBy: 'me').copyWith(state: MeetingState.declined);
     final tree = await wrapWithTheme(
       child: Scaffold(body: MeetingCardBubble(proposal: p, viewerId: 'me')),
     );
@@ -62,10 +62,9 @@ void main() {
     expect(find.text('Add to calendar'), findsNothing);
   });
 
-  testWidgets('cancelled: same as declined, no action buttons',
-      (tester) async {
-    final p = _proposed(proposedBy: 'me')
-        .copyWith(state: MeetingState.cancelled);
+  testWidgets('cancelled: same as declined, no action buttons', (tester) async {
+    final p =
+        _proposed(proposedBy: 'me').copyWith(state: MeetingState.cancelled);
     final tree = await wrapWithTheme(
       child: Scaffold(body: MeetingCardBubble(proposal: p, viewerId: 'me')),
     );

@@ -46,5 +46,6 @@ class MeetingPlaybook with _$MeetingPlaybook {
 
   /// Per spec §4.5: regenerate is rate-limited to 1 hour client-side.
   bool get canRegenerate =>
-      DateTime.now().toUtc().difference(generatedAt) >= const Duration(hours: 1);
+      DateTime.now().toUtc().difference(generatedAt) >=
+      const Duration(hours: 1);
 }

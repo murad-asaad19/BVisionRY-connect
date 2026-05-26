@@ -95,9 +95,7 @@ class _ConfirmMeetingSheetState extends ConsumerState<ConfirmMeetingSheet> {
                 // ignore: deprecated_member_use
                 groupValue: _selected,
                 // ignore: deprecated_member_use
-                onChanged: _busy
-                    ? null
-                    : (v) => setState(() => _selected = v),
+                onChanged: _busy ? null : (v) => setState(() => _selected = v),
                 title: Text(
                   fmt.format(s.toLocal()),
                   style: typo.bodyLg.copyWith(color: colors.body),

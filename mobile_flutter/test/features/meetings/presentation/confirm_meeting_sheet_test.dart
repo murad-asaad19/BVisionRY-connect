@@ -34,7 +34,8 @@ void main() {
     expect(find.text('Confirm'), findsWidgets);
   });
 
-  testWidgets('Confirm tap calls confirmMeeting on the service', (tester) async {
+  testWidgets('Confirm tap calls confirmMeeting on the service',
+      (tester) async {
     final svc = _MockSvc();
     final slot = DateTime.now().toUtc().add(const Duration(days: 1));
     final proposal = _proposed(slots: [slot]);

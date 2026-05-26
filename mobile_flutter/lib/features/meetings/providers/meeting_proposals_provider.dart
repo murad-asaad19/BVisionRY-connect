@@ -36,8 +36,7 @@ final AutoDisposeStreamProviderFamily<List<MeetingProposal>, String>
           .from('meeting_proposals')
           .select()
           .eq('conversation_id', conversationId)
-          .order('created_at', ascending: false)
-          as List<dynamic>;
+          .order('created_at', ascending: false) as List<dynamic>;
       cache
         ..clear()
         ..addEntries(
