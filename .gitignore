@@ -30,7 +30,9 @@ supabase/.branches/
 .vscode/
 
 # Internal docs (not for upstream)
-docs/
+docs/*
+# Phase 15 — top-level flutter-rebuild doc IS shipped.
+!docs/flutter-readme.md
 
 # Claude / MCP local config
 .claude/settings.local.json
