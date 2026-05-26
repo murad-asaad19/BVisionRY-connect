@@ -69,7 +69,7 @@ void main() {
     });
 
     test('TagInput.dirty marks dirty state', () {
-      final TagInput t = const TagInput.dirty(<String>['pm', 'fintech']);
+      const TagInput t = TagInput.dirty(<String>['pm', 'fintech']);
       expect(t.isPure, isFalse);
       expect(t.value, <String>['pm', 'fintech']);
       expect(t.isValid, isTrue);
@@ -90,7 +90,7 @@ void main() {
     });
 
     test('TagInput.dirty with an empty tag is invalid', () {
-      final TagInput t = TagInput.dirty(const <String>['']);
+      const TagInput t = TagInput.dirty(<String>['']);
       expect(t.error, TagInputError.tagEmpty);
     });
   });

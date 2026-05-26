@@ -36,4 +36,40 @@ void main() {
     );
     expect(bookingsMatch.fullPath, '/bookings');
   });
+
+  test('router knows all 5 opportunities sub-routes', () {
+    final ProviderContainer container = ProviderContainer();
+    addTearDown(container.dispose);
+    final GoRouter router = container.read(appRouterProvider);
+    expect(
+      router.configuration
+          .findMatch(Uri.parse('/opportunities/new'))
+          .fullPath,
+      '/opportunities/new',
+    );
+    expect(
+      router.configuration
+          .findMatch(Uri.parse('/opportunities/mine'))
+          .fullPath,
+      '/opportunities/mine',
+    );
+    expect(
+      router.configuration
+          .findMatch(Uri.parse('/opportunities/oid'))
+          .fullPath,
+      '/opportunities/:id',
+    );
+    expect(
+      router.configuration
+          .findMatch(Uri.parse('/opportunities/oid/edit'))
+          .fullPath,
+      '/opportunities/:id/edit',
+    );
+    expect(
+      router.configuration
+          .findMatch(Uri.parse('/opportunities/oid/interested'))
+          .fullPath,
+      '/opportunities/:id/interested',
+    );
+  });
 }
