@@ -127,13 +127,16 @@ void main() {
       expect(
         body,
         contains(
-            'UID:meeting-11111111-2222-3333-4444-555555555555@bvisionry.com'),
+          'UID:meeting-11111111-2222-3333-4444-555555555555@bvisionry.com',
+        ),
       );
       expect(body, contains('DTSTART:20260601T150000Z'));
       expect(body, contains('DTEND:20260601T153000Z'));
       expect(body, contains('SUMMARY:Coffee with Tara'));
       expect(
-          body, contains(r'DESCRIPTION:Catch-up\; talk about design systems'));
+        body,
+        contains(r'DESCRIPTION:Catch-up\; talk about design systems'),
+      );
       expect(body, contains('LOCATION:https://meet.google.com/abc-defg-hij'));
       expect(body, contains('ATTENDEE;CN=a@b.com:mailto:a@b.com'));
       expect(body, contains('ATTENDEE;CN=c@d.com:mailto:c@d.com'));

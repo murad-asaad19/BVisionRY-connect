@@ -4,13 +4,17 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('MeetingReviewOutcome.fromJson maps the three DB values', () {
     expect(
-        MeetingReviewOutcome.fromJson('useful'), MeetingReviewOutcome.useful);
+      MeetingReviewOutcome.fromJson('useful'),
+      MeetingReviewOutcome.useful,
+    );
     expect(
       MeetingReviewOutcome.fromJson('not_useful'),
       MeetingReviewOutcome.notUseful,
     );
     expect(
-        MeetingReviewOutcome.fromJson('no_show'), MeetingReviewOutcome.noShow);
+      MeetingReviewOutcome.fromJson('no_show'),
+      MeetingReviewOutcome.noShow,
+    );
     expect(() => MeetingReviewOutcome.fromJson('bad'), throwsArgumentError);
   });
 

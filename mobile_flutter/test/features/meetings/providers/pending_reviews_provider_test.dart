@@ -24,9 +24,11 @@ void main() {
       createdAt: DateTime.now().toUtc(),
       updatedAt: DateTime.now().toUtc(),
     );
-    when(() => svc.pendingMeetingReviews(
-            conversationId: any(named: 'conversationId')))
-        .thenAnswer((_) async => [p]);
+    when(
+      () => svc.pendingMeetingReviews(
+        conversationId: any(named: 'conversationId'),
+      ),
+    ).thenAnswer((_) async => [p]);
     final container = ProviderContainer(
       overrides: [meetingsServiceProvider.overrideWithValue(svc)],
     );
