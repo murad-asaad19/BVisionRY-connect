@@ -266,6 +266,7 @@
       "sentTitle": "Reportado",
       "sentBody": "Gracias, el equipo lo revisará.",
       "failedTitle": "Error al reportar",
+      "noteTooLong": "Los detalles deben tener 1000 caracteres o menos.",
       "reasons": {
         "spam": "Spam",
         "harassment": "Acoso",

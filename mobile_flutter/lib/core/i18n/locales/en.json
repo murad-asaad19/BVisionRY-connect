@@ -266,6 +266,7 @@
       "sentTitle": "Reported",
       "sentBody": "Thank you, the team will review.",
       "failedTitle": "Report failed",
+      "noteTooLong": "Details must be 1000 characters or fewer.",
       "reasons": {
         "spam": "Spam",
         "harassment": "Harassment",
