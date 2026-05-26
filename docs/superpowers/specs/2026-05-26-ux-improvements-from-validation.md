@@ -98,4 +98,54 @@ headline / bio / goal — all entry points dead.
 
 ---
 
+## Public profile → Office Hours runtime error
+
+### 5. `type 'Null' is not a subtype of type 'String'` on Office Hours block
+
+**Today.** Opening another user's public profile renders the centered
+hero correctly but the *Book office hours* SectionCard crashes inside
+with the above type cast error + a Retry button. Almost certainly a
+non-null required String in the office-hours availability model that
+the RPC returns null for some rows. Probably parallel to the
+Opportunity status/updated_at issue I fixed earlier.
+
+**Where to look.** `mobile_flutter/lib/features/office_hours/domain/`
+freezed model — find the required `String` field and either make it
+optional or default it inside `fromJson`.
+
+---
+
+## Public profile → Top-bar title is "bvisionry"
+
+### 6. Public profile top-bar reads "bvisionry"
+
+**Today.** The TopBar on `/p/{handle}` renders `"bvisionry"` as title.
+Should be either empty (let the centered hero be the title), or the
+peer's `@handle`.
+
+**Where to look.**
+`mobile_flutter/lib/features/profile/presentation/public_profile_screen.dart`
+— TopBar `title` prop.
+
+---
+
+## Auth → No sign-up entry point on sign-in screen
+
+### 7. New users have no path to /sign-up
+
+**Today.** Removing the "Don't have an account? Sign up" footer (audit
+section A, improvement #4) left `/sign-up` reachable only via deep-link.
+A net-new visitor lands on `/sign-in`, sees only Google/Apple/email
+sign-in, and has no affordance to create an account.
+
+**Why it matters.** Blocks the acquisition funnel for password-based
+sign-ups. SSO works but many users don't want to attach a third-party.
+
+**Proposed.**
+- Restore the footer link "New here? Create an account" under the Sign
+  in button. The gallery's removal applied to the *sign-up* card's
+  footer, not the *sign-in* card's.
+
+---
+
 ## (Continue adding observations as validation walks more flows)
