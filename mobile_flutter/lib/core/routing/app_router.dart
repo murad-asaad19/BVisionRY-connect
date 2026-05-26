@@ -17,6 +17,7 @@ import '../../features/discovery/presentation/search_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/intros/presentation/inbox_screen.dart';
 import '../../features/intros/presentation/intro_detail_screen.dart';
+import '../../features/meetings/presentation/post_meeting_prompt_modal.dart';
 import '../../features/onboarding/presentation/about_step.dart';
 import '../../features/onboarding/presentation/goal_step.dart';
 import '../../features/onboarding/presentation/identity_step.dart';
@@ -146,6 +147,16 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
         path: '/chats/:id',
         builder: (_, GoRouterState state) => ConversationScreen(
           conversationId: state.pathParameters['id']!,
+        ),
+      ),
+      // Push deep link from a `meeting_review_pending` notification.
+      // Opens the full-screen review modal pre-bound to the meeting id.
+      GoRoute(
+        path: '/meetings/:meetingId/review',
+        builder: (_, GoRouterState state) => PostMeetingPromptModal(
+          meetingId: state.pathParameters['meetingId']!,
+          peerHandle: state.uri.queryParameters['handle'],
+          whenLabel: state.uri.queryParameters['when'],
         ),
       ),
       StatefulShellRoute.indexedStack(

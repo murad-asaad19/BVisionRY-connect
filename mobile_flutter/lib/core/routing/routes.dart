@@ -36,6 +36,8 @@ abstract final class Routes {
   static String intro(String id) => '/intros/$id';
   static String opportunity(String id) => '/opportunities/$id';
   static String publicProfile(String handle) => '/p/$handle';
+  static String meetingReview(String meetingId) =>
+      '/meetings/$meetingId/review';
 
   // Profile
   static const String profile = '/profile';
