@@ -12,7 +12,7 @@ import '../../features/auth/providers/session_provider.dart';
 import '../../features/chat/presentation/chats_list_screen.dart';
 import '../../features/chat/presentation/conversation_screen.dart';
 import '../../features/connections/presentation/connections_screen.dart';
-import '../../features/connections/presentation/network_screen_stub.dart';
+import '../../features/discovery/presentation/network_screen.dart';
 import '../../features/discovery/presentation/search_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/intros/presentation/inbox_screen.dart';
@@ -34,8 +34,15 @@ import '../../features/privacy/presentation/blocked_users_screen.dart';
 import '../../features/profile/presentation/profile_edit_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/profile/presentation/public_profile_screen.dart';
-import '../../features/shell/presentation/tab_shell.dart';
+import '../../features/settings/presentation/account_screen.dart';
+import '../../features/settings/presentation/help_screen.dart';
+import '../../features/settings/presentation/language_screen.dart';
+import '../../features/settings/presentation/legal_screen.dart';
+import '../../features/settings/presentation/notifications_settings_screen.dart';
+import '../../features/settings/presentation/privacy_settings_screen.dart';
+import '../../features/settings/presentation/settings_home_screen.dart';
 import '../../features/verification/presentation/verification_screen.dart';
+import '../widgets/app_shell.dart';
 import 'route_guard.dart';
 import 'router_refresh.dart';
 import 'routes.dart';
@@ -210,9 +217,43 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
           whenLabel: state.uri.queryParameters['when'],
         ),
       ),
+      // Settings, Legal & Language — outside the StatefulShellRoute so the
+      // bottom-nav chrome retracts when drilling into a settings stack.
+      GoRoute(
+        path: Routes.settings,
+        builder: (_, __) => const SettingsHomeScreen(),
+      ),
+      GoRoute(
+        path: Routes.settingsAccount,
+        builder: (_, __) => const AccountScreen(),
+      ),
+      GoRoute(
+        path: Routes.settingsPrivacy,
+        builder: (_, __) => const PrivacySettingsScreen(),
+      ),
+      GoRoute(
+        path: Routes.settingsNotifications,
+        builder: (_, __) => const NotificationsSettingsScreen(),
+      ),
+      GoRoute(
+        path: Routes.settingsHelp,
+        builder: (_, __) => HelpScreen(),
+      ),
+      GoRoute(
+        path: Routes.settingsLanguage,
+        builder: (_, __) => const LanguageScreen(),
+      ),
+      GoRoute(
+        path: Routes.legalPrivacy,
+        builder: (_, __) => const LegalScreen(kind: LegalKind.privacy),
+      ),
+      GoRoute(
+        path: Routes.legalTerms,
+        builder: (_, __) => const LegalScreen(kind: LegalKind.terms),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (_, __, StatefulNavigationShell shell) =>
-            TabShell(navigationShell: shell),
+            AppShell(navigationShell: shell),
         branches: <StatefulShellBranch>[
           StatefulShellBranch(
             routes: <RouteBase>[
@@ -234,7 +275,7 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
             routes: <RouteBase>[
               GoRoute(
                 path: Routes.network,
-                builder: (_, __) => const NetworkScreenStub(),
+                builder: (_, __) => const NetworkScreen(),
               ),
             ],
           ),

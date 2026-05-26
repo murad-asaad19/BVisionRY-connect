@@ -11,6 +11,7 @@ class TopBarAction {
     required this.icon,
     required this.onPressed,
     required this.label,
+    this.key,
   });
 
   final IconData icon;
@@ -18,6 +19,10 @@ class TopBarAction {
 
   /// Required for screen-readers — never derived implicitly.
   final String label;
+
+  /// Optional key forwarded onto the rendered [AppIconButton]. Surfaces
+  /// for widget tests that need to target a specific action by key.
+  final Key? key;
 }
 
 /// AppBar replacement matching the gallery / RN `TopBar` treatment.
@@ -110,6 +115,7 @@ class TopBar extends StatelessWidget {
           if (actions != null)
             for (final a in actions!)
               AppIconButton(
+                key: a.key,
                 icon: a.icon,
                 label: a.label,
                 size: AppIconButtonSize.md,
