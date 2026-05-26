@@ -80,11 +80,16 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     _scrollController
       ..removeListener(_onScroll)
       ..dispose();
-    // ref is still valid at dispose; clear active conversation directly so
-    // Phase 12 push routing is consistent.
-    final currentActive = ref.read(activeConversationProvider);
-    if (currentActive == widget.conversationId) {
-      ref.read(activeConversationProvider.notifier).state = null;
+    // Newer flutter_riverpod versions disallow `ref` access in dispose;
+    // wrap defensively so the cleanup is best-effort and never throws.
+    try {
+      final currentActive = ref.read(activeConversationProvider);
+      if (currentActive == widget.conversationId) {
+        ref.read(activeConversationProvider.notifier).state = null;
+      }
+    } catch (_) {
+      // ref already disposed — Phase 12 push routing tolerates a stale
+      // active-conversation state until the next mount.
     }
     super.dispose();
   }

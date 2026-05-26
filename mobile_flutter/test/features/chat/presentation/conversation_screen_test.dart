@@ -20,6 +20,7 @@ import 'package:connect_mobile/features/meetings/domain/meeting_state.dart';
 import 'package:connect_mobile/features/meetings/providers/meeting_proposals_provider.dart';
 import 'package:connect_mobile/features/meetings/providers/pending_reviews_provider.dart';
 import 'package:connect_mobile/core/supabase/supabase_client.dart';
+import 'package:connect_mobile/core/theme/app_theme.dart';
 import 'package:connect_mobile/features/profile/data/peer_profile_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -199,8 +200,9 @@ void main() {
     addTearDown(container.dispose);
     final widget = UncontrolledProviderScope(
       container: container,
-      child: const MaterialApp(
-        home: ConversationScreen(conversationId: 'c1'),
+      child: MaterialApp(
+        theme: buildAppTheme(Brightness.light),
+        home: const ConversationScreen(conversationId: 'c1'),
       ),
     );
     await tester.pumpWidget(widget);
