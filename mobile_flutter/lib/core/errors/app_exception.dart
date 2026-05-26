@@ -73,3 +73,50 @@ class WrongIntroKindException extends AppException {
 class IntroNoteRangeException extends AppException {
   IntroNoteRangeException() : super('intros.compose.errorRange');
 }
+
+// ---------------------------------------------------------------------------
+// Office Hours (Phase 9) — typed P0001 hint mappings for `book_slot` and
+// `cancel_booking`. The server raises one of these via `RAISE EXCEPTION ...
+// USING HINT = '<name>'`; the mapping in error_map.dart funnels each hint
+// into one of these exception types so the UI can show a localized toast.
+// ---------------------------------------------------------------------------
+
+/// `book_slot` raised `slot_unavailable` — the slot is no longer `open`
+/// (already booked / cancelled while the user lingered).
+class SlotUnavailableException extends AppException {
+  SlotUnavailableException() : super('officeHours.book.errorSlotUnavailable');
+}
+
+/// `book_slot` raised `slot_too_soon` — slot starts within the 15-minute
+/// lead-time window.
+class SlotTooSoonException extends AppException {
+  SlotTooSoonException() : super('officeHours.book.errorTooSoon');
+}
+
+/// `book_slot` raised `host_self` — caller is the host of this slot.
+class HostSelfException extends AppException {
+  HostSelfException() : super('officeHours.book.errorHostSelf');
+}
+
+/// `book_slot` raised `oh_disabled` — the host turned office hours off.
+class OhDisabledException extends AppException {
+  OhDisabledException() : super('officeHours.book.errorOhDisabled');
+}
+
+/// `book_slot` raised `weekly_cap` — caller has already booked
+/// `max_bookings_per_week` slots with this host in the current Monday-UTC
+/// week bucket.
+class WeeklyCapException extends AppException {
+  WeeklyCapException() : super('officeHours.book.errorWeeklyCap');
+}
+
+/// `book_slot` raised `blocked` — host has blocked caller or vice-versa.
+class BlockedException extends AppException {
+  BlockedException() : super('officeHours.book.errorBlocked');
+}
+
+/// `book_slot` raised `bad_meeting_url` — host's `meeting_link_template`
+/// resolved to a non-`https://` URL after `{slot_id}` substitution.
+class BadMeetingUrlException extends AppException {
+  BadMeetingUrlException() : super('officeHours.book.errorBadMeetingUrl');
+}

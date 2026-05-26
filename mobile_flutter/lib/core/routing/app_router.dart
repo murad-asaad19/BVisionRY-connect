@@ -18,6 +18,8 @@ import '../../features/home/presentation/home_screen.dart';
 import '../../features/intros/presentation/inbox_screen.dart';
 import '../../features/intros/presentation/intro_detail_screen.dart';
 import '../../features/meetings/presentation/post_meeting_prompt_modal.dart';
+import '../../features/office_hours/presentation/my_bookings_screen.dart';
+import '../../features/office_hours/presentation/office_hours_settings_screen.dart';
 import '../../features/onboarding/presentation/about_step.dart';
 import '../../features/onboarding/presentation/goal_step.dart';
 import '../../features/onboarding/presentation/identity_step.dart';
@@ -129,6 +131,14 @@ final Provider<GoRouter> appRouterProvider = Provider<GoRouter>((
       GoRoute(
         path: Routes.settingsVerification,
         builder: (_, __) => const VerificationScreen(),
+      ),
+      GoRoute(
+        path: Routes.settingsOfficeHours,
+        builder: (_, __) => const OfficeHoursSettingsScreen(),
+      ),
+      GoRoute(
+        path: Routes.myBookings,
+        builder: (_, __) => const MyBookingsScreen(),
       ),
       GoRoute(
         path: '/intros/:id',

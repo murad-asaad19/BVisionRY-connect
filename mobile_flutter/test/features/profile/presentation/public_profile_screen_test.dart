@@ -1,5 +1,11 @@
 import 'package:connect_mobile/features/auth/data/profile_repository.dart';
 import 'package:connect_mobile/features/auth/providers/auth_service_provider.dart';
+import 'package:connect_mobile/features/office_hours/data/office_hours_service.dart';
+import 'package:connect_mobile/features/office_hours/domain/my_booking.dart';
+import 'package:connect_mobile/features/office_hours/domain/office_hours_settings.dart';
+import 'package:connect_mobile/features/office_hours/domain/office_hours_slot.dart';
+import 'package:connect_mobile/features/office_hours/domain/office_hours_window.dart';
+import 'package:connect_mobile/features/office_hours/presentation/office_hours_section_on_profile.dart';
 import 'package:connect_mobile/features/profile/data/public_profile_service.dart';
 import 'package:connect_mobile/features/profile/presentation/public_profile_screen.dart';
 import 'package:connect_mobile/features/profile/providers/public_profile_provider.dart';
@@ -14,6 +20,44 @@ import '../../../helpers/pump.dart';
 class _NoRowRunner implements ProfileQueryRunner {
   @override
   Future<Map<String, dynamic>?> selectById(String id) async => null;
+}
+
+class _FakeOfficeHoursService implements OfficeHoursService {
+  @override
+  Future<List<OfficeHoursSlot>> listUpcomingSlots(String hostId) async =>
+      const <OfficeHoursSlot>[];
+
+  @override
+  Future<OfficeHoursSettings> myOfficeHoursSettings() async =>
+      OfficeHoursSettings.defaults(userId: 'me');
+
+  @override
+  Future<List<MyBooking>> myBookings() async => const <MyBooking>[];
+
+  @override
+  Future<String> bookSlot({
+    required String slotId,
+    required String topic,
+  }) async =>
+      'mp';
+
+  @override
+  Future<void> cancelBooking(String slotId) async {}
+
+  @override
+  Future<OfficeHoursSettings> setOfficeHours({
+    required bool enabled,
+    required List<OfficeHoursWindow> windows,
+    required int slotDurationMinutes,
+    required int maxBookingsPerWeek,
+    required int bufferMinutes,
+    String? meetingLinkTemplate,
+    String? notesTemplate,
+  }) async =>
+      OfficeHoursSettings.defaults(userId: 'me');
+
+  @override
+  Future<String> conversationIdForProposal(String proposalId) async => 'c';
 }
 
 PublicProfile _omar() => const PublicProfile(
@@ -49,6 +93,8 @@ Future<Widget> _renderPublicProfile({
       publicProfileProvider('omar-d').overrideWith(
         (Ref<AsyncValue<PublicProfile?>> _) async => data,
       ),
+      officeHoursServiceProvider
+          .overrideWithValue(_FakeOfficeHoursService()),
     ],
   );
 }
@@ -95,5 +141,25 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('publicProfile.notFound')), findsOneWidget);
     });
+
+    testWidgets(
+      'mounts OfficeHoursSectionOnProfile for an authed viewer',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(420, 2400);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+        await tester.pumpWidget(
+          await _renderPublicProfile(data: _omar(), authed: true),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.byType(OfficeHoursSectionOnProfile),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }

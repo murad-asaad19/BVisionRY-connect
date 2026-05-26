@@ -997,6 +997,18 @@
       "meetingLinkHelp": "Use {slot_id} to insert the slot's id.",
       "notesLabel": "Pre-meeting notes",
       "windowEndAfterStart": "End time must be after start time.",
+      "windowsEmpty": "Add at least one window to publish your availability.",
+      "editWindow": "Edit window",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "invalidSlotDuration": "Slot duration must be 15, 30, 45, or 60 minutes.",
+      "invalidMaxBookings": "Max bookings per week must be between 1 and 50.",
+      "invalidBuffer": "Buffer must be between 0 and 60 minutes.",
+      "windowInvalidWeekday": "Weekday must be Sunday through Saturday.",
+      "windowInvalidStart": "Start time is out of range.",
+      "windowInvalidEnd": "End time is out of range.",
+      "windowInvalidTimezone": "Pick a timezone.",
+      "meetingLinkHttpsRequired": "Meeting link must start with https://",
       "save": "Save",
       "saved": "Saved",
       "saveFailed": "Couldn't save your settings."
@@ -1011,7 +1023,16 @@
       "topicLabel": "What would you like to discuss?",
       "topicPlaceholder": "Topic (5-280 chars)",
       "submit": "Confirm booking",
-      "success": "Booking confirmed"
+      "success": "Booking confirmed",
+      "duration": "{{minutes}} min",
+      "errorTooSoon": "This slot starts too soon. Pick a later time.",
+      "errorBlocked": "You can't book a slot with this user.",
+      "errorWeeklyCap": "You've reached the host's weekly booking cap.",
+      "errorHostSelf": "You can't book your own office hours.",
+      "errorOhDisabled": "This host turned off office hours.",
+      "errorBadMeetingUrl": "This host's meeting link is misconfigured. Try again later.",
+      "errorTopicInvalid": "Topic must be 5-280 characters.",
+      "errorSlotUnavailable": "Someone else just grabbed this slot."
     },
     "bookings": {
       "title": "My office-hours bookings",
@@ -1026,7 +1047,8 @@
       "loading": "Loading bookings…",
       "slotsLoading": "Loading slots…",
       "slotsEmptyTitle": "No upcoming slots",
-      "slotsEmptyBody": "This host doesn't have any open windows in the next few weeks."
+      "slotsEmptyBody": "This host doesn't have any open windows in the next few weeks.",
+      "errorNotBooked": "This booking is no longer active."
     },
     "badge": {
       "label": "Office hours"

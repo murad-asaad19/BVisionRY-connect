@@ -15,6 +15,19 @@ AppException mapPostgrestError(Object error) {
     ('28000', _) => UnauthenticatedException(),
     ('P0001', 'cooldown') => IntroCooldownException(),
     ('P0001', 'daily_cap') => DailyCapException(),
+    // Phase 9 — office hours `book_slot` / `cancel_booking` hints.
+    ('P0001', 'slot_unavailable') => SlotUnavailableException(),
+    ('P0001', 'slot_too_soon') => SlotTooSoonException(),
+    ('P0001', 'host_self') => HostSelfException(),
+    ('P0001', 'oh_disabled') => OhDisabledException(),
+    ('P0001', 'weekly_cap') => WeeklyCapException(),
+    ('P0001', 'blocked') => BlockedException(),
+    ('P0001', 'bad_meeting_url') => BadMeetingUrlException(),
+    ('P0001', 'topic_invalid') =>
+      ValidationException('officeHours.book.errorTopicInvalid'),
+    ('P0001', 'not_booked') =>
+      ValidationException('officeHours.bookings.errorNotBooked'),
+    ('P0001', 'not_authorised') => ForbiddenException(),
     ('23505', _) => DuplicateException(),
     ('P0002', _) => NotOnboardedException(),
     ('22023', _) => _map22023(error),

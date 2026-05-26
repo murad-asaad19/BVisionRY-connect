@@ -43,6 +43,9 @@ abstract final class Routes {
   static const String profile = '/profile';
   static const String profileEdit = '/profile/edit';
 
+  // My bookings (office hours bookings list)
+  static const String myBookings = '/bookings';
+
   // Settings
   static const String settings = '/settings';
   static const String settingsAccount = '/settings/account';

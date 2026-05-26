@@ -997,6 +997,18 @@
       "meetingLinkHelp": "Usa {slot_id} para insertar el id del espacio.",
       "notesLabel": "Notas previas",
       "windowEndAfterStart": "La hora de fin debe ser posterior a la de inicio.",
+      "windowsEmpty": "Agrega al menos un bloque para publicar tu disponibilidad.",
+      "editWindow": "Editar bloque",
+      "startTime": "Hora de inicio",
+      "endTime": "Hora de fin",
+      "invalidSlotDuration": "La duración debe ser 15, 30, 45 o 60 minutos.",
+      "invalidMaxBookings": "El máximo semanal debe estar entre 1 y 50.",
+      "invalidBuffer": "El espacio entre reuniones debe estar entre 0 y 60 minutos.",
+      "windowInvalidWeekday": "Elige un día entre domingo y sábado.",
+      "windowInvalidStart": "Hora de inicio fuera de rango.",
+      "windowInvalidEnd": "Hora de fin fuera de rango.",
+      "windowInvalidTimezone": "Selecciona una zona horaria.",
+      "meetingLinkHttpsRequired": "El enlace debe comenzar con https://",
       "save": "Guardar",
       "saved": "Guardado",
       "saveFailed": "No se pudo guardar la configuración."
@@ -1011,7 +1023,16 @@
       "topicLabel": "¿De qué te gustaría hablar?",
       "topicPlaceholder": "Tema (5-280 caracteres)",
       "submit": "Confirmar reserva",
-      "success": "Reserva confirmada"
+      "success": "Reserva confirmada",
+      "duration": "{{minutes}} min",
+      "errorTooSoon": "Este espacio comienza muy pronto. Elige otro horario.",
+      "errorBlocked": "No puedes reservar con este usuario.",
+      "errorWeeklyCap": "Ya alcanzaste el límite semanal del anfitrión.",
+      "errorHostSelf": "No puedes reservar tu propio horario.",
+      "errorOhDisabled": "Este anfitrión desactivó el horario de atención.",
+      "errorBadMeetingUrl": "El enlace de reunión del anfitrión no es válido. Intenta más tarde.",
+      "errorTopicInvalid": "El tema debe tener entre 5 y 280 caracteres.",
+      "errorSlotUnavailable": "Alguien acabó de reservar este espacio."
     },
     "bookings": {
       "title": "Mis reservas",
@@ -1026,7 +1047,8 @@
       "loading": "Cargando reservas…",
       "slotsLoading": "Cargando espacios…",
       "slotsEmptyTitle": "Sin espacios disponibles",
-      "slotsEmptyBody": "Este anfitrión no tiene huecos libres en las próximas semanas."
+      "slotsEmptyBody": "Este anfitrión no tiene huecos libres en las próximas semanas.",
+      "errorNotBooked": "Esta reserva ya no está activa."
     },
     "badge": {
       "label": "Horario disponible"

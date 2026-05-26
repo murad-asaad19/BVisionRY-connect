@@ -9,6 +9,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../auth/providers/session_provider.dart';
 import '../../intros/presentation/send_intro_sheet.dart';
+import '../../office_hours/presentation/office_hours_section_on_profile.dart';
 import '../data/public_profile_service.dart';
 import '../providers/public_profile_provider.dart';
 import 'profile_hero.dart';
@@ -94,6 +95,12 @@ class PublicProfileScreen extends ConsumerWidget {
                       style: typo.bodyMd.copyWith(color: colors.body),
                     ),
                   ),
+                ),
+              if (isAuthed)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                  child:
+                      OfficeHoursSectionOnProfile(hostId: profile.id),
                 ),
               const SizedBox(height: 24),
               Padding(

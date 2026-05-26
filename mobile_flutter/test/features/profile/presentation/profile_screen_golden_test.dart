@@ -3,6 +3,11 @@ import 'package:connect_mobile/core/theme/app_theme.dart';
 import 'package:connect_mobile/features/auth/data/profile_repository.dart';
 import 'package:connect_mobile/features/auth/providers/auth_service_provider.dart';
 import 'package:connect_mobile/features/auth/providers/profile_provider.dart';
+import 'package:connect_mobile/features/office_hours/data/office_hours_service.dart';
+import 'package:connect_mobile/features/office_hours/domain/my_booking.dart';
+import 'package:connect_mobile/features/office_hours/domain/office_hours_settings.dart';
+import 'package:connect_mobile/features/office_hours/domain/office_hours_slot.dart';
+import 'package:connect_mobile/features/office_hours/domain/office_hours_window.dart';
 import 'package:connect_mobile/features/profile/data/profile_signals_service.dart';
 import 'package:connect_mobile/features/profile/domain/profile.dart';
 import 'package:connect_mobile/features/profile/domain/profile_signals.dart';
@@ -25,6 +30,44 @@ class _FakeSignalsService implements ProfileSignalsService {
   @override
   Future<ProfileSignals> fetchSignals(String targetUserId) async =>
       ProfileSignals.empty;
+}
+
+class _FakeOfficeHoursService implements OfficeHoursService {
+  @override
+  Future<List<OfficeHoursSlot>> listUpcomingSlots(String hostId) async =>
+      const <OfficeHoursSlot>[];
+
+  @override
+  Future<OfficeHoursSettings> myOfficeHoursSettings() async =>
+      OfficeHoursSettings.defaults(userId: 'me');
+
+  @override
+  Future<List<MyBooking>> myBookings() async => const <MyBooking>[];
+
+  @override
+  Future<String> bookSlot({
+    required String slotId,
+    required String topic,
+  }) async =>
+      'mp';
+
+  @override
+  Future<void> cancelBooking(String slotId) async {}
+
+  @override
+  Future<OfficeHoursSettings> setOfficeHours({
+    required bool enabled,
+    required List<OfficeHoursWindow> windows,
+    required int slotDurationMinutes,
+    required int maxBookingsPerWeek,
+    required int bufferMinutes,
+    String? meetingLinkTemplate,
+    String? notesTemplate,
+  }) async =>
+      OfficeHoursSettings.defaults(userId: 'me');
+
+  @override
+  Future<String> conversationIdForProposal(String proposalId) async => 'c';
 }
 
 Profile _omar() => Profile.fromJson(<String, dynamic>{
@@ -74,6 +117,8 @@ void main() {
           ),
           profileSignalsServiceProvider
               .overrideWithValue(_FakeSignalsService()),
+          officeHoursServiceProvider
+              .overrideWithValue(_FakeOfficeHoursService()),
         ],
         child: const ProfileScreen(),
       ),

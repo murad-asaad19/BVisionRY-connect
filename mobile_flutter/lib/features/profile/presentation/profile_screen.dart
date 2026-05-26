@@ -10,6 +10,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../auth/providers/auth_service_provider.dart';
 import '../../auth/providers/profile_provider.dart';
+import '../../office_hours/presentation/office_hours_section_on_profile.dart';
 import '../domain/profile.dart';
 import '../domain/profile_signals.dart';
 import '../providers/profile_signals_provider.dart';
@@ -173,6 +174,10 @@ class _ProfileBody extends ConsumerWidget {
             child: ProfileSignalsRow(signals: signals),
           ),
           orElse: () => const SizedBox.shrink(),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+          child: OfficeHoursSectionOnProfile(hostId: profile.id),
         ),
         const SizedBox(height: 16),
         Padding(

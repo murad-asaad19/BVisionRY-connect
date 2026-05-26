@@ -1,4 +1,9 @@
 import 'package:connect_mobile/features/auth/providers/profile_provider.dart';
+import 'package:connect_mobile/features/office_hours/data/office_hours_service.dart';
+import 'package:connect_mobile/features/office_hours/domain/my_booking.dart';
+import 'package:connect_mobile/features/office_hours/domain/office_hours_settings.dart';
+import 'package:connect_mobile/features/office_hours/domain/office_hours_slot.dart';
+import 'package:connect_mobile/features/office_hours/domain/office_hours_window.dart';
 import 'package:connect_mobile/features/profile/data/profile_signals_service.dart';
 import 'package:connect_mobile/features/profile/domain/profile.dart';
 import 'package:connect_mobile/features/profile/domain/profile_signals.dart';
@@ -13,6 +18,46 @@ class _FakeSignalsService implements ProfileSignalsService {
   @override
   Future<ProfileSignals> fetchSignals(String targetUserId) async =>
       ProfileSignals.empty;
+}
+
+/// Inert office-hours service so the embedded section settles to an empty
+/// state without hitting Supabase during widget tests.
+class _FakeOfficeHoursService implements OfficeHoursService {
+  @override
+  Future<List<OfficeHoursSlot>> listUpcomingSlots(String hostId) async =>
+      const <OfficeHoursSlot>[];
+
+  @override
+  Future<OfficeHoursSettings> myOfficeHoursSettings() async =>
+      OfficeHoursSettings.defaults(userId: 'me');
+
+  @override
+  Future<List<MyBooking>> myBookings() async => const <MyBooking>[];
+
+  @override
+  Future<String> bookSlot({
+    required String slotId,
+    required String topic,
+  }) async =>
+      'mp';
+
+  @override
+  Future<void> cancelBooking(String slotId) async {}
+
+  @override
+  Future<OfficeHoursSettings> setOfficeHours({
+    required bool enabled,
+    required List<OfficeHoursWindow> windows,
+    required int slotDurationMinutes,
+    required int maxBookingsPerWeek,
+    required int bufferMinutes,
+    String? meetingLinkTemplate,
+    String? notesTemplate,
+  }) async =>
+      OfficeHoursSettings.defaults(userId: 'me');
+
+  @override
+  Future<String> conversationIdForProposal(String proposalId) async => 'c';
 }
 
 Profile omarProfile() => Profile.fromJson(<String, dynamic>{
@@ -54,6 +99,8 @@ void main() {
             ),
             profileSignalsServiceProvider
                 .overrideWithValue(_FakeSignalsService()),
+            officeHoursServiceProvider
+                .overrideWithValue(_FakeOfficeHoursService()),
           ],
         ),
       );
@@ -66,6 +113,12 @@ void main() {
     testWidgets('renders Edit / Share / Sign out actions', (
       WidgetTester tester,
     ) async {
+      tester.view.physicalSize = const Size(420, 2400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
       await tester.pumpWidget(
         await wrapWithTheme(
           child: const ProfileScreen(),
@@ -75,6 +128,8 @@ void main() {
             ),
             profileSignalsServiceProvider
                 .overrideWithValue(_FakeSignalsService()),
+            officeHoursServiceProvider
+                .overrideWithValue(_FakeOfficeHoursService()),
           ],
         ),
       );
@@ -111,6 +166,8 @@ void main() {
             ),
             profileSignalsServiceProvider
                 .overrideWithValue(_FakeSignalsService()),
+            officeHoursServiceProvider
+                .overrideWithValue(_FakeOfficeHoursService()),
           ],
         ),
       );

@@ -66,6 +66,11 @@ void main() {
     );
   });
 
+  test('Routes exposes office-hours and my-bookings paths', () {
+    expect(Routes.settingsOfficeHours, '/settings/office-hours');
+    expect(Routes.myBookings, '/bookings');
+  });
+
   group('anon-allowed paths', () {
     test('isAnonAllowed matches /p/:handle prefix', () {
       expect(isAnonAllowed('/p/omar-d'), isTrue);

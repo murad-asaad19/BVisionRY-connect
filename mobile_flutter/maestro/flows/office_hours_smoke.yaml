@@ -1,0 +1,35 @@
+appId: com.bvisionry.connect_mobile
+tags:
+  - office_hours
+  - smoke
+---
+# Phase 9 smoke — host enables office hours, configures a window, opens
+# My Bookings tab to verify the route mounts. A full host->booker round
+# trip needs two devices / two seeded accounts and lives in CI; this flow
+# exercises the new screens in isolation against a signed-in session.
+- launchApp:
+    clearState: false
+# Navigate to profile → office hours settings.
+- tapOn:
+    text: "Profile"
+- assertVisible: "Office hours"
+- tapOn:
+    text: "Office hours"
+- assertVisible: "Enable office hours"
+- tapOn:
+    id: "oh-enable-switch"
+- assertVisible: "Saved"
+- tapOn:
+    id: "oh-add-window"
+- assertVisible: "Add window"
+# Save the default 9:00 - 11:00 Monday/UTC window.
+- tapOn:
+    id: "window-save"
+- assertVisible: "Saved"
+- takeScreenshot: office_hours_settings_filled
+- back
+# Verify the My Bookings entry row navigates correctly.
+- tapOn:
+    id: "oh-my-bookings-row"
+- assertVisible: "My office-hours bookings"
+- takeScreenshot: office_hours_my_bookings
