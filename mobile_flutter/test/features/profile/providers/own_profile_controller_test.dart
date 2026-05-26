@@ -88,7 +88,7 @@ void main() {
     test('build() returns whatever profileProvider returns', () async {
       final FakeAuthGateway auth = FakeAuthGateway();
       auth.pushAuthState(
-          AuthChangeEvent.initialSession, fakeSession(id: 'u-1'));
+          AuthChangeEvent.initialSession, fakeSession(id: 'u-1'),);
       final _FakeQueryRunner runner = _FakeQueryRunner(<String, dynamic>{
         'id': 'u-1',
         'handle': 'h',
@@ -110,7 +110,7 @@ void main() {
         () async {
       final FakeAuthGateway auth = FakeAuthGateway();
       auth.pushAuthState(
-          AuthChangeEvent.initialSession, fakeSession(id: 'u-1'));
+          AuthChangeEvent.initialSession, fakeSession(id: 'u-1'),);
       final _FakeQueryRunner runner = _FakeQueryRunner(<String, dynamic>{
         'id': 'u-1',
         'handle': 'h',
@@ -167,7 +167,7 @@ void main() {
         () async {
       final FakeAuthGateway auth = FakeAuthGateway();
       auth.pushAuthState(
-          AuthChangeEvent.initialSession, fakeSession(id: 'u-1'));
+          AuthChangeEvent.initialSession, fakeSession(id: 'u-1'),);
       final _FakeQueryRunner runner = _FakeQueryRunner(<String, dynamic>{
         'id': 'u-1',
         'onboarded': true,
@@ -193,7 +193,7 @@ void main() {
     test('refresh invalidates the underlying provider', () async {
       final FakeAuthGateway auth = FakeAuthGateway();
       auth.pushAuthState(
-          AuthChangeEvent.initialSession, fakeSession(id: 'u-1'));
+          AuthChangeEvent.initialSession, fakeSession(id: 'u-1'),);
       final _FakeQueryRunner runner = _FakeQueryRunner(<String, dynamic>{
         'id': 'u-1',
         'onboarded': true,

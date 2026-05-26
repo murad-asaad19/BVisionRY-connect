@@ -79,7 +79,7 @@ void main() {
         () => gateway.rpc('set_office_hours', params: any(named: 'params')),
       ).thenThrow(
         const PostgrestException(
-            message: 'bad', code: 'P0001', hint: 'blocked'),
+            message: 'bad', code: 'P0001', hint: 'blocked',),
       );
       await expectLater(
         svc.setOfficeHours(

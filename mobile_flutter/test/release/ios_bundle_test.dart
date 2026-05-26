@@ -6,8 +6,10 @@ void main() {
   test('iOS pbxproj uses bundle id com.bvisionry.connect', () {
     final pbxproj =
         File('ios/Runner.xcodeproj/project.pbxproj').readAsStringSync();
-    expect(pbxproj,
-        contains('PRODUCT_BUNDLE_IDENTIFIER = com.bvisionry.connect;'));
+    expect(
+      pbxproj,
+      contains('PRODUCT_BUNDLE_IDENTIFIER = com.bvisionry.connect;'),
+    );
     expect(pbxproj, isNot(contains('com.bvisionry.connect_mobile')));
     expect(pbxproj, isNot(contains('com.bvisionry.connectMobile;')));
   });

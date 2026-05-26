@@ -38,7 +38,7 @@ void main() {
         chatsUnread: 0,
       ),
       loader: loader,
-    ));
+    ),);
     await tester.pumpAndSettle();
     expect(find.byIcon(LucideIcons.house), findsOneWidget);
     expect(find.byIcon(LucideIcons.inbox), findsOneWidget);
@@ -58,7 +58,7 @@ void main() {
         chatsUnread: 12,
       ),
       loader: loader,
-    ));
+    ),);
     await tester.pumpAndSettle();
     expect(find.text('4'), findsOneWidget);
     expect(find.text('12'), findsOneWidget);
@@ -75,7 +75,7 @@ void main() {
         chatsUnread: 100,
       ),
       loader: loader,
-    ));
+    ),);
     await tester.pumpAndSettle();
     expect(find.text('99+'), findsNWidgets(2));
   });
@@ -91,7 +91,7 @@ void main() {
         chatsUnread: 0,
       ),
       loader: loader,
-    ));
+    ),);
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(LucideIcons.users));
     await tester.pumpAndSettle();

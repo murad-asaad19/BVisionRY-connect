@@ -102,7 +102,7 @@ void main() {
         'meetings.playbook.section.dont',
       ]) {
         expect(loader.t(key), isNot(equals(key)),
-            reason: 'missing $key in $code');
+            reason: 'missing $key in $code',);
       }
       // Keys with vars need separate handling — assert their interpolated
       // form differs from the raw key.

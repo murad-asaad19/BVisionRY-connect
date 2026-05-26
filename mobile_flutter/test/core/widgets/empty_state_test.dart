@@ -19,7 +19,7 @@ void main() {
     );
     expect(find.text('Nothing here yet'), findsOneWidget);
     expect(find.text('Once you send an intro it will appear here.'),
-        findsOneWidget);
+        findsOneWidget,);
     expect(find.byIcon(Icons.inbox_outlined), findsOneWidget);
   });
 

@@ -54,4 +54,4 @@ class MyBookingsNotifier extends AsyncNotifier<List<MyBooking>> {
 final AsyncNotifierProvider<MyBookingsNotifier, List<MyBooking>>
     myBookingsProvider =
     AsyncNotifierProvider<MyBookingsNotifier, List<MyBooking>>(
-        MyBookingsNotifier.new);
+        MyBookingsNotifier.new,);

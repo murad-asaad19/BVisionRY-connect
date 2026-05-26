@@ -8,10 +8,12 @@ void main() {
   testWidgets('LiveWaveform renders AudioWaveforms when controller provided',
       (tester) async {
     final controller = RecorderController();
-    await tester.pumpWidget(MaterialApp(
-      theme: buildAppTheme(Brightness.light),
-      home: Scaffold(body: LiveWaveform(controller: controller)),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildAppTheme(Brightness.light),
+        home: Scaffold(body: LiveWaveform(controller: controller)),
+      ),
+    );
     expect(find.byType(AudioWaveforms), findsOneWidget);
     controller.dispose();
   });

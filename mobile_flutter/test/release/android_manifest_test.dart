@@ -27,7 +27,10 @@ void main() {
 
   test('key.properties.example committed for release signing', () {
     final f = File('android/key.properties.example');
-    expect(f.existsSync(), isTrue,
-        reason: 'android/key.properties.example missing');
+    expect(
+      f.existsSync(),
+      isTrue,
+      reason: 'android/key.properties.example missing',
+    );
   });
 }

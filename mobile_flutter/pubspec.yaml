@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   app_links: ^6.3.2
+  audio_waveforms: ^1.2.0
   cached_network_image: ^3.4.1
   cupertino_icons: ^1.0.8
   firebase_analytics: ^11.3.5
@@ -41,18 +42,18 @@ dependencies:
   sentry_flutter: ^8.11.2
   share_plus: ^10.1.2
   shared_preferences: ^2.3.3
+  shimmer: ^3.0.0
   supabase_flutter: ^2.8.0
   url_launcher: ^6.3.1
   uuid: ^4.5.1
   visibility_detector: ^0.4.0+2
-  # Phase 15 visual polish
-  audio_waveforms: ^1.2.0
-  shimmer: ^3.0.0
 
 dev_dependencies:
   build_runner: ^2.4.13
   custom_lint: ^0.7.0
+  flutter_launcher_icons: ^0.14.1
   flutter_lints: ^5.0.0
+  flutter_native_splash: ^2.4.3
   flutter_test:
     sdk: flutter
   freezed: ^2.5.7
@@ -67,9 +68,6 @@ dev_dependencies:
   # `sentry.properties` (org / project / auth_token) is wired in Phase 15
   # release config.
   sentry_dart_plugin: ^2.4.0
-  # Phase 15 — launcher icons and native splash generation.
-  flutter_launcher_icons: ^0.14.1
-  flutter_native_splash: ^2.4.3
 
 # custom_lint 0.7.3 / riverpod_lint 2.6.4 pin analyzer_plugin to 0.12.0, which
 # only compiles against analyzer 6.x. Our toolchain resolves analyzer 7.6.0

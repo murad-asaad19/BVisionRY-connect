@@ -40,7 +40,7 @@ void main() {
     ]) {
       expect(
         mapAuthError(AuthException(m),
-            AuthMode.signIn), // ignore: prefer_const_constructors
+            AuthMode.signIn,), // ignore: prefer_const_constructors
         'auth.errors.rateLimited',
         reason: m,
       );

@@ -104,7 +104,7 @@ void main() {
       );
       expect(g.capturedUpdateId, 'u-1');
       expect(
-          g.capturedUpdatePatch, <String, dynamic>{'headline': 'New headline'});
+          g.capturedUpdatePatch, <String, dynamic>{'headline': 'New headline'},);
       expect(p.headline, 'New headline');
     });
 
@@ -165,7 +165,7 @@ void main() {
     test('exportMyData calls export_my_data RPC and returns the map', () async {
       final _FakeGateway g = _FakeGateway()
         ..rpcResult = <String, dynamic>{
-          'profile': <String, dynamic>{'id': 'u'}
+          'profile': <String, dynamic>{'id': 'u'},
         };
       final ProfileService svc = ProfileService(g);
       final Map<String, dynamic> result = await svc.exportMyData();
