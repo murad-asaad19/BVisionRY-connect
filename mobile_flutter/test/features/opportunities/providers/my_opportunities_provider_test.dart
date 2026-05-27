@@ -1,3 +1,4 @@
+import 'package:connect_mobile/features/auth/providers/profile_provider.dart';
 import 'package:connect_mobile/features/opportunities/data/opportunities_service.dart';
 import 'package:connect_mobile/features/opportunities/domain/opportunity.dart';
 import 'package:connect_mobile/features/opportunities/domain/opportunity_kind.dart';
@@ -40,6 +41,11 @@ void main() {
     final ProviderContainer container = ProviderContainer(
       overrides: <Override>[
         opportunitiesServiceProvider.overrideWithValue(fake),
+        // myOpportunitiesProvider also watches profileProvider to enrich
+        // the rows with the viewer's own metadata. Default-resolving that
+        // path drags in Supabase init; bypass with a static null viewer
+        // since the provider already handles that branch.
+        profileProvider.overrideWith((_) async => null),
       ],
     );
     addTearDown(container.dispose);
