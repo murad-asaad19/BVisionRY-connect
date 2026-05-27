@@ -7,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
+import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
@@ -193,6 +194,21 @@ class _IntroDetailBodyState extends ConsumerState<_IntroDetailBody> {
           Text(
             context.t('intros.detail.expiredHint'),
             style: typo.bodyMd.copyWith(color: colors.muted),
+          ),
+        ],
+        // Connected intros land here once the chat thread has been
+        // created. Surface an "Open chat" CTA so the next step (replying)
+        // is one tap away instead of forcing the user to hunt for the
+        // peer in the Chats tab.
+        if (intro.state == IntroState.connected &&
+            intro.conversationId != null) ...[
+          const SizedBox(height: 20),
+          AppButton(
+            key: const Key('intro-detail-open-chat'),
+            label: context.t('intros.detail.openChat'),
+            variant: AppButtonVariant.gold,
+            icon: LucideIcons.messageSquare,
+            onPressed: () => context.push(Routes.chat(intro.conversationId!)),
           ),
         ],
         if (_errorKey != null) ...[
