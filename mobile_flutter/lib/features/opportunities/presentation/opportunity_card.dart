@@ -149,17 +149,35 @@ class OpportunityCard extends StatelessWidget {
                 ),
               ],
               const Spacer(),
-              Icon(LucideIcons.heart, size: 14, color: colors.muted),
-              const SizedBox(width: 4),
-              Text(
-                context.t(
-                  count == 1
-                      ? 'opportunities.detail.viewInterested_one'
-                      : 'opportunities.detail.viewInterested_other',
-                  vars: <String, Object>{'count': count},
+              // On My Opportunities (statusOverlay=true) any positive
+              // interest count surfaces as a gold-solid pill so the
+              // author can spot posts with traction at a glance. On the
+              // public feed it stays as a quiet muted heart+count.
+              if (statusOverlay && count > 0)
+                Pill(
+                  label: context.t(
+                    count == 1
+                        ? 'opportunities.detail.viewInterested_one'
+                        : 'opportunities.detail.viewInterested_other',
+                    vars: <String, Object>{'count': count},
+                  ),
+                  size: PillSize.sm,
+                  variant: PillVariant.solid,
+                  icon: LucideIcons.heart,
+                )
+              else ...<Widget>[
+                Icon(LucideIcons.heart, size: 14, color: colors.muted),
+                const SizedBox(width: 4),
+                Text(
+                  context.t(
+                    count == 1
+                        ? 'opportunities.detail.viewInterested_one'
+                        : 'opportunities.detail.viewInterested_other',
+                    vars: <String, Object>{'count': count},
+                  ),
+                  style: typo.bodySm.copyWith(color: colors.muted),
                 ),
-                style: typo.bodySm.copyWith(color: colors.muted),
-              ),
+              ],
             ],
           ),
         ],

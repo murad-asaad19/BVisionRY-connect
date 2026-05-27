@@ -85,14 +85,16 @@ class _Body extends ConsumerWidget {
       cancelLabel: 'Cancel',
       destructive: true,
       onConfirm: () async {
-        await ref.read(opportunitiesServiceProvider).closeOpportunity(
-              detail.withAuthor.opportunity.id,
-            );
-        ref.invalidate(
-          opportunityProvider(detail.withAuthor.opportunity.id),
-        );
+        final String oppId = detail.withAuthor.opportunity.id;
+        await ref.read(opportunitiesServiceProvider).closeOpportunity(oppId);
+        // Invalidate + await the next future so the detail screen
+        // repaints with the Closed pill before the success toast fires.
+        // Previously the screen stayed on the stale (status='open')
+        // snapshot until the next manual interaction.
+        ref.invalidate(opportunityProvider(oppId));
         ref.invalidate(myOpportunitiesProvider);
         ref.invalidate(opportunitiesFeedProvider);
+        await ref.read(opportunityProvider(oppId).future);
       },
     );
     if (!context.mounted) return;

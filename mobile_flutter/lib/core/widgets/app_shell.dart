@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/chat/providers/unread_counts_provider.dart';
 import '../../features/intros/providers/intros_providers.dart';
+import '../../features/opportunities/providers/interest_badge_provider.dart';
 import 'connect_bottom_nav_bar.dart';
 
 /// Host scaffold for the 5-tab `StatefulShellRoute.indexedStack` — the
@@ -36,12 +37,15 @@ class AppShell extends ConsumerWidget {
     final int chatsBadge = unread == null
         ? 0
         : unread.values.fold<int>(0, (int a, int b) => a + b);
+    final int opportunitiesBadge =
+        ref.watch(opportunitiesInterestBadgeProvider).asData?.value ?? 0;
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: ConnectBottomNavBar(
         currentIndex: navigationShell.currentIndex,
         inboxUnread: introBadge,
         chatsUnread: chatsBadge,
+        opportunitiesUnread: opportunitiesBadge,
         onTap: (int i) => navigationShell.goBranch(
           i,
           initialLocation: i == navigationShell.currentIndex,

@@ -148,4 +148,13 @@ sign-ups. SSO works but many users don't want to attach a third-party.
 
 ---
 
+## Resolution notes
+
+- #5 (Office Hours null cast): fixed in commit — `OfficeHoursService.listUpcomingSlots` now stamps `host_id` onto every row before parsing (RPC omits it since the caller supplies it).
+- #6 (Public profile title "bvisionry"): fixed — TopBar now shows `@<handle>`.
+- #7 (Sign-up entry): fixed — restored "Don't have an account? Sign up" link under the Sign in button.
+- #3 (Close-opportunity refresh): fixed — `closeOpportunity` now `await ref.read(...future)` after invalidate so the detail repaints with the Closed pill.
+- #2 (Direct connect from InterestedListScreen): fixed — each row now has inline Send intro (gold) + View profile (outline) buttons.
+- **#7 URL-encoded `%2C` note**: NOT a code bug — current `sendIntro` path passes `note.trim()` un-encoded. The single offending row in `public.intros` is pre-existing seed data created by an earlier manual test. Skipped (data-only, requires `UPDATE` permission outside the agent's scope).
+
 ## (Continue adding observations as validation walks more flows)

@@ -764,7 +764,9 @@
       "errorGeneric": "No se pudo enviar. Inténtalo de nuevo."
     },
     "interested": {
-      "empty": "Nadie ha mostrado interés todavía."
+      "empty": "Nadie ha mostrado interés todavía.",
+      "sendIntro": "Enviar intro",
+      "viewProfile": "Ver perfil"
     },
     "push": {
       "interestTitle": "Nuevo interés en {{title}}",

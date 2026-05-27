@@ -101,12 +101,17 @@ class OfficeHoursService {
         params: <String, dynamic>{'p_host': hostId},
       );
       final rows = (raw as List).cast<dynamic>();
-      return rows
-          .map(
-            (r) =>
-                OfficeHoursSlot.fromJson(Map<String, dynamic>.from(r as Map)),
-          )
-          .toList(growable: false);
+      return rows.map((r) {
+        // The RPC projects only id / starts_at / ends_at /
+        // host_settings_notes_template (caller knows the host_id from
+        // the param), but OfficeHoursSlot.fromJson requires `host_id`.
+        // Stamp it on every row before parsing.
+        final Map<String, dynamic> row = <String, dynamic>{
+          ...Map<String, dynamic>.from(r as Map),
+          'host_id': hostId,
+        };
+        return OfficeHoursSlot.fromJson(row);
+      }).toList(growable: false);
     } on PostgrestException catch (e) {
       throw mapPostgrestError(e);
     }

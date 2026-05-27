@@ -7,6 +7,7 @@ import 'package:connect_mobile/core/widgets/app_shell.dart';
 import 'package:connect_mobile/core/widgets/connect_bottom_nav_bar.dart';
 import 'package:connect_mobile/features/chat/providers/unread_counts_provider.dart';
 import 'package:connect_mobile/features/intros/providers/intros_providers.dart';
+import 'package:connect_mobile/features/opportunities/providers/interest_badge_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -58,6 +59,8 @@ void main() {
             (Ref<AsyncValue<Map<String, int>>> _) async =>
                 <String, int>{'c1': 4, 'c2': 5},
           ),
+          opportunitiesInterestBadgeProvider
+              .overrideWith((Ref<AsyncValue<int>> _) async => 2),
         ],
         child: MaterialApp.router(
           theme: buildAppTheme(Brightness.light),
@@ -72,5 +75,6 @@ void main() {
     );
     expect(bar.inboxUnread, 3);
     expect(bar.chatsUnread, 9);
+    expect(bar.opportunitiesUnread, 2);
   });
 }

@@ -28,6 +28,7 @@ class ConnectBottomNavBar extends StatelessWidget {
     required this.onTap,
     required this.inboxUnread,
     required this.chatsUnread,
+    this.opportunitiesUnread = 0,
   });
 
   /// Fixed content height — the safe-area inset is added on top, clamped
@@ -54,6 +55,11 @@ class ConnectBottomNavBar extends StatelessWidget {
   /// tab badge (Phase 7).
   final int chatsUnread;
 
+  /// Total interested-user count across the caller's open opportunities.
+  /// Surfaces a badge so an author sees at-a-glance when somebody has
+  /// expressed interest in their posts. UX gap #1 from validation walks.
+  final int opportunitiesUnread;
+
   @override
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
@@ -69,7 +75,11 @@ class ConnectBottomNavBar extends StatelessWidget {
         badge: inboxUnread,
       ),
       _TabDef(LucideIcons.users, context.t('common.tabs.network')),
-      _TabDef(LucideIcons.briefcase, context.t('common.tabs.opportunities')),
+      _TabDef(
+        LucideIcons.briefcase,
+        context.t('common.tabs.opportunities'),
+        badge: opportunitiesUnread,
+      ),
       _TabDef(
         LucideIcons.messageSquare,
         context.t('common.tabs.chats'),

@@ -9,20 +9,28 @@ import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/avatar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/pill.dart';
 import '../../../core/widgets/skeleton.dart';
 import '../../../core/widgets/top_bar.dart';
+import '../../intros/presentation/send_intro_sheet.dart';
 import '../domain/interested_user.dart';
 import '../providers/interested_provider.dart';
 import '_relative_time.dart';
 
 /// Author-only list of users who expressed interest in an opportunity.
 ///
-/// Maps a `ForbiddenException` (non-author / RLS-denied) to a guarded empty
-/// state so non-authors who hit the route via deep-link see the right copy.
+/// Each row surfaces a **Send intro** inline action so the author can
+/// reach out without bouncing through the user's public profile first.
+/// Tapping the row body still routes to the public profile for richer
+/// context.
+///
+/// Maps a `ForbiddenException` (non-author / RLS-denied) to a guarded
+/// empty state so non-authors who hit the route via deep-link see the
+/// right copy.
 class InterestedListScreen extends ConsumerWidget {
   const InterestedListScreen({super.key, required this.opportunityId});
 
@@ -114,55 +122,97 @@ class _InterestedRow extends StatelessWidget {
     final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
     return AppCard(
       onTap: () => context.push(Routes.publicProfile(user.handle)),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          AvatarCircle(
-            name: user.name,
-            photoUrl: user.photoUrl,
-            size: 38,
-            tone: AvatarTone.muted,
-          ),
-          SizedBox(width: spacing.card),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Row(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              AvatarCircle(
+                name: user.name,
+                photoUrl: user.photoUrl,
+                size: 38,
+                tone: AvatarTone.muted,
+              ),
+              SizedBox(width: spacing.card),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        user.name,
-                        style: typo.displaySm.copyWith(color: colors.navy),
-                        overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            user.name,
+                            style: typo.displaySm.copyWith(color: colors.navy),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          relativeShort(user.createdAt),
+                          style: typo.bodyXs.copyWith(color: colors.muted),
+                        ),
+                      ],
+                    ),
+                    if (user.primaryRole != null) ...<Widget>[
+                      const SizedBox(height: 4),
+                      Pill(
+                        label: user.primaryRole!,
+                        size: PillSize.sm,
+                        variant: PillVariant.muted,
                       ),
-                    ),
-                    Text(
-                      relativeShort(user.createdAt),
-                      style: typo.bodyXs.copyWith(color: colors.muted),
-                    ),
+                    ],
+                    if (user.note != null && user.note!.isNotEmpty) ...<Widget>[
+                      const SizedBox(height: 6),
+                      Text(
+                        user.note!,
+                        style: typo.bodyMd.copyWith(
+                          color: colors.body,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
-                if (user.primaryRole != null) ...<Widget>[
-                  const SizedBox(height: 4),
-                  Pill(
-                    label: user.primaryRole!,
-                    size: PillSize.sm,
-                    variant: PillVariant.muted,
-                  ),
-                ],
-                if (user.note != null && user.note!.isNotEmpty) ...<Widget>[
-                  const SizedBox(height: 6),
-                  Text(
-                    user.note!,
-                    style: typo.bodyMd.copyWith(
-                      color: colors.body,
-                      fontStyle: FontStyle.italic,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          // Direct-connect action — author can reach out without
+          // bouncing through the public profile. (Validation UX gap #2.)
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: AppButton(
+                  key: Key('interested.${user.userId}.sendIntro'),
+                  label: context.t('opportunities.interested.sendIntro'),
+                  variant: AppButtonVariant.gold,
+                  size: AppButtonSize.small,
+                  icon: LucideIcons.send,
+                  onPressed: () => showSendIntroSheet(
+                    context,
+                    recipient: SendIntroRecipient(
+                      id: user.userId,
+                      name: user.name,
+                      handle: user.handle,
+                      photoUrl: user.photoUrl,
                     ),
                   ),
-                ],
-              ],
-            ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: AppButton(
+                  key: Key('interested.${user.userId}.viewProfile'),
+                  label: context.t('opportunities.interested.viewProfile'),
+                  variant: AppButtonVariant.outline,
+                  size: AppButtonSize.small,
+                  icon: LucideIcons.user,
+                  onPressed: () =>
+                      context.push(Routes.publicProfile(user.handle)),
+                ),
+              ),
+            ],
           ),
         ],
       ),
