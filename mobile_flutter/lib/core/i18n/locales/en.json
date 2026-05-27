@@ -34,7 +34,7 @@
     "signInCta": "Sign in",
     "forgotPassword": "Forgot password?",
     "forgotPasswordBody": "Enter your email and tap \"Send magic link\" below.",
-    "forgotPwdInstructions": "Enter your email above, then tap \"Send magic link\" — we'll email you a one-tap sign-in link.",
+    "forgotPwdInstructions": "Enter your email above, then tap \"Forgot password?\" again — we'll email you a one-tap sign-in link.",
     "errors": {
       "socialSignInTitle": "Couldn't sign in",
       "oauthCancelled": "Sign-in cancelled",

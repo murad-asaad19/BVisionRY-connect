@@ -100,6 +100,7 @@ class _IdentityStepState extends ConsumerState<IdentityStep> {
       footer: AppButton(
         key: const ValueKey<String>('identity-next'),
         label: context.t('onboarding.identity.next'),
+        disabled: !canProceed,
         onPressed: canProceed ? () => context.go(Routes.onboardingRoles) : null,
       ),
       child: Column(

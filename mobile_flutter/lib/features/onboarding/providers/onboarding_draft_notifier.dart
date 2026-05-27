@@ -40,11 +40,18 @@ class OnboardingDraftNotifier extends AsyncNotifier<OnboardingDraft> {
 
   /// Replaces the roles list. If the existing [primaryRole] is no longer a
   /// member of the new list it is cleared, preventing an inconsistent state
-  /// from ever being persisted.
+  /// from ever being persisted. When the user has selected at least one
+  /// role but hasn't picked a primary yet, default the primary to the
+  /// first role in the list — removes the "Next is disabled with no
+  /// indication why" friction. The user can still change it manually via
+  /// the primary-role pill row.
   Future<void> updateRoles(List<String> roles) {
-    final OnboardingDraft next = _current.copyWith(roles: roles);
+    OnboardingDraft next = _current.copyWith(roles: roles);
     if (next.primaryRole != null && !next.roles.contains(next.primaryRole)) {
-      return _persist(next.copyWith(primaryRole: null));
+      next = next.copyWith(primaryRole: null);
+    }
+    if (next.primaryRole == null && next.roles.isNotEmpty) {
+      next = next.copyWith(primaryRole: next.roles.first);
     }
     return _persist(next);
   }

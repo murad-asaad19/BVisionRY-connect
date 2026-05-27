@@ -191,6 +191,9 @@ class _SendCircleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
+    final bool active = canSend || sending;
+    final Color bg = active ? colors.navy : colors.slate100;
+    final Color fg = active ? colors.white : colors.muted;
     final Widget child = sending
         ? const SizedBox(
             width: 16,
@@ -200,27 +203,27 @@ class _SendCircleButton extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
           )
-        : Icon(LucideIcons.arrowUp, size: 20, color: colors.white);
+        : Icon(LucideIcons.arrowUp, size: 20, color: fg);
     return Padding(
       padding: const EdgeInsets.only(left: 4, right: 2),
       child: Semantics(
         button: true,
         enabled: canSend,
         label: 'Send',
-        child: Opacity(
-          opacity: canSend || sending ? 1.0 : 0.45,
-          child: Material(
-            color: colors.navy,
-            shape: const CircleBorder(),
-            child: InkWell(
-              key: const ValueKey('chat-send-button'),
-              customBorder: const CircleBorder(),
-              onTap: canSend ? onTap : null,
-              child: SizedBox(
-                width: 44,
-                height: 44,
-                child: Center(child: child),
-              ),
+        // Solid navy when active, light-slate when waiting for text —
+        // gives a clearer "available vs disabled" cue than fading the
+        // navy fill (which read as gray over a white bg).
+        child: Material(
+          color: bg,
+          shape: const CircleBorder(),
+          child: InkWell(
+            key: const ValueKey('chat-send-button'),
+            customBorder: const CircleBorder(),
+            onTap: canSend ? onTap : null,
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: Center(child: child),
             ),
           ),
         ),

@@ -168,6 +168,11 @@ class _AboutStepState extends ConsumerState<AboutStep> {
         key: const ValueKey<String>('about-submit'),
         label: context.t('onboarding.about.finish'),
         loading: _submitting,
+        // Visually disable until every field validates — a silently
+        // no-op Submit reads as broken (the issue new users hit when
+        // they typed only a city without a country in the combined
+        // "Location" field).
+        disabled: !canSubmit,
         onPressed: canSubmit && !_submitting ? _submit : null,
       ),
       child: Column(
@@ -225,10 +230,14 @@ class _AboutStepState extends ConsumerState<AboutStep> {
             placeholder: context.t('onboarding.about.locationPlaceholder'),
             value: _composeLocation(draft),
             onChanged: _onLocationChanged,
-            errorText: (cityErr != null && draft.city.isNotEmpty) ||
-                    (countryErr != null && draft.country.isNotEmpty)
-                ? context.t('onboarding.about.errorLocation')
-                : null,
+            // Always surface the location error when either half is
+            // invalid. Previously the error only showed when the user
+            // had typed something into the (hidden) city/country fields
+            // — empty Location stayed silent and Submit no-op'd.
+            errorText:
+                (cityErr != null || countryErr != null)
+                    ? context.t('onboarding.about.errorLocation')
+                    : null,
           ),
           SizedBox(height: spacing.card),
           AppInput(

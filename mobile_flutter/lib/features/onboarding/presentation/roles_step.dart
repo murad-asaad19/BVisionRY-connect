@@ -92,6 +92,7 @@ class RolesStep extends ConsumerWidget {
       footer: AppButton(
         key: const ValueKey<String>('roles-next'),
         label: context.t('onboarding.roles.next'),
+        disabled: !canProceed,
         onPressed: canProceed ? () => context.go(Routes.onboardingBio) : null,
       ),
       child: Column(

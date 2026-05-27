@@ -89,7 +89,7 @@ void main() {
     expect(await repo.read(), isNull);
   });
 
-  test('updateRoles drops primaryRole when it falls out of the new set',
+  test('updateRoles re-defaults primaryRole when it falls out of the new set',
       () async {
     final ProviderContainer container = await makeContainer();
     addTearDown(container.dispose);
@@ -104,8 +104,18 @@ void main() {
       'founder',
     );
 
-    // Now drop "founder" from roles — primaryRole must be cleared.
+    // Drop "founder" — primary falls out, so the notifier re-defaults
+    // primary to the first remaining role ("leader"). This removes the
+    // "Next is disabled with no indication why" friction users hit
+    // after picking roles but forgetting to also tap a primary.
     await notifier.updateRoles(<String>['leader']);
+    expect(
+      container.read(onboardingDraftProvider).value!.primaryRole,
+      'leader',
+    );
+
+    // Removing every role still clears primary (no role to default to).
+    await notifier.updateRoles(<String>[]);
     expect(container.read(onboardingDraftProvider).value!.primaryRole, isNull);
   });
 

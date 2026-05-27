@@ -82,6 +82,10 @@ class _GoalStepState extends ConsumerState<GoalStep> {
       footer: AppButton(
         key: const ValueKey<String>('goal-next'),
         label: context.t('onboarding.goal.next'),
+        // Visually collapse to disabled so the user sees Next can't
+        // advance yet — without this the button stays navy and a tap
+        // silently no-ops, which reads as broken.
+        disabled: !canProceed,
         onPressed:
             canProceed ? () => context.go(Routes.onboardingIdentity) : null,
       ),

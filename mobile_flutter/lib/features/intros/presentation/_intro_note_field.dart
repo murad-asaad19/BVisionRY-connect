@@ -56,6 +56,14 @@ class IntroNoteField extends StatelessWidget {
     final typo = Theme.of(context).extension<AppTypography>()!;
     final int trimmed = trimmedNoteLength(value);
     final bool inRange = isIntroNoteInRange(value);
+    // Counter colours: muted while the user hasn't reached the min,
+    // gold once the note is valid, danger only when over the max. Red
+    // at 0/400 is misleading — that's a "not yet" state, not an error.
+    final Color counterColor = trimmed > kIntroNoteMax
+        ? colors.danger
+        : inRange
+            ? colors.gold
+            : colors.muted;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -81,9 +89,7 @@ class IntroNoteField extends StatelessWidget {
                   'max': kIntroNoteMax,
                 },
               ),
-              style: typo.bodyXs.copyWith(
-                color: inRange ? colors.gold : colors.danger,
-              ),
+              style: typo.bodyXs.copyWith(color: counterColor),
             ),
           ],
         ),

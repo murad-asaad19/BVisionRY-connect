@@ -93,7 +93,7 @@ void main() {
     expect((await _readDraft(prefs)).primaryRole, isNull);
   });
 
-  testWidgets('Next disabled without >=1 role + primary',
+  testWidgets('Next disabled with no roles; enabled after picking one',
       (WidgetTester tester) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await pumpWithI18n(tester, await _renderRolesStep(prefs));
@@ -104,21 +104,16 @@ void main() {
     );
     expect(ink.onTap, isNull);
 
-    // Pick one role — still disabled (no primary yet).
+    // Picking a role now auto-sets it as primary (so Next enables
+    // immediately) — removing the "Next is disabled with no
+    // indication why" friction the user reported. The primary-pill
+    // row still lets the user change which role is primary.
     await tester.tap(find.byKey(const ValueKey<String>('role-chip-builder')));
     await tester.pumpAndSettle();
     ink = tester.widget<InkWell>(
       find.descendant(of: btn, matching: find.byType(InkWell)),
     );
-    expect(ink.onTap, isNull);
-
-    // Pick primary — now enabled.
-    await tester
-        .tap(find.byKey(const ValueKey<String>('primary-pill-builder')));
-    await tester.pumpAndSettle();
-    ink = tester.widget<InkWell>(
-      find.descendant(of: btn, matching: find.byType(InkWell)),
-    );
     expect(ink.onTap, isNotNull);
+    expect((await _readDraft(prefs)).primaryRole, 'builder');
   });
 }

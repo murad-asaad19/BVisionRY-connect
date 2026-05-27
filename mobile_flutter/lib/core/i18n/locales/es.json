@@ -34,7 +34,7 @@
     "signInCta": "Inicia sesión",
     "forgotPassword": "¿Olvidaste tu contraseña?",
     "forgotPasswordBody": "Escribe tu correo y toca \"Enviar enlace mágico\" abajo.",
-    "forgotPwdInstructions": "Escribe tu correo arriba y toca \"Enviar enlace mágico\" — te enviaremos un enlace de inicio de sesión con un toque.",
+    "forgotPwdInstructions": "Escribe tu correo arriba y toca \"¿Olvidaste tu contraseña?\" de nuevo — te enviaremos un enlace de inicio de sesión con un toque.",
     "errors": {
       "socialSignInTitle": "No se pudo iniciar sesión",
       "oauthCancelled": "Inicio de sesión cancelado",
