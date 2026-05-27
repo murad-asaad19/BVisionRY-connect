@@ -151,10 +151,6 @@ class _SendIntroSheetState extends ConsumerState<SendIntroSheet> {
             label: context.t('intros.compose.sendIntro'),
             variant: AppButtonVariant.gold,
             loading: _sending,
-            // Surface the disabled visual when the note is too short —
-            // otherwise the button looks tappable but no-ops, which the
-            // user reads as a broken Send.
-            disabled: !valid,
             onPressed: (valid && !_sending) ? _send : null,
           ),
           const Padding(

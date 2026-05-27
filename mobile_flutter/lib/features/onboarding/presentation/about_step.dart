@@ -168,11 +168,6 @@ class _AboutStepState extends ConsumerState<AboutStep> {
         key: const ValueKey<String>('about-submit'),
         label: context.t('onboarding.about.finish'),
         loading: _submitting,
-        // Visually disable until every field validates — a silently
-        // no-op Submit reads as broken (the issue new users hit when
-        // they typed only a city without a country in the combined
-        // "Location" field).
-        disabled: !canSubmit,
         onPressed: canSubmit && !_submitting ? _submit : null,
       ),
       child: Column(

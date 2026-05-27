@@ -43,13 +43,33 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: buildAppTheme(Brightness.light),
-        home: const Scaffold(
-          body: AppButton(label: 'Go', variant: AppButtonVariant.gold),
+        home: Scaffold(
+          body: AppButton(
+            label: 'Go',
+            variant: AppButtonVariant.gold,
+            onPressed: () {},
+          ),
         ),
       ),
     );
     final text = tester.widget<Text>(find.text('Go'));
     expect(text.style?.color, const Color(0xFF0F3460));
+  });
+
+  testWidgets('AppButton with null onPressed collapses to disabled visual',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildAppTheme(Brightness.light),
+        home: const Scaffold(
+          body: AppButton(label: 'Next', variant: AppButtonVariant.gold),
+        ),
+      ),
+    );
+    // Gold variant uses navy text; disabled variant uses white text. If
+    // null onPressed correctly collapses to disabled, fg becomes white.
+    final text = tester.widget<Text>(find.text('Next'));
+    expect(text.style?.color, const Color(0xFFFFFFFF));
   });
 
   testWidgets('AppButton loading shows progress and ignores tap',

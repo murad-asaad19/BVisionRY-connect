@@ -6,8 +6,8 @@ import '../theme/app_typography.dart';
 
 /// Visual variants supported by [AppButton].
 ///
-/// `disabled` is internal — callers should pass `disabled: true` or
-/// `loading: true` instead and the widget collapses to the disabled visual.
+/// `disabled` is internal — the widget collapses to the disabled visual
+/// whenever `disabled: true`, `loading: true`, or `onPressed: null` is set.
 enum AppButtonVariant {
   primary,
   gold,
@@ -54,11 +54,10 @@ class AppButton extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColors>()!;
     final radii = Theme.of(context).extension<AppRadii>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
-    // Visual collapse to "disabled" only happens for explicit disabled / loading
-    // states — a button with `onPressed: null` still renders its variant
-    // colours (matches the React Native source) and the tap is simply a no-op.
-    final visualDisabled = disabled || loading;
-    final tapBlocked = visualDisabled || onPressed == null;
+    // A null onPressed always reads as disabled — matches Flutter idiom
+    // (ElevatedButton, etc.) and removes the disabled/onPressed double-set
+    // boilerplate that was easy to forget at the call site.
+    final visualDisabled = disabled || loading || onPressed == null;
     final v = visualDisabled ? AppButtonVariant.disabled : variant;
 
     final (bg, fg, borderColor) = switch (v) {
@@ -119,7 +118,7 @@ class AppButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(radii.button),
       child: InkWell(
         borderRadius: BorderRadius.circular(radii.button),
-        onTap: tapBlocked ? null : onPressed,
+        onTap: visualDisabled ? null : onPressed,
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(radii.button),

@@ -101,9 +101,6 @@ class _BioDraftStepState extends ConsumerState<BioDraftStep> {
         key: const ValueKey<String>('bio-looks-good'),
         label: context.t('onboarding.bio.looksGood'),
         variant: AppButtonVariant.gold,
-        // Disabled until the user has selected a variant — and surface
-        // the disabled visual so the tap doesn't read as broken.
-        disabled: _selectedIndex == null,
         onPressed: _selectedIndex == null ? null : acceptSelected,
       ),
       child: Column(

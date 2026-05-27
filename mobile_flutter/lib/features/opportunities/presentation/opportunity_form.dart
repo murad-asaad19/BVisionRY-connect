@@ -316,8 +316,7 @@ class _OpportunityFormState extends State<OpportunityForm> {
           label: widget.submitLabel,
           variant: AppButtonVariant.gold,
           loading: widget.submitting,
-          disabled: !_value.isValid,
-          onPressed: _handleSubmit,
+          onPressed: _value.isValid ? _handleSubmit : null,
         ),
       ],
     );
