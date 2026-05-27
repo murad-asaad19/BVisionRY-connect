@@ -42,7 +42,10 @@ class PublicProfileScreen extends ConsumerWidget {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(56),
         child: TopBar(
-          title: 'bvisionry',
+          // Show the peer's @handle so the bar carries useful context.
+          // Previously hard-coded to the brand name which looked like
+          // stale boilerplate.
+          title: '@$handle',
           back: Navigator.of(context).canPop(),
         ),
       ),

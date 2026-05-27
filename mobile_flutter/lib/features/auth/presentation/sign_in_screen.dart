@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/i18n/i18n.dart';
+import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/widgets.dart';
@@ -197,6 +199,26 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
             label: context.t('auth.submitSignIn'),
             onPressed: _busy ? null : _onSubmit,
             loading: _busy,
+          ),
+          // Sign-up entry — without this net-new users have no path
+          // to /sign-up after the previous footer removal. The gallery
+          // strips the link on the sign-up card, not the sign-in card.
+          SizedBox(height: spacing.gutter),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                context.t('auth.noAccount'),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colors.muted,
+                    ),
+              ),
+              TextButton(
+                key: const Key('sign-up-link'),
+                onPressed: _busy ? null : () => context.go(Routes.signUp),
+                child: Text(context.t('auth.signUpCta')),
+              ),
+            ],
           ),
         ],
       ),

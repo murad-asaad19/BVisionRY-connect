@@ -14,14 +14,14 @@ import '../providers/handle_availability_provider.dart';
 import '../providers/onboarding_draft_notifier.dart';
 import 'stepper_layout.dart';
 
-/// Step 2 of 4 — Identity.
+/// Step 2 of 5 — Identity.
 ///
 /// Two fields: full name (1..80 chars) and handle (lowercase regex, 2..30
-/// chars, single hyphens). On blur of the handle field we kick off the
-/// `check_handle_available` RPC via [handleAvailabilityProvider], which
-/// surfaces a check / X / spinner icon as the trailing widget. The Next
-/// button is gated on (name valid) ∧ (handle valid) ∧ (handle reported
-/// available).
+/// chars, single hyphens). The `check_handle_available` RPC runs via
+/// [handleAvailabilityProvider] as soon as the handle is format-valid +
+/// non-empty (the provider is keyed by handle so a unique value triggers
+/// a single RPC and caches the result). The Next button is gated on
+/// (name valid) ∧ (handle valid) ∧ (handle reported available).
 class IdentityStep extends ConsumerStatefulWidget {
   const IdentityStep({super.key});
 
@@ -30,12 +30,6 @@ class IdentityStep extends ConsumerStatefulWidget {
 }
 
 class _IdentityStepState extends ConsumerState<IdentityStep> {
-  /// Once the user has blurred the handle field at least once we want the
-  /// availability check to be authoritative for the Next button. Tracked
-  /// here so the initial render (where the provider returns idle) doesn't
-  /// imply "available".
-  bool _handleBlurred = false;
-
   @override
   Widget build(BuildContext context) {
     final AsyncValue<OnboardingDraft> draftAsync =
@@ -57,10 +51,14 @@ class _IdentityStepState extends ConsumerState<IdentityStep> {
     final bool handleFormatValid =
         HandleInput.dirty(draft.handle).error == null;
 
-    // Only watch the availability provider for a format-valid handle —
-    // otherwise we'd waste a provider subscription on every invalid keystroke.
+    // Watch the availability provider whenever the handle is format-valid
+    // + non-empty. Previously we gated this on an explicit blur, which
+    // left users stuck if they tapped Next without first blurring the
+    // field (no indicator, no error, button forever disabled). The
+    // provider is keyed by handle string so each unique value fires
+    // exactly one RPC and caches the result.
     final AsyncValue<bool?> availability =
-        handleFormatValid && _handleBlurred && draft.handle.isNotEmpty
+        handleFormatValid && draft.handle.isNotEmpty
             ? ref.watch(handleAvailabilityProvider(draft.handle))
             : const AsyncValue<bool?>.data(null);
 
@@ -133,16 +131,6 @@ class _IdentityStepState extends ConsumerState<IdentityStep> {
             maxLength: 30,
             onChanged: (String v) {
               ref.read(onboardingDraftProvider.notifier).updateHandle(v);
-            },
-            onBlur: () {
-              if (!mounted) return;
-              // Re-read the draft so we react to the latest handle value,
-              // not the snapshot from the build that scheduled this listener.
-              final String latest =
-                  ref.read(onboardingDraftProvider).value?.handle ?? '';
-              if (latest.isEmpty) return;
-              if (HandleInput.dirty(latest).error != null) return;
-              setState(() => _handleBlurred = true);
             },
             trailing: trailing,
             errorText: handleError,
