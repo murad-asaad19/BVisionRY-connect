@@ -280,6 +280,10 @@
       "drafting": "Redactando sugerencias…",
       "variantsHeading": "Elige la que más se parezca a ti",
       "writeMyOwn": "Escribir la mía →",
+      "backToSuggestions": "← Volver a sugerencias",
+      "customHeadlineHint": "Una línea — lo que haces, en tus palabras.",
+      "customBioHint": "Unas frases sobre quién eres y qué buscas.",
+      "customSave": "Guardar y continuar →",
       "privacyNote": "Generado por IA. No guardamos el prompt ni la respuesta."
     },
     "about": {
@@ -537,6 +541,7 @@
       "declined": "Intro rechazada.",
       "expiredHint": "Esta intro ha caducado y ya no puede gestionarse.",
       "declineSilent": "Rechazar es silencioso — el remitente no será notificado.",
+      "openChat": "Abrir chat",
       "report": "Reportar",
       "mutualConnections_one": "{{count}} conexión en común",
       "mutualConnections_other": "{{count}} conexiones en común",

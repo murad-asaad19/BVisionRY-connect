@@ -12,6 +12,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../data/bio_drafter_service.dart';
 import '../domain/onboarding_draft.dart';
+import '../domain/onboarding_schemas.dart';
 import '../providers/onboarding_draft_notifier.dart';
 import 'stepper_layout.dart';
 
@@ -44,6 +45,13 @@ class _BioDraftStepState extends ConsumerState<BioDraftStep> {
   /// `true` once we've kicked off the API call so we don't re-fire on
   /// rebuilds (e.g. when the draft provider's AsyncValue ticks).
   bool _draftRequested = false;
+
+  /// `true` once the user opts into writing their own headline + bio —
+  /// hides the variant cards and surfaces two inline text fields. Stays
+  /// `false` when the user accepts a generated variant.
+  bool _customMode = false;
+  String _customHeadline = '';
+  String _customBio = '';
 
   /// Visible only for unit tests — when set, the step uses [_testService]
   /// instead of building one from [Env.anthropicApiKey].
@@ -93,15 +101,37 @@ class _BioDraftStepState extends ConsumerState<BioDraftStep> {
       advance();
     }
 
+    final bool customValid = _customMode &&
+        HeadlineInput.dirty(_customHeadline).error == null &&
+        BioInput.dirty(_customBio).error == null &&
+        _customHeadline.trim().length >= HeadlineInput.minLength &&
+        _customBio.trim().length >= BioInput.minLength;
+
+    Future<void> acceptCustom() async {
+      if (!customValid) return;
+      await ref
+          .read(onboardingDraftProvider.notifier)
+          .updateHeadline(_customHeadline.trim());
+      await ref
+          .read(onboardingDraftProvider.notifier)
+          .updateBio(_customBio.trim());
+      if (!mounted) return;
+      advance();
+    }
+
     return StepperLayout(
       stepIndex: 3,
       stepNameKey: 'onboarding.stepName.bio',
       onBack: () => context.go(Routes.onboardingRoles),
       footer: AppButton(
         key: const ValueKey<String>('bio-looks-good'),
-        label: context.t('onboarding.bio.looksGood'),
+        label: _customMode
+            ? context.t('onboarding.bio.customSave')
+            : context.t('onboarding.bio.looksGood'),
         variant: AppButtonVariant.gold,
-        onPressed: _selectedIndex == null ? null : acceptSelected,
+        onPressed: _customMode
+            ? (customValid ? acceptCustom : null)
+            : (_selectedIndex == null ? null : acceptSelected),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,98 +146,150 @@ class _BioDraftStepState extends ConsumerState<BioDraftStep> {
             style: typo.bodyMd.copyWith(color: colors.muted),
           ),
           SizedBox(height: spacing.card),
-          // Chat-thread bubble explaining what's happening.
-          Container(
-            key: const ValueKey<String>('bio-ai-bubble'),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: colors.white,
-              borderRadius: BorderRadius.circular(radii.button),
-              border: Border.all(color: colors.border, width: 1),
-            ),
-            child: RichText(
-              text: TextSpan(
-                style: typo.bodyMd.copyWith(color: colors.body),
-                children: <InlineSpan>[
-                  TextSpan(
-                    text: 'AI: ',
-                    style: typo.displaySm.copyWith(color: colors.navy),
-                  ),
-                  TextSpan(text: context.t('onboarding.bio.aiBubble')),
-                ],
+          if (!_customMode) ...<Widget>[
+            // Chat-thread bubble explaining what's happening.
+            Container(
+              key: const ValueKey<String>('bio-ai-bubble'),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: colors.white,
+                borderRadius: BorderRadius.circular(radii.button),
+                border: Border.all(color: colors.border, width: 1),
               ),
-            ),
-          ),
-          SizedBox(height: spacing.card),
-          // Loading indicator — visible while the API call is in flight.
-          if (_drafting)
-            Padding(
-              key: const ValueKey<String>('bio-drafting'),
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: <Widget>[
-                  SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(colors.muted),
+              child: RichText(
+                text: TextSpan(
+                  style: typo.bodyMd.copyWith(color: colors.body),
+                  children: <InlineSpan>[
+                    TextSpan(
+                      text: 'AI: ',
+                      style: typo.displaySm.copyWith(color: colors.navy),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    context.t('onboarding.bio.drafting'),
-                    style: typo.bodyMd.copyWith(color: colors.muted),
-                  ),
-                ],
-              ),
-            ),
-          Text(
-            context.t('onboarding.bio.variantsHeading'),
-            style: typo.bodyXs.copyWith(
-              color: colors.muted,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1,
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Variant cards.
-          ...List<Widget>.generate(_variants.length, (int i) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: i == _variants.length - 1 ? 0 : 8,
-              ),
-              child: _VariantCard(
-                key: ValueKey<String>('bio-variant-$i'),
-                variant: _variants[i],
-                selected: _selectedIndex == i,
-                onTap: () => setState(() => _selectedIndex = i),
-              ),
-            );
-          }),
-          SizedBox(height: spacing.card / 2),
-          // "Write my own" skip link — always available, even while drafting.
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              key: const ValueKey<String>('bio-write-my-own'),
-              onPressed: advance,
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: const Size(0, 0),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                foregroundColor: colors.navy,
-              ),
-              child: Text(
-                context.t('onboarding.bio.writeMyOwn'),
-                style: typo.bodyMd.copyWith(
-                  color: colors.navy,
-                  decoration: TextDecoration.underline,
+                    TextSpan(text: context.t('onboarding.bio.aiBubble')),
+                  ],
                 ),
               ),
             ),
-          ),
+            SizedBox(height: spacing.card),
+            // Loading indicator — visible while the API call is in flight.
+            if (_drafting)
+              Padding(
+                key: const ValueKey<String>('bio-drafting'),
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  children: <Widget>[
+                    SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(colors.muted),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      context.t('onboarding.bio.drafting'),
+                      style: typo.bodyMd.copyWith(color: colors.muted),
+                    ),
+                  ],
+                ),
+              ),
+            Text(
+              context.t('onboarding.bio.variantsHeading'),
+              style: typo.bodyXs.copyWith(
+                color: colors.muted,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Variant cards.
+            ...List<Widget>.generate(_variants.length, (int i) {
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: i == _variants.length - 1 ? 0 : 8,
+                ),
+                child: _VariantCard(
+                  key: ValueKey<String>('bio-variant-$i'),
+                  variant: _variants[i],
+                  selected: _selectedIndex == i,
+                  onTap: () => setState(() => _selectedIndex = i),
+                ),
+              );
+            }),
+            SizedBox(height: spacing.card / 2),
+            // Switch into custom-write mode — reveals the inline editor
+            // below in place of the variant cards.
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                key: const ValueKey<String>('bio-write-my-own'),
+                onPressed: () => setState(() {
+                  _customMode = true;
+                  _selectedIndex = null;
+                }),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  foregroundColor: colors.navy,
+                ),
+                child: Text(
+                  context.t('onboarding.bio.writeMyOwn'),
+                  style: typo.bodyMd.copyWith(
+                    color: colors.navy,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
+          ] else ...<Widget>[
+            // Inline custom editor — two text fields the user fills in
+            // themselves. Validated against the same Headline/Bio range
+            // checks the schema enforces at submission.
+            AppInput(
+              key: const ValueKey<String>('bio-custom-headline'),
+              label: context.t('onboarding.bio.headlineLabel'),
+              value: _customHeadline,
+              maxLength: HeadlineInput.maxLength,
+              placeholder: context.t('onboarding.bio.customHeadlineHint'),
+              onChanged: (String v) => setState(() => _customHeadline = v),
+            ),
+            SizedBox(height: spacing.card),
+            AppInput(
+              key: const ValueKey<String>('bio-custom-bio'),
+              label: context.t('onboarding.bio.bioLabel'),
+              value: _customBio,
+              multiline: true,
+              minLines: 3,
+              maxLines: 6,
+              maxLength: BioInput.maxLength,
+              placeholder: context.t('onboarding.bio.customBioHint'),
+              onChanged: (String v) => setState(() => _customBio = v),
+            ),
+            SizedBox(height: spacing.card / 2),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                key: const ValueKey<String>('bio-back-to-suggestions'),
+                onPressed: () => setState(() => _customMode = false),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  foregroundColor: colors.navy,
+                ),
+                child: Text(
+                  context.t('onboarding.bio.backToSuggestions'),
+                  style: typo.bodyMd.copyWith(
+                    color: colors.navy,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
+          ],
           SizedBox(height: spacing.card / 2),
           // Privacy footnote.
           Text(

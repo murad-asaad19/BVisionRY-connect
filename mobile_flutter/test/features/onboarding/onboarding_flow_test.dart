@@ -215,4 +215,121 @@ void main() {
       expect(await OnboardingDraftRepository(prefs).read(), isNull);
     },
   );
+
+  testWidgets(
+    'bio "Write my own" path persists user-entered headline + bio to the patch',
+    (WidgetTester tester) async {
+      final FakeAuthGateway auth = FakeAuthGateway();
+      auth.pushAuthState(
+        AuthChangeEvent.initialSession,
+        fakeSession(id: 'user-2'),
+      );
+      final _ProfileQ profileQ = _ProfileQ(<String, dynamic>{
+        'id': 'user-2',
+        'onboarded': false,
+        'suspended_at': null,
+      });
+      final _RecordingUpdate updateRunner = _RecordingUpdate();
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final LocaleLoader loader = await primedLocaleLoader();
+
+      final ProviderContainer container = ProviderContainer(
+        overrides: <Override>[
+          localeLoaderProvider.overrideWithValue(loader),
+          authGatewayProvider.overrideWithValue(auth),
+          profileRepositoryProvider
+              .overrideWithValue(ProfileRepository(profileQ)),
+          onboardingDraftRepositoryProvider
+              .overrideWith((_) async => OnboardingDraftRepository(prefs)),
+          sharedPreferencesProvider.overrideWith((_) async => prefs),
+          inferGoalServiceProvider.overrideWithValue(_StubInfer()),
+          handleAvailabilityRunnerProvider
+              .overrideWithValue(_AvailableRunner()),
+          onboardingServiceProvider
+              .overrideWithValue(OnboardingService(updateRunner)),
+        ],
+      );
+      addTearDown(() {
+        container.dispose();
+        auth.close();
+      });
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(
+            theme: buildAppTheme(Brightness.light),
+            routerConfig: container.read(appRouterProvider),
+          ),
+        ),
+      );
+      for (int i = 0; i < 5; i++) {
+        await tester.pumpAndSettle(const Duration(milliseconds: 50));
+      }
+
+      // STEPS 1-3 same as the full-flow test.
+      await tester.enterText(
+        find.byType(TextField),
+        'Looking to hire a fractional designer for our healthtech app.',
+      );
+      await tester.pump(const Duration(milliseconds: 900));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey<String>('goal-next')));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('identity-name')),
+        'Ada Lovelace',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('identity-handle')),
+        'ada',
+      );
+      await _blur(tester);
+      await tester.tap(find.byKey(const ValueKey<String>('identity-next')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey<String>('role-chip-founder')));
+      await tester.pumpAndSettle();
+      await tester
+          .tap(find.byKey(const ValueKey<String>('primary-pill-founder')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey<String>('roles-next')));
+      await tester.pumpAndSettle();
+
+      // STEP 4 — Bio: take the "Write my own" path and fill the inline
+      // editor with custom copy that passes the schema validators.
+      await tester.tap(find.byKey(const ValueKey<String>('bio-write-my-own')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('bio-custom-headline')),
+        'Fractional designer for healthtech',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('bio-custom-bio')),
+        'Building healthtech tools — looking for a fractional designer to '
+        'partner with on a six-month engagement.',
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey<String>('bio-looks-good')));
+      await tester.pumpAndSettle();
+
+      // STEP 5 — About + submit.
+      await tester.enterText(
+        find.byKey(const ValueKey<String>('about-location')),
+        'Berlin, Germany',
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey<String>('about-submit')));
+      await tester.pumpAndSettle();
+
+      expect(updateRunner.calls, 1);
+      final Map<String, dynamic> patch = updateRunner.lastPatch!;
+      expect(patch['headline'], 'Fractional designer for healthtech');
+      expect(
+        patch['bio'],
+        contains('looking for a fractional designer'),
+      );
+    },
+  );
 }
