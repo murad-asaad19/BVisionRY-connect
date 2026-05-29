@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../domain/profile.dart';
@@ -28,6 +29,16 @@ class GoalRefreshCard extends StatelessWidget {
   final VoidCallback onUpdate;
   final VoidCallback? onDismiss;
 
+  /// Whole weeks elapsed since the goal was last updated, floored at 1 so the
+  /// copy never reads "0 weeks ago". Falls back to the soft threshold (4) when
+  /// [Profile.goalUpdatedAt] is unexpectedly null on a stale profile.
+  int _weeksSinceUpdate() {
+    final DateTime? updated = profile.goalUpdatedAt;
+    if (updated == null) return 4;
+    final int days = DateTime.now().toUtc().difference(updated).inDays;
+    return (days ~/ 7).clamp(1, 520);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!profile.isGoalStale) {
@@ -38,6 +49,11 @@ class GoalRefreshCard extends StatelessWidget {
     if (!profile.isGoalVeryStale) {
       return _SoftNudge(onUpdate: onUpdate, onDismiss: onDismiss);
     }
+    final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
+    final AppColors colors = Theme.of(context).extension<AppColors>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
+    final int weeks = _weeksSinceUpdate();
+    final String goal = (profile.goalText ?? '').trim();
     return AppBanner(
       key: const ValueKey<String>('goal-refresh-card'),
       intent: AppIntent.warning,
@@ -45,8 +61,26 @@ class GoalRefreshCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(context.t('profile.goalRefresh.bodyStale')),
-          const SizedBox(height: 8),
+          // Body quotes the user's current goal + the elapsed time so they
+          // know exactly what they're confirming (mockup I1 line 2296).
+          Text(
+            context.t(
+              'profile.goalRefresh.bodyStale',
+              vars: <String, Object>{'weeks': weeks},
+            ),
+          ),
+          if (goal.isNotEmpty) ...<Widget>[
+            Gap(spacing.xs),
+            Text(
+              '"$goal"',
+              style: typo.bodyMd.copyWith(
+                color: colors.navy,
+                fontStyle: FontStyle.italic,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+          Gap(spacing.sm),
           Row(
             children: <Widget>[
               AppButton(
@@ -57,7 +91,7 @@ class GoalRefreshCard extends StatelessWidget {
                 fullWidth: false,
                 onPressed: onDismiss,
               ),
-              const SizedBox(width: 8),
+              Gap(spacing.sm),
               AppButton(
                 key: const Key('goalRefresh.update'),
                 label: context.t('profile.goalRefresh.update'),
@@ -82,33 +116,38 @@ class _SoftNudge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Theme.of(context).extension<AppColors>()!;
-    final t = Theme.of(context).extension<AppTypography>()!;
+    final AppColors colors = Theme.of(context).extension<AppColors>()!;
+    final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     return Padding(
       key: const ValueKey<String>('goal-refresh-card-soft'),
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+      padding: EdgeInsets.fromLTRB(
+        spacing.md,
+        spacing.sm,
+        spacing.md,
+        spacing.xs,
+      ),
       child: Row(
         children: <Widget>[
           Expanded(
             child: Text(
               context.t('profile.goalRefresh.softNudge'),
-              style: t.bodySm.copyWith(color: c.muted),
+              style: typo.bodySm.copyWith(color: colors.muted),
             ),
           ),
-          const SizedBox(width: 8),
+          Gap(spacing.sm),
           TextButton(
             key: const Key('goalRefresh.softUpdate'),
             onPressed: onUpdate,
             child: Text(context.t('profile.goalRefresh.update')),
           ),
           if (onDismiss != null)
-            IconButton(
+            AppIconButton(
               key: const Key('goalRefresh.softDismiss'),
-              icon: const Icon(Icons.close, size: 16),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+              icon: Icons.close,
+              size: AppIconButtonSize.sm,
+              label: context.t('profile.goalRefresh.stillAccurate'),
               onPressed: onDismiss,
-              tooltip: context.t('profile.goalRefresh.stillAccurate'),
             ),
         ],
       ),

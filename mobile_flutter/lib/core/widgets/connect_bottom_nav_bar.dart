@@ -8,26 +8,26 @@ import '../i18n/i18n.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 
-/// Finalized 5-tab bottom navigation bar — promoted from the Phase 5 stub
-/// (which lived under `features/shell/presentation/widgets/`). Carries the
-/// brand visual treatment + live unread badges sourced from
-/// `unreadIntrosCountProvider` (Phase 6) and `unreadCountsProvider`
-/// (Phase 7) via [AppShell].
+/// Bottom navigation bar — 5 destinations. Carries the brand visual treatment
+/// + live unread badges sourced from `unreadIntrosCountProvider` (Phase 6) and
+/// `unreadCountsProvider` (Phase 7) via [AppShell].
 ///
-/// Visual contract (spec §7.2):
-///   * 5 destinations, Lucide icons: house / inbox / users / briefcase /
-///     messageSquare.
+/// Visual contract:
+///   * 5 destinations, Lucide icons: house / users / inbox / briefcase /
+///     circleUser → Home / Network / Inbox / Opportunities / Profile.
+///   * The chats list is a segment of the Inbox (no standalone tab), so the
+///     Inbox badge folds in unread conversations on top of unread intros.
 ///   * Active tab: navy icon + label. Inactive: muted slate.
 ///   * Tab bar height: 56 (content) + min(safe-area bottom inset, 24).
-///   * Badges only on inbox (index 1) and chats (index 4). Cap visible
-///     label at `99+`.
+///   * Badges attach to the Inbox and Opportunities tabs by identity (not
+///     index), capped at `99+`. Labels [FittedBox]-shrink to fit the per-tab
+///     width so a long word ("Opportunities") never clips.
 class ConnectBottomNavBar extends StatelessWidget {
   const ConnectBottomNavBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
     required this.inboxUnread,
-    required this.chatsUnread,
     this.opportunitiesUnread = 0,
   });
 
@@ -48,12 +48,10 @@ class ConnectBottomNavBar extends StatelessWidget {
   /// initialLocation: ...)`.
   final ValueChanged<int> onTap;
 
-  /// Unread intros count for the inbox tab badge (Phase 6).
+  /// Combined unread count for the Inbox tab badge: unread intro requests
+  /// (Phase 6) plus unread conversation messages (Phase 7), since the chats
+  /// list now lives inside the Inbox.
   final int inboxUnread;
-
-  /// Sum of unread message counts across all conversations for the chats
-  /// tab badge (Phase 7).
-  final int chatsUnread;
 
   /// Total interested-user count across the caller's open opportunities.
   /// Surfaces a badge so an author sees at-a-glance when somebody has
@@ -69,22 +67,18 @@ class ConnectBottomNavBar extends StatelessWidget {
 
     final List<_TabDef> tabs = <_TabDef>[
       _TabDef(LucideIcons.house, context.t('common.tabs.home')),
+      _TabDef(LucideIcons.users, context.t('common.tabs.network')),
       _TabDef(
         LucideIcons.inbox,
         context.t('common.tabs.inbox'),
         badge: inboxUnread,
       ),
-      _TabDef(LucideIcons.users, context.t('common.tabs.network')),
       _TabDef(
         LucideIcons.briefcase,
         context.t('common.tabs.opportunities'),
         badge: opportunitiesUnread,
       ),
-      _TabDef(
-        LucideIcons.messageSquare,
-        context.t('common.tabs.chats'),
-        badge: chatsUnread,
-      ),
+      _TabDef(LucideIcons.circleUser, context.t('common.tabs.profile')),
     ];
 
     return Container(
@@ -98,32 +92,49 @@ class ConnectBottomNavBar extends StatelessWidget {
             final bool active = i == currentIndex;
             final Color color = active ? colors.navy : colors.muted;
             return Expanded(
-              child: InkWell(
-                key: Key('nav_tab_$i'),
-                onTap: () => onTap(i),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: <Widget>[
-                    Column(
+              child: Semantics(
+                selected: active,
+                button: true,
+                label: t.label,
+                child: MergeSemantics(
+                  child: InkWell(
+                    key: Key('nav_tab_$i'),
+                    onTap: () => onTap(i),
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        Icon(t.icon, size: 22, color: color),
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: <Widget>[
+                            Icon(t.icon, size: 22, color: color),
+                            if (t.badge != null && t.badge! > 0)
+                              Positioned(
+                                top: -6,
+                                right: -10,
+                                child: TabBadge(count: t.badge!),
+                              ),
+                          ],
+                        ),
                         const SizedBox(height: 2),
-                        Text(
-                          t.label,
-                          style: typo.displayXs
-                              .copyWith(color: color, fontSize: 10),
+                        // Shrink-to-fit keeps a long word ("Opportunities")
+                        // fully visible at the tighter 6-tab width instead of
+                        // clipping or forcing an ellipsis.
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              t.label,
+                              maxLines: 1,
+                              style: typo.displayXs
+                                  .copyWith(color: color, fontSize: 10),
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    if (t.badge != null && t.badge! > 0)
-                      Positioned(
-                        top: 6,
-                        right: 24,
-                        child: TabBadge(count: t.badge!),
-                      ),
-                  ],
+                  ),
                 ),
               ),
             );

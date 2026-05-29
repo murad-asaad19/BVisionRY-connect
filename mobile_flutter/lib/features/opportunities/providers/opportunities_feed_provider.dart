@@ -22,6 +22,7 @@ class OpportunitiesFeedState {
     required this.hasMore,
     required this.isLoadingMore,
     required this.nextOffset,
+    this.loadMoreError = false,
   });
 
   /// The rows fetched so far — never paged twice, never duplicated.
@@ -46,6 +47,11 @@ class OpportunitiesFeedState {
   /// Cursor passed as `p_offset` on the next `loadMore` call.
   final int nextOffset;
 
+  /// `true` when the most recent `loadMore` failed. The already-loaded feed
+  /// is preserved; the UI surfaces a footer "couldn't load more — retry"
+  /// row instead of blowing the whole list away with a full-screen error.
+  final bool loadMoreError;
+
   /// Sentinel used by [copyWith] to distinguish "didn't pass this argument"
   /// from "pass `null`" — required because `search` is nullable.
   static const Object _sentinel = Object();
@@ -58,6 +64,7 @@ class OpportunitiesFeedState {
     bool? hasMore,
     bool? isLoadingMore,
     int? nextOffset,
+    bool? loadMoreError,
   }) {
     return OpportunitiesFeedState(
       items: items ?? this.items,
@@ -67,6 +74,7 @@ class OpportunitiesFeedState {
       hasMore: hasMore ?? this.hasMore,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       nextOffset: nextOffset ?? this.nextOffset,
+      loadMoreError: loadMoreError ?? this.loadMoreError,
     );
   }
 }
@@ -135,11 +143,23 @@ class OpportunitiesFeedNotifier extends AsyncNotifier<OpportunitiesFeedState> {
 
   /// Appends the next page to the existing item list. No-op when there's
   /// nothing more to load or a fetch is already in flight.
-  Future<void> loadMore() async {
+  ///
+  /// On failure this is **non-destructive**: the already-loaded feed is kept
+  /// intact, the in-flight flag is cleared, and [OpportunitiesFeedState
+  /// .loadMoreError] is flipped so the UI can render a footer
+  /// "couldn't load more — retry" row. The full-screen error state is
+  /// reserved for the initial load / refresh ([_initialLoad]). Pass
+  /// [force] from the explicit footer retry to bypass the sticky-error
+  /// guard (the auto-scroll listener must not keep re-firing a known
+  /// failure).
+  Future<void> loadMore({bool force = false}) async {
     final OpportunitiesFeedState? current = state.valueOrNull;
     if (current == null || !current.hasMore || current.isLoadingMore) return;
+    // After a failure, only an explicit retry (force) may re-issue — the
+    // scroll listener would otherwise hammer the same broken page.
+    if (current.loadMoreError && !force) return;
     state = AsyncValue<OpportunitiesFeedState>.data(
-      current.copyWith(isLoadingMore: true),
+      current.copyWith(isLoadingMore: true, loadMoreError: false),
     );
     try {
       final List<OpportunityWithAuthor> rows =
@@ -155,11 +175,15 @@ class OpportunitiesFeedNotifier extends AsyncNotifier<OpportunitiesFeedState> {
           items: <OpportunityWithAuthor>[...current.items, ...rows],
           hasMore: rows.length == kOpportunitiesPageSize,
           isLoadingMore: false,
+          loadMoreError: false,
           nextOffset: current.nextOffset + rows.length,
         ),
       );
-    } catch (e, st) {
-      state = AsyncValue<OpportunitiesFeedState>.error(e, st);
+    } catch (_) {
+      // Keep the loaded feed; surface the failure via the footer retry row.
+      state = AsyncValue<OpportunitiesFeedState>.data(
+        current.copyWith(isLoadingMore: false, loadMoreError: true),
+      );
     }
   }
 

@@ -80,13 +80,13 @@ String? _complementaryGoal(String? viewer, String? match) {
 /// Text corpora used by the keyword-overlap heuristic. Lower-cased so
 /// matches are case-insensitive. We deliberately exclude the bio (too
 /// noisy) and stick to fields the user curated explicitly.
-String _corpusFor(Profile p) =>
-    <String?>[p.goalText, p.headline].whereType<String>().join(' ').toLowerCase();
-
-String _corpusForMatch(DiscoveryProfile p) => <String?>[p.headline, p.bio]
+String _corpusFor(Profile p) => <String?>[p.goalText, p.headline]
     .whereType<String>()
     .join(' ')
     .toLowerCase();
+
+String _corpusForMatch(DiscoveryProfile p) =>
+    <String?>[p.headline, p.bio].whereType<String>().join(' ').toLowerCase();
 
 /// Domain keywords the composer looks for in both corpora. Curated rather
 /// than data-derived so the chip text stays predictable.

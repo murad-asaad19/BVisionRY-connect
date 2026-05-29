@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_events.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
 import '../domain/goal_type.dart';
 import '../domain/onboarding_draft.dart';
 import '../providers/onboarding_draft_notifier.dart';
+import 'onboarding_exit.dart';
+import 'onboarding_skeletons.dart';
 import 'stepper_layout.dart';
 
 /// Roles supported by the onboarding step. Mirrors the wire values stored in
@@ -49,12 +53,12 @@ String? _roleHintFromGoal(GoalType? gt) {
   }
 }
 
-/// Step 3 of 5 — Roles.
+/// Step 2 of 4 — Roles.
 ///
 /// Multi-select chip row + primary-role pill row. Tapping a role chip
 /// toggles membership in `draft.roles`; the [OnboardingDraftNotifier]
 /// auto-clears `primaryRole` when the picked primary falls out of the list.
-/// Next is enabled iff at least one role is selected AND a primary is
+/// Continue is enabled iff at least one role is selected AND a primary is
 /// chosen.
 class RolesStep extends ConsumerWidget {
   const RolesStep({super.key});
@@ -66,9 +70,9 @@ class RolesStep extends ConsumerWidget {
     final OnboardingDraft? draft = draftAsync.value;
     if (draft == null) {
       return const StepperLayout(
-        stepIndex: 2,
+        stepIndex: 1,
         stepNameKey: 'onboarding.stepName.roles',
-        child: Center(child: CircularProgressIndicator()),
+        child: OnboardingFormSkeleton(fields: 0, chipRow: true),
       );
     }
 
@@ -82,17 +86,26 @@ class RolesStep extends ConsumerWidget {
     // a role they haven't already picked. Confirming the chip dismisses
     // the banner naturally.
     final String? inferredRole = _roleHintFromGoal(draft.goalType);
-    final bool showInferBanner = inferredRole != null &&
-        !draft.roles.contains(inferredRole);
+    final bool showInferBanner =
+        inferredRole != null && !draft.roles.contains(inferredRole);
 
     return StepperLayout(
-      stepIndex: 2,
+      stepIndex: 1,
       stepNameKey: 'onboarding.stepName.roles',
-      onBack: () => context.go(Routes.onboardingIdentity),
+      onBack: () => context.go(Routes.onboardingGoal),
+      onSignOut: () => confirmAndSignOut(context, ref),
       footer: AppButton(
         key: const ValueKey<String>('roles-next'),
-        label: context.t('onboarding.roles.next'),
-        onPressed: canProceed ? () => context.go(Routes.onboardingBio) : null,
+        label: context.t('onboarding.roles.continue'),
+        onPressed: canProceed
+            ? () {
+                Analytics.log(
+                  AppEvent.onboardingStepCompleted,
+                  const <String, Object>{'step': 'roles'},
+                );
+                context.go(Routes.onboardingBio);
+              }
+            : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,6 +149,7 @@ class RolesStep extends ConsumerWidget {
                       : context.t('onboarding.roles.$r'),
                   active: draft.roles.contains(r),
                   onTap: () {
+                    Haptics.selection();
                     final List<String> next = List<String>.from(draft.roles);
                     if (next.contains(r)) {
                       next.remove(r);
@@ -202,7 +216,10 @@ class _PrimaryPill extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(999),
-      onTap: onTap,
+      onTap: () {
+        Haptics.selection();
+        onTap();
+      },
       child: Pill(
         label: label,
         variant: selected ? PillVariant.navy : PillVariant.outline,

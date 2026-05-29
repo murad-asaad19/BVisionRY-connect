@@ -6,22 +6,28 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../auth/providers/auth_service_provider.dart';
 import '../../auth/providers/profile_provider.dart';
 import '../../office_hours/presentation/office_hours_section_on_profile.dart';
 import '../domain/profile.dart';
 import '../domain/profile_signals.dart';
+import '../providers/own_profile_controller.dart';
 import '../providers/profile_signals_provider.dart';
 import 'goal_refresh_card.dart';
 import 'profile_hero.dart';
 import 'profile_signals_row.dart';
 
-/// Host name used to compose the public share URL for `/p/:handle`. Keeping
-/// it as a top-level constant lets Phase-12 deep-link / branding swaps
-/// override it via a `--dart-define`.
-const String _kPublicHost = 'app.bvisionry.com';
+/// Host name used to compose the public share URL for `/p/:handle`. Mirrors
+/// the App Links host registered in AndroidManifest
+/// (`https://connect.bvisionry.com/p/*`) so the shared link actually deep-
+/// links back into the app. Phase-12 branding swaps can override via a
+/// `--dart-define`.
+const String _kPublicHost = 'connect.bvisionry.com';
 
 /// Own profile view — gallery section D1.
 ///
@@ -52,7 +58,7 @@ class ProfileScreen extends ConsumerWidget {
             TopBarAction(
               icon: Icons.edit_outlined,
               label: context.t('profile.edit.title'),
-              onPressed: () => context.go(Routes.profileEdit),
+              onPressed: () => context.push(Routes.profileEdit),
             ),
           ],
         ),
@@ -96,14 +102,9 @@ class _ProfileBody extends ConsumerWidget {
       padding: EdgeInsets.zero,
       children: <Widget>[
         if (profile.privateMode)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-            child: AppBanner(
-              key: const ValueKey<String>('profile.privateModeBanner'),
-              intent: AppIntent.neutral,
-              title: context.t('profile.privateModeBannerTitle'),
-              child: Text(context.t('profile.privateModeBannerBody')),
-            ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(12, 12, 12, 0),
+            child: _PrivateModeBanner(),
           ),
         ProfileHero(
           data: ProfileHeroData(
@@ -123,7 +124,14 @@ class _ProfileBody extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
             child: GoalRefreshCard(
               profile: profile,
-              onUpdate: () => context.go(Routes.profileEdit),
+              onUpdate: () => context.push(Routes.profileEdit),
+              // "Yes, still accurate" — confirm freshness so the nudge clears.
+              onDismiss: () async {
+                Haptics.light();
+                await ref
+                    .read(ownProfileControllerProvider.notifier)
+                    .confirmGoalFreshness();
+              },
             ),
           ),
         if ((profile.goalText ?? '').isNotEmpty)
@@ -145,53 +153,34 @@ class _ProfileBody extends ConsumerWidget {
               child: Text(profile.bio!, style: typo.bodyLg),
             ),
           ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-          child: SectionCard(
-            title: context.t('profile.details'),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                _DetailRow(
-                  label: context.t('profile.handle'),
-                  value: '@${profile.handle ?? ''}',
-                ),
-                if (profile.primaryRole != null)
-                  _DetailRow(
-                    label: context.t('profile.primaryRoleLabel'),
-                    value: _cap(profile.primaryRole!),
-                  ),
-                if (profile.roles.length > 1)
-                  _DetailRow(
-                    label: context.t('profile.allRoles'),
-                    value: profile.roles.map(_cap).join(', '),
-                  ),
-                if ((profile.city ?? '').isNotEmpty ||
-                    (profile.country ?? '').isNotEmpty)
-                  _DetailRow(
-                    label: context.t('profile.section.location'),
-                    value: <String?>[profile.city, profile.country]
-                        .where((String? v) => v != null && v.isNotEmpty)
-                        .cast<String>()
-                        .join(', '),
-                  ),
-                _DetailRow(
-                  label: context.t('verification.github'),
-                  value: profile.verifiedGithubUsername != null
-                      ? '@${profile.verifiedGithubUsername}'
-                      : context.t('profile.githubNotVerified'),
-                ),
-              ],
-            ),
-          ),
-        ),
+        // NOTE: the generic "Details" card (handle / primary role / all roles
+        // / location) was removed to match mockup D1 — the mockup shows ONLY
+        // the role-specific struct card here. Handle is editable in D3 and
+        // surfaced in the D2 URL; primary/all roles render as hero pills; and
+        // location already appears in the hero meta, so the key-value card was
+        // pure duplication.
         _RoleDetailsCard(profile: profile),
         asyncSignals.maybeWhen(
-          data: (ProfileSignals signals) => Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-            child: ProfileSignalsRow(signals: signals),
-          ),
+          data: (ProfileSignals signals) {
+            // Collapse to nothing when there are no mutuals/rating signals so
+            // we don't render an empty titled card.
+            if (signals.mutualConnectionCount == 0 && !signals.showRating) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+              child: SectionCard(
+                key: const ValueKey<String>('profile-mutual-connections'),
+                title: context.t('profile.mutualConnectionsTitle'),
+                child: ProfileSignalsRow(signals: signals),
+              ),
+            );
+          },
           orElse: () => const SizedBox.shrink(),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+          child: _ProfileCompleteness(profile: profile),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
@@ -218,7 +207,7 @@ class _ProfileBody extends ConsumerWidget {
                   label: context.t('profile.edit.title'),
                   variant: AppButtonVariant.primary,
                   icon: Icons.edit,
-                  onPressed: () => context.go(Routes.profileEdit),
+                  onPressed: () => context.push(Routes.profileEdit),
                 ),
               ),
             ],
@@ -232,6 +221,15 @@ class _ProfileBody extends ConsumerWidget {
             label: context.t('profile.signOut'),
             variant: AppButtonVariant.outlineDanger,
             onPressed: () async {
+              final confirmed = await ref.read(confirmServiceProvider).confirm(
+                    context,
+                    title: context.t('settings.signOutConfirm.title'),
+                    body: context.t('settings.signOutConfirm.body'),
+                    confirmLabel: context.t('profile.signOut'),
+                    cancelLabel: context.t('common.cancel'),
+                    destructive: true,
+                  );
+              if (!confirmed) return;
               await ref.read(authServiceProvider).signOut();
             },
           ),
@@ -240,9 +238,6 @@ class _ProfileBody extends ConsumerWidget {
       ],
     );
   }
-
-  static String _cap(String s) =>
-      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 }
 
 class _GoldSection extends StatelessWidget {
@@ -253,14 +248,16 @@ class _GoldSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
+    final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
+    final AppRadii radii = Theme.of(context).extension<AppRadii>()!;
     final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     return Container(
       decoration: BoxDecoration(
         color: colors.goldPale,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(radii.card),
         border: Border.all(color: colors.goldLight),
       ),
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(spacing.card),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -272,8 +269,136 @@ class _GoldSection extends StatelessWidget {
               letterSpacing: 0.6,
             ),
           ),
-          const SizedBox(height: 6),
+          Gap(spacing.xs),
           child,
+        ],
+      ),
+    );
+  }
+}
+
+/// Private-mode banner — gallery section I2 (lines 2316-2318).
+///
+/// Distinct high-contrast treatment that the generic [AppBanner] intents
+/// don't cover: dark navy (#1e293b ≈ [AppColors.navy]) background, the title
+/// "Private mode is on." in gold, and white body text. Built as a one-off
+/// container rather than a new [AppBanner] intent because this dark/gold combo
+/// is unique to this surface.
+class _PrivateModeBanner extends StatelessWidget {
+  const _PrivateModeBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors colors = Theme.of(context).extension<AppColors>()!;
+    final AppRadii radii = Theme.of(context).extension<AppRadii>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
+    return Container(
+      key: const ValueKey<String>('profile.privateModeBanner'),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: colors.navyDark,
+        borderRadius: BorderRadius.circular(radii.button),
+        border: Border.all(color: colors.navyDark),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(
+            context.t('profile.privateModeBannerTitle'),
+            style: typo.displaySm.copyWith(color: colors.gold),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            context.t('profile.privateModeBannerBody'),
+            style: typo.bodyMd.copyWith(color: colors.onNavy),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Profile-completeness progress section — gallery section I2 (lines
+/// 2330-2336): an 8px gold progress bar with a "{percent}% — add structured
+/// fields to improve match quality." caption.
+///
+/// Completeness is derived locally from the populated profile fields (there
+/// is no server-side percent). The weights below mirror the fields the
+/// mockup nudges users to complete; role-specific structured fields count as
+/// a single "structured details" slot so a fully-filled profile reaches 100%.
+class _ProfileCompleteness extends StatelessWidget {
+  const _ProfileCompleteness({required this.profile});
+  final Profile profile;
+
+  /// Returns the completion ratio in `[0, 1]` over the tracked fields.
+  double _ratio() {
+    final List<bool> slots = <bool>[
+      (profile.photoUrl ?? '').isNotEmpty,
+      (profile.headline ?? '').isNotEmpty,
+      (profile.bio ?? '').isNotEmpty,
+      (profile.goalText ?? '').isNotEmpty,
+      profile.roles.isNotEmpty,
+      (profile.city ?? '').isNotEmpty || (profile.country ?? '').isNotEmpty,
+      _hasStructuredDetails(),
+    ];
+    final int done = slots.where((bool v) => v).length;
+    return done / slots.length;
+  }
+
+  /// True when any role-specific structured field is populated — the
+  /// "structured fields" the completeness caption asks the user to add.
+  bool _hasStructuredDetails() {
+    return (profile.builderDiscipline ?? '').isNotEmpty ||
+        (profile.builderSeniority ?? '').isNotEmpty ||
+        profile.builderSkills.isNotEmpty ||
+        profile.builderOpenTo.isNotEmpty ||
+        (profile.builderRateBand ?? '').isNotEmpty ||
+        (profile.founderStage ?? '').isNotEmpty ||
+        (profile.founderSector ?? '').isNotEmpty ||
+        (profile.founderFunding ?? '').isNotEmpty ||
+        profile.founderHiring != null ||
+        (profile.investorType ?? '').isNotEmpty ||
+        (profile.investorCheckSize ?? '').isNotEmpty ||
+        profile.investorSectors.isNotEmpty ||
+        (profile.investorStage ?? '').isNotEmpty;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors colors = Theme.of(context).extension<AppColors>()!;
+    final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
+    final AppRadii radii = Theme.of(context).extension<AppRadii>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
+    final double ratio = _ratio();
+    final int percent = (ratio * 100).round();
+
+    return SectionCard(
+      key: const ValueKey<String>('profile-completeness'),
+      title: context.t('profile.completenessSectionTitle'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          // 8px gold progress bar (gold-pale track + gold fill).
+          ClipRRect(
+            borderRadius: BorderRadius.circular(radii.pill),
+            child: LinearProgressIndicator(
+              key: const ValueKey<String>('profile-completeness-bar'),
+              value: ratio.clamp(0.0, 1.0),
+              minHeight: 8,
+              backgroundColor: colors.goldPale,
+              valueColor: AlwaysStoppedAnimation<Color>(colors.gold),
+            ),
+          ),
+          Gap(spacing.xs),
+          Text(
+            context.t(
+              'profile.completenessCaption',
+              vars: <String, Object>{'percent': percent},
+            ),
+            style: typo.bodySm.copyWith(color: colors.muted),
+          ),
         ],
       ),
     );

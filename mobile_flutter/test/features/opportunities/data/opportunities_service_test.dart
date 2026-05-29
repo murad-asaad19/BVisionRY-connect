@@ -234,41 +234,59 @@ void main() {
   });
 
   group('updateOpportunity', () {
-    test('sends all params and parses returned row', () async {
+    test('sends all params and completes on a void/null response', () async {
+      // RPC `RETURNS void` — the gateway yields null and the call must not
+      // throw (the P1 false-failure bug this guards against).
       when(
         () => gateway.rpc('update_opportunity', params: any(named: 'params')),
       ).thenAnswer(
-        (_) async => _opportunityRow(),
+        (_) async => null,
       );
-      final r = await service.updateOpportunity(
-        id: 'oid',
-        kind: OpportunityKind.hiring,
-        title: 'Senior PM',
-        body: 'Tell us if you ship.',
-        tags: const <String>['pm'],
-        locationCity: null,
-        locationCountry: null,
-        remoteOk: true,
-        expiresAt: DateTime.utc(2026, 7, 25),
+      await expectLater(
+        service.updateOpportunity(
+          id: 'oid',
+          kind: OpportunityKind.hiring,
+          title: 'Senior PM',
+          body: 'Tell us if you ship.',
+          tags: const <String>['pm'],
+          locationCity: null,
+          locationCountry: null,
+          remoteOk: true,
+          expiresAt: DateTime.utc(2026, 7, 25),
+        ),
+        completes,
       );
-      expect(r.title, 'Senior PM');
-      expect(r.kind, OpportunityKind.hiring);
+      final Map<String, dynamic> captured = verify(
+        () => gateway.rpc(
+          'update_opportunity',
+          params: captureAny(named: 'params'),
+        ),
+      ).captured.single as Map<String, dynamic>;
+      expect(captured['p_id'], 'oid');
+      expect(captured['p_kind'], OpportunityKind.hiring.dbValue);
+      expect(captured['p_title'], 'Senior PM');
+      expect(captured['p_body'], 'Tell us if you ship.');
+      expect(captured['p_tags'], const <String>['pm']);
+      expect(captured['p_remote_ok'], true);
+      expect(captured['p_expires_at'], DateTime.utc(2026, 7, 25).toIso8601String());
     });
   });
 
   group('closeOpportunity', () {
-    test('returns updated row with status=closed', () async {
+    test('sends p_id and completes on a void/null response', () async {
       when(
         () => gateway.rpc('close_opportunity', params: any(named: 'params')),
       ).thenAnswer(
-        (_) async => _opportunityRow(
-          status: 'closed',
-          closedAt: '2026-05-26T00:00:00Z',
-        ),
+        (_) async => null,
       );
-      final r = await service.closeOpportunity('oid');
-      expect(r.status.dbValue, 'closed');
-      expect(r.closedAt, isNotNull);
+      await expectLater(service.closeOpportunity('oid'), completes);
+      final Map<String, dynamic> captured = verify(
+        () => gateway.rpc(
+          'close_opportunity',
+          params: captureAny(named: 'params'),
+        ),
+      ).captured.single as Map<String, dynamic>;
+      expect(captured['p_id'], 'oid');
     });
   });
 

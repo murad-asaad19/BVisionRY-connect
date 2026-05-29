@@ -3,10 +3,12 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 
 import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_bottom_sheet.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_input.dart';
+import '../../../core/widgets/gap.dart';
 import '../domain/office_hours_window.dart';
 
 /// Modal sheet used to add or edit a single [OfficeHoursWindow].
@@ -14,8 +16,10 @@ import '../domain/office_hours_window.dart';
 /// Inputs: weekday `DropdownButtonFormField<int>` (0=Sun..6=Sat with
 /// localized labels), start/end via [_TimeField] (tap → `showTimePicker`),
 /// IANA timezone via dropdown sourced from `FlutterTimezone`. Save is
-/// disabled while [OfficeHoursWindow.validate] returns a non-null error
-/// key; the localized error renders inline above the button.
+/// disabled while [OfficeHoursWindow.validateAgainst] returns a non-null
+/// error key — that covers the standalone range check plus
+/// overlap/duplicate detection against the host's [existing] windows. The
+/// localized error renders inline above the button.
 ///
 /// The [timezones] / [deviceTimezone] parameters are injection seams for
 /// tests so we can avoid the async hop to the platform channel during a
@@ -25,12 +29,22 @@ class WindowEditorSheet extends StatefulWidget {
     super.key,
     this.initial,
     required this.onSave,
+    this.existing = const <OfficeHoursWindow>[],
+    this.editingIndex,
     this.timezones,
     this.deviceTimezone,
   });
 
   final OfficeHoursWindow? initial;
   final ValueChanged<OfficeHoursWindow> onSave;
+
+  /// The host's already-saved windows, used to reject overlaps/duplicates.
+  final List<OfficeHoursWindow> existing;
+
+  /// Index within [existing] being edited (so a window isn't compared against
+  /// its own previous value). Null when adding a new window.
+  final int? editingIndex;
+
   // Injection seams for tests.
   final List<String>? timezones;
   final String? deviceTimezone;
@@ -40,6 +54,8 @@ class WindowEditorSheet extends StatefulWidget {
   static Future<OfficeHoursWindow?> show(
     BuildContext context, {
     OfficeHoursWindow? initial,
+    List<OfficeHoursWindow> existing = const <OfficeHoursWindow>[],
+    int? editingIndex,
   }) {
     return showAppBottomSheet<OfficeHoursWindow>(
       context: context,
@@ -49,6 +65,8 @@ class WindowEditorSheet extends StatefulWidget {
         ),
         child: WindowEditorSheet(
           initial: initial,
+          existing: existing,
+          editingIndex: editingIndex,
           onSave: (w) => Navigator.of(context).pop(w),
         ),
       ),
@@ -69,7 +87,11 @@ class _WindowEditorSheetState extends State<WindowEditorSheet> {
   @override
   void initState() {
     super.initState();
-    _weekday = widget.initial?.weekday ?? 1;
+    // DB weekday convention is 0=Sun..6=Sat; Dart's DateTime.weekday is
+    // 1=Mon..7=Sun. Default a brand-new window to *today* mapped into the DB
+    // convention (`% 7` turns Sunday's 7 into 0) rather than a hardcoded
+    // value that silently mismatched the convention.
+    _weekday = widget.initial?.weekday ?? (DateTime.now().weekday % 7);
     _start = widget.initial?.startMinute ?? 540;
     _end = widget.initial?.endMinute ?? 660;
     _tz = widget.initial?.timezone ?? widget.deviceTimezone ?? 'UTC';
@@ -99,9 +121,18 @@ class _WindowEditorSheetState extends State<WindowEditorSheet> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
-    final error = _draft.validate();
+    final spacing = Theme.of(context).extension<AppSpacing>()!;
+    final error = _draft.validateAgainst(
+      widget.existing,
+      excludeIndex: widget.editingIndex,
+    );
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      padding: EdgeInsets.fromLTRB(
+        spacing.lg,
+        spacing.sm,
+        spacing.lg,
+        spacing.xxl,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -112,10 +143,13 @@ class _WindowEditorSheetState extends State<WindowEditorSheet> {
                 : context.t('officeHours.settings.editWindow'),
             style: typo.displayLg.copyWith(color: colors.navy),
           ),
-          const SizedBox(height: 12),
+          Gap(spacing.md),
           DropdownButtonFormField<int>(
             key: const ValueKey<String>('weekday'),
             initialValue: _weekday,
+            decoration: InputDecoration(
+              labelText: context.t('officeHours.settings.weekdayLabel'),
+            ),
             items: List<DropdownMenuItem<int>>.generate(
               7,
               (i) => DropdownMenuItem<int>(
@@ -127,7 +161,7 @@ class _WindowEditorSheetState extends State<WindowEditorSheet> {
               if (v != null) setState(() => _weekday = v);
             },
           ),
-          const SizedBox(height: 12),
+          Gap(spacing.md),
           Row(
             children: <Widget>[
               Expanded(
@@ -139,7 +173,7 @@ class _WindowEditorSheetState extends State<WindowEditorSheet> {
                   label: context.t('officeHours.settings.startTime'),
                 ),
               ),
-              const SizedBox(width: 12),
+              Gap(spacing.md),
               Expanded(
                 child: _TimeField(
                   key: const ValueKey<String>('end-time'),
@@ -151,11 +185,14 @@ class _WindowEditorSheetState extends State<WindowEditorSheet> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          Gap(spacing.md),
           DropdownButtonFormField<String>(
             key: const ValueKey<String>('timezone'),
             initialValue:
                 _availableTzs.contains(_tz) ? _tz : _availableTzs.first,
+            decoration: InputDecoration(
+              labelText: context.t('officeHours.settings.timezoneLabel'),
+            ),
             items: _availableTzs
                 .map(
                   (z) => DropdownMenuItem<String>(value: z, child: Text(z)),
@@ -166,10 +203,13 @@ class _WindowEditorSheetState extends State<WindowEditorSheet> {
             },
           ),
           if (error != null) ...<Widget>[
-            const SizedBox(height: 8),
-            Text(context.t(error), style: TextStyle(color: colors.danger)),
+            Gap(spacing.sm),
+            Text(
+              context.t(error),
+              style: typo.bodySm.copyWith(color: colors.danger),
+            ),
           ],
-          const SizedBox(height: 16),
+          Gap(spacing.lg),
           AppButton(
             key: const ValueKey<String>('window-save'),
             label: context.t('officeHours.settings.save'),
@@ -202,13 +242,24 @@ class _TimeField extends StatefulWidget {
 class _TimeFieldState extends State<_TimeField> {
   @override
   Widget build(BuildContext context) {
+    final hhmm = OfficeHoursWindow.minuteToHhmm(widget.value);
     return Stack(
       children: <Widget>[
-        AppInput(
+        // The visible AppInput is a non-focusable display only; expose the
+        // label + current value to screen readers (the bare disabled field
+        // announced nothing) and mark it as a button since the whole field
+        // opens the time picker.
+        Semantics(
+          button: true,
           label: widget.label,
-          value: OfficeHoursWindow.minuteToHhmm(widget.value),
-          enabled: false,
-          onChanged: null,
+          value: hhmm,
+          excludeSemantics: true,
+          child: AppInput(
+            label: widget.label,
+            value: hhmm,
+            enabled: false,
+            onChanged: null,
+          ),
         ),
         Positioned.fill(
           child: Material(
@@ -236,20 +287,22 @@ class _TimeFieldState extends State<_TimeField> {
           child: SizedBox(
             width: 1,
             height: 1,
-            child: TextField(
-              key: widget.rawKey,
-              onSubmitted: (v) {
-                try {
-                  widget.onChanged(OfficeHoursWindow.hhmmToMinute(v));
-                } catch (_) {
-                  // ignore malformed input from the test seam
-                }
-              },
-              onChanged: (v) {
-                if (RegExp(r'^\d{2}:\d{2}$').hasMatch(v)) {
-                  widget.onChanged(OfficeHoursWindow.hhmmToMinute(v));
-                }
-              },
+            child: ExcludeSemantics(
+              child: TextField(
+                key: widget.rawKey,
+                onSubmitted: (v) {
+                  try {
+                    widget.onChanged(OfficeHoursWindow.hhmmToMinute(v));
+                  } catch (_) {
+                    // ignore malformed input from the test seam
+                  }
+                },
+                onChanged: (v) {
+                  if (RegExp(r'^\d{2}:\d{2}$').hasMatch(v)) {
+                    widget.onChanged(OfficeHoursWindow.hhmmToMinute(v));
+                  }
+                },
+              ),
             ),
           ),
         ),

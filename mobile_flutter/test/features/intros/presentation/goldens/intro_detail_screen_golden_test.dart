@@ -69,7 +69,9 @@ void main() {
           profileSignalsServiceProvider.overrideWithValue(
             _EmptySignalsService(),
           ),
-          currentUserIdProvider.overrideWithValue('me'),
+          // Match buildIntro's default recipientId so the recipient-only
+          // Accept/Decline/Forward CTAs render in the golden snapshot.
+          currentUserIdProvider.overrideWithValue('recipient-1'),
         ],
         child: const IntroDetailScreen(introId: 'intro-1'),
       ),

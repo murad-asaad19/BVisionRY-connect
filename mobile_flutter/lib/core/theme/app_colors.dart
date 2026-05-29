@@ -6,6 +6,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.navy,
     required this.navyLight,
     required this.navyDark,
+    required this.navyFill,
+    required this.onNavy,
     required this.gold,
     required this.goldLight,
     required this.goldPale,
@@ -34,13 +36,19 @@ class AppColors extends ThemeExtension<AppColors> {
     navy: Color(0xFF0F3460),
     navyLight: Color(0xFF1A4A80),
     navyDark: Color(0xFF0A2340),
+    navyFill: Color(0xFF0F3460),
+    onNavy: Color(0xFFFFFFFF),
     gold: Color(0xFFFFC107),
     goldLight: Color(0xFFFFE187),
     goldPale: Color(0xFFFFF8E1),
     surface: Color(0xFFF8F8F8),
     white: Color(0xFFFFFFFF),
     body: Color(0xFF212529),
-    muted: Color(0xFF94A3B8),
+    // Darkened from #94A3B8 (2.56:1 — failed WCAG AA) to #5B6675, which
+    // clears 4.5:1 AA on white and on the slate100/surface troughs while
+    // preserving the gray hierarchy. `muted` carries essential secondary
+    // text in 60+ files, so this single edit fixes contrast app-wide.
+    muted: Color(0xFF5B6675),
     border: Color(0xFFE5E7EB),
     slate100: Color(0xFFF1F5F9),
     slate300: Color(0xFFCBD5E1),
@@ -58,9 +66,51 @@ class AppColors extends ThemeExtension<AppColors> {
     infoBorder: Color(0xFF93C5FD),
   );
 
+  /// Dark theme palette. Brand navy is lightened into a readable blue for
+  /// primary surfaces/accents on dark backgrounds; gold is retained as-is
+  /// (it reads well on dark). Status foreground colors are lightened and
+  /// their backgrounds darkened so each pair clears AA on the dark surface.
+  static const AppColors dark = AppColors(
+    navy: Color(0xFF4D8AD6),
+    navyLight: Color(0xFF6BA3E0),
+    navyDark: Color(0xFF0F3460),
+    navyFill: Color(0xFF2E6BC0),
+    onNavy: Color(0xFFFFFFFF),
+    gold: Color(0xFFFFC107),
+    goldLight: Color(0xFFFFE187),
+    goldPale: Color(0xFF3A341F),
+    surface: Color(0xFF0F172A),
+    white: Color(0xFF1E293B),
+    body: Color(0xFFE8EDF4),
+    muted: Color(0xFF9FB0C3),
+    border: Color(0xFF334155),
+    slate100: Color(0xFF1B2638),
+    slate300: Color(0xFF475569),
+    successBg: Color(0xFF14331F),
+    success: Color(0xFF4ADE80),
+    successBorder: Color(0xFF166534),
+    warningBg: Color(0xFF3A2E12),
+    warning: Color(0xFFFBBF24),
+    warningBorder: Color(0xFF92660C),
+    dangerBg: Color(0xFF3B1A1A),
+    danger: Color(0xFFF87171),
+    dangerBorder: Color(0xFF7F1D1D),
+    infoBg: Color(0xFF152A45),
+    info: Color(0xFF93C5FD),
+    infoBorder: Color(0xFF1E40AF),
+  );
+
   final Color navy;
   final Color navyLight;
   final Color navyDark;
+
+  /// Brand-navy FILL for tappable buttons/bubbles (mid-navy in dark so white
+  /// text clears AA 5.28:1 AND the control stays distinct from the #0F172A
+  /// surface at 3.38:1).
+  final Color navyFill;
+
+  /// Always-white text/icon foreground for navy fills/bands.
+  final Color onNavy;
   final Color gold;
   final Color goldLight;
   final Color goldPale;
@@ -89,6 +139,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? navy,
     Color? navyLight,
     Color? navyDark,
+    Color? navyFill,
+    Color? onNavy,
     Color? gold,
     Color? goldLight,
     Color? goldPale,
@@ -116,6 +168,8 @@ class AppColors extends ThemeExtension<AppColors> {
       navy: navy ?? this.navy,
       navyLight: navyLight ?? this.navyLight,
       navyDark: navyDark ?? this.navyDark,
+      navyFill: navyFill ?? this.navyFill,
+      onNavy: onNavy ?? this.onNavy,
       gold: gold ?? this.gold,
       goldLight: goldLight ?? this.goldLight,
       goldPale: goldPale ?? this.goldPale,
@@ -148,6 +202,8 @@ class AppColors extends ThemeExtension<AppColors> {
       navy: Color.lerp(navy, other.navy, t)!,
       navyLight: Color.lerp(navyLight, other.navyLight, t)!,
       navyDark: Color.lerp(navyDark, other.navyDark, t)!,
+      navyFill: Color.lerp(navyFill, other.navyFill, t)!,
+      onNavy: Color.lerp(onNavy, other.onNavy, t)!,
       gold: Color.lerp(gold, other.gold, t)!,
       goldLight: Color.lerp(goldLight, other.goldLight, t)!,
       goldPale: Color.lerp(goldPale, other.goldPale, t)!,

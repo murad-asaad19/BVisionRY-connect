@@ -41,6 +41,42 @@ class OfficeHoursWindow with _$OfficeHoursWindow {
     return null;
   }
 
+  /// True when this window's time range overlaps [other] on the same weekday
+  /// (timezone-aware: only windows sharing a weekday + timezone can clash,
+  /// since a different tz materializes to a different wall-clock band).
+  /// Touching edges (one ends exactly where the next starts) do not overlap.
+  bool overlaps(OfficeHoursWindow other) {
+    if (weekday != other.weekday) return false;
+    if (timezone != other.timezone) return false;
+    return startMinute < other.endMinute && other.startMinute < endMinute;
+  }
+
+  /// Validates this window standalone AND against the already-saved
+  /// [existing] windows, returning the localized i18n error key for the first
+  /// problem or null when it's safe to save. Pass [excludeIndex] when editing
+  /// an existing row so the window isn't compared against its own old value.
+  String? validateAgainst(
+    List<OfficeHoursWindow> existing, {
+    int? excludeIndex,
+  }) {
+    final selfError = validate();
+    if (selfError != null) return selfError;
+    for (var i = 0; i < existing.length; i++) {
+      if (i == excludeIndex) continue;
+      final other = existing[i];
+      if (weekday == other.weekday &&
+          startMinute == other.startMinute &&
+          endMinute == other.endMinute &&
+          timezone == other.timezone) {
+        return 'officeHours.settings.windowDuplicate';
+      }
+      if (overlaps(other)) {
+        return 'officeHours.settings.windowOverlap';
+      }
+    }
+    return null;
+  }
+
   static const List<String> _weekdayNames = <String>[
     'Sunday',
     'Monday',

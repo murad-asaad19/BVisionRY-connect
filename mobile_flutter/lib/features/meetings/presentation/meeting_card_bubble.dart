@@ -4,9 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/errors/app_exception.dart';
+import '../../../core/errors/error_messages.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
 import '../data/ics_service.dart';
 import '../data/meetings_service.dart';
@@ -15,8 +17,8 @@ import '../domain/meeting_state.dart';
 import 'confirm_meeting_sheet.dart';
 import 'meeting_playbook_card.dart';
 
-/// In-chat meeting bubble (gallery G1). Replaces the Phase 7
-/// `MeetingPlaceholderBubble` and renders one of four state variants:
+/// In-chat meeting bubble (gallery G1). Renders one of four state
+/// variants:
 ///
 /// - **proposed + viewer is proposer**: only "Cancel proposal" — server
 ///   raises `42501` if the proposer tries to confirm, so the Confirm
@@ -57,6 +59,14 @@ class MeetingCardBubble extends ConsumerWidget {
               const SizedBox(height: 8),
               _MeetingUrl(url: proposal.meetingUrl!),
             ],
+            if (proposal.note != null && proposal.note!.trim().isNotEmpty) ...[
+              const SizedBox(height: 10),
+              _ProposerNote(note: proposal.note!.trim()),
+            ],
+            if (proposal.hasEnded) ...[
+              const SizedBox(height: 10),
+              _EndedBanner(),
+            ],
             const SizedBox(height: 12),
             _Actions(
               proposal: proposal,
@@ -64,7 +74,7 @@ class MeetingCardBubble extends ConsumerWidget {
               onConfirm: () => _openConfirmSheet(context),
               onDecline: () => _decline(context, ref),
               onCancel: () => _cancel(context, ref),
-              onAddToCalendar: () => _addToCalendar(context),
+              onAddToCalendar: () => _addToCalendar(context, ref),
               onViewPlaybook: () => _viewPlaybook(context),
             ),
           ],
@@ -81,11 +91,24 @@ class MeetingCardBubble extends ConsumerWidget {
   }
 
   Future<void> _decline(BuildContext context, WidgetRef ref) async {
+    final confirmSvc = ref.read(confirmServiceProvider);
     final toast = ref.read(toastServiceProvider.notifier);
     final failedTitle = context.t('meetings.errors.actionFailed');
     // Resolve any i18n keys we'll need ahead of the await so we don't
     // touch [context] after an async gap.
     final translator = context.t;
+    // Decline is terminal — gate it behind a destructive confirmation.
+    final ok = await confirmSvc.confirm(
+      context,
+      title: translator('meetings.declineConfirm'),
+      body: translator('meetings.declineConfirmBody'),
+      confirmLabel: translator('meetings.decline'),
+      cancelLabel: translator('common.cancel'),
+      destructive: true,
+    );
+    if (!ok) return;
+    // Destructive confirm accepted — buzz to acknowledge the terminal action.
+    Haptics.error();
     try {
       await ref.read(meetingsServiceProvider).declineMeeting(proposal.id);
     } on AppException catch (e) {
@@ -96,9 +119,23 @@ class MeetingCardBubble extends ConsumerWidget {
   }
 
   Future<void> _cancel(BuildContext context, WidgetRef ref) async {
+    final confirmSvc = ref.read(confirmServiceProvider);
     final toast = ref.read(toastServiceProvider.notifier);
     final failedTitle = context.t('meetings.errors.actionFailed');
     final translator = context.t;
+    // Cancelling a proposal is terminal — gate it behind a destructive
+    // confirmation (mirrors the my_bookings cancel flow).
+    final ok = await confirmSvc.confirm(
+      context,
+      title: translator('meetings.cancelConfirm'),
+      body: translator('meetings.cancelConfirmBody'),
+      confirmLabel: translator('meetings.cancelProposal'),
+      cancelLabel: translator('common.cancel'),
+      destructive: true,
+    );
+    if (!ok) return;
+    // Destructive confirm accepted — buzz to acknowledge the terminal action.
+    Haptics.error();
     try {
       await ref.read(meetingsServiceProvider).cancelMeeting(proposal.id);
     } on AppException catch (e) {
@@ -108,21 +145,31 @@ class MeetingCardBubble extends ConsumerWidget {
     }
   }
 
-  Future<void> _addToCalendar(BuildContext context) async {
+  Future<void> _addToCalendar(BuildContext context, WidgetRef ref) async {
+    final toast = ref.read(toastServiceProvider.notifier);
+    // Resolve everything that touches [context] before the async gap.
+    final title = context.t('meetings.title');
+    String errorFor(Object e) => messageForError(context, e);
     final svc = IcsService();
     final start = proposal.confirmedSlot!.toUtc();
     final end = start.add(Duration(minutes: proposal.durationMinutes));
-    final title = context.t('meetings.title');
-    final file = await svc.generateIcsFile(
-      meetingId: proposal.id,
-      title: title,
-      description: title,
-      startUtc: start,
-      endUtc: end,
-      attendeesEmails: const [],
-      location: proposal.meetingUrl,
-    );
-    await svc.shareIcs(file, subject: title);
+    try {
+      Haptics.light();
+      final file = await svc.generateIcsFile(
+        meetingId: proposal.id,
+        title: title,
+        description: title,
+        startUtc: start,
+        endUtc: end,
+        attendeesEmails: const [],
+        location: proposal.meetingUrl,
+      );
+      await svc.shareIcs(file, subject: title);
+    } catch (e) {
+      // Generating or sharing the .ics can fail (temp-dir write error,
+      // no share target). Surface it instead of failing silently.
+      toast.showToast(title: errorFor(e), intent: AppIntent.danger);
+    }
   }
 
   void _viewPlaybook(BuildContext context) {
@@ -169,7 +216,22 @@ class _Header extends StatelessWidget {
           style: typo.displaySm.copyWith(color: colors.navy),
         ),
         const SizedBox(width: 8),
-        Pill(label: label, variant: variant),
+        // Cross-fade the status badge so a proposal flipping to "confirmed"
+        // (or declined/cancelled) reads as a gentle state change, not a jump.
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 220),
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeOut,
+          transitionBuilder: (child, animation) => FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(scale: animation, child: child),
+          ),
+          child: Pill(
+            key: ValueKey<MeetingState>(state),
+            label: label,
+            variant: variant,
+          ),
+        ),
         const Spacer(),
         Text(
           context.t(
@@ -195,16 +257,18 @@ class _Slots extends StatelessWidget {
     final confirmed = proposal.confirmedSlot;
     final crossedOut = proposal.state == MeetingState.declined ||
         proposal.state == MeetingState.cancelled;
+    final preferredIdx = proposal.preferredSlotIndex;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final s in proposal.slots)
+        for (int i = 0; i < proposal.slots.length; i++)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 2),
             child: Row(
               children: [
                 Icon(
-                  confirmed != null && s.isAtSameMomentAs(confirmed)
+                  confirmed != null &&
+                          proposal.slots[i].isAtSameMomentAs(confirmed)
                       ? LucideIcons.checkCircle2
                       : LucideIcons.clock,
                   size: 14,
@@ -212,16 +276,33 @@ class _Slots extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  fmt.format(s.toLocal()),
+                  fmt.format(proposal.slots[i].toLocal()),
                   style: typo.bodyMd.copyWith(
                     color: crossedOut ? colors.muted : colors.body,
-                    fontWeight:
-                        confirmed != null && s.isAtSameMomentAs(confirmed)
-                            ? FontWeight.w700
-                            : FontWeight.w400,
+                    fontWeight: (confirmed != null &&
+                                proposal.slots[i]
+                                    .isAtSameMomentAs(confirmed)) ||
+                            (confirmed == null && preferredIdx == i)
+                        ? FontWeight.w700
+                        : FontWeight.w400,
                     decoration: crossedOut ? TextDecoration.lineThrough : null,
                   ),
                 ),
+                // Highlight the proposer's preferred slot with a gold star
+                // while the meeting is still pending — once confirmed, the
+                // check-circle on the chosen slot carries that role.
+                if (preferredIdx == i && confirmed == null && !crossedOut) ...[
+                  const SizedBox(width: 6),
+                  Icon(LucideIcons.star, size: 12, color: colors.gold),
+                  const SizedBox(width: 4),
+                  Text(
+                    context.t('meetings.preferredSlot'),
+                    style: typo.bodyXs.copyWith(
+                      color: colors.gold,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -249,6 +330,53 @@ class _MeetingUrl extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: typo.bodyMd.copyWith(color: colors.navy),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Quoted-block rendering of the proposer's optional note. Gold-pale fill
+/// + navy left rule so it reads as a quoted excerpt and not part of the
+/// slot list.
+class _ProposerNote extends StatelessWidget {
+  const _ProposerNote({required this.note});
+  final String note;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final typo = Theme.of(context).extension<AppTypography>()!;
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.goldPale,
+        borderRadius: BorderRadius.circular(8),
+        border: Border(left: BorderSide(color: colors.gold, width: 3)),
+      ),
+      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+      child: Text(
+        note,
+        style: typo.bodyMd.copyWith(color: colors.body, height: 1.35),
+      ),
+    );
+  }
+}
+
+/// Inline label rendered when a confirmed meeting's slot + duration has
+/// elapsed — replaces the "Add to calendar" CTA which would otherwise
+/// generate an ICS for a past time. Pairs with the gating in [_Actions].
+class _EndedBanner extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final typo = Theme.of(context).extension<AppTypography>()!;
+    return Row(
+      children: [
+        Icon(LucideIcons.checkCircle2, size: 14, color: colors.muted),
+        const SizedBox(width: 6),
+        Text(
+          context.t('meetings.ended'),
+          style: typo.bodyMd.copyWith(color: colors.muted),
         ),
       ],
     );
@@ -310,6 +438,11 @@ class _Actions extends StatelessWidget {
       );
     }
     if (proposal.state == MeetingState.confirmed) {
+      // Hide future-tense CTAs once the slot + duration has elapsed; the
+      // ICS would be generated with start_time in the past and the
+      // pre-meeting playbook copy would invite users to "prepare" for
+      // something that already happened.
+      if (proposal.hasEnded) return const SizedBox.shrink();
       return Wrap(
         alignment: WrapAlignment.end,
         spacing: 8,

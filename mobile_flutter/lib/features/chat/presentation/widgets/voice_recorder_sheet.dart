@@ -7,12 +7,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:record/record.dart' as r;
 
 import '../../../../core/i18n/i18n.dart';
+import '../../../../core/supabase/supabase_client.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/haptics.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../media/constants.dart';
 import '../../../media/data/media_service.dart';
 import '../../../media/data/voice_recorder.dart';
+import '../../domain/message.dart';
+import '../../providers/messages_provider.dart';
 
 /// Tri-state enum tracking the sheet's UI mode.
 ///
@@ -88,15 +92,23 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
-    // Auto-start so the sheet matches the gallery's "already recording"
-    // visual the moment the user taps the mic in the composer.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _start());
+    // Idle on open — the user explicitly taps "Start recording" so an
+    // accidental composer-mic tap does NOT capture audio. Resolves
+    // T-CHAT-RECORD-AUTOSTART (audit 21-F02).
   }
 
   @override
   void dispose() {
     _sub?.cancel();
     _ampSub?.cancel();
+    // The mic may be open in TWO states: still recording, OR captured a
+    // clip but never sent (ready). Both must close the underlying recorder
+    // so we don't leak the mic on swipe-down / Android-back dismissal.
+    // voiceRecorderProvider is a non-autoDispose Provider so ref.read in
+    // dispose returns the live singleton.
+    if (_state == _RecState.recording || _state == _RecState.ready) {
+      unawaited(ref.read(voiceRecorderProvider).cancel());
+    }
     _levels.dispose();
     _pulse.dispose();
     super.dispose();
@@ -137,6 +149,9 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
     }
     await recorder.start();
     if (!mounted) return;
+    // Light tick to confirm the mic is now live (meaningful action: the
+    // user committed to recording).
+    Haptics.light();
     setState(() {
       _state = _RecState.recording;
       _durationMs = 0;
@@ -152,7 +167,13 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
     });
   }
 
-  Future<void> _stop() async {
+  /// Stops the recorder and transitions to [_RecState.ready].
+  ///
+  /// [haptic] fires a light tick to confirm the capture ended — true for a
+  /// deliberate stop (auto-stop at the 2-minute cap). The send path passes
+  /// false because [_send] already emits its own send haptic, so we avoid a
+  /// double buzz.
+  Future<void> _stop({bool haptic = true}) async {
     await _sub?.cancel();
     _sub = null;
     await _ampSub?.cancel();
@@ -160,6 +181,7 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
     final recorder = ref.read(voiceRecorderProvider);
     final result = await recorder.stop();
     if (!mounted) return;
+    if (haptic) Haptics.light();
     // Drain the live buffer so the strip falls back to its idle visual
     // (all bars at the minimum height).
     _levels.value = List<double>.filled(_LiveWaveformStrip.barCount, 0);
@@ -187,44 +209,69 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
     // post-await `context` reads in async handlers.
     final media = ref.read(mediaServiceProvider);
     final toast = ref.read(toastServiceProvider.notifier);
+    final messages = ref.read(
+      messagesProvider(widget.conversationId).notifier,
+    );
+    final senderId = ref.read(supabaseClientProvider).auth.currentUser?.id;
     final failedTitle = context.t('chat.send.failed');
     final navigator = Navigator.of(context);
     // If still recording, stop first so we have a finalised clip on disk.
+    // Suppress the stop haptic — _send() emits its own send tick below.
     if (_state == _RecState.recording) {
-      await _stop();
+      await _stop(haptic: false);
     }
     if (_path == null) return;
     setState(() => _sending = true);
+    final Uint8List bytes;
     try {
-      final file = File(_path!);
-      final bytes = await file.readAsBytes();
-      media.validateVoiceBytes(
-        bytes,
-        mime: _mime,
-        durationMs: _durationMs,
-      );
-      final messageId = media.generateMessageId();
-      final ext = _mime.endsWith('webm') ? 'webm' : 'm4a';
-      final path = await media.uploadChatMedia(
-        conversationId: widget.conversationId,
-        messageId: messageId,
-        fileName: 'voice.$ext',
-        bytes: bytes,
-        mime: _mime,
-      );
-      await media.sendVoiceMessage(
-        conversationId: widget.conversationId,
-        mediaPath: path,
-        mediaMime: _mime,
-        mediaSizeBytes: bytes.lengthInBytes,
-        durationMs: _durationMs,
-      );
-      if (mounted) unawaited(navigator.maybePop());
+      bytes = await File(_path!).readAsBytes();
+      media.validateVoiceBytes(bytes, mime: _mime, durationMs: _durationMs);
     } catch (_) {
+      // Pre-flight failure (too long / too large) before any optimistic
+      // bubble exists — surface inside the still-open sheet.
       toast.showToast(title: failedTitle, intent: AppIntent.danger);
-    } finally {
       if (mounted) setState(() => _sending = false);
+      return;
     }
+
+    Haptics.light();
+    final messageId = media.generateMessageId();
+    final ext = _mime.endsWith('webm') ? 'webm' : 'm4a';
+    final mime = _mime;
+    final durationMs = _durationMs;
+
+    Future<void> send() => messages.sendMedia(
+          messageId: messageId,
+          optimistic: Message.optimisticVoice(
+            messageId: messageId,
+            conversationId: widget.conversationId,
+            senderId: senderId ?? '',
+            createdAt: DateTime.now().toUtc(),
+            durationMs: durationMs,
+          ),
+          send: () async {
+            final path = await media.uploadChatMedia(
+              conversationId: widget.conversationId,
+              messageId: messageId,
+              fileName: 'voice.$ext',
+              bytes: bytes,
+              mime: mime,
+            );
+            return media.sendVoiceMessage(
+              conversationId: widget.conversationId,
+              mediaPath: path,
+              mediaMime: mime,
+              mediaSizeBytes: bytes.lengthInBytes,
+              durationMs: durationMs,
+            );
+          },
+        );
+
+    // Close the sheet immediately — the optimistic bubble (and any inline
+    // FAILED state) now lives in the conversation thread. Errors surface on
+    // the bubble, not as a toast here.
+    if (mounted) unawaited(navigator.maybePop());
+    unawaited(send().catchError((_) {}));
   }
 
   String _fmt(int ms) {
@@ -255,21 +302,15 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          // Pulsing red dot — opacity-animated; the gallery uses the same
-          // "live" cue at the top of the recorder card.
+          // Prominent "recording" affordance — a 70px danger-bg circle with
+          // a 3px danger border, a centred glyph, and an outer glow ring,
+          // matching the gallery's `.recorder .pulse`. The glow ring breathes
+          // (opacity-animated) while recording to read as "live"; idle/ready
+          // drops to a muted, static treatment.
           Center(
-            child: FadeTransition(
-              opacity: Tween<double>(begin: 0.35, end: 1.0).animate(_pulse),
-              child: Container(
-                width: 14,
-                height: 14,
-                decoration: BoxDecoration(
-                  color: _state == _RecState.recording
-                      ? colors.danger
-                      : colors.muted,
-                  shape: BoxShape.circle,
-                ),
-              ),
+            child: _RecordPulse(
+              animation: _pulse,
+              recording: _state == _RecState.recording,
             ),
           ),
           const SizedBox(height: 12),
@@ -298,28 +339,110 @@ class _VoiceRecorderSheetState extends ConsumerState<VoiceRecorderSheet>
             style: typo.bodyXs.copyWith(color: colors.muted, height: 1.4),
           ),
           const SizedBox(height: 20),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: AppButton(
-                  label: context.t('chat.recording.cancel'),
-                  variant: AppButtonVariant.outline,
-                  onPressed: _sending ? null : _cancel,
+          if (_state == _RecState.idle)
+            // Explicit START gate — user must opt in to recording instead of
+            // the sheet auto-capturing the moment it opens. Pairs with the
+            // dispose() cancel sweep above.
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: AppButton(
+                    label: context.t('chat.recording.cancel'),
+                    variant: AppButtonVariant.outline,
+                    onPressed: _cancel,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: AppButton(
-                  label: context.t('chat.recording.send'),
-                  variant: AppButtonVariant.primary,
-                  loading: _sending,
-                  onPressed: canSend ? _send : null,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: AppButton(
+                    key: const ValueKey('voice-recorder-start'),
+                    label: context.t('chat.recording.start'),
+                    variant: AppButtonVariant.primary,
+                    onPressed: _start,
+                  ),
                 ),
+              ],
+            )
+          else
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: AppButton(
+                    label: context.t('chat.recording.cancel'),
+                    variant: AppButtonVariant.outline,
+                    onPressed: _sending ? null : _cancel,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: AppButton(
+                    label: context.t('chat.recording.send'),
+                    variant: AppButtonVariant.primary,
+                    loading: _sending,
+                    onPressed: canSend ? _send : null,
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The gallery's `.recorder .pulse`: a 70px danger-bg circle with a 3px
+/// danger border, a centred ● glyph in the danger tone, and a soft outer
+/// glow ring (`box-shadow: 0 0 0 6px rgba(danger,0.15)`).
+///
+/// While [recording] the glow ring breathes via [animation] to signal a
+/// live mic; idle/ready collapses to a static muted disc so the affordance
+/// still reads but no longer implies capture is in progress.
+class _RecordPulse extends StatelessWidget {
+  const _RecordPulse({required this.animation, required this.recording});
+
+  final Animation<double> animation;
+  final bool recording;
+
+  static const double _diameter = 70;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final fill = recording ? colors.dangerBg : colors.slate100;
+    final accent = recording ? colors.danger : colors.muted;
+    final disc = Container(
+      width: _diameter,
+      height: _diameter,
+      decoration: BoxDecoration(
+        color: fill,
+        shape: BoxShape.circle,
+        border: Border.all(color: accent, width: 3),
+      ),
+      alignment: Alignment.center,
+      child: Icon(Icons.circle, size: 24, color: accent),
+    );
+    if (!recording) return disc;
+    // Animate the 6px outer glow ring's opacity so the disc itself stays
+    // crisp while the surrounding halo breathes.
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final t = 0.10 + 0.18 * animation.value;
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: colors.danger.withValues(alpha: t),
+                spreadRadius: 6,
+                blurRadius: 0,
               ),
             ],
           ),
-        ],
-      ),
+          child: child,
+        );
+      },
+      child: disc,
     );
   }
 }

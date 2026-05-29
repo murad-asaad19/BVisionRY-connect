@@ -1,15 +1,16 @@
-import 'package:connect_mobile/core/theme/app_theme.dart';
 import 'package:connect_mobile/core/widgets/app_banner.dart';
 import 'package:connect_mobile/core/widgets/variants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/pump.dart';
+
 void main() {
   testWidgets('AppBanner shows title and body text', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: buildAppTheme(Brightness.light),
-        home: const Scaffold(
+    await pumpWithI18n(
+      tester,
+      await wrapWithTheme(
+        child: const Scaffold(
           body: AppBanner(
             intent: AppIntent.info,
             title: 'Heads up',
@@ -25,10 +26,10 @@ void main() {
   testWidgets('AppBanner close button fires onClose when tapped',
       (tester) async {
     var closed = false;
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: buildAppTheme(Brightness.light),
-        home: Scaffold(
+    await pumpWithI18n(
+      tester,
+      await wrapWithTheme(
+        child: Scaffold(
           body: AppBanner(
             intent: AppIntent.warning,
             onClose: () => closed = true,
@@ -42,10 +43,10 @@ void main() {
   });
 
   testWidgets('AppBanner uses warning intent colors', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: buildAppTheme(Brightness.light),
-        home: const Scaffold(
+    await pumpWithI18n(
+      tester,
+      await wrapWithTheme(
+        child: const Scaffold(
           body: AppBanner(intent: AppIntent.warning, child: Text('!')),
         ),
       ),

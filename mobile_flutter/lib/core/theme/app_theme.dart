@@ -6,7 +6,8 @@ import 'app_spacing.dart';
 import 'app_typography.dart';
 
 ThemeData buildAppTheme(Brightness brightness) {
-  const colors = AppColors.light;
+  final AppColors colors =
+      brightness == Brightness.dark ? AppColors.dark : AppColors.light;
   final typography = AppTypography.dosisInter();
   return ThemeData(
     brightness: brightness,

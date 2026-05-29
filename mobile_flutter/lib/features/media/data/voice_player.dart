@@ -11,6 +11,7 @@ abstract class VoicePlayerBackend {
   Future<void> play();
   Future<void> pause();
   Future<void> stop();
+  Future<void> seek(Duration position);
   Stream<Duration> get positionStream;
   Duration? get duration;
   void dispose();
@@ -33,6 +34,9 @@ class RealVoicePlayerBackend implements VoicePlayerBackend {
 
   @override
   Future<void> stop() => _player.stop();
+
+  @override
+  Future<void> seek(Duration position) => _player.seek(position);
 
   @override
   Stream<Duration> get positionStream => _player.positionStream;
@@ -84,6 +88,12 @@ class FakeVoicePlayerBackend implements VoicePlayerBackend {
     isPlaying = false;
     stopped = true;
     position = Duration.zero;
+  }
+
+  @override
+  Future<void> seek(Duration position) async {
+    this.position = position;
+    _positions.add(position);
   }
 
   @override

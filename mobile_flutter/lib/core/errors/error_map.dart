@@ -28,6 +28,25 @@ AppException mapPostgrestError(Object error) {
     ('P0001', 'not_booked') =>
       ValidationException('officeHours.bookings.errorNotBooked'),
     ('P0001', 'not_authorised') => ForbiddenException(),
+    // Invite + waitlist (redeem_invite / join_waitlist) hints.
+    ('P0001', 'invalid_code') =>
+      ValidationException('invite.errors.invalidCode'),
+    ('P0001', 'code_expired') =>
+      ValidationException('invite.errors.expiredCode'),
+    ('P0001', 'code_exhausted') =>
+      ValidationException('invite.errors.exhaustedCode'),
+    ('P0001', 'email_required') =>
+      ValidationException('waitlist.errors.emailRequired'),
+    ('P0001', 'email_invalid') =>
+      ValidationException('waitlist.errors.invalidEmail'),
+    // record_signup_consent (age-gate + legal consent) hints.
+    ('P0001', 'under_age') =>
+      ValidationException('auth.consent.underAgeError'),
+    ('P0001', 'consent_required') =>
+      ValidationException('auth.consent.consentRequired'),
+    // submit_verification (manual-review proofs) hints.
+    ('P0001', 'already_pending') => VerificationAlreadyPendingException(),
+    ('P0001', 'already_approved') => VerificationAlreadyApprovedException(),
     ('23505', _) => DuplicateException(),
     ('P0002', _) => NotOnboardedException(),
     ('22023', _) => _map22023(error),

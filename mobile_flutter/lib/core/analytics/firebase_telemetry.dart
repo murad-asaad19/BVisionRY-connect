@@ -19,10 +19,6 @@ Future<void> _defaultCrashlytics(bool enabled) =>
 /// enabled, applies the user's two booleans to autocollection toggles.
 /// The RN app has no custom `logEvent` calls — analytics relies on Firebase
 /// autocollect.
-///
-/// Pref changes take effect on next launch (per spec): we don't re-call
-/// these setters on toggle changes — the toggle UI just writes to
-/// `TelemetryStore`, and `main.dart` re-applies on next cold start.
 Future<void> initFirebaseTelemetry({
   required bool firebaseEnabled,
   required bool analyticsEnabled,
@@ -39,4 +35,28 @@ Future<void> initFirebaseTelemetry({
 
   await analytics(analyticsEnabled);
   await crashlytics(crashReportsEnabled);
+}
+
+/// Live toggle hook called by [TelemetryNotifier.setAnalyticsEnabled] so
+/// flipping the switch in settings takes effect immediately. No-op when
+/// Firebase isn't enabled in this build.
+Future<void> applyAnalyticsCollectionLive(
+  bool enabled, {
+  required bool firebaseEnabled,
+  @visibleForTesting SetCollectionEnabled? setAnalyticsCollection,
+}) async {
+  if (!firebaseEnabled) return;
+  await (setAnalyticsCollection ?? _defaultAnalytics)(enabled);
+}
+
+/// Live toggle hook called by [TelemetryNotifier.setCrashReportsEnabled].
+/// Toggles Firebase Crashlytics autocollection mid-session in addition to
+/// the Sentry runtime opt-out in `core/analytics/sentry.dart`.
+Future<void> applyCrashlyticsCollectionLive(
+  bool enabled, {
+  required bool firebaseEnabled,
+  @visibleForTesting SetCollectionEnabled? setCrashlyticsCollection,
+}) async {
+  if (!firebaseEnabled) return;
+  await (setCrashlyticsCollection ?? _defaultCrashlytics)(enabled);
 }

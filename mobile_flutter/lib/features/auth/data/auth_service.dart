@@ -48,6 +48,11 @@ abstract class AuthGateway {
   Future<void> startAutoRefresh();
 
   Future<void> stopAutoRefresh();
+
+  /// `supabase.rpc(name, params)` — used to call SECURITY DEFINER functions
+  /// against the caller's own JWT (e.g. `record_signup_consent`). Returns
+  /// whatever Postgrest echoes back.
+  Future<Object?> rpc(String name, {Map<String, dynamic>? params});
 }
 
 /// Test-seam abstraction over the slice of `FunctionsClient` our auth code
@@ -70,12 +75,14 @@ class AuthService {
     required PersistedStores stores,
     Future<void> Function(String token)? deregisterFcm,
     Future<void> Function()? resetTelemetry,
+    void Function()? invalidateAuthedProviders,
   })  : _auth = auth,
         _functions = functions,
         _tokens = tokens,
         _stores = stores,
         _deregisterFcm = deregisterFcm,
-        _resetTelemetry = resetTelemetry;
+        _resetTelemetry = resetTelemetry,
+        _invalidateAuthedProviders = invalidateAuthedProviders;
 
   final AuthGateway _auth;
   final FunctionsGateway _functions;
@@ -83,6 +90,7 @@ class AuthService {
   final PersistedStores _stores;
   final Future<void> Function(String token)? _deregisterFcm;
   final Future<void> Function()? _resetTelemetry;
+  final void Function()? _invalidateAuthedProviders;
 
   String _normaliseEmail(String email) => email.trim().toLowerCase();
 
@@ -117,6 +125,36 @@ class AuthService {
       password: password,
       emailRedirectTo: authRedirectUri(),
     );
+  }
+
+  /// Records the age-gate + legal consent captured at sign-up against the
+  /// caller's own `profiles` row via the `record_signup_consent` RPC.
+  ///
+  /// The server is the source of truth: it re-validates that the caller is old
+  /// enough (age threshold lives in the migration) and that both legal
+  /// documents were accepted, raising otherwise. Pass [dateOfBirth] as a plain
+  /// `date` and the two accept flags (the UI only ever calls this with both
+  /// true, but the RPC re-checks). Throws on failure so callers can surface it.
+  Future<void> recordSignupConsent({
+    required DateTime dateOfBirth,
+    required bool acceptTos,
+    required bool acceptPrivacy,
+  }) async {
+    await _auth.rpc(
+      'record_signup_consent',
+      params: <String, dynamic>{
+        'p_date_of_birth': _formatDate(dateOfBirth),
+        'p_accept_tos': acceptTos,
+        'p_accept_privacy': acceptPrivacy,
+      },
+    );
+  }
+
+  /// `YYYY-MM-DD` (Postgres `date` literal) from the date portion of [d].
+  String _formatDate(DateTime d) {
+    final String mm = d.month.toString().padLeft(2, '0');
+    final String dd = d.day.toString().padLeft(2, '0');
+    return '${d.year.toString().padLeft(4, '0')}-$mm-$dd';
   }
 
   /// Signs in with a normalised email + password.
@@ -221,5 +259,11 @@ class AuthService {
         // best-effort.
       }
     }
+
+    // Drop every Riverpod cache that was keyed to the now-defunct UID. If we
+    // skip this, the next sign-in renders the previous session's
+    // conversation list, blocked count, intros, and so on until each
+    // provider happens to refresh. The wiring lives in authServiceProvider.
+    _invalidateAuthedProviders?.call();
   }
 }

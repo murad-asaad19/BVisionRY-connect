@@ -5,6 +5,7 @@ import 'package:connect_mobile/features/profile/presentation/avatar_picker_field
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../helpers/pump.dart';
 
@@ -12,12 +13,16 @@ class _FakeSource implements AvatarSource {
   _FakeSource(this._bytes);
   final Uint8List? _bytes;
   @override
-  Future<Uint8List?> pickAndCropSquareAvatar() async => _bytes;
+  Future<Uint8List?> pickAndCropSquareAvatar({
+    ImageSource source = ImageSource.gallery,
+  }) async =>
+      _bytes;
 }
 
 class _FakeStorage implements AvatarStorageGateway {
   String? uploadedPath;
   String? patchedUrl;
+  String? clearedUserId;
   @override
   Future<void> uploadAvatar({
     required String path,
@@ -36,6 +41,11 @@ class _FakeStorage implements AvatarStorageGateway {
     required String url,
   }) async {
     patchedUrl = url;
+  }
+
+  @override
+  Future<void> clearPhotoUrl({required String userId}) async {
+    clearedUserId = userId;
   }
 }
 
@@ -61,6 +71,7 @@ void main() {
               name: 'Sara K',
               currentUrl: null,
               onUploaded: (String url) => receivedUrl = url,
+              onRemoved: () {},
             ),
           ),
         ),
@@ -95,6 +106,7 @@ void main() {
             name: 'Sara K',
             currentUrl: null,
             onUploaded: (_) {},
+            onRemoved: () {},
           ),
         ),
       ),

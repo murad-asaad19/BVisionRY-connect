@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/i18n/i18n.dart';
+import '../../../core/i18n/relative_time.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
@@ -10,7 +11,6 @@ import '../../../core/widgets/avatar.dart';
 import '../../../core/widgets/pill.dart';
 import '../domain/opportunity_status.dart';
 import '../domain/opportunity_with_author.dart';
-import '_relative_time.dart';
 import 'opportunity_kind_pill.dart';
 
 /// Feed / list card for an [OpportunityWithAuthor].
@@ -74,7 +74,7 @@ class OpportunityCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      relativeShort(o.createdAt),
+                      relativeTimeAgo(context, o.createdAt),
                       style: typo.bodyXs.copyWith(color: colors.muted),
                     ),
                   ],

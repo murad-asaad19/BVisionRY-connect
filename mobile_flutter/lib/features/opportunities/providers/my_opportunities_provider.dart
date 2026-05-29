@@ -29,8 +29,8 @@ final FutureProvider<List<OpportunityWithAuthor>> myOpportunitiesProvider =
                 : r.authorName,
             authorPhotoUrl: r.authorPhotoUrl ?? viewer.photoUrl,
             authorPrimaryRole: r.authorPrimaryRole ?? viewer.primaryRole,
-            authorVerifiedGithubUsername: r.authorVerifiedGithubUsername ??
-                viewer.verifiedGithubUsername,
+            authorVerifiedGithubUsername:
+                r.authorVerifiedGithubUsername ?? viewer.verifiedGithubUsername,
           ),
         )
         .toList(growable: false);

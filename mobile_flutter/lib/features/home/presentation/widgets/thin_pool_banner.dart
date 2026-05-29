@@ -3,7 +3,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/i18n/i18n.dart';
 import '../../../../core/routing/routes.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/haptics.dart';
 import '../../../../core/widgets/app_banner.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/gap.dart';
 import '../../../../core/widgets/variants.dart';
 
 /// Inline warning surfaced above the daily-matches list when the server
@@ -17,10 +21,17 @@ class ThinPoolBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final spacing = Theme.of(context).extension<AppSpacing>()!;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: spacing.lg,
+        vertical: spacing.sm,
+      ),
       child: AppBanner(
-        intent: AppIntent.warning,
+        // Niche-pool treatment per spec §4 — a calm, confident "we're being
+        // picky" note, not an alarming warning. Mockup C2 uses the neutral
+        // (muted) banner style.
+        intent: AppIntent.neutral,
         title: context.t('discovery.thinPoolTitle'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,19 +39,24 @@ class ThinPoolBanner extends StatelessWidget {
           children: <Widget>[
             Text(
               context.t(
-                'discovery.thinPoolBanner',
+                'discovery.thinPoolBannerFixed',
                 vars: <String, Object>{'count': count},
               ),
             ),
-            const SizedBox(height: 6),
-            InkWell(
-              onTap: () => context.push(Routes.onboardingGoal),
-              child: Text(
-                context.t('discovery.thinPoolAction'),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  decoration: TextDecoration.underline,
-                ),
+            Gap(spacing.sm),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: AppButton(
+                key: const Key('home.thinPool.refineGoal'),
+                label: context.t('discovery.thinPoolAction'),
+                variant: AppButtonVariant.outline,
+                size: AppButtonSize.small,
+                fullWidth: false,
+                icon: Icons.tune,
+                onPressed: () {
+                  Haptics.light();
+                  context.push(Routes.onboardingGoal);
+                },
               ),
             ),
           ],

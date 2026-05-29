@@ -118,6 +118,26 @@ void main() {
       );
     });
 
+    test('consentRecorded true iff both consent timestamps present', () {
+      expect(Profile.empty('u').consentRecorded, isFalse);
+      // Only one accepted → still not fully consented.
+      expect(
+        Profile.empty('u')
+            .copyWith(tosAcceptedAt: DateTime.utc(2026))
+            .consentRecorded,
+        isFalse,
+      );
+      expect(
+        Profile.empty('u')
+            .copyWith(
+              tosAcceptedAt: DateTime.utc(2026),
+              privacyAcceptedAt: DateTime.utc(2026),
+            )
+            .consentRecorded,
+        isTrue,
+      );
+    });
+
     test('isGoalStale returns true when goal_updated_at > 28 days ago', () {
       final Profile stale = Profile.empty('u').copyWith(
         goalUpdatedAt:

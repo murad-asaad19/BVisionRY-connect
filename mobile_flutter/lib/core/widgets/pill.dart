@@ -72,11 +72,11 @@ class Pill extends StatelessWidget {
       switch (variant) {
         case PillVariant.solid:
           bg = palette.gold;
-          fg = palette.navy;
+          fg = palette.navyDark;
           border = null;
         case PillVariant.navy:
-          bg = palette.navy;
-          fg = palette.white;
+          bg = palette.navyFill;
+          fg = palette.onNavy;
           border = null;
         case PillVariant.outline:
           bg = palette.white;
@@ -89,7 +89,7 @@ class Pill extends StatelessWidget {
         case PillVariant.danger:
         case PillVariant.muted:
           bg = palette.goldPale;
-          fg = palette.navy;
+          fg = palette.navyDark;
           border = null;
       }
     }

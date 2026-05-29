@@ -1,5 +1,6 @@
-// Phase 13 AppShell test. Verifies the shell reads the unread counts from
-// the Phase 6 + 7 providers and forwards them into [ConnectBottomNavBar].
+// AppShell test. Verifies the shell reads the unread counts from the
+// Phase 6 + 7 providers and folds chats into the Inbox badge before
+// forwarding into [ConnectBottomNavBar].
 import 'package:connect_mobile/core/i18n/locale_loader.dart';
 import 'package:connect_mobile/core/i18n/locale_notifier.dart';
 import 'package:connect_mobile/core/theme/app_theme.dart';
@@ -73,8 +74,9 @@ void main() {
     final ConnectBottomNavBar bar = tester.widget<ConnectBottomNavBar>(
       find.byType(ConnectBottomNavBar),
     );
-    expect(bar.inboxUnread, 3);
-    expect(bar.chatsUnread, 9);
+    // Chats fold into the Inbox badge: 3 unread intros + (4 + 5) unread
+    // conversations = 12.
+    expect(bar.inboxUnread, 12);
     expect(bar.opportunitiesUnread, 2);
   });
 }

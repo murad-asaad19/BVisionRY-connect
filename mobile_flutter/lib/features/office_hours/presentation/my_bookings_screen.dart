@@ -8,6 +8,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/confirm_dialog.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/query_state.dart';
@@ -114,6 +115,8 @@ class _Row extends ConsumerWidget {
       cancelLabel: translator('common.cancel'),
     );
     if (!ok) return;
+    // Destructive confirm accepted — buzz to acknowledge cancelling the slot.
+    Haptics.error();
     try {
       await ref.read(officeHoursServiceProvider).cancelBooking(booking.slotId);
       await ref.read(myBookingsProvider.notifier).refresh();

@@ -5,12 +5,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../core/analytics/analytics_events.dart';
 import '../../../core/errors/app_exception.dart';
+import '../../../core/errors/error_messages.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../auth/providers/session_provider.dart';
 import '../../privacy/privacy.dart';
 import '../../profile/domain/profile.dart';
 import '../../profile/domain/profile_signals.dart';
@@ -21,6 +25,7 @@ import '../domain/intro.dart';
 import '../domain/intro_enums.dart';
 import '../providers/intro_by_id_provider.dart';
 import '../providers/intros_providers.dart';
+import 'intro_accepted_celebration.dart';
 import 'intro_state_badge.dart';
 import 'warm_intro_forward_sheet.dart';
 
@@ -45,6 +50,14 @@ class IntroDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(introByIdProvider(introId));
+    final viewerId = ref.watch(currentSessionProvider)?.user.id;
+    final intro = async.valueOrNull;
+    // Sender can't report their own intro — only show the flag when the
+    // viewer is the recipient (or any third party that happens to land
+    // here through deep-link). Mirrors the conditional on the chat
+    // 3-dot Block row.
+    final showReport =
+        intro != null && viewerId != null && intro.senderId != viewerId;
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(56),
@@ -52,27 +65,62 @@ class IntroDetailScreen extends ConsumerWidget {
           title: context.t('intros.detail.title'),
           back: true,
           actions: <TopBarAction>[
-            TopBarAction(
-              key: const ValueKey('intro-detail-report'),
-              icon: LucideIcons.flag,
-              label: context.t('intros.detail.report'),
-              onPressed: () => unawaited(
-                showReportSheet(
-                  context,
-                  targetType: ReportTargetType.intro,
-                  targetId: introId,
+            if (showReport)
+              TopBarAction(
+                key: const ValueKey('intro-detail-report'),
+                icon: LucideIcons.flag,
+                label: context.t('intros.detail.report'),
+                onPressed: () => unawaited(
+                  showReportSheet(
+                    context,
+                    targetType: ReportTargetType.intro,
+                    targetId: introId,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
-      body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) =>
-            Center(child: Text(context.t('intros.detail.notFound'))),
+      body: QueryState<Intro>(
+        value: async,
+        loading: const SkeletonProfile(),
+        // The cached-list lookup either has the row or it doesn't, so a bare
+        // retry can't recover a genuinely-missing intro. Give the user a real
+        // way out: an "Open inbox" recovery action alongside the localized
+        // error copy (NotFoundException -> errors.notFound).
+        error: (e, _) => _IntroNotFound(error: e),
         data: (intro) => _IntroDetailBody(intro: intro),
       ),
+    );
+  }
+}
+
+/// Recovery surface shown when [introByIdProvider] can't resolve the intro
+/// (deep-link to a deleted / expired / RLS-hidden row, or a cold start with
+/// no cached lists). Routes back to the Inbox rather than dead-ending on a
+/// bare "not found" line.
+class _IntroNotFound extends StatelessWidget {
+  const _IntroNotFound({required this.error});
+
+  final Object error;
+
+  @override
+  Widget build(BuildContext context) {
+    // ListView keeps the surface scrollable so it composes cleanly inside the
+    // Scaffold body and matches the other inbox error states.
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        EmptyState(
+          icon: LucideIcons.mailQuestion,
+          title: context.t('intros.detail.notFound'),
+          body: messageForError(context, error),
+          action: EmptyStateAction(
+            label: context.t('intros.detail.backToInbox'),
+            onPressed: () => context.go(Routes.inbox),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -98,12 +146,22 @@ class _IntroDetailBodyState extends ConsumerState<_IntroDetailBody> {
     try {
       final IntrosService svc = ref.read(introsServiceProvider);
       final updated = await svc.acceptIntro(widget.intro.id);
+      Analytics.log(AppEvent.introAccepted);
       ref
         ..invalidate(receivedIntrosProvider)
         ..invalidate(sentIntrosProvider);
       if (!mounted) return;
-      if (updated.conversationId != null) {
-        context.go('/chats/${updated.conversationId}');
+      // SIGNATURE MOMENT — the intro is accepted (the app's core payoff).
+      // Heavy impact + a brief celebration that floats on the ROOT overlay
+      // so it keeps playing over the chat screen we push to below; it never
+      // blocks navigation.
+      Haptics.heavy();
+      IntroAcceptedCelebration.play(context);
+      final String? conversationId = updated.conversationId;
+      if (conversationId != null) {
+        // Mirror the "Open chat" CTA below — same push semantics + Routes
+        // constant so accepting and re-opening land on the chat identically.
+        unawaited(context.push(Routes.chat(conversationId)));
       } else {
         unawaited(Navigator.of(context).maybePop());
       }
@@ -121,8 +179,11 @@ class _IntroDetailBodyState extends ConsumerState<_IntroDetailBody> {
     });
     try {
       await ref.read(introsServiceProvider).declineIntro(widget.intro.id);
+      Analytics.log(AppEvent.introDeclined);
       ref.invalidate(receivedIntrosProvider);
       if (!mounted) return;
+      // Medium impact — confirms the decision without celebrating it.
+      Haptics.medium();
       unawaited(Navigator.of(context).maybePop());
     } on AppException catch (e) {
       setState(() => _errorKey = e.i18nKey);
@@ -148,6 +209,19 @@ class _IntroDetailBodyState extends ConsumerState<_IntroDetailBody> {
     final senderRole = peer?.primaryRole ?? intro.sender?.primaryRole;
     final bool senderVerified =
         peer?.isVerified ?? intro.sender?.isVerified ?? false;
+    // Two-line sender meta per gallery E3 (lines 1842-1843): a muted
+    // "Role · Stage · Location" line plus the headline/tagline beneath —
+    // both shown independent of verified state.
+    final String? senderMeta = _composeSenderMeta(peer ?? intro.sender);
+    final String? senderHeadline = peer?.headline ?? intro.sender?.headline;
+    // Accept/Decline buttons are recipient-only — `intro.isActionable`
+    // checks state+expiry but not viewer role, so without this gate the
+    // sender of a still-delivered intro would see Accept/Decline on their
+    // own outbound row and hit a 42501 ("only the recipient can accept")
+    // mapped to the misleading 'auth.errors.signInFailed' copy.
+    final String? viewerId = ref.watch(currentUserIdProvider);
+    final bool viewerIsRecipient =
+        viewerId != null && viewerId == intro.recipientId;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -156,18 +230,33 @@ class _IntroDetailBodyState extends ConsumerState<_IntroDetailBody> {
           name: senderName,
           photoUrl: senderPhoto,
           role: senderRole,
+          metaLine: senderMeta,
+          headline: senderHeadline,
           verified: senderVerified,
         ),
         const SizedBox(height: 14),
         Align(
           alignment: Alignment.centerLeft,
-          child: IntroStateBadge(state: intro.state),
+          child: IntroStateBadge(
+            state: intro.state,
+            // Mirror IntroListRow: when the viewer is the sender, route
+            // the badge through its sender-POV labels so a declined row
+            // surfaces as "Delivered, awaiting response" (spec §12
+            // silent-decline) instead of leaking a "Declined" pill.
+            fromSender: !viewerIsRecipient,
+            connectedAt: intro.createdAt,
+          ),
         ),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: colors.goldPale,
+            // Gallery E3 (line 1846) uses `.banner.muted` (#f1f5f9 + border)
+            // for the "{NAME} SAYS" note — not the gold-pale of the E1
+            // composer card. slate100 is the dark-mode-aware muted-surface
+            // token that resolves to #f1f5f9 in light mode.
+            color: colors.slate100,
+            border: Border.all(color: colors.border),
             borderRadius: BorderRadius.circular(14),
           ),
           child: Column(
@@ -185,7 +274,7 @@ class _IntroDetailBodyState extends ConsumerState<_IntroDetailBody> {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(intro.note, style: typo.bodyMd.copyWith(color: colors.navy)),
+              Text(intro.note, style: typo.bodyMd.copyWith(color: colors.body)),
             ],
           ),
         ),
@@ -218,7 +307,7 @@ class _IntroDetailBodyState extends ConsumerState<_IntroDetailBody> {
             child: Text(context.t(_errorKey!)),
           ),
         ],
-        if (intro.isActionable) ...[
+        if (intro.isActionable && viewerIsRecipient) ...[
           const SizedBox(height: 20),
           _ActionRow(
             intro: intro,
@@ -235,6 +324,17 @@ class _IntroDetailBodyState extends ConsumerState<_IntroDetailBody> {
         ],
         const SizedBox(height: 20),
         _MutualConnectionsFooter(targetUserId: intro.senderId),
+        // Block CTA — only when viewer is the recipient (i.e. someone
+        // they don't know reached out). The sender can't block themselves;
+        // mirrors the conditional on the Report flag in the top bar.
+        if (viewerIsRecipient) ...[
+          const SizedBox(height: 24),
+          BlockButton(
+            userId: intro.senderId,
+            name: senderName,
+            handle: peer?.handle,
+          ),
+        ],
       ],
     );
   }
@@ -250,19 +350,51 @@ class _IntroDetailBodyState extends ConsumerState<_IntroDetailBody> {
   }
 }
 
+/// Composes the gallery's E3 meta line "Role · Stage · Location" from a
+/// [Profile]'s role, stage (founder/investor), and city/country. Each part
+/// is dropped when empty; returns `null` when nothing resolves so the hero
+/// can collapse the line entirely.
+String? _composeSenderMeta(Profile? profile) {
+  if (profile == null) return null;
+  final List<String> parts = <String>[
+    if ((profile.primaryRole ?? '').isNotEmpty) profile.primaryRole!,
+    if ((profile.founderStage ?? '').isNotEmpty)
+      profile.founderStage!
+    else if ((profile.investorStage ?? '').isNotEmpty)
+      profile.investorStage!,
+    if ((profile.city ?? '').isNotEmpty)
+      profile.city!
+    else if ((profile.country ?? '').isNotEmpty)
+      profile.country!,
+  ];
+  return parts.isEmpty ? null : parts.join(' · ');
+}
+
 /// Left-aligned hero: 60px avatar on the left, name + verified pill on a
-/// row, role beneath. Mirrors the gallery's E3 sender block.
+/// row, and two muted meta lines beneath — a "Role · Stage · Location" line
+/// and the headline/tagline. Mirrors the gallery's E3 sender block (lines
+/// 1841-1843): the verified pill and the role meta line coexist.
 class _SenderHero extends StatelessWidget {
   const _SenderHero({
     required this.name,
     required this.photoUrl,
     required this.role,
+    required this.metaLine,
+    required this.headline,
     required this.verified,
   });
 
   final String name;
   final String? photoUrl;
+
+  /// Short role word folded into the verified badge label.
   final String? role;
+
+  /// Composed "Role · Stage · Location" line shown under the name.
+  final String? metaLine;
+
+  /// Headline / tagline shown as the second meta line.
+  final String? headline;
   final bool verified;
 
   @override
@@ -309,11 +441,22 @@ class _SenderHero extends StatelessWidget {
                   ],
                 ],
               ),
-              if (role != null && !verified) ...<Widget>[
+              if (metaLine != null && metaLine!.isNotEmpty) ...<Widget>[
                 const SizedBox(height: 2),
                 Text(
-                  role!,
+                  metaLine!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: typo.bodyMd.copyWith(color: colors.muted),
+                ),
+              ],
+              if (headline != null && headline!.isNotEmpty) ...<Widget>[
+                const SizedBox(height: 3),
+                Text(
+                  headline!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: typo.bodyMd.copyWith(color: colors.body),
                 ),
               ],
             ],
@@ -372,10 +515,11 @@ class _MutualConnectionsFooter extends ConsumerWidget {
 }
 
 /// Overlapping mini-avatar stack, capped at 3 avatars to keep the footer
-/// width predictable. Renders blank gold-pale circles when the signals row
-/// has no user ids (the gallery shows two empty circles in the same
-/// scenario — keeps the layout stable while we wait on the profile fetch).
-class _MutualAvatarStack extends StatelessWidget {
+/// width predictable. Resolves each user id to a [Profile] via
+/// [peerProfileProvider] so we render proper initials / photos — not the
+/// raw UUID (which would otherwise produce hex-prefix "initials"). Renders
+/// blank gold-pale circles when the signals row has no user ids.
+class _MutualAvatarStack extends ConsumerWidget {
   const _MutualAvatarStack({required this.userIds});
 
   final List<String> userIds;
@@ -384,7 +528,7 @@ class _MutualAvatarStack extends StatelessWidget {
   static const double _overlap = 8;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final int count = userIds.isEmpty ? 2 : userIds.take(3).length;
     final double width = _avatarSize + (count - 1) * (_avatarSize - _overlap);
     return SizedBox(
@@ -395,13 +539,33 @@ class _MutualAvatarStack extends StatelessWidget {
           for (int i = 0; i < count; i++)
             Positioned(
               left: i * (_avatarSize - _overlap),
-              child: Avatar(
-                name: userIds.length > i ? userIds[i] : '··',
+              child: _MutualAvatar(
+                userId: userIds.length > i ? userIds[i] : null,
                 size: _avatarSize,
               ),
             ),
         ],
       ),
+    );
+  }
+}
+
+class _MutualAvatar extends ConsumerWidget {
+  const _MutualAvatar({required this.userId, required this.size});
+
+  final String? userId;
+  final double size;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (userId == null) {
+      return Avatar(name: '··', size: size);
+    }
+    final profile = ref.watch(peerProfileProvider(userId!)).valueOrNull;
+    return Avatar(
+      name: profile?.name ?? '··',
+      photoUrl: profile?.photoUrl,
+      size: size,
     );
   }
 }

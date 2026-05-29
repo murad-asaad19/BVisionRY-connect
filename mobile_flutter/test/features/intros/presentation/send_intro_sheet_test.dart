@@ -21,12 +21,25 @@ class _ThrowingIntrosService implements IntrosService {
     required String note,
   }) async =>
       throw _error;
+  // The compose sheet watches sentTodayProvider on every build; give it a
+  // valid counter so the error-path tests exercise sendIntro, not the counter.
+  @override
+  Future<({int used, int cap})> introsSentTodayCount() async =>
+      (used: 0, cap: 5);
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
   setUpAll(() => registerFallbackValue(<String, dynamic>{}));
+
+  _FakeIntrosService fakeService({int used = 3, int cap = 5}) {
+    final fake = _FakeIntrosService();
+    when(
+      () => fake.introsSentTodayCount(),
+    ).thenAnswer((_) async => (used: used, cap: cap));
+    return fake;
+  }
 
   Future<void> pumpSheet(
     WidgetTester tester, {
@@ -53,13 +66,25 @@ void main() {
   }
 
   testWidgets('Send button disabled until 80-400 chars typed', (tester) async {
-    await pumpSheet(tester, introsService: _FakeIntrosService());
+    await pumpSheet(tester, introsService: fakeService());
     final sendKey = find.byKey(const ValueKey('send-intro-sheet-send'));
     expect(sendKey, findsOneWidget);
     final InkWell inkWell = tester.widget(
       find.descendant(of: sendKey, matching: find.byType(InkWell)).first,
     );
     expect(inkWell.onTap, isNull);
+  });
+
+  testWidgets('renders server cap counter from sentTodayProvider', (
+    tester,
+  ) async {
+    await pumpSheet(tester, introsService: fakeService(used: 3, cap: 5));
+    expect(
+      find.byKey(const ValueKey('send-intro-today-counter')),
+      findsOneWidget,
+    );
+    // Cap shown is the RPC value (5), not the dailyIntroCapProvider override.
+    expect(find.text("Today's intros: 3 / 5"), findsOneWidget);
   });
 
   testWidgets('cooldown error renders intros.compose.errorCooldown', (

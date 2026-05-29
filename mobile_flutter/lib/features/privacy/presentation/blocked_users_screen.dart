@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../core/errors/error_messages.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
 import '../data/privacy_service.dart';
 import '../domain/blocked_user.dart';
@@ -120,7 +123,8 @@ class _BlockedRow extends ConsumerWidget {
                   context.t(
                     'privacy.blockedAt',
                     vars: <String, Object>{
-                      'date': _formatDate(user.createdAt),
+                      'date':
+                          DateFormat.yMMMd().format(user.createdAt.toLocal()),
                     },
                   ),
                   style: typo.bodyXs.copyWith(color: colors.muted),
@@ -149,16 +153,18 @@ class _BlockedRow extends ConsumerWidget {
           confirmLabel: context.t('privacy.unblock'),
         );
     if (!confirmed) return;
-    await ref.read(privacyServiceProvider).unblockUser(user.blockedId);
-    ref.invalidate(blocksProvider);
-  }
-
-  /// `YYYY-MM-DD` — locale-agnostic date format suitable for the gallery's
-  /// muted "blocked at" line.
-  static String _formatDate(DateTime d) {
-    final DateTime local = d.toLocal();
-    final String mm = local.month.toString().padLeft(2, '0');
-    final String dd = local.day.toString().padLeft(2, '0');
-    return '${local.year}-$mm-$dd';
+    Haptics.selection();
+    try {
+      await ref.read(privacyServiceProvider).unblockUser(user.blockedId);
+      ref.invalidate(blocksProvider);
+    } catch (e) {
+      Haptics.error();
+      if (context.mounted) {
+        ref.read(toastServiceProvider.notifier).showToast(
+              intent: AppIntent.danger,
+              title: messageForError(context, e),
+            );
+      }
+    }
   }
 }

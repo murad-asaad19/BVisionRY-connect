@@ -3,10 +3,12 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/i18n/i18n.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/avatar.dart';
+import '../../../../core/widgets/gap.dart';
 import '../../domain/my_booking.dart';
 
 /// Renders one [MyBooking] on the My Bookings screen.
@@ -31,8 +33,9 @@ class BookingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
-    final dateLabel =
-        DateFormat.MMMEd().add_jm().format(booking.startsAt.toLocal());
+    final spacing = Theme.of(context).extension<AppSpacing>()!;
+    final local = booking.startsAt.toLocal();
+    final dateLabel = DateFormat.MMMEd().add_jm().format(local);
     return AppCard(
       onTap: onTap,
       child: Column(
@@ -46,7 +49,7 @@ class BookingCard extends StatelessWidget {
                 name: booking.hostName,
                 size: 40,
               ),
-              const SizedBox(width: 10),
+              Gap(spacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,16 +59,27 @@ class BookingCard extends StatelessWidget {
                       dateLabel,
                       style: typo.bodyMd.copyWith(color: colors.muted),
                     ),
+                    // Time is shown in the viewer's local zone — label it so
+                    // the booking isn't ambiguous across DST / travel.
+                    Text(
+                      context.t(
+                        'officeHours.book.timezoneNote',
+                        vars: <String, Object>{
+                          'timezone': local.timeZoneName,
+                        },
+                      ),
+                      style: typo.bodyXs.copyWith(color: colors.muted),
+                    ),
                   ],
                 ),
               ),
             ],
           ),
           if (booking.topic != null && booking.topic!.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 8),
+            Gap(spacing.sm),
             Text(booking.topic!, style: typo.bodyLg),
           ],
-          const SizedBox(height: 10),
+          Gap(spacing.sm),
           Align(
             alignment: Alignment.centerLeft,
             child: AppButton(

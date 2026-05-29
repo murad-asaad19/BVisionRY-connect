@@ -1,19 +1,25 @@
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../core/analytics/analytics_events.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../auth/providers/session_provider.dart';
+import '../../intros/providers/intros_providers.dart';
 import '../../media/data/media_service.dart';
 import '../../meetings/presentation/meeting_card_bubble.dart';
 import '../../meetings/presentation/meeting_review_prompt.dart';
 import '../../meetings/presentation/propose_meeting_sheet.dart';
 import '../../meetings/providers/meeting_proposals_provider.dart';
+import '../../privacy/privacy.dart';
 import '../../profile/providers/peer_profile_provider.dart';
 import '../data/chat_service.dart';
 import '../domain/conversation_overview.dart';
@@ -23,10 +29,12 @@ import '../providers/active_conversation_provider.dart';
 import '../providers/conversation_overview_provider.dart';
 import '../providers/messages_provider.dart';
 import '../providers/typing_provider.dart';
+import '../providers/unread_counts_provider.dart';
 import 'widgets/conversation_app_bar.dart';
 import 'widgets/image_bubble.dart';
 import 'widgets/message_actions_sheet.dart';
 import 'widgets/message_input_bar.dart';
+import 'widgets/message_timestamp.dart';
 import 'widgets/text_bubble.dart';
 import 'widgets/tombstone_bubble.dart';
 import 'widgets/typing_indicator.dart';
@@ -62,6 +70,7 @@ class ConversationScreen extends ConsumerStatefulWidget {
 class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _markingRead = false;
+  bool _paginating = false;
 
   @override
   void initState() {
@@ -71,6 +80,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       if (!mounted) return;
       ref.read(activeConversationProvider.notifier).state =
           widget.conversationId;
+      Analytics.log(AppEvent.conversationOpened);
       _markRead();
     });
   }
@@ -101,7 +111,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       await ref
           .read(chatServiceProvider)
           .markConversationRead(widget.conversationId);
-      ref.invalidate(conversationOverviewProvider);
+      // Refresh only the lightweight unread-counts provider (the badge
+      // source) — NOT the heavyweight conversationOverviewProvider RPC,
+      // which the _onScroll handler would otherwise refetch on every
+      // scroll-to-bottom tick. The overview list still stays current via
+      // its own messageStreamProvider Realtime listener.
+      ref.invalidate(unreadCountsProvider);
     } catch (_) {
       // Soft-fail; the badge will refresh on next list invalidation.
     } finally {
@@ -115,7 +130,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     // Reverse list → top of the visible thread is `extentAfter` (oldest
     // rows haven't been fetched yet). Trigger pagination on approach.
     if (pos.extentAfter < 100) {
-      ref.read(messagesProvider(widget.conversationId).notifier).loadMore();
+      _loadOlder();
     }
     // Scrolled back to the newest row → mark read again so the unread
     // badge clears even when new messages stream in via Realtime.
@@ -124,23 +139,106 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
   }
 
-  Future<void> _sendText(String body) async {
-    await ref
-        .read(messagesProvider(widget.conversationId).notifier)
-        .sendText(body);
-    ref.invalidate(conversationOverviewProvider);
+  /// Loads the next older page and surfaces a visible spinner at the top of
+  /// the thread while the fetch is in flight. The notifier itself gates
+  /// re-entrancy / end-of-history, so a redundant call here is harmless.
+  Future<void> _loadOlder() async {
+    final notifier = _messages;
+    if (_paginating || !notifier.hasMore) return;
+    setState(() => _paginating = true);
+    try {
+      await notifier.loadMore();
+    } finally {
+      if (mounted) setState(() => _paginating = false);
+    }
   }
 
+  MessagesNotifier get _messages =>
+      ref.read(messagesProvider(widget.conversationId).notifier);
+
+  Future<void> _sendText(String body) async {
+    Haptics.light();
+    try {
+      await _messages.sendText(body);
+      ref.invalidate(conversationOverviewProvider);
+    } catch (_) {
+      // The failure is surfaced inline on the optimistic bubble (FAILED +
+      // retry); no transient toast needed.
+    }
+  }
+
+  Future<void> _retryText(Message m) async {
+    try {
+      await _messages.retryText(clientId: m.id, body: m.body ?? '');
+      ref.invalidate(conversationOverviewProvider);
+    } catch (_) {
+      // Stays in the FAILED state; the bubble keeps its retry affordance.
+    }
+  }
+
+  /// Picks + resizes an image, prepends an optimistic bubble with the local
+  /// bytes, then uploads + sends. The upload/RPC reuse the client message id
+  /// so the server row reconciles by id.
   Future<void> _pickAndSendImage() async {
     final media = ref.read(mediaServiceProvider);
-    final toast = ref.read(toastServiceProvider.notifier);
-    final failedTitle = context.t('chat.send.failed');
+    final file = await media.pickImage();
+    if (file == null) return;
+    Uint8List bytes;
     try {
-      final file = await media.pickImage();
-      if (file == null) return;
-      final bytes = await media.resizeImage(file);
+      bytes = await media.resizeImage(file);
       media.validateImageBytes(bytes, mime: 'image/jpeg');
-      final messageId = media.generateMessageId();
+    } catch (_) {
+      // Pre-flight failure (too large / unsupported) before any bubble was
+      // shown — surface via toast since there is nothing to retry inline.
+      if (mounted) {
+        ref.read(toastServiceProvider.notifier).showToast(
+              title: context.t('chat.send.failed'),
+              intent: AppIntent.danger,
+            );
+      }
+      return;
+    }
+    Haptics.light();
+    final messageId = media.generateMessageId();
+    final session = ref.read(currentSessionProvider);
+    await _runImageSend(
+      messageId: messageId,
+      bytes: bytes,
+      optimistic: Message.optimisticImage(
+        messageId: messageId,
+        conversationId: widget.conversationId,
+        senderId: session?.user.id ?? '',
+        createdAt: DateTime.now().toUtc(),
+        localBytes: bytes,
+      ),
+      isRetry: false,
+    );
+  }
+
+  Future<void> _retryImage(Message m) async {
+    final bytes = m.localImageBytes;
+    if (bytes == null) {
+      // Local bytes are gone (e.g. after a cold reconcile) — drop the stale
+      // failed bubble rather than retry with nothing to upload.
+      _messages.discardPending(m.id);
+      return;
+    }
+    await _runImageSend(
+      messageId: m.id,
+      bytes: bytes,
+      optimistic: m,
+      isRetry: true,
+    );
+  }
+
+  Future<void> _runImageSend({
+    required String messageId,
+    required Uint8List bytes,
+    required Message optimistic,
+    required bool isRetry,
+  }) async {
+    final media = ref.read(mediaServiceProvider);
+    Future<Message> send() async {
       final path = await media.uploadChatMedia(
         conversationId: widget.conversationId,
         messageId: messageId,
@@ -148,15 +246,27 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         bytes: bytes,
         mime: 'image/jpeg',
       );
-      await media.sendImageMessage(
+      return media.sendImageMessage(
         conversationId: widget.conversationId,
         mediaPath: path,
         mediaMime: 'image/jpeg',
         mediaSizeBytes: bytes.lengthInBytes,
       );
+    }
+
+    try {
+      if (isRetry) {
+        await _messages.retryMedia(messageId: messageId, send: send);
+      } else {
+        await _messages.sendMedia(
+          messageId: messageId,
+          optimistic: optimistic,
+          send: send,
+        );
+      }
       ref.invalidate(conversationOverviewProvider);
     } catch (_) {
-      toast.showToast(title: failedTitle, intent: AppIntent.danger);
+      // Inline FAILED state on the bubble already reflects this.
     }
   }
 
@@ -168,10 +278,18 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     ref.invalidate(conversationOverviewProvider);
   }
 
+  /// Voice retry: the captured clip no longer exists once the recorder sheet
+  /// closed, so discard the failed bubble and re-open the recorder.
+  Future<void> _retryVoice(Message m) async {
+    _messages.discardPending(m.id);
+    await _openVoiceSheet();
+  }
+
   Future<void> _openProposeMeetingSheet({
     String? peerName,
     String? peerHandle,
     String? peerPhotoUrl,
+    String? peerHeadline,
   }) async {
     await showAppBottomSheet<void>(
       context: context,
@@ -180,6 +298,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         peerName: peerName,
         peerHandle: peerHandle,
         peerPhotoUrl: peerPhotoUrl,
+        peerHeadline: peerHeadline,
       ),
     );
   }
@@ -204,6 +323,51 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
   }
 
+  /// Confirms then blocks the peer. Mirrors [BlockButton]'s flow:
+  /// destructive confirm dialog → block_user RPC → invalidate dependent
+  /// providers (server-side auto-declines any active delivered intros).
+  Future<void> _blockPeer({
+    required String userId,
+    required String name,
+    required String handle,
+  }) async {
+    final confirm = ref.read(confirmServiceProvider);
+    final svc = ref.read(privacyServiceProvider);
+    final toast = ref.read(toastServiceProvider.notifier);
+    final actionFailed = context.t('chat.mute.actionFailed');
+    final ok = await confirm.confirm(
+      context,
+      title: context.t(
+        'privacy.blockConfirm.title',
+        vars: <String, Object>{'handle': handle.isNotEmpty ? handle : name},
+      ),
+      body: context.t('privacy.blockConfirm.body'),
+      confirmLabel: context.t('privacy.blockUser'),
+      destructive: true,
+    );
+    if (!ok) return;
+    try {
+      await svc.blockUser(userId);
+      ref.invalidate(blocksProvider);
+      ref.invalidate(receivedIntrosProvider);
+      ref.invalidate(sentIntrosProvider);
+      ref.invalidate(conversationOverviewProvider);
+    } catch (_) {
+      toast.showToast(title: actionFailed, intent: AppIntent.danger);
+    }
+  }
+
+  /// Returns true when `rows[i]` is the oldest message of its 5-min
+  /// cluster — meaning the timestamp header should render above it. In a
+  /// `reverse: true` ListView, `rows[i+1]` is older than `rows[i]`, so the
+  /// boundary is at the index where the gap to the next-older message
+  /// exceeds 5 minutes (or no older message exists).
+  bool _isClusterStart(List<Message> rows, int i) {
+    if (i == rows.length - 1) return true;
+    final gap = rows[i].createdAt.difference(rows[i + 1].createdAt);
+    return gap > const Duration(minutes: 5);
+  }
+
   Widget _buildBubble(Message m, String selfId) {
     final variant =
         m.senderId == selfId ? BubbleVariant.me : BubbleVariant.them;
@@ -212,25 +376,38 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
     final canOpenActions = m.senderId == selfId;
     final longPress = canOpenActions
-        ? () => MessageActionsSheet.show(
+        ? () {
+            // Selection tick on long-press — confirms the actions sheet is
+            // opening before it animates in.
+            Haptics.selection();
+            MessageActionsSheet.show(
               context,
               message: m,
               currentUserId: selfId,
-            )
+            );
+          }
         : null;
+    // Optimistic placeholders can't be long-pressed for actions (no server
+    // row yet) — gate the actions sheet on a confirmed message.
+    final effectiveLongPress = m.isOptimistic ? null : longPress;
     switch (m.kind) {
       case MessageKind.text:
         return TextBubble(
           body: m.body ?? '',
           variant: variant,
           isEdited: m.isEdited,
-          onLongPress: longPress,
+          onLongPress: effectiveLongPress,
+          sendStatus: m.sendStatus,
+          onRetry: m.isFailed ? () => _retryText(m) : null,
         );
       case MessageKind.image:
         return ImageBubble(
           mediaPath: m.mediaPath ?? '',
           variant: variant,
-          onLongPress: longPress,
+          onLongPress: effectiveLongPress,
+          localBytes: m.localImageBytes,
+          sendStatus: m.sendStatus,
+          onRetry: m.isFailed ? () => _retryImage(m) : null,
         );
       case MessageKind.voice:
         return VoiceBubble(
@@ -240,7 +417,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           variant: variant,
           transcript: m.transcript,
           transcriptStatus: m.transcriptStatus,
-          onLongPress: longPress,
+          onLongPress: effectiveLongPress,
+          sendStatus: m.sendStatus,
+          // Voice retry re-opens the recorder (the local clip is gone once
+          // the sheet closed), so the failed bubble is discarded and a fresh
+          // recording flow is started.
+          onRetry: m.isFailed ? () => _retryVoice(m) : null,
         );
       case MessageKind.meeting:
         return _buildMeetingBubble(m, selfId);
@@ -250,19 +432,23 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   Widget _buildMeetingBubble(Message m, String selfId) {
     final id = m.meetingProposalId;
     if (id == null) return const SizedBox.shrink();
-    final proposals = ref
-            .watch(meetingProposalsProvider(widget.conversationId))
-            .valueOrNull ??
-        const [];
-    for (final p in proposals) {
-      if (p.id == id) {
-        return MeetingCardBubble(proposal: p, viewerId: selfId);
-      }
-    }
-    // Realtime row not yet arrived — render nothing so the list keeps
-    // its layout; an UPDATE on `meeting_proposals` will invalidate the
-    // messages provider and re-trigger the build.
-    return const SizedBox.shrink();
+    // Select ONLY this bubble's proposal so a change to one proposal doesn't
+    // rebuild every meeting bubble in the thread (freezed value-equality on
+    // the selected proposal gates the rebuild).
+    final proposal = ref.watch(
+      meetingProposalsProvider(widget.conversationId).select((asyncProposals) {
+        final list = asyncProposals.valueOrNull;
+        if (list == null) return null;
+        for (final p in list) {
+          if (p.id == id) return p;
+        }
+        return null;
+      }),
+    );
+    // Realtime row not yet arrived — render nothing so the list keeps its
+    // layout; the proposal's arrival/UPDATE re-triggers this select.
+    if (proposal == null) return const SizedBox.shrink();
+    return MeetingCardBubble(proposal: proposal, viewerId: selfId);
   }
 
   @override
@@ -289,81 +475,121 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final isTyping = typingSet.isNotEmpty;
     final colors = Theme.of(context).extension<AppColors>()!;
 
-    return Scaffold(
-      backgroundColor: colors.surface,
-      appBar: ConversationAppBar(
-        peerName: overview?.peerName ?? peer?.name ?? '',
-        peerHandle: overview?.peerHandle ?? peer?.handle ?? '',
-        peerPhotoUrl: overview?.peerPhotoUrl ?? peer?.photoUrl,
-        peerHeadline: peer?.headline,
-        isMuted: overview?.isMuted ?? false,
-        isVerified: peer?.isVerified ?? false,
-        peerRole: peer?.primaryRole,
-        isTyping: isTyping,
-        onTapProfile: () {
-          final handle = overview?.peerHandle ?? peer?.handle;
-          if (handle != null && handle.isNotEmpty) {
-            context.push(Routes.publicProfile(handle));
-          }
-        },
-        onToggleMute: () {
-          if (overview != null) _toggleMute(overview);
-        },
-        onReport: () {
-          ref
-              .read(toastServiceProvider.notifier)
-              .showToast(title: 'Coming soon');
-        },
-      ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: messagesAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    e.toString(),
-                    style: Theme.of(
-                      context,
-                    ).extension<AppTypography>()!.bodyMd.copyWith(
-                          color: colors.danger,
-                        ),
-                  ),
-                ),
+    return PopScope(
+      // A conversation reached via context.go (accept_intro / deep-link) has
+      // an empty back stack, so the OS back gesture would otherwise exit the
+      // app. Mirror the app-bar chevron's fallback to the Inbox hub.
+      canPop: context.canPop(),
+      onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (!didPop) context.go(Routes.inbox);
+      },
+      child: Scaffold(
+        backgroundColor: colors.surface,
+        appBar: ConversationAppBar(
+          peerName: overview?.peerName ?? peer?.name ?? '',
+          peerHandle: overview?.peerHandle ?? peer?.handle ?? '',
+          peerPhotoUrl: overview?.peerPhotoUrl ?? peer?.photoUrl,
+          peerHeadline: peer?.headline,
+          isMuted: overview?.isMuted ?? false,
+          isVerified: peer?.isVerified ?? false,
+          peerRole: peer?.primaryRole,
+          isTyping: isTyping,
+          onTapProfile: () {
+            final handle = overview?.peerHandle ?? peer?.handle;
+            if (handle != null && handle.isNotEmpty) {
+              context.push(Routes.publicProfile(handle));
+            }
+          },
+          onToggleMute: () {
+            if (overview != null) _toggleMute(overview);
+          },
+          onReport: () {
+            if (overview == null) return;
+            unawaited(
+              showReportSheet(
+                context,
+                targetType: ReportTargetType.profile,
+                targetId: overview.peerId,
               ),
-              data: (rows) {
-                if (rows.isEmpty) {
-                  return EmptyState(
-                    icon: LucideIcons.messageSquare,
-                    title: context.t('chat.noMessages'),
+            );
+          },
+          onBlock: overview == null
+              ? null
+              : () => _blockPeer(
+                    userId: overview!.peerId,
+                    name: overview.peerName,
+                    handle: overview.peerHandle,
+                  ),
+        ),
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              child: QueryState<List<Message>>(
+                value: messagesAsync,
+                // Default error UI is already localized via messageForError
+                // (no raw toString) and scrollable; just wire retry.
+                onRetry: () =>
+                    ref.invalidate(messagesProvider(widget.conversationId)),
+                data: (rows) {
+                  if (rows.isEmpty) {
+                    return EmptyState(
+                      icon: LucideIcons.messageSquare,
+                      title: context.t('chat.noMessages'),
+                    );
+                  }
+                  // Reverse list → the older-history end is the TOP, so an
+                  // extra trailing index renders the pagination spinner above
+                  // the oldest message.
+                  final itemCount = rows.length + (_paginating ? 1 : 0);
+                  return ListView.builder(
+                    controller: _scrollController,
+                    reverse: true,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: itemCount,
+                    itemBuilder: (ctx, i) {
+                      if (i >= rows.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        );
+                      }
+                      final showTimestamp = _isClusterStart(rows, i);
+                      final bubble = _buildBubble(rows[i], selfId);
+                      if (!showTimestamp) return bubble;
+                      return Column(
+                        children: <Widget>[
+                          MessageTimestamp(at: rows[i].createdAt),
+                          bubble,
+                        ],
+                      );
+                    },
                   );
-                }
-                return ListView.builder(
-                  controller: _scrollController,
-                  reverse: true,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: rows.length,
-                  itemBuilder: (ctx, i) => _buildBubble(rows[i], selfId),
-                );
-              },
+                },
+              ),
             ),
-          ),
-          if (isTyping) TypingIndicator(peerName: overview?.peerName),
-          MeetingReviewPrompt(conversationId: widget.conversationId),
-          MessageInputBar(
-            conversationId: widget.conversationId,
-            onSendText: _sendText,
-            onPickImage: _pickAndSendImage,
-            onRecordVoice: _openVoiceSheet,
-            onProposeMeeting: () => _openProposeMeetingSheet(
-              peerName: overview?.peerName ?? peer?.name,
-              peerHandle: overview?.peerHandle ?? peer?.handle,
-              peerPhotoUrl: overview?.peerPhotoUrl ?? peer?.photoUrl,
+            if (isTyping) TypingIndicator(peerName: overview?.peerName),
+            MeetingReviewPrompt(conversationId: widget.conversationId),
+            MessageInputBar(
+              conversationId: widget.conversationId,
+              onSendText: _sendText,
+              onPickImage: _pickAndSendImage,
+              onRecordVoice: _openVoiceSheet,
+              onProposeMeeting: () => _openProposeMeetingSheet(
+                peerName: overview?.peerName ?? peer?.name,
+                peerHandle: overview?.peerHandle ?? peer?.handle,
+                peerPhotoUrl: overview?.peerPhotoUrl ?? peer?.photoUrl,
+                peerHeadline: peer?.headline,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

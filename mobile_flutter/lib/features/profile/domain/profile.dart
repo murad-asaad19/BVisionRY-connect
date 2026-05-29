@@ -46,15 +46,22 @@ class Profile with _$Profile {
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
     @JsonKey(name: 'last_active_at') DateTime? lastActiveAt,
+    // Age-gate + legal consent (set by record_signup_consent). Both are
+    // stamped together; the [consentRecorded] getter reads them to drive the
+    // post-auth consent interstitial gate.
+    @JsonKey(name: 'tos_accepted_at') DateTime? tosAcceptedAt,
+    @JsonKey(name: 'privacy_accepted_at') DateTime? privacyAcceptedAt,
     // Role-specific structured details (spec §3a). All optional; the profile
     // screen renders only the rows that resolve to a non-null value.
     // Builder details
     @JsonKey(name: 'builder_discipline') String? builderDiscipline,
     @JsonKey(name: 'builder_seniority') String? builderSeniority,
-    @JsonKey(name: 'builder_skills') @Default(<String>[]) List<String>
-        builderSkills,
-    @JsonKey(name: 'builder_open_to') @Default(<String>[]) List<String>
-        builderOpenTo,
+    @JsonKey(name: 'builder_skills')
+    @Default(<String>[])
+    List<String> builderSkills,
+    @JsonKey(name: 'builder_open_to')
+    @Default(<String>[])
+    List<String> builderOpenTo,
     @JsonKey(name: 'builder_rate_band') String? builderRateBand,
     // Founder details
     @JsonKey(name: 'founder_stage') String? founderStage,
@@ -64,8 +71,9 @@ class Profile with _$Profile {
     // Investor details
     @JsonKey(name: 'investor_type') String? investorType,
     @JsonKey(name: 'investor_check_size') String? investorCheckSize,
-    @JsonKey(name: 'investor_sectors') @Default(<String>[]) List<String>
-        investorSectors,
+    @JsonKey(name: 'investor_sectors')
+    @Default(<String>[])
+    List<String> investorSectors,
     @JsonKey(name: 'investor_stage') String? investorStage,
   }) = _Profile;
 
@@ -106,6 +114,8 @@ class Profile with _$Profile {
       'created_at': map['created_at'],
       'updated_at': map['updated_at'],
       'last_active_at': map['last_active_at'],
+      'tos_accepted_at': map['tos_accepted_at'],
+      'privacy_accepted_at': map['privacy_accepted_at'],
       'builder_discipline': map['builder_discipline'],
       'builder_seniority': map['builder_seniority'],
       'builder_skills': map['builder_skills'] ?? const <String>[],
@@ -143,6 +153,13 @@ class Profile with _$Profile {
   /// True when the profile carries a non-null `suspended_at` timestamp.
   /// Mirrors spec §5.3 — suspension is a soft-state flag, not a deletion.
   bool get isSuspended => suspendedAt != null;
+
+  /// True once both the Terms of Service and Privacy Policy have been accepted
+  /// (stamped together by `record_signup_consent`). Drives the post-auth
+  /// consent interstitial gate — a profile that returns `false` here is routed
+  /// to [Routes.consent] before onboarding regardless of how it authenticated.
+  bool get consentRecorded =>
+      tosAcceptedAt != null && privacyAcceptedAt != null;
 
   /// True when the most recent goal change is older than 28 days / 4 weeks —
   /// the *soft* threshold. Pairs with [GoalRefreshCard]'s muted inline

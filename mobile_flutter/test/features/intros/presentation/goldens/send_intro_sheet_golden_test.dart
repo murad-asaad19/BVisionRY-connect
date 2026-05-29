@@ -17,9 +17,12 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() => registerFallbackValue(<String, dynamic>{}));
 
-  _FakeIntrosService stub({int today = 3}) {
+  _FakeIntrosService stub({int today = 3, int sent = 3, int cap = 5}) {
     final fake = _FakeIntrosService();
     when(() => fake.introsTodayCount()).thenAnswer((_) async => today);
+    when(
+      () => fake.introsSentTodayCount(),
+    ).thenAnswer((_) async => (used: sent, cap: cap));
     return fake;
   }
 

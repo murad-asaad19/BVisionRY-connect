@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
@@ -13,15 +14,18 @@ import 'intro_state_badge.dart';
 
 /// One row in the Received / Sent lists.
 ///
-/// Layout: 44px [Avatar] + a column with peer name + truncated note
-/// snippet, and a trailing [IntroStateBadge]. Tapping the row pushes the
-/// detail route.
+/// Layout: 36px avatar + a column with peer name + truncated note snippet,
+/// and a trailing [IntroStateBadge]. Tapping the row pushes the detail
+/// route.
 ///
-/// The peer's identity is resolved through [peerProfileProvider] keyed off
-/// the relevant side of the intro (recipient_id when the viewer is the
-/// sender, sender_id otherwise). While the lookup is in-flight a skeleton
-/// row keeps the layout stable; on error we fall back to rendering the
-/// user id so the row is still tappable.
+/// The note and state badge come straight off the [Intro] and render
+/// immediately. Only the peer identity (avatar + name) is resolved through
+/// [peerProfileProvider] keyed off the relevant side of the intro
+/// (recipient_id when the viewer is the sender, sender_id otherwise). That
+/// secondary lookup is scoped to just the avatar + name so the whole row no
+/// longer flashes a full-row skeleton (the old N+1 behaviour). On peer-load
+/// failure we fall back to any [Intro]-embedded profile, then to a neutral
+/// placeholder name — never the raw UUID.
 class IntroListRow extends ConsumerWidget {
   const IntroListRow({
     super.key,
@@ -39,55 +43,27 @@ class IntroListRow extends ConsumerWidget {
 
   String get _peerId => viewerIsRecipient ? intro.senderId : intro.recipientId;
 
+  /// Profile embedded on the intro row itself (if the list query joined it),
+  /// used as a fallback before resorting to a neutral placeholder.
+  Profile? get _embeddedPeer =>
+      viewerIsRecipient ? intro.sender : intro.recipient;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<Profile?> async = ref.watch(peerProfileProvider(_peerId));
-    return async.when(
-      loading: () => const SkeletonListRow(),
-      error: (_, __) => _RowBody(
-        intro: intro,
-        peerName: _peerId,
-        peerHandle: _peerId,
-        peerPhotoUrl: null,
-        snippetMaxChars: _snippetMaxChars,
-        viewerIsRecipient: viewerIsRecipient,
-      ),
-      data: (Profile? profile) => _RowBody(
-        intro: intro,
-        peerName: profile?.name ?? _peerId,
-        peerHandle: profile?.handle ?? _peerId,
-        peerPhotoUrl: profile?.photoUrl,
-        snippetMaxChars: _snippetMaxChars,
-        viewerIsRecipient: viewerIsRecipient,
-      ),
-    );
-  }
-}
-
-class _RowBody extends StatelessWidget {
-  const _RowBody({
-    required this.intro,
-    required this.peerName,
-    required this.peerHandle,
-    required this.peerPhotoUrl,
-    required this.snippetMaxChars,
-    required this.viewerIsRecipient,
-  });
-
-  final Intro intro;
-  final String peerName;
-  final String peerHandle;
-  final String? peerPhotoUrl;
-  final int snippetMaxChars;
-  final bool viewerIsRecipient;
-
-  @override
-  Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
-    final snippet = intro.note.length > snippetMaxChars
-        ? '${intro.note.substring(0, snippetMaxChars).trimRight()}…'
+    final snippet = intro.note.length > _snippetMaxChars
+        ? '${intro.note.substring(0, _snippetMaxChars).trimRight()}…'
         : intro.note;
+
+    // Resolve the peer without blocking the row: the avatar + name area
+    // shows its own skeleton while the lookup is in-flight; the note +
+    // badge below stay rendered the whole time.
+    final AsyncValue<Profile?> peerAsync =
+        ref.watch(peerProfileProvider(_peerId));
+    final Profile? peer = peerAsync.valueOrNull ?? _embeddedPeer;
+    final bool loadingPeer = peerAsync.isLoading && peer == null;
+    final String peerName = peer?.name ?? context.t('intros.row.unknownPeer');
 
     return Material(
       color: Colors.transparent,
@@ -98,7 +74,15 @@ class _RowBody extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Avatar(name: peerName, photoUrl: peerPhotoUrl, size: 44),
+              if (loadingPeer)
+                const Skeleton(width: 36, height: 36, rounded: 18)
+              else
+                Avatar(
+                  name: peerName,
+                  photoUrl: peer?.photoUrl,
+                  size: 36,
+                  semanticLabel: peerName,
+                ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -107,12 +91,18 @@ class _RowBody extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            peerName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: typo.displaySm.copyWith(color: colors.navy),
-                          ),
+                          child: loadingPeer
+                              ? const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 4),
+                                  child: Skeleton(width: 120, height: 12),
+                                )
+                              : Text(
+                                  peerName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: typo.displaySm
+                                      .copyWith(color: colors.navy),
+                                ),
                         ),
                         const SizedBox(width: 8),
                         IntroStateBadge(

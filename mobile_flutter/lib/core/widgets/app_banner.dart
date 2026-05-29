@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
+import '../i18n/i18n.dart';
 import '../theme/app_radii.dart';
 import '../theme/app_typography.dart';
+import 'app_icon_button.dart';
 import 'variants.dart';
 
 /// Inline banner / alert primitive.
@@ -44,7 +45,6 @@ class AppBanner extends StatelessWidget {
     final colors = intentColors(context, intent);
     final radii = Theme.of(context).extension<AppRadii>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
-    final palette = Theme.of(context).extension<AppColors>()!;
 
     return Container(
       key: const ValueKey('app-banner-frame'),
@@ -85,10 +85,11 @@ class AppBanner extends StatelessWidget {
           ),
           if (onClose != null) ...[
             const SizedBox(width: 4),
-            InkResponse(
-              radius: 16,
-              onTap: onClose,
-              child: Icon(Icons.close, size: 14, color: palette.muted),
+            AppIconButton(
+              icon: Icons.close,
+              label: context.t('common.close'),
+              size: AppIconButtonSize.sm,
+              onPressed: onClose,
             ),
           ],
         ],

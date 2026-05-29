@@ -29,8 +29,8 @@ void main() {
     final GoRouter router = container.read(appRouterProvider);
     for (final String path in <String>[
       Routes.onboardingGoal,
-      Routes.onboardingIdentity,
       Routes.onboardingRoles,
+      Routes.onboardingBio,
       Routes.onboardingAbout,
     ]) {
       final RouteMatchList match =

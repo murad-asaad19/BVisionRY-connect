@@ -3,10 +3,12 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/i18n/i18n.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/app_input.dart';
+import '../../../../core/widgets/gap.dart';
 import '../../domain/office_hours_slot.dart';
 
 /// Renders one upcoming slot on a host's public profile.
@@ -43,53 +45,77 @@ class _SlotCardState extends State<SlotCard> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
+    final spacing = Theme.of(context).extension<AppSpacing>()!;
     final local = widget.slot.startsAt.toLocal();
     final dateLabel = DateFormat.MMMEd().add_jm().format(local);
     final duration = widget.slot.durationMinutes;
 
-    return AppCard(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Row(
+    // While a booking is in flight, gently dim + settle the card so the slot
+    // visibly reads as "being taken" before it drops out of the list.
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      opacity: widget.loading ? 0.6 : 1,
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        scale: widget.loading ? 0.98 : 1,
+        child: AppCard(
+          padding: EdgeInsets.all(spacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Expanded(child: Text(dateLabel, style: typo.displaySm)),
+              Row(
+                children: <Widget>[
+                  Expanded(child: Text(dateLabel, style: typo.displaySm)),
+                  Text(
+                    context.t(
+                      'officeHours.book.duration',
+                      vars: <String, Object>{'minutes': duration},
+                    ),
+                    style: typo.bodyMd.copyWith(color: colors.muted),
+                  ),
+                ],
+              ),
+              Gap(spacing.xs),
+              // Times above are rendered in the viewer's local zone — label it so
+              // the slot isn't ambiguous across DST / travel.
               Text(
                 context.t(
-                  'officeHours.book.duration',
-                  vars: <String, Object>{'minutes': duration},
+                  'officeHours.book.timezoneNote',
+                  vars: <String, Object>{'timezone': local.timeZoneName},
                 ),
-                style: typo.bodyMd.copyWith(color: colors.muted),
+                style: typo.bodyXs.copyWith(color: colors.muted),
+              ),
+              if ((widget.slot.hostNotesTemplate ?? '').isNotEmpty) ...<Widget>[
+                Gap(spacing.sm),
+                Text(
+                  widget.slot.hostNotesTemplate!,
+                  style: typo.bodySm.copyWith(color: colors.muted),
+                ),
+              ],
+              Gap(spacing.sm),
+              AppInput(
+                label: context.t('officeHours.book.topicLabel'),
+                placeholder: context.t('officeHours.book.topicPlaceholder'),
+                value: _topic,
+                multiline: true,
+                maxLength: 280,
+                enabled: !widget.loading,
+                onChanged: (v) => setState(() => _topic = v),
+              ),
+              Gap(spacing.sm),
+              AppButton(
+                key: const ValueKey<String>('slot-book'),
+                label: context.t('officeHours.book.submit'),
+                loading: widget.loading,
+                onPressed: _valid && !widget.loading
+                    ? () => widget.onBook(widget.slot.id, _topic.trim())
+                    : null,
               ),
             ],
           ),
-          if ((widget.slot.hostNotesTemplate ?? '').isNotEmpty) ...<Widget>[
-            const SizedBox(height: 6),
-            Text(
-              widget.slot.hostNotesTemplate!,
-              style: typo.bodySm.copyWith(color: colors.muted),
-            ),
-          ],
-          const SizedBox(height: 8),
-          AppInput(
-            label: context.t('officeHours.book.topicLabel'),
-            placeholder: context.t('officeHours.book.topicPlaceholder'),
-            value: _topic,
-            multiline: true,
-            maxLength: 280,
-            onChanged: (v) => setState(() => _topic = v),
-          ),
-          const SizedBox(height: 8),
-          AppButton(
-            key: const ValueKey<String>('slot-book'),
-            label: context.t('officeHours.book.submit'),
-            loading: widget.loading,
-            onPressed: _valid && !widget.loading
-                ? () => widget.onBook(widget.slot.id, _topic.trim())
-                : null,
-          ),
-        ],
+        ),
       ),
     );
   }

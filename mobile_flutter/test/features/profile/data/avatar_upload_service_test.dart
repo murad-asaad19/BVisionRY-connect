@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:connect_mobile/features/profile/data/avatar_upload_service.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
 
 class _FakeSource implements AvatarSource {
   _FakeSource(this._bytes, {this.throwable});
@@ -15,7 +16,9 @@ class _FakeSource implements AvatarSource {
   int calls = 0;
 
   @override
-  Future<Uint8List?> pickAndCropSquareAvatar() async {
+  Future<Uint8List?> pickAndCropSquareAvatar({
+    ImageSource source = ImageSource.gallery,
+  }) async {
     calls++;
     if (throwable != null) {
       // ignore: only_throw_errors
@@ -32,6 +35,7 @@ class _FakeStorage implements AvatarStorageGateway {
   bool? capturedUpsert;
   String? capturedPatchUserId;
   String? capturedPatchUrl;
+  String? capturedClearUserId;
   String publicUrl = 'https://cdn.example.com/avatars/u-1/avatar.jpg';
   Object? uploadThrowable;
   Object? patchThrowable;
@@ -67,6 +71,11 @@ class _FakeStorage implements AvatarStorageGateway {
       // ignore: only_throw_errors
       throw patchThrowable!;
     }
+  }
+
+  @override
+  Future<void> clearPhotoUrl({required String userId}) async {
+    capturedClearUserId = userId;
   }
 }
 

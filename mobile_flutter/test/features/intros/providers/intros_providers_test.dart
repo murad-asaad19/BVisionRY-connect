@@ -83,6 +83,43 @@ void main() {
     expect(await container.read(todayCountProvider.future), 7);
   });
 
+  test('sentTodayProvider returns service (used, cap) record', () async {
+    final fake = _FakeIntrosService();
+    when(
+      () => fake.introsSentTodayCount(),
+    ).thenAnswer((_) async => (used: 3, cap: 5));
+
+    final container = ProviderContainer(
+      overrides: <Override>[
+        introsServiceProvider.overrideWithValue(fake),
+        currentUserIdProvider.overrideWithValue('me'),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final result = await container.read(sentTodayProvider.future);
+    expect(result.used, 3);
+    expect(result.cap, 5);
+  });
+
+  test('sentTodayProvider falls back to client cap when signed-out', () async {
+    final fake = _FakeIntrosService();
+
+    final container = ProviderContainer(
+      overrides: <Override>[
+        introsServiceProvider.overrideWithValue(fake),
+        currentUserIdProvider.overrideWithValue(null),
+        dailyIntroCapProvider.overrideWith((_) => 5),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final result = await container.read(sentTodayProvider.future);
+    expect(result.used, 0);
+    expect(result.cap, 5);
+    verifyNever(() => fake.introsSentTodayCount());
+  });
+
   test(
     'unreadIntrosCountProvider counts only delivered receivedIntros',
     () async {

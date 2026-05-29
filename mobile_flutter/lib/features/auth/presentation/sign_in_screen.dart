@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/env.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
 import '../data/auth_error_map.dart';
 import '../providers/auth_service_provider.dart';
 import 'auth_shell.dart';
+import 'password_field.dart';
 import 'social_sign_in_buttons.dart';
 
 /// Email + password sign-in form, aligned with gallery A3.
@@ -36,11 +39,22 @@ class SignInScreen extends ConsumerStatefulWidget {
   ConsumerState<SignInScreen> createState() => _SignInScreenState();
 }
 
+/// The SSO provider whose request is currently in flight, if any — drives
+/// the per-button spinner so only the tapped button shows progress.
+enum _SsoInFlight { apple, google }
+
 class _SignInScreenState extends ConsumerState<SignInScreen> {
   String _identifier = '';
   String _password = '';
   bool _busy = false;
-  String? _error;
+  _SsoInFlight? _ssoInFlight;
+
+  /// Top-of-form banner message key (network / rate-limit / cancellation /
+  /// generic). Field-specific failures live in [_identifierError] /
+  /// [_passwordError] instead.
+  String? _bannerError;
+  String? _identifierError;
+  String? _passwordError;
 
   bool get _looksLikeEmail {
     final String s = _identifier.trim();
@@ -48,22 +62,52 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     return s.contains('@') && s.contains('.');
   }
 
+  void _clearErrors() {
+    _bannerError = null;
+    _identifierError = null;
+    _passwordError = null;
+  }
+
+  /// Routes a mapped error key to the right surface: credential problems
+  /// highlight the offending field(s); everything else lands in the banner.
+  void _surfaceError(String mappedKey) {
+    final String msg = context.t(mappedKey);
+    switch (authErrorField(mappedKey)) {
+      case AuthErrorField.identifier:
+        // "Incorrect username, email, or password" is ambiguous across both
+        // credential fields; the message names both, so anchoring it on the
+        // labelled identifier field is enough to point the user at the fix.
+        _identifierError = msg;
+      case AuthErrorField.password:
+        _passwordError = msg;
+      case AuthErrorField.banner:
+        _bannerError = mappedKey;
+    }
+  }
+
   Future<void> _runGuard(
     Future<void> Function() body,
-    AuthMode mode,
-  ) async {
+    AuthMode mode, {
+    _SsoInFlight? sso,
+  }) async {
     if (_busy) return;
     setState(() {
       _busy = true;
-      _error = null;
+      _ssoInFlight = sso;
+      _clearErrors();
     });
     try {
       await body();
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = context.t(mapAuthError(e, mode)));
+      setState(() => _surfaceError(mapAuthError(e, mode)));
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _ssoInFlight = null;
+        });
+      }
     }
   }
 
@@ -71,13 +115,20 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final String id = _identifier.trim();
     final String pwd = _password;
     if (id.isEmpty) {
-      setState(() => _error = context.t('auth.errors.identifierRequired'));
+      setState(() {
+        _clearErrors();
+        _identifierError = context.t('auth.errors.identifierRequired');
+      });
       return;
     }
     if (pwd.isEmpty) {
-      setState(() => _error = context.t('auth.errors.passwordRequired'));
+      setState(() {
+        _clearErrors();
+        _passwordError = context.t('auth.errors.passwordRequired');
+      });
       return;
     }
+    Haptics.light();
     await _runGuard(
       () async {
         await ref
@@ -91,16 +142,18 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   Future<void> _onApple() => _runGuard(
         () async => ref.read(socialAuthServiceProvider).signInWithApple(),
         AuthMode.signIn,
+        sso: _SsoInFlight.apple,
       );
 
   Future<void> _onGoogle() => _runGuard(
         () async => ref.read(socialAuthServiceProvider).signInWithGoogle(),
         AuthMode.signIn,
+        sso: _SsoInFlight.google,
       );
 
-  /// Forgot-password tap → sends a magic link to the entered email. If the
-  /// field is empty or doesn't look like an email, surfaces an inline
-  /// instruction dialog instead of firing the request.
+  /// Forgot-password tap → emails a one-tap sign-in (magic) link to the
+  /// entered email. If the field is empty or doesn't look like an email,
+  /// surfaces a localized instruction dialog instead of firing the request.
   Future<void> _onForgot() async {
     final String email = _identifier.trim();
     if (email.isEmpty || !_looksLikeEmail) {
@@ -112,13 +165,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('OK'),
+              child: Text(ctx.t('common.ok')),
             ),
           ],
         ),
       );
       return;
     }
+    Haptics.light();
     await _runGuard(
       () async {
         await ref.read(authServiceProvider).sendMagicLink(email);
@@ -137,54 +191,69 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
     final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
     return AuthShell(
+      // Mockup A3: the wordmark sub-line reads "Welcome back" and the card
+      // heading reads "Sign in" — the inverse of how the copy was wired.
       tagline: context.t('auth.signInTagline'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            context.t('auth.signInTitle'),
+            context.t('auth.signInHeading'),
             style: Theme.of(context).textTheme.displayMedium,
           ),
           SizedBox(height: spacing.section),
           SocialSignInButtons(
             onApple: _busy ? null : _onApple,
             onGoogle: _busy ? null : _onGoogle,
+            appleLoading: _ssoInFlight == _SsoInFlight.apple,
+            googleLoading: _ssoInFlight == _SsoInFlight.google,
           ),
           SizedBox(height: spacing.gutter),
           AppDivider(label: context.t('signIn.or')),
           SizedBox(height: spacing.gutter),
-          AppInput(
-            key: const Key('identifier-input'),
-            label: context.t('auth.email'),
-            placeholder: context.t('auth.emailPlaceholder'),
-            value: _identifier,
-            onChanged: (String v) => setState(() => _identifier = v),
-            keyboardType: TextInputType.emailAddress,
-            autocorrect: false,
-            autofillHints: const <String>[AutofillHints.username],
-            textInputAction: TextInputAction.next,
-          ),
-          const SizedBox(height: 12),
-          AppInput(
-            key: const Key('password-input'),
-            label: context.t('auth.password'),
-            placeholder: context.t('auth.passwordPlaceholder'),
-            value: _password,
-            onChanged: (String v) => setState(() => _password = v),
-            obscureText: true,
-            autofillHints: const <String>[AutofillHints.password],
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _onSubmit(),
-          ),
-          if (_error != null) ...<Widget>[
-            const SizedBox(height: 10),
-            Text(
-              _error!,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: colors.danger),
+          if (_bannerError != null) ...<Widget>[
+            AppBanner(
+              key: const Key('sign-in-error-banner'),
+              intent: AppIntent.danger,
+              title: context.t('auth.errors.socialSignInTitle'),
+              onClose: () => setState(() => _bannerError = null),
+              child: Text(context.t(_bannerError!)),
             ),
+            SizedBox(height: spacing.gutter),
           ],
+          AutofillGroup(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                AppInput(
+                  key: const Key('identifier-input'),
+                  label: context.t('auth.email'),
+                  placeholder: context.t('auth.emailPlaceholder'),
+                  value: _identifier,
+                  onChanged: (String v) => setState(() => _identifier = v),
+                  keyboardType: TextInputType.emailAddress,
+                  autocorrect: false,
+                  autofillHints: const <String>[AutofillHints.email],
+                  textInputAction: TextInputAction.next,
+                  errorText: _identifierError,
+                ),
+                const SizedBox(height: 12),
+                PasswordField(
+                  inputKey: const Key('password-input'),
+                  label: context.t('auth.password'),
+                  // Mockup A3 uses a masked-dots placeholder on sign-in; the
+                  // "At least 8 characters" hint belongs to sign-up only.
+                  placeholder: context.t('auth.signInPasswordPlaceholder'),
+                  value: _password,
+                  onChanged: (String v) => setState(() => _password = v),
+                  autofillHints: const <String>[AutofillHints.password],
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => _onSubmit(),
+                  errorText: _passwordError,
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 6),
           Align(
             alignment: Alignment.centerRight,
@@ -220,6 +289,39 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               ),
             ],
           ),
+          // Waitlist entry. When the app is invite-gated this is surfaced
+          // prominently (a bordered card) so users without access know what
+          // to do; otherwise it's a subtle text link.
+          SizedBox(height: spacing.gutter),
+          if (Env.inviteOnly)
+            AppBanner(
+              key: const Key('sign-in-waitlist-card'),
+              intent: AppIntent.info,
+              title: context.t('waitlist.gateTitle'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(context.t('waitlist.gateBody')),
+                  const SizedBox(height: 8),
+                  AppButton(
+                    key: const Key('sign-in-waitlist-cta'),
+                    label: context.t('waitlist.joinCta'),
+                    variant: AppButtonVariant.outline,
+                    onPressed:
+                        _busy ? null : () => context.go(Routes.waitlist),
+                  ),
+                ],
+              ),
+            )
+          else
+            Center(
+              child: TextButton(
+                key: const Key('sign-in-waitlist-link'),
+                onPressed: _busy ? null : () => context.go(Routes.waitlist),
+                child: Text(context.t('waitlist.noAccessLink')),
+              ),
+            ),
         ],
       ),
     );

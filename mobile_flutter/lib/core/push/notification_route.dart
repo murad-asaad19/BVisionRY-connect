@@ -36,7 +36,9 @@ String resolvePushRoute(
     case 'voice_received':
       return (conversationId != null && conversationId.isNotEmpty)
           ? Routes.chat(conversationId)
-          : Routes.chats;
+          // No specific conversation id — land on the Inbox hub, which now
+          // hosts the chats list (the standalone /chats tab was merged in).
+          : Routes.inbox;
 
     case 'meeting_proposal':
     case 'meeting_confirmed':

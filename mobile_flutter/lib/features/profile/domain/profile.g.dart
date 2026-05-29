@@ -46,6 +46,12 @@ _$ProfileImpl _$$ProfileImplFromJson(Map<String, dynamic> json) =>
       lastActiveAt: json['last_active_at'] == null
           ? null
           : DateTime.parse(json['last_active_at'] as String),
+      tosAcceptedAt: json['tos_accepted_at'] == null
+          ? null
+          : DateTime.parse(json['tos_accepted_at'] as String),
+      privacyAcceptedAt: json['privacy_accepted_at'] == null
+          ? null
+          : DateTime.parse(json['privacy_accepted_at'] as String),
       builderDiscipline: json['builder_discipline'] as String?,
       builderSeniority: json['builder_seniority'] as String?,
       builderSkills: (json['builder_skills'] as List<dynamic>?)
@@ -96,6 +102,8 @@ Map<String, dynamic> _$$ProfileImplToJson(_$ProfileImpl instance) =>
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),
       'last_active_at': instance.lastActiveAt?.toIso8601String(),
+      'tos_accepted_at': instance.tosAcceptedAt?.toIso8601String(),
+      'privacy_accepted_at': instance.privacyAcceptedAt?.toIso8601String(),
       'builder_discipline': instance.builderDiscipline,
       'builder_seniority': instance.builderSeniority,
       'builder_skills': instance.builderSkills,

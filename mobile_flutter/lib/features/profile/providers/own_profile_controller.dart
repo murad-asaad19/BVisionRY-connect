@@ -38,6 +38,16 @@ class OwnProfileController extends AsyncNotifier<Profile?> {
     return state.value;
   }
 
+  /// Confirms the caller's goal is still accurate by bumping
+  /// `goal_updated_at` to now — the "Yes, still accurate" action on the
+  /// stale-goal nudge. Reuses [updateOwnProfile] so it flows through the same
+  /// column-allowlist guard (`goal_updated_at` is not a read-only column).
+  Future<void> confirmGoalFreshness() async {
+    await updateOwnProfile(<String, dynamic>{
+      'goal_updated_at': DateTime.now().toUtc().toIso8601String(),
+    });
+  }
+
   /// Toggles `profiles.private_mode` via the dedicated RPC then invalidates
   /// the underlying profileProvider.
   Future<void> togglePrivateMode(bool value) async {

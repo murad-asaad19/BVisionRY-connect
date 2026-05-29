@@ -8,6 +8,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../../core/i18n/i18n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/haptics.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../data/chat_service.dart';
 import '../../domain/message.dart';
@@ -69,17 +70,26 @@ class MessageActionsSheet extends ConsumerWidget {
       messagesProvider(message.conversationId).notifier,
     );
     final navigator = Navigator.of(context);
+    // Capture localized copy up-front — several branches pop the sheet first,
+    // which unmounts `context` before any post-await `context.t` call.
+    final comingSoon = context.t('chat.actions.comingSoon');
+    final copied = context.t('chat.actions.copied');
+    final editFailed = context.t('chat.edit.failed');
+    final deleteFailed = context.t('chat.delete.failed');
     switch (action) {
       case MessageAction.reply:
         unawaited(navigator.maybePop());
-        toast.showToast(title: 'Coming soon');
+        toast.showToast(title: comingSoon);
       case MessageAction.copy:
         unawaited(navigator.maybePop());
         if (message.body != null) {
           await Clipboard.setData(ClipboardData(text: message.body!));
+          // Explicit feedback — clipboard writes are otherwise silent.
+          Haptics.selection();
+          toast.showToast(title: copied, intent: AppIntent.success);
         }
       case MessageAction.edit:
-        unawaited(navigator.maybePop());
+        await navigator.maybePop();
         if (!context.mounted) return;
         final newBody = await _MessageEditSheet.show(
           context,
@@ -90,17 +100,14 @@ class MessageActionsSheet extends ConsumerWidget {
           final updated = await chat.editMessage(message.id, newBody);
           notifier.mergeUpdated(updated);
         } catch (_) {
-          toast.showToast(
-            title: 'Edit failed',
-            intent: AppIntent.danger,
-          );
+          toast.showToast(title: editFailed, intent: AppIntent.danger);
         }
       case MessageAction.delete:
         final titleLabel = context.t('chat.delete.confirmTitle');
         final bodyLabel = context.t('chat.delete.confirmBody');
         final confirmLabel = context.t('chat.actions.delete');
         final cancelLabel = context.t('chat.recording.cancel');
-        unawaited(navigator.maybePop());
+        await navigator.maybePop();
         if (!context.mounted) return;
         final confirmed = await confirm.confirm(
           context,
@@ -111,18 +118,16 @@ class MessageActionsSheet extends ConsumerWidget {
           destructive: true,
         );
         if (!confirmed) return;
+        Haptics.medium();
         try {
           final tombstoned = await chat.deleteMessage(message.id);
           notifier.mergeUpdated(tombstoned);
         } catch (_) {
-          toast.showToast(
-            title: 'Delete failed',
-            intent: AppIntent.danger,
-          );
+          toast.showToast(title: deleteFailed, intent: AppIntent.danger);
         }
       case MessageAction.report:
         unawaited(navigator.maybePop());
-        toast.showToast(title: 'Coming soon');
+        toast.showToast(title: comingSoon);
     }
   }
 

@@ -61,8 +61,12 @@ class AppButton extends StatelessWidget {
     final v = visualDisabled ? AppButtonVariant.disabled : variant;
 
     final (bg, fg, borderColor) = switch (v) {
-      AppButtonVariant.primary => (colors.navy, colors.white, colors.navy),
-      AppButtonVariant.gold => (colors.gold, colors.navy, colors.gold),
+      AppButtonVariant.primary => (
+          colors.navyFill,
+          colors.onNavy,
+          colors.navyFill,
+        ),
+      AppButtonVariant.gold => (colors.gold, colors.navyDark, colors.gold),
       AppButtonVariant.outline => (colors.white, colors.navy, colors.navy),
       AppButtonVariant.outlineDanger => (
           colors.white,
@@ -76,9 +80,9 @@ class AppButton extends StatelessWidget {
         ),
       AppButtonVariant.apple => (Colors.black, colors.white, Colors.black),
       AppButtonVariant.disabled => (
-          colors.slate100,
+          colors.slate300,
           colors.white,
-          colors.slate100,
+          colors.slate300,
         ),
     };
 
@@ -86,31 +90,31 @@ class AppButton extends StatelessWidget {
         ? const EdgeInsets.symmetric(horizontal: 11, vertical: 7)
         : const EdgeInsets.symmetric(horizontal: 16, vertical: 10);
 
-    final child = Padding(
-      padding: padding,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (loading)
-            SizedBox(
-              width: 14,
-              height: 14,
-              child: CircularProgressIndicator(strokeWidth: 2, color: fg),
-            )
-          else if (icon != null) ...[
-            Icon(icon, size: 16, color: fg),
-            const SizedBox(width: 8),
-          ],
-          Text(
-            label,
-            style: typo.displaySm.copyWith(
-              color: fg,
-              fontSize: size == AppButtonSize.small ? 11 : 13,
-            ),
-          ),
+    // Enforce an accessible minimum tap height (Material 48 / compact 36) so
+    // the visual padding can stay tight without dropping below the target.
+    final double minHeight = size == AppButtonSize.small ? 36 : 48;
+    final content = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (loading)
+          SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(strokeWidth: 2, color: fg),
+          )
+        else if (icon != null) ...[
+          Icon(icon, size: 16, color: fg),
+          const SizedBox(width: 8),
         ],
-      ),
+        Text(
+          label,
+          style: typo.displaySm.copyWith(
+            color: fg,
+            fontSize: size == AppButtonSize.small ? 11 : 13,
+          ),
+        ),
+      ],
     );
 
     final button = Material(
@@ -119,16 +123,26 @@ class AppButton extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(radii.button),
         onTap: visualDisabled ? null : onPressed,
-        child: DecoratedBox(
+        child: Container(
+          constraints: BoxConstraints(minHeight: minHeight),
+          alignment: Alignment.center,
+          padding: padding,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(radii.button),
             border: Border.all(color: borderColor, width: 1.5),
           ),
-          child: child,
+          child: content,
         ),
       ),
     );
 
-    return fullWidth ? SizedBox(width: double.infinity, child: button) : button;
+    final Widget sized =
+        fullWidth ? SizedBox(width: double.infinity, child: button) : button;
+    return Semantics(
+      button: true,
+      enabled: !visualDisabled,
+      label: label,
+      child: ExcludeSemantics(child: sized),
+    );
   }
 }

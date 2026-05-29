@@ -82,12 +82,29 @@ void main() {
       tokens: FcmTokenStore(),
       stores: PersistedStores(),
     );
+    // The sign-up form (SSO + email/password + DOB + consent + invite +
+    // submit) is taller than the default 800x600 test surface, which leaves
+    // the consent checkbox and submit button below the fold and un-tappable.
+    // Give the test a tall viewport so every gate control is hit-testable.
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     await pump(tester, svc);
     await tester.enterText(find.byKey(const Key('email-input')), 'a@b.com');
     await tester.enterText(
       find.byKey(const Key('password-input')),
       'pw345678',
     );
+    // The submit button is gated on the age + consent checks (launch
+    // compliance). Satisfy them: open the DOB picker (it defaults to exactly
+    // the minimum age, which passes) and confirm, then accept consent.
+    await tester.tap(find.byKey(const Key('dob-input')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('consent-checkbox')));
+    await tester.pump();
     await tester.tap(find.byKey(const Key('signup-submit')));
     await tester.pumpAndSettle();
     expect(capEmail, 'a@b.com');

@@ -3,13 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/i18n/i18n.dart';
 import '../../../../core/widgets/app_filter_chip.dart';
+import '../../domain/feed_filters.dart';
 import '../../providers/feed_filters_provider.dart';
 import '../../providers/search_provider.dart';
 import '../filter_sheet.dart';
 
-/// Inline horizontal-scroller above the search results showing each active
-/// filter as a removable chip + a trailing "+ Filters" affordance that
-/// opens [showFilterSheet].
+/// Inline horizontal-scroller above the Browse results (gallery C3, lines
+/// 1542-1548): each active filter renders as a solid removable chip
+/// (`Founder ×` / `London ×`), followed by per-facet outline adder pills
+/// (`+ Sector` / `+ Stage` / `+ Region`) and a catch-all `+ Filters`
+/// affordance. The per-facet adders open [showFilterSheet] positioned to
+/// add that facet — Sector/Stage are backend-driven facets surfaced through
+/// the same sheet rather than faked client-side.
 class FeedFilterBar extends ConsumerWidget {
   const FeedFilterBar({super.key});
 
@@ -63,24 +68,68 @@ class FeedFilterBar extends ConsumerWidget {
                   },
                 ),
               ),
+            // Per-facet outline adder pills (gallery C3). Region is wired to
+            // the country facet; Sector / Stage are backend-driven facets the
+            // sheet surfaces when available — all open the same filter sheet.
+            if (f.country == null)
+              _AdderChip(
+                label: '+ ${context.t('discovery.facet.region')}',
+                initial: f,
+              ),
+            _AdderChip(
+              label: '+ ${context.t('discovery.facet.sector')}',
+              initial: f,
+            ),
+            _AdderChip(
+              label: '+ ${context.t('discovery.facet.stage')}',
+              initial: f,
+            ),
             AppFilterChip(
               label: '+ ${context.t('discovery.filtersTitle')}',
               active: false,
-              onTap: () async {
-                final next = await showFilterSheet(context, initial: f);
-                if (next != null) {
-                  await ref.read(searchProvider.notifier).applyFilters(
-                        roles: next.roles,
-                        goalTypes: next.goalTypes,
-                        country: next.country,
-                      );
-                }
-              },
+              onTap: () => _openSheet(context, ref, f),
             ),
           ],
         ),
       ),
       orElse: () => const SizedBox(height: 48),
+    );
+  }
+}
+
+/// Opens the structured filter sheet and writes any returned facets back
+/// through the shared [searchProvider].
+Future<void> _openSheet(
+  BuildContext context,
+  WidgetRef ref,
+  FeedFilters initial,
+) async {
+  final next = await showFilterSheet(context, initial: initial);
+  if (next != null) {
+    await ref.read(searchProvider.notifier).applyFilters(
+          roles: next.roles,
+          goalTypes: next.goalTypes,
+          country: next.country,
+        );
+  }
+}
+
+/// Outline "+ Facet" adder pill that opens the structured filter sheet.
+class _AdderChip extends ConsumerWidget {
+  const _AdderChip({required this.label, required this.initial});
+
+  final String label;
+  final FeedFilters initial;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: AppFilterChip(
+        label: label,
+        active: false,
+        onTap: () => _openSheet(context, ref, initial),
+      ),
     );
   }
 }

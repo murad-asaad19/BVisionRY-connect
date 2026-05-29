@@ -5,8 +5,8 @@ import '../theme/app_colors.dart';
 
 /// Visual emphasis tone for [Avatar].
 ///
-/// `default` draws a neutral 2px border; `featured` swaps it for a 3px gold
-/// halo; `muted` removes the border entirely (used inside dense list rows).
+/// `featured` adds the gallery's double white+gold halo (used on profile
+/// heroes / verified). `default` and `muted` render the plain gradient disc.
 enum AvatarTone { defaultTone, featured, muted }
 
 /// Circular avatar primitive — renders a photo when [photoUrl] is provided
@@ -22,12 +22,18 @@ class Avatar extends StatefulWidget {
     this.photoUrl,
     this.size = 48,
     this.tone = AvatarTone.defaultTone,
+    this.semanticLabel,
   });
 
   final String name;
   final String? photoUrl;
   final double size;
   final AvatarTone tone;
+
+  /// Screen-reader label for the avatar as an image. When null the avatar is
+  /// excluded from semantics (treated as decorative) — appropriate when an
+  /// adjacent name/handle already conveys the identity.
+  final String? semanticLabel;
 
   @override
   State<Avatar> createState() => _AvatarState();
@@ -41,22 +47,41 @@ class _AvatarState extends State<Avatar> {
     final colors = Theme.of(context).extension<AppColors>()!;
     final showImage =
         widget.photoUrl != null && widget.photoUrl!.isNotEmpty && !_failed;
-    final border = switch (widget.tone) {
-      AvatarTone.featured => Border.all(color: colors.gold, width: 3),
-      AvatarTone.defaultTone => Border.all(color: colors.border, width: 2),
-      AvatarTone.muted => null,
-    };
+    // Mockup: large/featured avatars use a 135° gold gradient (navy
+    // initials); small list/chat avatars use a 135° navy gradient (white
+    // initials). Featured adds the double white+gold halo.
+    final bool useGold =
+        widget.tone == AvatarTone.featured || widget.size >= 60;
+    final Gradient gradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: useGold
+          ? <Color>[colors.goldLight, colors.gold]
+          : <Color>[colors.navyLight, colors.navy],
+    );
+    final Color initialsColor = useGold ? colors.navy : colors.white;
+    final List<BoxShadow>? halo = widget.tone == AvatarTone.featured
+        ? <BoxShadow>[
+            BoxShadow(color: colors.gold, spreadRadius: 4),
+            BoxShadow(color: colors.white, spreadRadius: 2),
+          ]
+        : null;
     final initials = _initials(widget.name);
     final textSize = _textSizeFor(widget.size);
+    // Cap the decoded bitmap to the displayed pixel size so list avatars
+    // don't pin multi-megabyte full-resolution images in the image cache.
+    final int memCache =
+        (widget.size * MediaQuery.devicePixelRatioOf(context)).round();
 
-    return Container(
+    final Widget frame = Container(
       key: const ValueKey('avatar-frame'),
       width: widget.size,
       height: widget.size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: colors.goldPale,
-        border: border,
+        gradient: showImage ? null : gradient,
+        color: showImage ? colors.goldPale : null,
+        boxShadow: halo,
       ),
       clipBehavior: Clip.antiAlias,
       child: showImage
@@ -65,6 +90,8 @@ class _AvatarState extends State<Avatar> {
               width: widget.size,
               height: widget.size,
               fit: BoxFit.cover,
+              memCacheWidth: memCache,
+              memCacheHeight: memCache,
               errorWidget: (_, __, ___) {
                 // Defer the fallback to initials by flagging the failure on
                 // next frame — this avoids a setState during build.
@@ -78,7 +105,7 @@ class _AvatarState extends State<Avatar> {
               child: Text(
                 initials,
                 style: TextStyle(
-                  color: colors.navy,
+                  color: initialsColor,
                   fontWeight: FontWeight.w700,
                   fontSize: textSize,
                   height: 1.1,
@@ -86,6 +113,9 @@ class _AvatarState extends State<Avatar> {
               ),
             ),
     );
+    return widget.semanticLabel == null
+        ? ExcludeSemantics(child: frame)
+        : Semantics(image: true, label: widget.semanticLabel, child: frame);
   }
 }
 
@@ -121,12 +151,14 @@ class AvatarCircle extends StatelessWidget {
     this.photoUrl,
     this.size = 48,
     this.tone = AvatarTone.defaultTone,
+    this.semanticLabel,
   });
 
   final String name;
   final String? photoUrl;
   final double size;
   final AvatarTone tone;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) => Avatar(
@@ -134,5 +166,6 @@ class AvatarCircle extends StatelessWidget {
         photoUrl: photoUrl,
         size: size,
         tone: tone,
+        semanticLabel: semanticLabel,
       );
 }

@@ -5,6 +5,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
 import '../data/privacy_service.dart';
 import '../domain/report_reason.dart';
@@ -65,6 +66,7 @@ class _ReportSheetBodyState extends ConsumerState<_ReportSheetBody> {
       setState(() => _errorKey = 'privacy.reportModal.pickReasonBody');
       return;
     }
+    Haptics.medium();
     setState(() {
       _submitting = true;
       _errorKey = null;
@@ -85,6 +87,7 @@ class _ReportSheetBodyState extends ConsumerState<_ReportSheetBody> {
           );
       Navigator.of(context).pop(true);
     } on AppException catch (e) {
+      Haptics.error();
       if (!mounted) return;
       setState(() {
         _submitting = false;

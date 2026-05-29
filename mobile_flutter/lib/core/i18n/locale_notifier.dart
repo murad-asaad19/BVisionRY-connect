@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 
 import 'locale_loader.dart';
 
@@ -21,7 +23,13 @@ final FutureProvider<void> localeReadyProvider =
     FutureProvider<void>((Ref<void> ref) async {
   final LocaleLoader loader = ref.watch(localeLoaderProvider);
   final Locale locale = ref.watch(localeProvider);
-  if (loader.code != locale.languageCode) {
-    await loader.load(locale.languageCode);
+  final String code = locale.languageCode;
+  // Wire `package:intl` so every DateFormat / number / relative-time render
+  // follows the active language instead of falling back to en_US. Done
+  // atomically with the JSON bundle load on every locale switch.
+  Intl.defaultLocale = code;
+  await initializeDateFormatting(code);
+  if (loader.code != code) {
+    await loader.load(code);
   }
 });

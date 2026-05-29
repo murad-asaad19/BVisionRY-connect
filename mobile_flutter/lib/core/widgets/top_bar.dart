@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../i18n/i18n.dart';
 import '../routing/routes.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
@@ -81,7 +82,7 @@ class TopBar extends StatelessWidget {
           if (back)
             AppIconButton(
               icon: Icons.chevron_left,
-              label: 'Back',
+              label: context.t('common.back'),
               size: AppIconButtonSize.md,
               onPressed: onBack ?? () => _defaultBack(context),
             ),

@@ -5,42 +5,37 @@ import '../../../core/errors/error_map.dart';
 import '../../../core/supabase/supabase_client.dart';
 import '../domain/onboarding_draft.dart';
 
-/// Test-seam abstraction over the `profiles.update(...).eq('id', userId)`
-/// chain. The concrete [_SupabaseProfileUpdateRunner] delegates to the real
-/// Supabase client; tests inject an in-memory fake.
-abstract class ProfileUpdateRunner {
-  Future<void> update({
-    required String userId,
-    required Map<String, dynamic> patch,
-  });
+/// Test-seam abstraction over the `finish_onboarding(...)` RPC. The concrete
+/// [_SupabaseFinishOnboardingRunner] delegates to the real Supabase client;
+/// tests inject an in-memory fake.
+abstract class FinishOnboardingRunner {
+  Future<void> finish(Map<String, dynamic> params);
 }
 
-class _SupabaseProfileUpdateRunner implements ProfileUpdateRunner {
-  _SupabaseProfileUpdateRunner(this._client);
+class _SupabaseFinishOnboardingRunner implements FinishOnboardingRunner {
+  _SupabaseFinishOnboardingRunner(this._client);
   final SupabaseClient _client;
 
   @override
-  Future<void> update({
-    required String userId,
-    required Map<String, dynamic> patch,
-  }) async {
-    await _client.from('profiles').update(patch).eq('id', userId);
+  Future<void> finish(Map<String, dynamic> params) async {
+    await _client.rpc<dynamic>('finish_onboarding', params: params);
   }
 }
 
-/// Finalises the four-step wizard by PATCH-ing every column the user filled
-/// in plus setting `onboarded = true`. The DB trigger
-/// `profiles_set_goal_updated_at` will populate `goal_updated_at` whenever
-/// `goal_text` changes, so we don't send that column explicitly.
+/// Finalises the four-step wizard via the `finish_onboarding` SECURITY
+/// DEFINER RPC. Direct `profiles.update({...,'onboarded':true})` is rejected
+/// (42501) because migration `20260606000000_rls_hardening.sql` revokes
+/// column-level UPDATE on `onboarded` from authenticated; the RPC sets the
+/// whole payload + flips the flag atomically under definer privileges.
 class OnboardingService {
   OnboardingService(this._runner);
-  final ProfileUpdateRunner _runner;
+  final FinishOnboardingRunner _runner;
 
-  /// Submits the [draft] for [userId]. Throws [StateError] if the draft is
+  /// Submits the [draft]. The server reads the caller's id from `auth.uid()`,
+  /// so no explicit user id is forwarded. Throws [StateError] if the draft is
   /// missing a `goalType` — the caller should have caught that via
   /// [OnboardingSubmissionSchema] before calling this method.
   Future<void> submitOnboarding({
-    required String userId,
     required OnboardingDraft draft,
   }) async {
     if (draft.goalType == null) {
@@ -50,25 +45,24 @@ class OnboardingService {
       );
     }
 
-    final Map<String, dynamic> patch = <String, dynamic>{
-      'name': draft.name,
-      'handle': draft.handle,
+    final Map<String, dynamic> params = <String, dynamic>{
+      'p_name': draft.name,
+      'p_handle': draft.handle,
       // Empty strings round-trip as null so we don't store '' in
       // nullable text columns (the column CHECKs allow null but reject
       // zero-length non-null strings for headline/bio).
-      'headline': _nullIfEmpty(draft.headline),
-      'bio': _nullIfEmpty(draft.bio),
-      'roles': draft.roles,
-      'primary_role': draft.primaryRole,
-      'city': draft.city,
-      'country': draft.country,
-      'goal_text': draft.goalText,
-      'goal_type': draft.goalType!.wire,
-      'onboarded': true,
+      'p_headline': _nullIfEmpty(draft.headline),
+      'p_bio': _nullIfEmpty(draft.bio),
+      'p_roles': draft.roles,
+      'p_primary_role': draft.primaryRole,
+      'p_city': draft.city,
+      'p_country': draft.country,
+      'p_goal_type': draft.goalType!.wire,
+      'p_goal_text': draft.goalText,
     };
 
     try {
-      await _runner.update(userId: userId, patch: patch);
+      await _runner.finish(params);
     } on PostgrestException catch (e) {
       throw mapPostgrestError(e);
     }
@@ -80,6 +74,6 @@ class OnboardingService {
 final Provider<OnboardingService> onboardingServiceProvider =
     Provider<OnboardingService>((Ref<OnboardingService> ref) {
   return OnboardingService(
-    _SupabaseProfileUpdateRunner(ref.watch(supabaseClientProvider)),
+    _SupabaseFinishOnboardingRunner(ref.watch(supabaseClientProvider)),
   );
 });

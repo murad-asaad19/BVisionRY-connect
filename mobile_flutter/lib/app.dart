@@ -9,8 +9,11 @@ import 'core/push/background_tap_handler.dart';
 import 'core/push/foreground_handler.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_mode.dart';
 import 'core/widgets/toast.dart';
 import 'core/widgets/variants.dart';
+import 'features/auth/providers/authed_providers_registry.dart';
+import 'features/auth/providers/session_provider.dart';
 import 'features/push/providers/fcm_lifecycle_provider.dart';
 
 /// Root widget. Reads the router and active locale from Riverpod, awaits
@@ -28,39 +31,85 @@ class ConnectApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final GoRouter router = ref.watch(appRouterProvider);
     final Locale locale = ref.watch(localeProvider);
+    final ThemeMode themeMode = ref.watch(themeModeProvider);
     // Subscribe so locale changes trigger a reload of the JSON bundle.
     ref.watch(localeReadyProvider);
-    return _PushBootstrap(
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        title: 'BVisionry Connect',
-        theme: buildAppTheme(Brightness.light),
-        routerConfig: router,
-        locale: locale,
-        supportedLocales: const <Locale>[Locale('en'), Locale('es')],
-        localizationsDelegates: const <LocalizationsDelegate<Object>>[
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        // Overlay the global ToastHost above the routed content so toasts
-        // surfaced via `toastServiceProvider` from any screen are rendered.
-        builder: (BuildContext context, Widget? child) {
-          return Stack(
-            children: <Widget>[
-              if (child != null) child,
-              const Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: ToastHost(),
-              ),
-            ],
-          );
-        },
+    return _LifecycleRefresh(
+      child: _PushBootstrap(
+        child: MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          title: 'BVisionry Connect',
+          theme: buildAppTheme(Brightness.light),
+          darkTheme: buildAppTheme(Brightness.dark),
+          themeMode: themeMode,
+          routerConfig: router,
+          locale: locale,
+          supportedLocales: const <Locale>[Locale('en'), Locale('es')],
+          localizationsDelegates: const <LocalizationsDelegate<Object>>[
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          // Overlay the global ToastHost above the routed content so toasts
+          // surfaced via `toastServiceProvider` from any screen are rendered.
+          builder: (BuildContext context, Widget? child) {
+            return Stack(
+              children: <Widget>[
+                if (child != null) child,
+                const Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: ToastHost(),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
+}
+
+/// Root-scope lifecycle observer that drops every authed Riverpod cache on
+/// resume — closes T-LIFECYCLE so Inbox / Connections / Opportunities /
+/// conversations don't render stale data after the app spent time in the
+/// background. Realtime channels handle live updates while foregrounded;
+/// this hook covers the gap when no live channel was open.
+///
+/// No-ops while signed-out so we don't churn an empty cache.
+class _LifecycleRefresh extends ConsumerStatefulWidget {
+  const _LifecycleRefresh({required this.child});
+  final Widget child;
+
+  @override
+  ConsumerState<_LifecycleRefresh> createState() => _LifecycleRefreshState();
+}
+
+class _LifecycleRefreshState extends ConsumerState<_LifecycleRefresh>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    final signedIn = ref.read(currentSessionProvider) != null;
+    if (!signedIn) return;
+    invalidateAuthedProvidersWithWidgetRef(ref);
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// Wires the FCM lifecycle + tap handlers after the first frame.

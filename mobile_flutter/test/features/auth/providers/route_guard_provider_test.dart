@@ -46,6 +46,8 @@ void main() {
         'id': 'u',
         'onboarded': true,
         'suspended_at': null,
+        'tos_accepted_at': '2026-01-01T00:00:00Z',
+        'privacy_accepted_at': '2026-01-01T00:00:00Z',
       }),
     );
     addTearDown(c.dispose);
@@ -53,6 +55,27 @@ void main() {
     await c.read(sessionProvider.future);
     await c.read(profileProvider.future);
     expect(c.read(routeGuardProvider), Routes.home);
+  });
+
+  test('session + profile without recorded consent -> /consent', () async {
+    final FakeAuthGateway auth = FakeAuthGateway()
+      ..pushAuthState(AuthChangeEvent.initialSession, fakeSession(id: 'u'));
+    final ProviderContainer c = _container(
+      auth,
+      _Q(<String, dynamic>{
+        'id': 'u',
+        'onboarded': false,
+        'suspended_at': null,
+        // OAuth / magic-link sign-up: no consent recorded yet.
+        'tos_accepted_at': null,
+        'privacy_accepted_at': null,
+      }),
+    );
+    addTearDown(c.dispose);
+
+    await c.read(sessionProvider.future);
+    await c.read(profileProvider.future);
+    expect(c.read(routeGuardProvider), Routes.consent);
   });
 
   test('session + suspended_at NOT NULL -> /suspended', () async {
@@ -82,6 +105,9 @@ void main() {
         'id': 'u',
         'onboarded': false,
         'suspended_at': null,
+        // Consent recorded (e.g. email sign-up) but onboarding not finished.
+        'tos_accepted_at': '2026-01-01T00:00:00Z',
+        'privacy_accepted_at': '2026-01-01T00:00:00Z',
       }),
     );
     addTearDown(c.dispose);

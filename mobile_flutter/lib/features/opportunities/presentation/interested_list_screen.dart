@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/errors/app_exception.dart';
+import '../../../core/errors/error_messages.dart';
 import '../../../core/i18n/i18n.dart';
+import '../../../core/i18n/relative_time.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -14,12 +16,13 @@ import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/avatar.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/pill.dart';
+import '../../../core/widgets/query_state.dart';
 import '../../../core/widgets/skeleton.dart';
 import '../../../core/widgets/top_bar.dart';
+import '../../intros/presentation/intro_or_chat_button.dart';
 import '../../intros/presentation/send_intro_sheet.dart';
 import '../domain/interested_user.dart';
 import '../providers/interested_provider.dart';
-import '_relative_time.dart';
 
 /// Author-only list of users who expressed interest in an opportunity.
 ///
@@ -50,47 +53,74 @@ class InterestedListScreen extends ConsumerWidget {
               back: true,
             ),
             Expanded(
-              child: async.when(
-                loading: () => ListView(
-                  children: const <Widget>[
-                    SkeletonListRow(),
-                    SkeletonListRow(),
-                    SkeletonListRow(),
-                    SkeletonListRow(),
-                    SkeletonListRow(),
-                  ],
-                ),
-                error: (Object e, _) {
-                  if (e is ForbiddenException) {
-                    return EmptyState(
-                      icon: LucideIcons.shieldAlert,
-                      title: context.t(
-                        'opportunities.interestedScreen.forbiddenTitle',
-                      ),
-                      body: context.t(
-                        'opportunities.interestedScreen.forbiddenBody',
-                      ),
-                    );
-                  }
-                  return EmptyState(
-                    icon: LucideIcons.triangleAlert,
-                    title: 'Something went wrong.',
-                    body: e.toString(),
-                  );
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  ref.invalidate(interestedProvider(opportunityId));
+                  await ref.read(interestedProvider(opportunityId).future);
                 },
-                data: (List<InterestedUser> users) {
-                  if (users.isEmpty) {
-                    return EmptyState(
-                      icon: LucideIcons.heart,
-                      title: context.t('opportunities.interested.empty'),
+                child: QueryState<List<InterestedUser>>(
+                  value: async,
+                  loading: ListView(
+                    children: const <Widget>[
+                      SkeletonListRow(),
+                      SkeletonListRow(),
+                      SkeletonListRow(),
+                      SkeletonListRow(),
+                      SkeletonListRow(),
+                    ],
+                  ),
+                  onRetry: () =>
+                      ref.invalidate(interestedProvider(opportunityId)),
+                  // A ForbiddenException (non-author / RLS-denied) gets a
+                  // tailored guard empty state; every other failure routes
+                  // through the default localized QueryState error
+                  // (messageForError — never a raw toString()).
+                  error: (Object e, StackTrace st) {
+                    if (e is ForbiddenException) {
+                      return ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: <Widget>[
+                          EmptyState(
+                            icon: LucideIcons.shieldAlert,
+                            title: context.t(
+                              'opportunities.interestedScreen.forbiddenTitle',
+                            ),
+                            body: context.t(
+                              'opportunities.interestedScreen.forbiddenBody',
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                    return ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: <Widget>[
+                        EmptyState(
+                          icon: LucideIcons.triangleAlert,
+                          title: context.t('errors.title'),
+                          body: messageForError(context, e),
+                          action: EmptyStateAction(
+                            label: context.t('common.retry'),
+                            onPressed: () => ref
+                                .invalidate(interestedProvider(opportunityId)),
+                          ),
+                        ),
+                      ],
                     );
-                  }
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      ref.invalidate(interestedProvider(opportunityId));
-                      await ref.read(interestedProvider(opportunityId).future);
-                    },
-                    child: ListView.separated(
+                  },
+                  data: (List<InterestedUser> users) {
+                    if (users.isEmpty) {
+                      return ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: <Widget>[
+                          EmptyState(
+                            icon: LucideIcons.heart,
+                            title: context.t('opportunities.interested.empty'),
+                          ),
+                        ],
+                      );
+                    }
+                    return ListView.separated(
                       padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
                       physics: const AlwaysScrollableScrollPhysics(),
                       itemCount: users.length,
@@ -98,9 +128,9 @@ class InterestedListScreen extends ConsumerWidget {
                       itemBuilder: (BuildContext c, int i) {
                         return _InterestedRow(user: users[i]);
                       },
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -149,7 +179,7 @@ class _InterestedRow extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          relativeShort(user.createdAt),
+                          relativeTimeAgo(context, user.createdAt),
                           style: typo.bodyXs.copyWith(color: colors.muted),
                         ),
                       ],
@@ -183,21 +213,18 @@ class _InterestedRow extends StatelessWidget {
           Row(
             children: <Widget>[
               Expanded(
-                child: AppButton(
-                  key: Key('interested.${user.userId}.sendIntro'),
-                  label: context.t('opportunities.interested.sendIntro'),
-                  variant: AppButtonVariant.gold,
-                  size: AppButtonSize.small,
-                  icon: LucideIcons.send,
-                  onPressed: () => showSendIntroSheet(
-                    context,
-                    recipient: SendIntroRecipient(
-                      id: user.userId,
-                      name: user.name,
-                      handle: user.handle,
-                      photoUrl: user.photoUrl,
-                    ),
+                child: IntroOrChatButton(
+                  buttonKey: Key('interested.${user.userId}.sendIntro'),
+                  recipient: SendIntroRecipient(
+                    id: user.userId,
+                    name: user.name,
+                    handle: user.handle,
+                    photoUrl: user.photoUrl,
                   ),
+                  introLabel: context.t('opportunities.interested.sendIntro'),
+                  introVariant: AppButtonVariant.gold,
+                  introIcon: LucideIcons.send,
+                  size: AppButtonSize.small,
                 ),
               ),
               const SizedBox(width: 8),

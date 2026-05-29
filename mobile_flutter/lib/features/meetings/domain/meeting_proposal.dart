@@ -31,6 +31,8 @@ class MeetingProposal with _$MeetingProposal {
     required MeetingState state,
     required DateTime createdAt,
     required DateTime updatedAt,
+    int? preferredSlotIndex,
+    String? note,
   }) = _MeetingProposal;
 
   /// Construct from an RPC row / postgres_changes payload. Hand-rolled
@@ -52,6 +54,8 @@ class MeetingProposal with _$MeetingProposal {
         state: MeetingState.fromJson(json['state'] as String),
         createdAt: DateTime.parse(json['created_at'] as String).toUtc(),
         updatedAt: DateTime.parse(json['updated_at'] as String).toUtc(),
+        preferredSlotIndex: (json['preferred_slot_index'] as num?)?.toInt(),
+        note: json['note'] as String?,
       );
 
   /// `true` when the supplied [userId] is the proposer. The proposer may

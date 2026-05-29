@@ -76,14 +76,14 @@ class _AuthCallbackScreenState extends ConsumerState<AuthCallbackScreen> {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: (_busy || _errorKey == null)
-                ? const CircularProgressIndicator(color: Colors.white)
+                ? CircularProgressIndicator(color: colors.white)
                 : Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
                         context.t(_errorKey ?? 'auth.errors.signInFailed'),
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: colors.white,
                           fontSize: 16,
                         ),
                         textAlign: TextAlign.center,

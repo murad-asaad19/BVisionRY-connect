@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/chat/providers/active_conversation_provider.dart';
 import '../analytics/telemetry.dart';
+import '../i18n/locale_notifier.dart';
 import 'fcm_service.dart';
 import 'notification_route.dart';
 
@@ -60,13 +61,27 @@ class ForegroundHandler {
       return;
     }
 
-    final String title = message.notification?.title ??
+    String title = message.notification?.title ??
         (data['title'] as Object?)?.toString() ??
         '';
-    final String body = message.notification?.body ??
+    String body = message.notification?.body ??
         (data['body'] as Object?)?.toString() ??
         '';
-    if (title.isEmpty && body.isEmpty) return;
+
+    // A payload with neither display copy NOR a routable `kind` is noise -
+    // suppress it rather than surface an empty, dead-end card.
+    final bool hasKind =
+        ((data['kind'] as Object?)?.toString() ?? '').isNotEmpty;
+    if (title.isEmpty && body.isEmpty && !hasKind) return;
+
+    // Data-only messages (a real `kind` but no display copy at all) would
+    // otherwise show a blank toast. Fall back to localized copy so the user
+    // still gets a tappable open affordance. A server that DID supply a
+    // title but no body is left as-is (the empty body row simply collapses).
+    if (title.isEmpty) {
+      title = _t('push.fallbackTitle');
+      if (body.isEmpty) body = _t('push.fallbackBody');
+    }
 
     final String route = resolvePushRoute(data, _payloadFrom(data));
     Telemetry.recordBreadcrumb(
@@ -79,6 +94,11 @@ class ForegroundHandler {
       debugPrint('[push] foreground showToast failed: $e\n$st');
     }
   }
+
+  /// Translates [key] off the [ProviderContainer]'s active locale loader —
+  /// the foreground handler has no [BuildContext], so it reads the same
+  /// `localeLoaderProvider` that `context.t(...)` resolves under the hood.
+  String _t(String key) => _container.read(localeLoaderProvider).t(key);
 
   /// FCM `data` includes the flattened payload. We synthesise a payload
   /// map (containing `url` if present) so [resolvePushRoute] can fall

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radii.dart';
 import '../../../core/theme/app_typography.dart';
@@ -20,7 +21,8 @@ class SocialSignInButtons extends StatelessWidget {
     super.key,
     required this.onApple,
     required this.onGoogle,
-    this.loading = false,
+    this.appleLoading = false,
+    this.googleLoading = false,
   });
 
   /// Tap handler for the Apple entry point. Pass `null` to leave the button
@@ -30,8 +32,13 @@ class SocialSignInButtons extends StatelessWidget {
   /// Tap handler for the Google entry point.
   final VoidCallback? onGoogle;
 
-  /// When true, both buttons render their loading visual and ignore taps.
-  final bool loading;
+  /// When true, the Apple button shows its in-flight spinner and ignores
+  /// taps — set only for the button whose OAuth request is running.
+  final bool appleLoading;
+
+  /// When true, the Google button shows its in-flight spinner and ignores
+  /// taps.
+  final bool googleLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -39,18 +46,18 @@ class SocialSignInButtons extends StatelessWidget {
       children: <Widget>[
         _SsoButton(
           key: const Key('google-sso'),
-          label: 'Continue with Google',
+          label: context.t('auth.continueGoogle'),
           leading: const _GoogleGlyph(),
           onPressed: onGoogle,
-          loading: loading,
+          loading: googleLoading,
         ),
         const SizedBox(height: 10),
         _SsoButton(
           key: const Key('apple-sso'),
-          label: 'Continue with Apple',
+          label: context.t('auth.continueApple'),
           leading: const _AppleGlyph(),
           onPressed: onApple,
-          loading: loading,
+          loading: appleLoading,
         ),
       ],
     );
@@ -94,35 +101,40 @@ class _SsoButton extends StatelessWidget {
               borderRadius: br,
               border: Border.all(color: colors.navy, width: 1.5),
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 10,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  if (loading)
-                    SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
+            child: ConstrainedBox(
+              // ≥48dp tap target (WCAG 2.5.5 / Apple HIG) — the content alone
+              // only reaches ~40dp.
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    if (loading)
+                      SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: colors.navy,
+                        ),
+                      )
+                    else ...<Widget>[
+                      leading,
+                      const SizedBox(width: 10),
+                    ],
+                    Text(
+                      label,
+                      style: typo.displaySm.copyWith(
                         color: colors.navy,
+                        fontSize: 13,
                       ),
-                    )
-                  else ...<Widget>[
-                    leading,
-                    const SizedBox(width: 10),
-                  ],
-                  Text(
-                    label,
-                    style: typo.displaySm.copyWith(
-                      color: colors.navy,
-                      fontSize: 13,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

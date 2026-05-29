@@ -27,6 +27,14 @@ class UnauthenticatedException extends AppException {
   UnauthenticatedException() : super('auth.errors.signInFailed');
 }
 
+/// A requested row is missing / no longer visible (deep-link to a deleted,
+/// expired, closed, or RLS-hidden record). Carries an optional domain key so
+/// callers can show a tailored "no longer available" message; defaults to the
+/// generic not-found copy.
+class NotFoundException extends AppException {
+  NotFoundException([super.i18nKey = 'errors.notFound']);
+}
+
 /// `intros.send` triggered the 30-day cooldown after a decline
 /// (Postgrest `P0001` + hint `cooldown`).
 class IntroCooldownException extends AppException {
@@ -136,4 +144,24 @@ class UnimplementedRpcException extends AppException {
   final String rpcName;
   @override
   String toString() => 'UnimplementedRpcException(rpc=$rpcName)';
+}
+
+// ---------------------------------------------------------------------------
+// Verification (manual-review proofs) — `submit_verification` raises one of
+// these via `RAISE EXCEPTION ... USING HINT = '<name>'` when a live submission
+// already exists for the requested kind.
+// ---------------------------------------------------------------------------
+
+/// `submit_verification` raised `already_pending` — a submission for this kind
+/// is already awaiting team review.
+class VerificationAlreadyPendingException extends AppException {
+  VerificationAlreadyPendingException()
+      : super('verification.errors.alreadyPending');
+}
+
+/// `submit_verification` raised `already_approved` — the caller is already
+/// verified for this kind.
+class VerificationAlreadyApprovedException extends AppException {
+  VerificationAlreadyApprovedException()
+      : super('verification.errors.alreadyApproved');
 }

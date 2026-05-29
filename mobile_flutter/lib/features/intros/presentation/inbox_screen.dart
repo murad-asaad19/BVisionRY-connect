@@ -6,19 +6,22 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/widgets/widgets.dart';
-import '../../connections/presentation/connection_row.dart';
-import '../../connections/providers/connections_provider.dart';
+import '../../chat/presentation/widgets/chats_list_body.dart';
 import '../domain/intro.dart';
 import '../providers/intros_providers.dart';
 import 'intro_list_row.dart';
 
-/// Three-tab inbox surface that replaces `InboxScreenStub` from Phase 5.
+/// Unified inbox / communication hub.
 ///
 /// Tabs are driven by a local [_InboxTab] enum + [SegmentedControl] so the
-/// state is local to this screen (no global provider needed). The
-/// Received tab shows a today's-cap banner when the caller has been
-/// flooded; the Sent and Connections tabs omit it because that banner is
-/// recipient-side context only.
+/// state is local to this screen (no global provider needed):
+///   * Received — incoming intro requests (shows the today's-cap banner).
+///   * Chats — the conversation list (folded in from the former standalone
+///     Chats tab; chats don't warrant their own bottom-nav destination).
+///   * Sent — outgoing intro requests.
+///
+/// Established connections moved to the Network tab ("your people"), so the
+/// Inbox stays focused on the intro → chat flow.
 ///
 /// Each tab supports pull-to-refresh that invalidates its underlying
 /// provider — pulled together so the badge count is also refreshed.
@@ -29,7 +32,7 @@ class InboxScreen extends ConsumerStatefulWidget {
   ConsumerState<InboxScreen> createState() => _InboxScreenState();
 }
 
-enum _InboxTab { received, sent, connections }
+enum _InboxTab { received, chats, sent }
 
 /// Threshold above which the Inbox shows the daily-cap heads-up banner.
 /// Matches the `intros_today_count` recipient-side cap.
@@ -69,7 +72,9 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
       ),
       body: Column(
         children: [
-          if (_tab == _InboxTab.received) const _TodayCapBanner(),
+          // SegmentedControl is always first so its vertical position stays
+          // stable across tab switches; the cap banner renders below it
+          // (Received tab only) instead of pushing the control down.
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: SegmentedControl<_InboxTab>(
@@ -81,21 +86,22 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                   label: receivedLabel,
                 ),
                 SegmentedOption<_InboxTab>(
-                  value: _InboxTab.sent,
-                  label: sentLabel,
+                  value: _InboxTab.chats,
+                  label: context.t('common.tabs.chats'),
                 ),
                 SegmentedOption<_InboxTab>(
-                  value: _InboxTab.connections,
-                  label: context.t('intros.tab.connections'),
+                  value: _InboxTab.sent,
+                  label: sentLabel,
                 ),
               ],
             ),
           ),
+          if (_tab == _InboxTab.received) const _TodayCapBanner(),
           Expanded(
             child: switch (_tab) {
               _InboxTab.received => const _ReceivedTab(),
+              _InboxTab.chats => const ChatsListBody(),
               _InboxTab.sent => const _SentTab(),
-              _InboxTab.connections => const _ConnectionsTab(),
             },
           ),
         ],
@@ -117,10 +123,15 @@ class _TodayCapBanner extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
           child: AppBanner(
             intent: AppIntent.info,
-            title: context.t('intros.banner.dailyCapTitle'),
+            // Gallery I3 (lines 2351-2353): count-bearing title + body that
+            // names the 4 AM refresh and the sender-side "queued" semantics.
+            title: context.t(
+              'intros.banner.dailyCapTitle',
+              vars: <String, Object>{'count': count, 'cap': kIntrosDailyCap},
+            ),
             child: Text(
               context.t(
-                'intros.todayBannerCapped',
+                'intros.banner.dailyCapReceived',
                 vars: <String, Object>{'count': count, 'cap': kIntrosDailyCap},
               ),
             ),
@@ -144,9 +155,13 @@ class _ReceivedTab extends ConsumerWidget {
         ref.invalidate(todayCountProvider);
         await ref.read(receivedIntrosProvider.future);
       },
-      child: async.when(
-        loading: () => const _LoadingList(),
-        error: (e, _) => _ListError(message: e.toString()),
+      child: QueryState<List<Intro>>(
+        value: async,
+        loading: const _LoadingList(),
+        onRetry: () {
+          ref.invalidate(receivedIntrosProvider);
+          ref.invalidate(todayCountProvider);
+        },
         data: (list) {
           if (list.isEmpty) {
             return const _EmptyInbox(
@@ -173,9 +188,10 @@ class _SentTab extends ConsumerWidget {
         ref.invalidate(sentIntrosProvider);
         await ref.read(sentIntrosProvider.future);
       },
-      child: async.when(
-        loading: () => const _LoadingList(),
-        error: (e, _) => _ListError(message: e.toString()),
+      child: QueryState<List<Intro>>(
+        value: async,
+        loading: const _LoadingList(),
+        onRetry: () => ref.invalidate(sentIntrosProvider),
         data: (list) {
           if (list.isEmpty) {
             return const _EmptyInbox(
@@ -185,38 +201,6 @@ class _SentTab extends ConsumerWidget {
             );
           }
           return _IntroListView(intros: list, viewerIsRecipient: false);
-        },
-      ),
-    );
-  }
-}
-
-class _ConnectionsTab extends ConsumerWidget {
-  const _ConnectionsTab();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(connectionsProvider);
-    return RefreshIndicator(
-      onRefresh: () async {
-        ref.invalidate(connectionsProvider);
-        await ref.read(connectionsProvider.future);
-      },
-      child: async.when(
-        loading: () => const _LoadingList(),
-        error: (e, _) => _ListError(message: e.toString()),
-        data: (rows) {
-          if (rows.isEmpty) {
-            return const _EmptyInbox(
-              icon: LucideIcons.users,
-              bodyKey: 'intros.empty.connections',
-            );
-          }
-          return ListView.builder(
-            physics: const AlwaysScrollableScrollPhysics(),
-            itemCount: rows.length,
-            itemBuilder: (_, i) => ConnectionRow(connection: rows[i]),
-          );
         },
       ),
     );
@@ -291,22 +275,6 @@ class _LoadingList extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: 6,
       itemBuilder: (_, __) => const SkeletonListRow(),
-    );
-  }
-}
-
-class _ListError extends StatelessWidget {
-  const _ListError({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(message, textAlign: TextAlign.center),
-      ),
     );
   }
 }

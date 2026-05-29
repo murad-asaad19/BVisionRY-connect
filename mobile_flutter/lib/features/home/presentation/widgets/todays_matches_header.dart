@@ -7,10 +7,10 @@ import '../../../../core/theme/app_typography.dart';
 
 /// Eyebrow rendered above the daily-matches list.
 ///
-/// Format: navy uppercase `TODAY · 3 PICKS` with a tiny muted date line
-/// underneath ("Mon, Apr 28") and a gold star to the right. The
-/// present-tense wording reads more immediate than the gallery's
-/// newspaper-style "3 PICKS FOR YOU · MON, APR 28".
+/// Newspaper-style single line matching gallery C1 (line 1419):
+/// `3 PICKS FOR YOU · MON, APR 28` in navy uppercase Dosis with a trailing
+/// gold ★. The date is locale-formatted (abbreviated weekday + month + day)
+/// and folded into the same line rather than split onto a muted sub-line.
 class TodaysMatchesHeader extends StatelessWidget {
   const TodaysMatchesHeader({
     super.key,
@@ -25,11 +25,14 @@ class TodaysMatchesHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Theme.of(context).extension<AppColors>()!;
     final t = Theme.of(context).extension<AppTypography>()!;
-    final formatted = DateFormat('EEE, MMM d').format(date);
-    final picksWord = context.t(
-      'home.picksHeader',
+    // Locale-aware abbreviated weekday + month + day (e.g. "Mon, Apr 28" in
+    // en, localized month/weekday names + ordering elsewhere) — no hardcoded
+    // pattern so the format follows the active locale.
+    final formatted = DateFormat.MMMEd().format(date);
+    final picks = context.t(
+      'home.picksForYou',
       vars: <String, Object>{'count': count},
-    ).toUpperCase();
+    );
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Row(
@@ -37,29 +40,17 @@ class TodaysMatchesHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  'TODAY · $picksWord',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: t.displayXs.copyWith(
-                    color: c.navy,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  formatted,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: t.bodySm.copyWith(color: c.muted),
-                ),
-              ],
+            child: Text(
+              '$picks · $formatted'.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: t.displayXs.copyWith(
+                color: c.navy,
+                letterSpacing: 1.2,
+              ),
             ),
           ),
+          const SizedBox(width: 8),
           Text('★', style: t.displayXs.copyWith(color: c.gold)),
         ],
       ),

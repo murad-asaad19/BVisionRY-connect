@@ -10,9 +10,11 @@ import '../match_card.dart';
 /// Renders the up-to-5 daily matches on the home screen.
 ///
 /// Top 3 picks render as featured full-width cards (gold gradient via
-/// [MatchCard]'s `featured: true` flag). Picks 4–5 (if present) stack
-/// vertically below as regular (non-featured) cards — matches gallery C1
-/// where the long-tail picks sit under "BROWSE ALL".
+/// [MatchCard]'s `featured: true` flag) carrying the match-reason chip.
+/// Picks 4–5 (if present) stack vertically below as regular (non-featured)
+/// cards — gallery C1 shows these plain rows with an activity/badge status
+/// pill instead of a reason chip (handled inside [MatchCard]). The separate
+/// "BROWSE ALL" filter feed sits below this section on the Home screen.
 class DailyMatchesSection extends ConsumerWidget {
   const DailyMatchesSection({super.key, required this.matches});
 
@@ -32,6 +34,7 @@ class DailyMatchesSection extends ConsumerWidget {
             child: MatchCard(
               match: matches[i],
               featured: i < kFeaturedCount,
+              entranceIndex: i,
               onTap: () => context.push(
                 Routes.publicProfile(matches[i].profile.handle),
               ),

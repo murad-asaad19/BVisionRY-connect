@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/supabase/supabase_client.dart';
-import '../../chat/providers/messages_provider.dart' as chat;
 import '../domain/meeting_proposal.dart';
 
 /// Realtime stream of `public.meeting_proposals` rows for a single
@@ -12,9 +11,11 @@ import '../domain/meeting_proposal.dart';
 /// `supabase_realtime`, so we subscribe to postgres_changes and merge
 /// INSERT / UPDATE / DELETE events into a local cache.
 ///
-/// On any change, we ALSO invalidate
-/// `chat.messagesProvider(conversationId)` so the linked `kind=meeting`
-/// bubble re-renders with the new proposal state.
+/// A proposal change emits a fresh list on THIS stream only — the linked
+/// `kind=meeting` bubble watches this provider directly and rebuilds from
+/// the new emission, so we must NOT invalidate the paginated chat
+/// `messagesProvider` here (that would force a full thread refetch + a
+/// rebuild of every bubble on each proposal tick).
 ///
 /// AutoDispose so leaving a thread releases the realtime channel.
 final AutoDisposeStreamProviderFamily<List<MeetingProposal>, String>
@@ -75,9 +76,6 @@ final AutoDisposeStreamProviderFamily<List<MeetingProposal>, String>
             break;
         }
         emit();
-        // Re-render any kind=meeting message bubbles bound to this
-        // conversation — their state is keyed off the proposal row.
-        ref.invalidate(chat.messagesProvider(conversationId));
       },
     )
     ..subscribe();

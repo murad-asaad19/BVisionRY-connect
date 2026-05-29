@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_events.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
-import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../auth/providers/session_provider.dart';
 import '../data/intros_service.dart';
 import '../providers/intros_providers.dart';
 import '_intro_note_field.dart';
-
-/// Hard daily cap surfaced by `intros_today_count()` for the *recipient*
-/// inbound flow — server-side P0001 fires at 20 inbound intros per day.
-/// The sender-side cap is tier-aware; see
-/// [introsDailyCapForTier] in `providers/intros_providers.dart`.
-const int kIntrosDailyCapHard = 20;
 
 /// Recipient preview shape passed into [showSendIntroSheet]. Keeping this
 /// small + typed avoids leaking the full Profile model through every call
@@ -28,6 +23,8 @@ class SendIntroRecipient {
     this.handle,
     this.photoUrl,
     this.verified = false,
+    this.role,
+    this.headline,
   });
 
   final String id;
@@ -35,6 +32,16 @@ class SendIntroRecipient {
   final String? handle;
   final String? photoUrl;
   final bool verified;
+
+  /// Short role word shown inline as the verified badge label and, when the
+  /// recipient isn't verified, leading the muted subtitle line (gallery E1
+  /// line 1755: "Omar Daher · Builder").
+  final String? role;
+
+  /// Headline / "open to" tagline rendered as the muted subtitle line under
+  /// the name (gallery E1 line 1756: "Senior backend · Open to fractional
+  /// CTO").
+  final String? headline;
 }
 
 /// Opens the direct-intro composer for [recipient]. Returns `true` when the
@@ -53,9 +60,13 @@ Future<bool?> showSendIntroSheet(
 /// Bottom-sheet composer for a direct (kind=`direct`) intro.
 ///
 /// Drives `IntrosService.sendIntro` with 80-400 trimmed-length gating
-/// matching `char_length(btrim(note))` server-side. Surfaces the caller's
-/// `intros_today_count()` underneath the field as a heads-up before the
-/// hard P0001 cap fires.
+/// matching `char_length(btrim(note))` server-side.
+///
+/// Surfaces a sender-side "Today's intros: used / cap" heads-up beneath the
+/// Send button, backed by [sentTodayProvider] (`intros_sent_today_count()`).
+/// The cap shown is the server-authoritative value returned by the RPC, not
+/// the client tier guess, so the heads-up always matches what the server
+/// enforces.
 class SendIntroSheet extends ConsumerStatefulWidget {
   const SendIntroSheet({super.key, required this.recipient});
 
@@ -79,16 +90,33 @@ class _SendIntroSheetState extends ConsumerState<SendIntroSheet> {
     try {
       final IntrosService svc = ref.read(introsServiceProvider);
       await svc.sendIntro(recipientId: widget.recipient.id, note: _note);
+      Analytics.log(
+        AppEvent.introSent,
+        const <String, Object>{'via_warm': false},
+      );
       ref
         ..invalidate(sentIntrosProvider)
-        ..invalidate(todayCountProvider);
+        ..invalidate(todayCountProvider)
+        ..invalidate(sentTodayProvider);
       if (!mounted) return;
+      // Medium impact — confirms the intro left the device.
+      Haptics.medium();
       ref.read(toastServiceProvider.notifier).showToast(
             title: context.t('profile.introSent'),
             intent: AppIntent.success,
           );
-      Navigator.of(context).pop(true);
+      // Defer the pop one frame so the toast's enter animation kicks off
+      // before the sheet tears down its render subtree. Without this gap
+      // the user sees the sheet vanish with no confirmation (T-INTRO-SEND-
+      // TOAST-RACE).
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).pop(true);
+      });
     } on AppException catch (e) {
+      Analytics.log(
+        AppEvent.introSendFailed,
+        const <String, Object>{'via_warm': false},
+      );
       if (!mounted) return;
       setState(() => _errorKey = _resolveErrorKey(e));
     } finally {
@@ -111,6 +139,13 @@ class _SendIntroSheetState extends ConsumerState<SendIntroSheet> {
     final bool valid = isIntroNoteInRange(_note);
     final colors = Theme.of(context).extension<AppColors>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
+    // Email soft-gate (spec §13 / gallery B5): a viewer may browse + compose,
+    // but the Send-intro CTA stays locked until their email is verified. We
+    // read `emailConfirmedAt` straight off the live session so the lock
+    // clears the moment the user taps the link (auth state change rebuilds).
+    final session = ref.watch(currentSessionProvider);
+    final bool emailUnverified =
+        session != null && session.user.emailConfirmedAt == null;
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
         16,
@@ -145,18 +180,53 @@ class _SendIntroSheetState extends ConsumerState<SendIntroSheet> {
               child: Text(context.t(_errorKey!)),
             ),
           ],
+          if (emailUnverified) ...[
+            const SizedBox(height: 12),
+            AppBanner(
+              key: const ValueKey('send-intro-email-gate'),
+              intent: AppIntent.warning,
+              child: Text(
+                context.t(
+                  'intros.compose.verifyEmailFirst',
+                  vars: <String, Object>{
+                    'email': session.user.email ?? '',
+                  },
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 14),
           AppButton(
             key: const ValueKey('send-intro-sheet-send'),
-            label: context.t('intros.compose.sendIntro'),
+            label: emailUnverified
+                ? context.t('intros.compose.verifyEmailCta')
+                : context.t('intros.compose.sendIntro'),
             variant: AppButtonVariant.gold,
             loading: _sending,
-            onPressed: (valid && !_sending) ? _send : null,
+            onPressed: (valid && !_sending && !emailUnverified) ? _send : null,
           ),
-          const Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: _TodayStatusLine(),
-          ),
+          // Sender-side "Today's intros: used / cap" heads-up. The cap is the
+          // server-authoritative value from the RPC (sentTodayProvider), not
+          // the client tier guess. Render nothing while loading/erroring so the
+          // sheet never flashes a placeholder count.
+          ...ref.watch(sentTodayProvider).maybeWhen(
+                data: (count) => <Widget>[
+                  const SizedBox(height: 10),
+                  Text(
+                    context.t(
+                      'intros.compose.todaysIntros',
+                      vars: <String, Object>{
+                        'count': count.used,
+                        'cap': count.cap,
+                      },
+                    ),
+                    key: const ValueKey('send-intro-today-counter'),
+                    textAlign: TextAlign.center,
+                    style: typo.bodyMd.copyWith(color: colors.muted),
+                  ),
+                ],
+                orElse: () => const <Widget>[],
+              ),
         ],
       ),
     );
@@ -173,6 +243,21 @@ class _RecipientPreview extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColors>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
     final handle = recipient.handle;
+    final role = recipient.role;
+    final headline = recipient.headline;
+    // Muted subtitle line under the name (gallery E1 line 1756). Prefer the
+    // headline/"open to" tagline; fall back to the @handle so the card never
+    // loses its secondary identifier when no headline is set. When the role
+    // word isn't folded into the verified badge, lead the subtitle with it.
+    final List<String> subtitleParts = <String>[
+      if (!recipient.verified && role != null && role.isNotEmpty) role,
+      if (headline != null && headline.isNotEmpty)
+        headline
+      else if (handle != null && handle.isNotEmpty)
+        '@$handle',
+    ];
+    final String? subtitle =
+        subtitleParts.isEmpty ? null : subtitleParts.join(' · ');
     // Gold-pale rounded rectangle chrome mirrors `.ucard.featured` from the
     // gallery so the recipient block reads as a quick-reference card rather
     // than a bare name.
@@ -202,23 +287,29 @@ class _RecipientPreview extends StatelessWidget {
                         recipient.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style:
-                            typo.displaySm.copyWith(color: colors.navy),
+                        style: typo.displaySm.copyWith(color: colors.navy),
                       ),
                     ),
                     if (recipient.verified) ...[
                       const SizedBox(width: 6),
-                      Icon(
-                        Icons.verified,
-                        size: 16,
-                        color: colors.gold,
+                      // Role-text verified badge ("✓ Builder") matching the
+                      // gallery's `.verified-badge` rather than a bare check.
+                      Pill(
+                        key: const ValueKey('send-intro-verified'),
+                        label: (role != null && role.isNotEmpty)
+                            ? role
+                            : context.t('verification.verifiedPill'),
+                        variant: PillVariant.success,
+                        icon: Icons.check,
                       ),
                     ],
                   ],
                 ),
-                if (handle != null && handle.isNotEmpty)
+                if (subtitle != null)
                   Text(
-                    '@$handle',
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: typo.bodyMd.copyWith(color: colors.muted),
                   ),
               ],
@@ -226,64 +317,6 @@ class _RecipientPreview extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// `Today's intros: X / cap` heads-up line shown beneath the field. Hidden
-/// while the count is loading so the layout doesn't jitter. The cap is
-/// tier-aware via [dailyIntroCapProvider].
-class _TodayStatusLine extends ConsumerWidget {
-  const _TodayStatusLine();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    final typo = Theme.of(context).extension<AppTypography>()!;
-    final asyncCount = ref.watch(todayCountProvider);
-    final int cap = ref.watch(dailyIntroCapProvider);
-    final IntrosTier tier = ref.watch(accountTierProvider);
-    return asyncCount.maybeWhen(
-      data: (int count) {
-        final atCap = count >= cap;
-        // Surface an upgrade affordance when the user is within 1 of the
-        // cap *and* still has headroom on the next tier. Pro users have
-        // no higher tier, so no nudge is shown.
-        final nearCap = count >= cap - 1;
-        final canUpgrade = tier != IntrosTier.pro;
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Flexible(
-              child: Text(
-                context.t(
-                  'intros.compose.todaysIntros',
-                  vars: <String, Object>{
-                    'count': count,
-                    'cap': cap,
-                  },
-                ),
-                textAlign: TextAlign.center,
-                style: typo.bodyXs.copyWith(
-                  color: atCap ? colors.danger : colors.muted,
-                ),
-              ),
-            ),
-            if (nearCap && canUpgrade) ...[
-              const SizedBox(width: 8),
-              GestureDetector(
-                key: const Key('intros.compose.upgradePill'),
-                onTap: () => context.push(Routes.settingsVerification),
-                child: Pill(
-                  label: context.t('intros.compose.upgradeForMore'),
-                  variant: PillVariant.solid,
-                ),
-              ),
-            ],
-          ],
-        );
-      },
-      orElse: () => const SizedBox.shrink(),
     );
   }
 }

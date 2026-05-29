@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/errors/app_exception.dart';
+import '../../../../core/errors/error_messages.dart';
 import '../../../../core/i18n/i18n.dart';
 import '../../../../core/widgets/settings_row.dart';
 import '../../../../core/widgets/toast.dart';
@@ -63,11 +64,11 @@ class ExportDataTile extends ConsumerWidget {
                   title: context.t(e.i18nKey),
                 );
           }
-        } catch (_) {
+        } catch (e) {
           if (context.mounted) {
             ref.read(toastServiceProvider.notifier).showToast(
                   intent: AppIntent.danger,
-                  title: context.t('settings.exportFailed'),
+                  title: messageForError(context, e),
                 );
           }
         }

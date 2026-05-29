@@ -38,13 +38,16 @@ class MeetingReviewPrompt extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Question must match the offered answers (Useful / Not
+                // useful / No-show) — a usefulness rating, not a yes/no
+                // "did it happen?" prompt. Reuse the review-screen copy.
                 Text(
-                  context.t('meetings.prompt.title'),
+                  context.t('meetings.review.title'),
                   style: typo.displaySm.copyWith(color: colors.navy),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  context.t('meetings.prompt.subtitle'),
+                  context.t('meetings.review.subtitle'),
                   style: typo.bodyMd.copyWith(color: colors.muted),
                 ),
                 const SizedBox(height: 10),

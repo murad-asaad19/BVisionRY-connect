@@ -7,6 +7,7 @@ import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/query_state.dart';
 import '../../../core/widgets/settings_row.dart';
 import '../../../core/widgets/toast.dart';
@@ -63,11 +64,10 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
         value: profileAsync,
         data: (Profile? profile) {
           if (profile == null) return const SizedBox.shrink();
-          final int blockedCount =
-              ref.watch(blocksProvider).maybeWhen(
-                    data: (List<BlockedUser> xs) => xs.length,
-                    orElse: () => 0,
-                  );
+          final int blockedCount = ref.watch(blocksProvider).maybeWhen(
+                data: (List<BlockedUser> xs) => xs.length,
+                orElse: () => 0,
+              );
           return ListView(
             padding: const EdgeInsets.only(top: 8, bottom: 24),
             children: <Widget>[
@@ -108,8 +108,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                   SwitchListTile(
                     key: const Key('privacy.readReceipts'),
                     title: Text(context.t('settings.readReceipts.title')),
-                    subtitle:
-                        Text(context.t('settings.readReceipts.subtitle')),
+                    subtitle: Text(context.t('settings.readReceipts.subtitle')),
                     value: profile.readReceiptsEnabled,
                     onChanged: (bool v) => _toggleReadReceipts(v),
                   ),
@@ -145,6 +144,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   }
 
   Future<void> _togglePrivateMode(bool v) async {
+    Haptics.selection();
     try {
       await ref.read(settingsServiceProvider).setPrivateMode(v);
       ref.invalidate(profileProvider);
@@ -159,6 +159,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   }
 
   Future<void> _toggleReadReceipts(bool v) async {
+    Haptics.selection();
     try {
       await ref.read(settingsServiceProvider).setReadReceiptsEnabled(v);
       ref.invalidate(profileProvider);
@@ -173,13 +174,22 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
   }
 
   Future<void> _togglePublicInvestorPage(bool v) async {
+    Haptics.selection();
     try {
       await ref.read(settingsServiceProvider).setPublicInvestorPage(v);
       ref.invalidate(profileProvider);
     } on UnimplementedRpcException {
-      setState(() => _publicInvestorComingSoon = true);
+      // The write never landed. Force a rebuild so the controlled switch
+      // re-asserts the persisted (OFF) value instead of sitting visually ON,
+      // and surface the coming-soon card. We deliberately don't invalidate
+      // profileProvider — the persisted value is unchanged, so a refetch would
+      // only flash the whole screen's loading skeleton.
+      if (mounted) setState(() => _publicInvestorComingSoon = true);
     } on AppException catch (e) {
+      // Same: the write failed and the persisted value is unchanged, so a
+      // rebuild reverts the controlled switch. Surface the localized error.
       if (mounted) {
+        setState(() {});
         ref.read(toastServiceProvider.notifier).showToast(
               intent: AppIntent.danger,
               title: context.t(e.i18nKey),

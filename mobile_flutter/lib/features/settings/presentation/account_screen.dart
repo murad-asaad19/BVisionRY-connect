@@ -4,9 +4,14 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/errors/app_exception.dart';
+import '../../../core/errors/error_messages.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
+import '../../../core/widgets/app_banner.dart';
+import '../../../core/widgets/app_bottom_sheet.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/section_card.dart';
 import '../../../core/widgets/settings_row.dart';
 import '../../../core/widgets/toast.dart';
@@ -60,7 +65,7 @@ class AccountScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             child: SectionCard(
-              title: 'Email',
+              title: context.t('settings.emailTitle'),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Text(
@@ -75,11 +80,10 @@ class AccountScreen extends ConsumerWidget {
             key: const Key('account.changePasswordRow'),
             icon: LucideIcons.keyRound,
             label: context.t('settings.changePassword.title'),
-            onTap: () => showModalBottomSheet<void>(
+            onTap: () => showAppBottomSheet<void>(
               context: context,
-              isScrollControlled: true,
-              builder: (_) => ChangePasswordSheet(
-                onSubmit: (String pw) async {
+              child: ChangePasswordSheet(
+                onSubmit: (String _, String pw) async {
                   try {
                     await ref.read(settingsServiceProvider).changePassword(pw);
                     if (context.mounted) {
@@ -132,21 +136,32 @@ class AccountScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                error: (_, __) => Column(
-                  children: <Widget>[
-                    SwitchListTile(
-                      key: const Key('account.telemetry.analytics'),
-                      title: Text(context.t('settings.analytics')),
-                      value: false,
-                      onChanged: null,
+                // Distinguish a load FAILURE from a genuine opt-OUT: rather
+                // than render two off-looking switches (which read as "off"),
+                // surface a danger banner with a retry that re-runs
+                // rehydration. We never silently show consent as disabled.
+                error: (Object e, _) => Padding(
+                  key: const Key('account.telemetry.error'),
+                  padding: const EdgeInsets.all(16),
+                  child: AppBanner(
+                    intent: AppIntent.danger,
+                    title: context.t('settings.telemetry'),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text(messageForError(context, e)),
+                        const SizedBox(height: 8),
+                        AppButton(
+                          label: context.t('common.retry'),
+                          variant: AppButtonVariant.outline,
+                          size: AppButtonSize.small,
+                          fullWidth: false,
+                          onPressed: () => ref.invalidate(telemetryProvider),
+                        ),
+                      ],
                     ),
-                    SwitchListTile(
-                      key: const Key('account.telemetry.crashReports'),
-                      title: Text(context.t('settings.crashReports')),
-                      value: false,
-                      onChanged: null,
-                    ),
-                  ],
+                  ),
                 ),
                 data: (TelemetryPrefs prefs) => Column(
                   children: <Widget>[
@@ -154,17 +169,23 @@ class AccountScreen extends ConsumerWidget {
                       key: const Key('account.telemetry.analytics'),
                       title: Text(context.t('settings.analytics')),
                       value: prefs.analyticsEnabled,
-                      onChanged: (bool v) => ref
-                          .read(telemetryProvider.notifier)
-                          .setAnalyticsEnabled(v),
+                      onChanged: (bool v) {
+                        Haptics.selection();
+                        ref
+                            .read(telemetryProvider.notifier)
+                            .setAnalyticsEnabled(v);
+                      },
                     ),
                     SwitchListTile(
                       key: const Key('account.telemetry.crashReports'),
                       title: Text(context.t('settings.crashReports')),
                       value: prefs.crashReportsEnabled,
-                      onChanged: (bool v) => ref
-                          .read(telemetryProvider.notifier)
-                          .setCrashReportsEnabled(v),
+                      onChanged: (bool v) {
+                        Haptics.selection();
+                        ref
+                            .read(telemetryProvider.notifier)
+                            .setCrashReportsEnabled(v);
+                      },
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -184,10 +205,9 @@ class AccountScreen extends ConsumerWidget {
             icon: LucideIcons.trash2,
             label: context.t('settings.deleteAccount'),
             destructive: true,
-            onTap: () => showModalBottomSheet<void>(
+            onTap: () => showAppBottomSheet<void>(
               context: context,
-              isScrollControlled: true,
-              builder: (_) => DeleteAccountSheet(
+              child: DeleteAccountSheet(
                 onConfirm: () async {
                   try {
                     await ref.read(profileServiceProvider).deleteMyAccount();
@@ -200,11 +220,11 @@ class AccountScreen extends ConsumerWidget {
                             title: context.t(e.i18nKey),
                           );
                     }
-                  } catch (_) {
+                  } catch (e) {
                     if (context.mounted) {
                       ref.read(toastServiceProvider.notifier).showToast(
                             intent: AppIntent.danger,
-                            title: context.t('settings.deleteFailed'),
+                            title: messageForError(context, e),
                           );
                     }
                   }

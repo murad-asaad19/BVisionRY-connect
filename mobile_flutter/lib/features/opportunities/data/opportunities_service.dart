@@ -5,7 +5,6 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/errors/error_map.dart';
 import '../../../core/supabase/supabase_client.dart';
 import '../domain/interested_user.dart';
-import '../domain/opportunity.dart';
 import '../domain/opportunity_kind.dart';
 import '../domain/opportunity_with_author.dart';
 import '../domain/opportunity_with_counts.dart';
@@ -79,8 +78,9 @@ class OpportunitiesService {
 
   /// `get_opportunity(p_id)` — returns the detail row including running
   /// `interested_count` and `viewer_has_expressed_interest`. Throws
-  /// [GenericAppException] when the row is missing (e.g. RLS-hidden or
-  /// expired); the UI should surface this as a `notFound` empty state.
+  /// [NotFoundException] when the row is missing (e.g. RLS-hidden, deleted,
+  /// or expired); the UI maps this to a tailored "no longer available"
+  /// empty state.
   Future<OpportunityWithCounts> getOpportunity(String id) async {
     try {
       final Object? raw = await _gateway.rpc(
@@ -88,7 +88,9 @@ class OpportunitiesService {
         params: <String, dynamic>{'p_id': id},
       );
       final List<Map<String, dynamic>> rows = _rows(raw);
-      if (rows.isEmpty) throw GenericAppException();
+      if (rows.isEmpty) {
+        throw NotFoundException('opportunities.detail.notFound');
+      }
       return OpportunityWithCounts.fromJson(rows.first);
     } on AppException {
       rethrow;
@@ -128,8 +130,12 @@ class OpportunitiesService {
     }
   }
 
-  /// `update_opportunity(...)` — author-only; returns the persisted row.
-  Future<Opportunity> updateOpportunity({
+  /// `update_opportunity(...)` — author-only. The RPC `RETURNS void`, so this
+  /// returns `void`: callers invalidate `opportunityProvider`/feeds to repaint
+  /// from the canonical fetch. (Previously this parsed a row from the void
+  /// response, which threw on the always-null result and surfaced a *successful*
+  /// edit as a save failure — review P1.)
+  Future<void> updateOpportunity({
     required String id,
     required OpportunityKind kind,
     required String title,
@@ -141,7 +147,7 @@ class OpportunitiesService {
     required DateTime expiresAt,
   }) async {
     try {
-      final Object? raw = await _gateway.rpc(
+      await _gateway.rpc(
         'update_opportunity',
         params: <String, dynamic>{
           'p_id': id,
@@ -155,21 +161,21 @@ class OpportunitiesService {
           'p_expires_at': expiresAt.toUtc().toIso8601String(),
         },
       );
-      return Opportunity.fromJson(_singleRow(raw));
     } catch (e) {
       throw mapPostgrestError(e);
     }
   }
 
   /// `close_opportunity(p_id)` — author-only; flips `status='closed'` and
-  /// stamps `closed_at=now()`.
-  Future<Opportunity> closeOpportunity(String id) async {
+  /// stamps `closed_at=now()`. RPC `RETURNS void`; callers invalidate to
+  /// repaint with the Closed state (see [updateOpportunity] for the prior
+  /// false-failure bug this avoids).
+  Future<void> closeOpportunity(String id) async {
     try {
-      final Object? raw = await _gateway.rpc(
+      await _gateway.rpc(
         'close_opportunity',
         params: <String, dynamic>{'p_id': id},
       );
-      return Opportunity.fromJson(_singleRow(raw));
     } catch (e) {
       throw mapPostgrestError(e);
     }
@@ -230,14 +236,6 @@ class OpportunitiesService {
     return (raw as List)
         .map((Object? r) => Map<String, dynamic>.from(r! as Map))
         .toList(growable: false);
-  }
-
-  /// Normalises an RPC that returns either a row directly or a 1-row list.
-  static Map<String, dynamic> _singleRow(Object? raw) {
-    if (raw is List && raw.isNotEmpty) {
-      return Map<String, dynamic>.from(raw.first as Map);
-    }
-    return Map<String, dynamic>.from(raw! as Map);
   }
 }
 

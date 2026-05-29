@@ -1,5 +1,7 @@
-// Phase 13 ConnectBottomNavBar test — 5 Lucide tabs + live badges from
-// inbox + chats. Uses the i18n primed loader so the labels resolve.
+// ConnectBottomNavBar test — 5 Lucide tabs (Home/Network/Inbox/
+// Opportunities/Profile). The chats list folds into the Inbox tab, so the
+// inbox badge = unread intros + unread chats and there is no standalone
+// Chats tab. Uses the i18n primed loader so the labels resolve.
 import 'package:connect_mobile/core/i18n/locale_loader.dart';
 import 'package:connect_mobile/core/i18n/locale_notifier.dart';
 import 'package:connect_mobile/core/theme/app_theme.dart';
@@ -36,20 +38,21 @@ void main() {
           currentIndex: 0,
           onTap: (_) {},
           inboxUnread: 0,
-          chatsUnread: 0,
         ),
         loader: loader,
       ),
     );
     await tester.pumpAndSettle();
     expect(find.byIcon(LucideIcons.house), findsOneWidget);
-    expect(find.byIcon(LucideIcons.inbox), findsOneWidget);
     expect(find.byIcon(LucideIcons.users), findsOneWidget);
+    expect(find.byIcon(LucideIcons.inbox), findsOneWidget);
     expect(find.byIcon(LucideIcons.briefcase), findsOneWidget);
-    expect(find.byIcon(LucideIcons.messageSquare), findsOneWidget);
+    expect(find.byIcon(LucideIcons.circleUser), findsOneWidget);
+    // No standalone Chats tab — chats fold into the Inbox.
+    expect(find.byIcon(LucideIcons.messageSquare), findsNothing);
   });
 
-  testWidgets('Badges render on inbox + chats when unread > 0',
+  testWidgets('Inbox badge renders the combined unread count',
       (WidgetTester tester) async {
     final LocaleLoader loader = await primedLocaleLoader();
     await tester.pumpWidget(
@@ -57,15 +60,15 @@ void main() {
         ConnectBottomNavBar(
           currentIndex: 0,
           onTap: (_) {},
-          inboxUnread: 4,
-          chatsUnread: 12,
+          inboxUnread: 16,
+          opportunitiesUnread: 3,
         ),
         loader: loader,
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('4'), findsOneWidget);
-    expect(find.text('12'), findsOneWidget);
+    expect(find.text('16'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
   });
 
   testWidgets('Badge labels cap at 99+ when count > 99',
@@ -77,7 +80,7 @@ void main() {
           currentIndex: 0,
           onTap: (_) {},
           inboxUnread: 250,
-          chatsUnread: 100,
+          opportunitiesUnread: 100,
         ),
         loader: loader,
       ),
@@ -95,14 +98,14 @@ void main() {
           currentIndex: 0,
           onTap: (int i) => lastTapped = i,
           inboxUnread: 0,
-          chatsUnread: 0,
         ),
         loader: loader,
       ),
     );
     await tester.pumpAndSettle();
+    // Network is the second tab (index 1) in the 5-tab nav.
     await tester.tap(find.byIcon(LucideIcons.users));
     await tester.pumpAndSettle();
-    expect(lastTapped, 2);
+    expect(lastTapped, 1);
   });
 }

@@ -20,8 +20,14 @@ class TypingEvent {
 /// Production: opens `supabase.channel('typing:$convId')` with an
 /// `onBroadcast(event:'typing')` handler. Tests override this provider
 /// with a controlled stream.
-final StreamProviderFamily<TypingEvent, String> typingChannelProvider =
-    StreamProvider.family<TypingEvent, String>((ref, convId) {
+///
+/// AutoDispose so the broadcast channel is torn down when the listening
+/// [typingProvider] (also autoDispose) is released — without it, every
+/// conversation visited would keep its Supabase broadcast subscription
+/// open for the rest of the session.
+final AutoDisposeStreamProviderFamily<TypingEvent, String>
+    typingChannelProvider =
+    StreamProvider.autoDispose.family<TypingEvent, String>((ref, convId) {
   final client = ref.watch(supabaseClientProvider);
   final controller = StreamController<TypingEvent>.broadcast();
   final ch = client.channel('typing:$convId');

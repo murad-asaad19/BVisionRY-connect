@@ -129,13 +129,32 @@ class IntrosService {
     }
   }
 
-  /// `intros_today_count()` returns an integer count of intros the caller
-  /// has sent in the current local day. Used to render the gallery's I3
-  /// banner when the cap is hit.
+  /// `intros_today_count()` returns an integer count of intros the caller has
+  /// *received* in the current UTC day (the RPC filters `recipient_id =
+  /// auth.uid()`). Used to render the inbox/gallery I3 banner — NOT the
+  /// sender-side send cap. See [introsSentTodayCount] for the outbound counter.
   Future<int> introsTodayCount() async {
     try {
       final raw = await _gateway.rpc('intros_today_count');
       return (raw as num).toInt();
+    } on PostgrestException catch (e) {
+      throw mapPostgrestError(e);
+    }
+  }
+
+  /// `intros_sent_today_count()` returns the sender-side daily counter the
+  /// compose sheet renders as "Today's intros: used / cap". `used` is the
+  /// number of intros the caller has SENT in the current UTC day; `cap` is the
+  /// server-authoritative daily cap (same source the send RPCs enforce), so the
+  /// UI never has to guess the cap from the client tier.
+  Future<({int used, int cap})> introsSentTodayCount() async {
+    try {
+      final raw = await _gateway.rpc('intros_sent_today_count');
+      final row = _normaliseRow(raw);
+      return (
+        used: (row['used'] as num).toInt(),
+        cap: (row['cap'] as num).toInt(),
+      );
     } on PostgrestException catch (e) {
       throw mapPostgrestError(e);
     }

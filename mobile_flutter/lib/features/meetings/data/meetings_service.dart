@@ -40,9 +40,10 @@ class MeetingsService {
   /// p_meeting_url, p_timezone, p_preferred_slot_index, p_note)` returns
   /// the inserted row.
   ///
-  /// [preferredSlotIndex] / [note] are forwarded only when set so older
-  /// server versions that don't expose the new params keep working — the
-  /// server ignores unknown named args.
+  /// [preferredSlotIndex] / [note] are only forwarded when set so the body
+  /// matches the function's defaults — PostgREST rejects unknown named args
+  /// (PGRST202), so the 7-arg overload added in migration
+  /// 20260610000000_propose_meeting_preferred_slot_and_note.sql is required.
   Future<MeetingProposal> proposeMeeting({
     required String conversationId,
     required List<DateTime> slots,

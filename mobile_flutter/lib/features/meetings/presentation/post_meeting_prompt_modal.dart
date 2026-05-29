@@ -49,7 +49,6 @@ class _PostMeetingPromptModalState
     if (_busy) return;
     setState(() => _busy = true);
     final toast = ref.read(toastServiceProvider.notifier);
-    final navigator = Navigator.of(context);
     final translator = context.t;
     final submitted = translator('meetings.review.submitted');
     final failed = translator('meetings.review.submitFailed');
@@ -60,7 +59,15 @@ class _PostMeetingPromptModalState
             note: null,
           );
       toast.showToast(title: submitted, intent: AppIntent.success);
-      if (mounted) navigator.pop();
+      // Reached via a cold-start `meeting_review_pending` deep-link the back
+      // stack is empty, so a bare pop() would strand the user on this prompt.
+      // Fall back to the home hub in that case.
+      if (!mounted) return;
+      if (context.canPop()) {
+        Navigator.of(context).pop();
+      } else {
+        context.go(Routes.home);
+      }
     } on AppException catch (e) {
       toast.showToast(title: translator(e.i18nKey), intent: AppIntent.danger);
     } catch (_) {

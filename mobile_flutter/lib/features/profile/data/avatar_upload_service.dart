@@ -31,10 +31,12 @@ class AvatarUploadException implements Exception {
 /// `image_picker` → `image_cropper` → `flutter_image_compress` chain; tests
 /// inject in-memory byte buffers.
 abstract class AvatarSource {
-  /// Picks an image from gallery, crops it to a 1:1 square, compresses it
-  /// (≤ ~800×800, JPEG q85), and returns the resulting byte buffer. Returns
-  /// `null` if the user cancels at any step.
-  Future<Uint8List?> pickAndCropSquareAvatar();
+  /// Picks an image from [source] (gallery by default, or the camera), crops
+  /// it to a 1:1 square, compresses it (≤ ~800×800, JPEG q85), and returns the
+  /// resulting byte buffer. Returns `null` if the user cancels at any step.
+  Future<Uint8List?> pickAndCropSquareAvatar({
+    ImageSource source = ImageSource.gallery,
+  });
 }
 
 /// Real-device implementation of [AvatarSource]. Pipeline mirrors spec §13.3
@@ -51,9 +53,11 @@ class DeviceAvatarSource implements AvatarSource {
   final ImageCropper _cropper;
 
   @override
-  Future<Uint8List?> pickAndCropSquareAvatar() async {
+  Future<Uint8List?> pickAndCropSquareAvatar({
+    ImageSource source = ImageSource.gallery,
+  }) async {
     final XFile? picked = await _picker.pickImage(
-      source: ImageSource.gallery,
+      source: source,
       imageQuality: 90,
       maxWidth: 1600,
     );
@@ -101,6 +105,11 @@ abstract class AvatarStorageGateway {
     required String userId,
     required String url,
   });
+
+  /// Clears `profiles.photo_url` back to null. Used by the "remove photo"
+  /// affordance. The stored object is left in the bucket — it is overwritten
+  /// on the next upload (same canonical path) and is no longer referenced.
+  Future<void> clearPhotoUrl({required String userId});
 }
 
 class SupabaseAvatarStorageGateway implements AvatarStorageGateway {
@@ -137,6 +146,13 @@ class SupabaseAvatarStorageGateway implements AvatarStorageGateway {
         .from('profiles')
         .update(<String, dynamic>{'photo_url': url}).eq('id', userId);
   }
+
+  @override
+  Future<void> clearPhotoUrl({required String userId}) async {
+    await _client
+        .from('profiles')
+        .update(<String, dynamic>{'photo_url': null}).eq('id', userId);
+  }
 }
 
 /// Coordinates the full avatar pipeline: pick → crop → compress → upload →
@@ -160,8 +176,11 @@ class AvatarUploadService {
 
   /// Runs the full pipeline. Returns the new cache-busted public URL,
   /// `null` if the user cancels, or throws an [AvatarUploadException]
-  /// when something goes wrong.
-  Future<String?> pickAndUpload() async {
+  /// when something goes wrong. [source] selects the gallery (default) or the
+  /// device camera.
+  Future<String?> pickAndUpload({
+    ImageSource source = ImageSource.gallery,
+  }) async {
     final String? userId = _userId;
     if (userId == null) {
       throw AvatarUploadException(AvatarUploadError.authRequired);
@@ -169,7 +188,7 @@ class AvatarUploadService {
 
     Uint8List? bytes;
     try {
-      bytes = await _source.pickAndCropSquareAvatar();
+      bytes = await _source.pickAndCropSquareAvatar(source: source);
     } catch (e) {
       throw AvatarUploadException(AvatarUploadError.pickFailed, e);
     }
@@ -204,6 +223,21 @@ class AvatarUploadService {
     }
 
     return busted;
+  }
+
+  /// Clears the current avatar so the profile falls back to seeded initials.
+  /// Throws an [AvatarUploadException] when the caller is unauthenticated or
+  /// the patch fails.
+  Future<void> removeAvatar() async {
+    final String? userId = _userId;
+    if (userId == null) {
+      throw AvatarUploadException(AvatarUploadError.authRequired);
+    }
+    try {
+      await _storage.clearPhotoUrl(userId: userId);
+    } catch (e) {
+      throw AvatarUploadException(AvatarUploadError.uploadFailed, e);
+    }
   }
 }
 

@@ -37,31 +37,38 @@ class AppFilterChip extends StatelessWidget {
     final borderColor = active ? colors.navy : colors.border;
     final displayLabel = count != null ? '$label ($count)' : label;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(radii.pill),
-        onTap: onTap,
-        child: Container(
-          key: const ValueKey('app-filter-chip-frame'),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(radii.pill),
-            border: Border.all(color: borderColor, width: 1.5),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 14, color: fg),
-                const SizedBox(width: 6),
+    return Semantics(
+      button: true,
+      selected: active,
+      label: displayLabel,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(radii.pill),
+          onTap: onTap,
+          child: Container(
+            key: const ValueKey('app-filter-chip-frame'),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius: BorderRadius.circular(radii.pill),
+              border: Border.all(color: borderColor, width: 1.5),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 14, color: fg),
+                  const SizedBox(width: 6),
+                ],
+                ExcludeSemantics(
+                  child: Text(
+                    displayLabel,
+                    style: typo.displayXs.copyWith(color: fg),
+                  ),
+                ),
               ],
-              Text(
-                displayLabel,
-                style: typo.displayXs.copyWith(color: fg),
-              ),
-            ],
+            ),
           ),
         ),
       ),

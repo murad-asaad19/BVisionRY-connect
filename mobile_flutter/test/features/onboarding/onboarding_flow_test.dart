@@ -45,19 +45,14 @@ class _AvailableRunner implements HandleAvailabilityRunner {
   Future<bool> check(String handle) async => true;
 }
 
-class _RecordingUpdate implements ProfileUpdateRunner {
+class _RecordingUpdate implements FinishOnboardingRunner {
   int calls = 0;
-  String? lastUserId;
-  Map<String, dynamic>? lastPatch;
+  Map<String, dynamic>? lastParams;
 
   @override
-  Future<void> update({
-    required String userId,
-    required Map<String, dynamic> patch,
-  }) async {
+  Future<void> finish(Map<String, dynamic> params) async {
     calls++;
-    lastUserId = userId;
-    lastPatch = Map<String, dynamic>.from(patch);
+    lastParams = Map<String, dynamic>.from(params);
   }
 }
 
@@ -199,17 +194,15 @@ void main() {
 
       // Verify the service was called with the assembled draft.
       expect(updateRunner.calls, 1);
-      expect(updateRunner.lastUserId, 'user-1');
-      final Map<String, dynamic> patch = updateRunner.lastPatch!;
-      expect(patch['name'], 'Ada Lovelace');
-      expect(patch['handle'], 'ada');
-      expect(patch['goal_text'], contains('designer'));
-      expect(patch['goal_type'], 'hire');
-      expect(patch['roles'], <String>['founder']);
-      expect(patch['primary_role'], 'founder');
-      expect(patch['city'], 'Berlin');
-      expect(patch['country'], 'Germany');
-      expect(patch['onboarded'], isTrue);
+      final Map<String, dynamic> patch = updateRunner.lastParams!;
+      expect(patch['p_name'], 'Ada Lovelace');
+      expect(patch['p_handle'], 'ada');
+      expect(patch['p_goal_text'], contains('designer'));
+      expect(patch['p_goal_type'], 'hire');
+      expect(patch['p_roles'], <String>['founder']);
+      expect(patch['p_primary_role'], 'founder');
+      expect(patch['p_city'], 'Berlin');
+      expect(patch['p_country'], 'Germany');
 
       // Draft store cleared after success.
       expect(await OnboardingDraftRepository(prefs).read(), isNull);
@@ -324,10 +317,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(updateRunner.calls, 1);
-      final Map<String, dynamic> patch = updateRunner.lastPatch!;
-      expect(patch['headline'], 'Fractional designer for healthtech');
+      final Map<String, dynamic> patch = updateRunner.lastParams!;
+      expect(patch['p_headline'], 'Fractional designer for healthtech');
       expect(
-        patch['bio'],
+        patch['p_bio'],
         contains('looking for a fractional designer'),
       );
     },

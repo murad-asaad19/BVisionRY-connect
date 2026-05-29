@@ -13,31 +13,26 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../helpers/fake_supabase.dart';
 import '../../../helpers/pump.dart';
 
-/// Test-double for [ProfileUpdateRunner]. Captures the most recent patch so
-/// the assertions can verify exactly what was sent to the server.
-class _FakeRunner implements ProfileUpdateRunner {
+/// Test-double for [FinishOnboardingRunner]. Captures the most recent
+/// params so the assertions can verify exactly what was sent to the RPC.
+class _FakeRunner implements FinishOnboardingRunner {
   _FakeRunner({this.throwOnUpdate});
 
   int calls = 0;
-  String? lastUserId;
-  Map<String, dynamic>? lastPatch;
+  Map<String, dynamic>? lastParams;
   Object? throwOnUpdate;
 
   @override
-  Future<void> update({
-    required String userId,
-    required Map<String, dynamic> patch,
-  }) async {
+  Future<void> finish(Map<String, dynamic> params) async {
     calls++;
-    lastUserId = userId;
-    lastPatch = patch;
+    lastParams = params;
     if (throwOnUpdate != null) throw throwOnUpdate!;
   }
 }
 
 Future<Widget> _renderAboutStep({
   required SharedPreferences prefs,
-  required ProfileUpdateRunner runner,
+  required FinishOnboardingRunner runner,
   Session? session,
 }) async {
   return wrapWithTheme(
@@ -145,10 +140,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(runner.calls, 1);
-    expect(runner.lastUserId, 'user-1');
-    expect(runner.lastPatch?['name'], 'Ada');
-    expect(runner.lastPatch?['handle'], 'ada');
-    expect(runner.lastPatch?['onboarded'], isTrue);
+    expect(runner.lastParams?['p_name'], 'Ada');
+    expect(runner.lastParams?['p_handle'], 'ada');
 
     // Draft is reset after success.
     expect(await OnboardingDraftRepository(prefs).read(), isNull);

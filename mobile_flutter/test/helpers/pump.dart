@@ -41,6 +41,28 @@ Future<void> pumpWithI18n(WidgetTester tester, Widget child) async {
   await tester.pumpAndSettle();
 }
 
+/// Pumps a bounded number of frames instead of `pumpAndSettle`. Use for screens
+/// that show an indefinite [CircularProgressIndicator] / repeating animation
+/// while a faked future (transport, provider) is in flight — `pumpAndSettle`
+/// would spin forever against the perpetual animation. Each frame flushes the
+/// microtask queue so the queued futures resolve.
+Future<void> pumpFrames(WidgetTester tester, {int frames = 16}) async {
+  for (int i = 0; i < frames; i++) {
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+}
+
+/// Like [pumpWithI18n] but bounded (see [pumpFrames]) — for screens with an
+/// indefinite spinner that would hang `pumpAndSettle`.
+Future<void> pumpWithI18nFrames(
+  WidgetTester tester,
+  Widget child, {
+  int frames = 16,
+}) async {
+  await tester.pumpWidget(child);
+  await pumpFrames(tester, frames: frames);
+}
+
 /// Wraps [child] in a [ProviderScope] + [MaterialApp] with the brand theme
 /// and forces the locale loader to hydrate before any `context.t` reads.
 ///

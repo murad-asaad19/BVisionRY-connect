@@ -100,6 +100,28 @@ class OpportunityFormValue {
       body.length >= 10 &&
       body.length <= 2000 &&
       tags.isValid;
+
+  /// Field-by-field equality used to detect unsaved edits. Compares the tag
+  /// *values* (not the `TagInput` wrapper, whose `pure`/`dirty` flag differs
+  /// between the empty-composer and edit baselines).
+  bool sameContentAs(OpportunityFormValue other) {
+    return kind == other.kind &&
+        title == other.title &&
+        body == other.body &&
+        locationCity == other.locationCity &&
+        locationCountry == other.locationCountry &&
+        remoteOk == other.remoteOk &&
+        expiresAt == other.expiresAt &&
+        _listEquals(tags.value, other.tags.value);
+  }
+
+  static bool _listEquals(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 }
 
 /// Single-screen composer for an opportunity (per master plan §17.11 the
@@ -114,6 +136,7 @@ class OpportunityForm extends StatefulWidget {
     required this.onSubmit,
     required this.submitLabel,
     this.submitting = false,
+    this.onDirtyChanged,
   });
 
   final OpportunityFormValue? initial;
@@ -121,18 +144,25 @@ class OpportunityForm extends StatefulWidget {
   final String submitLabel;
   final bool submitting;
 
+  /// Fired whenever the form's dirty state flips. The owning screen wires
+  /// this into a `PopScope` so it can prompt to discard unsaved edits.
+  final ValueChanged<bool>? onDirtyChanged;
+
   @override
   State<OpportunityForm> createState() => _OpportunityFormState();
 }
 
 class _OpportunityFormState extends State<OpportunityForm> {
   late OpportunityFormValue _value;
+  late OpportunityFormValue _baseline;
   bool _touched = false;
+  bool _dirty = false;
 
   @override
   void initState() {
     super.initState();
-    _value = widget.initial ?? OpportunityFormValue.empty();
+    _baseline = widget.initial ?? OpportunityFormValue.empty();
+    _value = _baseline;
   }
 
   void _update(OpportunityFormValue next) {
@@ -140,6 +170,11 @@ class _OpportunityFormState extends State<OpportunityForm> {
       _value = next;
       _touched = true;
     });
+    final bool dirty = !next.sameContentAs(_baseline);
+    if (dirty != _dirty) {
+      _dirty = dirty;
+      widget.onDirtyChanged?.call(dirty);
+    }
   }
 
   Future<void> _pickExpiresAt() async {

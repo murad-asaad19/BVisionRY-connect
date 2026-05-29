@@ -21,6 +21,8 @@ class VoiceWaveform extends StatelessWidget {
     this.activeColor,
     this.inactiveColor,
     this.height = 22,
+    this.onSeek,
+    this.seekSemanticLabel,
   });
 
   final double progress;
@@ -29,6 +31,15 @@ class VoiceWaveform extends StatelessWidget {
   final Color? activeColor;
   final Color? inactiveColor;
   final double height;
+
+  /// When non-null the waveform becomes scrubbable: tapping or dragging
+  /// reports the target position as a 0..1 fraction so the caller can seek
+  /// the player. Null keeps the waveform purely decorative (recorder).
+  final ValueChanged<double>? onSeek;
+
+  /// Screen-reader label for the scrub surface (required-ish when [onSeek]
+  /// is set so the gesture target is announced).
+  final String? seekSemanticLabel;
 
   /// Deterministic pseudo-random heights so the same bar count always
   /// renders identically — important for golden tests.
@@ -49,19 +60,50 @@ class VoiceWaveform extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
-    return SizedBox(
-      key: const ValueKey('voice-waveform'),
-      width: double.infinity,
-      height: height,
-      child: CustomPaint(
-        size: Size(double.infinity, height),
-        painter: _WavePainter(
-          progress: progress.clamp(0, 1),
-          barCount: barCount,
-          heights: heights ?? defaultHeights(barCount),
-          active: activeColor ?? colors.navy,
-          inactive: inactiveColor ?? colors.slate300,
-        ),
+    final painter = CustomPaint(
+      size: Size(double.infinity, height),
+      painter: _WavePainter(
+        progress: progress.clamp(0, 1),
+        barCount: barCount,
+        heights: heights ?? defaultHeights(barCount),
+        active: activeColor ?? colors.navy,
+        inactive: inactiveColor ?? colors.slate300,
+      ),
+    );
+    if (onSeek == null) {
+      return SizedBox(
+        key: const ValueKey('voice-waveform'),
+        width: double.infinity,
+        height: height,
+        child: painter,
+      );
+    }
+    // Scrubbable: translate the local x position into a 0..1 fraction. A
+    // taller hit area than the bars keeps the gesture comfortable.
+    return Semantics(
+      slider: true,
+      label: seekSemanticLabel,
+      value: '${(progress.clamp(0, 1) * 100).round()}%',
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          void report(double dx) {
+            final w = constraints.maxWidth;
+            if (w <= 0) return;
+            onSeek!((dx / w).clamp(0.0, 1.0));
+          }
+
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapDown: (d) => report(d.localPosition.dx),
+            onHorizontalDragUpdate: (d) => report(d.localPosition.dx),
+            child: SizedBox(
+              key: const ValueKey('voice-waveform'),
+              width: double.infinity,
+              height: height,
+              child: painter,
+            ),
+          );
+        },
       ),
     );
   }

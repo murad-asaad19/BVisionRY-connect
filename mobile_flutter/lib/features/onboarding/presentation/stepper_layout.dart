@@ -9,15 +9,18 @@ import '../../../core/widgets/widgets.dart';
 /// Shared chrome for every step in the onboarding wizard.
 ///
 /// Renders, top-to-bottom:
-///   1. A back button + step counter ("Step 2 of 5 · Identity") + optional
+///   1. A back button + step counter ("Step 2 of 5 · Goal") + optional
 ///      Skip action.
 ///   2. Five-segment [ProgressDots] showing the current position.
 ///   3. A scrollable [child] slot for the step's main content.
-///   4. An optional [footer] (typically the Next / Submit button).
+///   4. An optional [footer] (typically the Continue / Finish button).
 ///
-/// Step screens (`GoalStep`, `IdentityStep`, `RolesStep`, `BioDraftStep`,
-/// `AboutStep`) hand over their `stepIndex` (0..4) and the i18n key for the
-/// step name; the layout assembles the visible step label via
+/// Per the mockup the wizard proper is 4 screens (Goal → Roles → Bio →
+/// Basics) but the progress rail shows 5 segments: the 5th dot is reserved
+/// for the first-action / verify step that follows submission. Step screens
+/// (`GoalStep`, `RolesStep`, `BioDraftStep`, `AboutStep`) hand over their
+/// `stepIndex` (0..3) and the i18n key for the step name; the layout
+/// assembles the visible step label via
 /// `t('onboarding.stepLabel', vars: {current, total, stepName})`.
 class StepperLayout extends StatelessWidget {
   const StepperLayout({
@@ -27,14 +30,17 @@ class StepperLayout extends StatelessWidget {
     required this.child,
     this.onBack,
     this.onSkip,
+    this.onSignOut,
     this.footer,
   }) : assert(
           stepIndex >= 0 && stepIndex < totalSteps,
           'stepIndex must be in 0..${totalSteps - 1}',
         );
 
-  /// Number of wizard steps. Fixed by the spec (goal → identity → roles →
-  /// bio → about); exposed as a constant so step screens can reference it
+  /// Number of progress segments shown in the rail. The wizard proper is 4
+  /// screens (goal → roles → bio → basics); the 5th dot is reserved for the
+  /// post-submission first-action / verify step, matching the mockup's
+  /// 5-segment rail. Exposed as a constant so step screens can reference it
   /// without re-declaring the value.
   static const int totalSteps = 5;
 
@@ -55,6 +61,13 @@ class StepperLayout extends StatelessWidget {
   /// used by any step in the current spec (all four are required), but the
   /// hook is kept so future variants can opt in cheaply.
   final VoidCallback? onSkip;
+
+  /// When non-null, shows a dedicated sign-out / exit affordance in the
+  /// header's trailing slot. Gives the user an escape hatch out of the
+  /// wizard (the route guard sends a session-less user back to /sign-in).
+  /// Kept distinct from [onSkip] so the exit action never collides with the
+  /// Skip slot/key.
+  final VoidCallback? onSignOut;
 
   /// Optional fixed footer (Next / Submit button typically).
   final Widget? footer;
@@ -86,13 +99,14 @@ class StepperLayout extends StatelessWidget {
               Row(
                 children: <Widget>[
                   if (onBack != null)
-                    IconButton(
-                      tooltip: 'Back',
-                      icon: const Icon(Icons.chevron_left),
+                    AppIconButton(
+                      key: const ValueKey<String>('stepper-back'),
+                      icon: Icons.chevron_left,
+                      label: context.t('common.back'),
                       onPressed: onBack,
                     )
                   else
-                    const SizedBox(width: 48),
+                    const SizedBox(width: 44),
                   Expanded(
                     child: Text(
                       label,
@@ -105,16 +119,49 @@ class StepperLayout extends StatelessWidget {
                       onPressed: onSkip,
                       child: Text(context.t('onboarding.skip')),
                     )
+                  else if (onSignOut != null)
+                    AppIconButton(
+                      key: const ValueKey<String>('stepper-sign-out'),
+                      icon: Icons.logout,
+                      label: context.t('onboarding.exit'),
+                      onPressed: onSignOut,
+                    )
                   else
-                    const SizedBox(width: 48),
+                    const SizedBox(width: 44),
                 ],
               ),
-              SizedBox(height: spacing.card),
+              Gap(spacing.card),
               ProgressDots(total: totalSteps, current: stepIndex),
-              SizedBox(height: spacing.section),
-              Expanded(child: SingleChildScrollView(child: child)),
+              Gap(spacing.section),
+              // Subtle fade + slide between steps. Keyed on [stepIndex] so
+              // each step's content gently cross-fades/slides in as the user
+              // advances or goes back, animating the transition without
+              // touching the (core-owned) route builder.
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 220),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeIn,
+                  transitionBuilder: (Widget c, Animation<double> anim) {
+                    return FadeTransition(
+                      opacity: anim,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0.05, 0),
+                          end: Offset.zero,
+                        ).animate(anim),
+                        child: c,
+                      ),
+                    );
+                  },
+                  child: SingleChildScrollView(
+                    key: ValueKey<int>(stepIndex),
+                    child: child,
+                  ),
+                ),
+              ),
               if (footer != null) ...<Widget>[
-                SizedBox(height: spacing.card),
+                Gap(spacing.card),
                 footer!,
               ],
             ],

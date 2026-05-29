@@ -64,133 +64,178 @@ class ProfileHero extends StatelessWidget {
     final String? primaryRoleLabel =
         (data.primaryRole == null || data.primaryRole!.isEmpty)
             ? null
-            : _capitalize(data.primaryRole!);
+            : _roleLabel(context, data.primaryRole!);
 
-    return Container(
-      key: const ValueKey<String>('profile-hero-frame'),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          // 135deg ≈ topLeft → bottomRight in Flutter terms.
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[colors.navy, colors.navyLight],
+    return TweenAnimationBuilder<double>(
+      // One-shot gentle fade-in on first build. Wraps (rather than replaces)
+      // the band so the navy→navyLight gradient and gold radial glow are
+      // untouched — they simply ease in with the rest of the hero.
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOut,
+      builder: (BuildContext context, double t, Widget? band) =>
+          Opacity(opacity: t, child: band),
+      child: Container(
+        key: const ValueKey<String>('profile-hero-frame'),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            // 135deg ≈ topLeft → bottomRight in Flutter terms.
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[colors.navy, colors.navyLight],
+          ),
         ),
-      ),
-      child: Stack(
-        children: <Widget>[
-          // Gold radial glow at top-center, 18% opacity per spec.
-          Positioned.fill(
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    center: const Alignment(0, -1.2),
-                    radius: 0.9,
-                    colors: <Color>[
-                      colors.gold.withValues(alpha: 0.18),
-                      Colors.transparent,
-                    ],
+        child: Stack(
+          children: <Widget>[
+            // Gold radial glow at top-center, 18% opacity per spec.
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      center: const Alignment(0, -1.2),
+                      radius: 0.9,
+                      colors: <Color>[
+                        colors.gold.withValues(alpha: 0.18),
+                        Colors.transparent,
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 36, 20, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Avatar(
-                  name: data.name ?? '',
-                  photoUrl: data.photoUrl,
-                  size: 76,
-                  tone: data.verified
-                      ? AvatarTone.featured
-                      : AvatarTone.defaultTone,
-                ),
-                const SizedBox(height: 14),
-                Wrap(
-                  key: const ValueKey<String>('profile-hero-name-row'),
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 8,
-                  runSpacing: 6,
-                  children: <Widget>[
-                    Text(
-                      data.name ?? '',
-                      style: typo.displayLg.copyWith(
-                        color: colors.white,
-                        fontSize: 18,
-                      ),
-                    ),
-                    if (data.verified && primaryRoleLabel != null)
-                      Pill(
-                        key: const ValueKey<String>(
-                          'profile-hero-verified-badge',
-                        ),
-                        label: primaryRoleLabel,
-                        icon: Icons.check,
-                        variant: PillVariant.success,
-                      ),
-                  ],
-                ),
-                if (data.headline != null &&
-                    data.headline!.isNotEmpty) ...<Widget>[
-                  const SizedBox(height: 4),
-                  Text(
-                    data.headline!,
-                    style: typo.bodyMd.copyWith(color: colors.goldLight),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 36, 20, 24),
+              child: Column(
+                // Center-stacked to match the mockup's `.profile-hero` (avatar
+                // margin:0 auto, name/head/meta/roles all centered).
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Avatar(
+                    name: data.name ?? '',
+                    photoUrl: data.photoUrl,
+                    size: 76,
+                    // Standalone hero avatar — name it for screen readers since
+                    // the adjacent display name is decorative-styled text.
+                    semanticLabel: (data.name ?? '').isEmpty ? null : data.name,
+                    // Gold-gradient disc + double white/gold halo for the hero
+                    // avatar per the mockup. Verified upgrades to `featured`
+                    // explicitly; size >= 60 already resolves to the gold disc.
+                    tone: data.verified
+                        ? AvatarTone.featured
+                        : AvatarTone.defaultTone,
                   ),
-                ],
-                if (location.isNotEmpty || data.activeThisWeek) ...<Widget>[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 14),
                   Wrap(
+                    key: const ValueKey<String>('profile-hero-name-row'),
+                    alignment: WrapAlignment.center,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     spacing: 8,
                     runSpacing: 6,
                     children: <Widget>[
-                      if (location.isNotEmpty)
-                        Text(
-                          location,
-                          style:
-                              typo.bodySm.copyWith(color: colors.goldLight),
+                      Text(
+                        data.name ?? '',
+                        textAlign: TextAlign.center,
+                        style: typo.displayLg.copyWith(
+                          color: colors.white,
+                          fontSize: 18,
                         ),
-                      if (data.activeThisWeek)
-                        Pill(
-                          key: const ValueKey<String>(
-                            'profile-hero-active-pill',
+                      ),
+                      if (data.verified && primaryRoleLabel != null)
+                        Semantics(
+                          // The green ✓ pill conveys "verified" via colour +
+                          // icon alone — label it so SR users get the meaning.
+                          label: context.t(
+                            'profile.a11y.verifiedRole',
+                            vars: <String, Object>{'role': primaryRoleLabel},
                           ),
-                          label: context.t('profile.activeThisWeek'),
-                          icon: Icons.star,
-                          variant: PillVariant.success,
+                          child: Pill(
+                            key: const ValueKey<String>(
+                              'profile-hero-verified-badge',
+                            ),
+                            label: primaryRoleLabel,
+                            icon: Icons.check,
+                            variant: PillVariant.success,
+                          ),
                         ),
                     ],
                   ),
+                  if (data.headline != null &&
+                      data.headline!.isNotEmpty) ...<Widget>[
+                    const SizedBox(height: 4),
+                    Text(
+                      data.headline!,
+                      textAlign: TextAlign.center,
+                      style: typo.bodyMd.copyWith(color: colors.goldLight),
+                    ),
+                  ],
+                  if (location.isNotEmpty || data.activeThisWeek) ...<Widget>[
+                    const SizedBox(height: 10),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: <Widget>[
+                        if (location.isNotEmpty)
+                          Text(
+                            location,
+                            style:
+                                typo.bodySm.copyWith(color: colors.goldLight),
+                          ),
+                        if (data.activeThisWeek)
+                          Semantics(
+                            // The star icon + green tint signals "recently
+                            // active"; surface that meaning textually so it
+                            // isn't conveyed by icon/colour alone.
+                            label: context.t('profile.a11y.activeThisWeek'),
+                            child: Pill(
+                              key: const ValueKey<String>(
+                                'profile-hero-active-pill',
+                              ),
+                              label: context.t('profile.activeThisWeek'),
+                              icon: Icons.star,
+                              variant: PillVariant.success,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                  if (data.roles.isNotEmpty) ...<Widget>[
+                    const SizedBox(height: 12),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: <Widget>[
+                        for (final String r in data.roles)
+                          Pill(
+                            label: _roleLabel(context, r),
+                            variant: r == data.primaryRole
+                                ? PillVariant.solid
+                                : PillVariant.outline,
+                          ),
+                      ],
+                    ),
+                  ],
                 ],
-                if (data.roles.isNotEmpty) ...<Widget>[
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: <Widget>[
-                      for (final String r in data.roles)
-                        Pill(
-                          label: _capitalize(r),
-                          variant: r == data.primaryRole
-                              ? PillVariant.solid
-                              : PillVariant.outline,
-                        ),
-                    ],
-                  ),
-                ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  static String _capitalize(String s) =>
-      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+  /// Localized role label via `onboarding.roles.<role>`, falling back to a
+  /// capitalized raw value for any unknown role kind.
+  static String _roleLabel(BuildContext context, String role) {
+    final String key = 'onboarding.roles.$role';
+    final String label = context.t(key);
+    if (label == key) {
+      return role.isEmpty ? role : role[0].toUpperCase() + role.substring(1);
+    }
+    return label;
+  }
 }

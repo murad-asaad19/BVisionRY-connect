@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/analytics/analytics_events.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
 import '../data/meetings_service.dart';
 import '../domain/meeting_proposal.dart';
@@ -44,11 +46,16 @@ class _ConfirmMeetingSheetState extends ConsumerState<ConfirmMeetingSheet> {
       _busy = true;
       _error = null;
     });
+    final toast = ref.read(toastServiceProvider.notifier);
+    final confirmedTitle = context.t('meetings.confirmSheet.confirmed');
     try {
       await ref
           .read(meetingsServiceProvider)
           .confirmMeeting(widget.proposal.id, _selected!);
+      Analytics.log(AppEvent.meetingConfirmed);
+      Haptics.medium();
       if (mounted) Navigator.of(context).pop();
+      toast.showToast(title: confirmedTitle, intent: AppIntent.success);
     } on AppException catch (e) {
       if (mounted) setState(() => _error = context.t(e.i18nKey));
     } catch (_) {

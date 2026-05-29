@@ -17,6 +17,8 @@ export 'app_stepper.dart';
 export 'avatar.dart';
 export 'confirm_dialog.dart';
 export 'empty_state.dart';
+export 'gap.dart';
+export 'hero_avatar.dart';
 export 'pill.dart';
 export 'progress_dots.dart';
 export 'query_state.dart';

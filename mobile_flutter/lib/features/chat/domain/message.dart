@@ -1,9 +1,20 @@
+import 'dart:typed_data';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'message_kind.dart';
 import 'transcript_status.dart';
 
 part 'message.freezed.dart';
+
+/// Lifecycle of a locally-originated (optimistic) message bubble.
+///
+/// A bubble is [sending] the instant the user hits send (before the server
+/// row exists), flips to [sent] once the Realtime INSERT / RPC result
+/// reconciles it, and to [failed] if the round-trip throws — at which point
+/// the bubble exposes a retry affordance. Server-sourced rows carry a null
+/// status (they are, by definition, already confirmed).
+enum MessageSendStatus { sending, sent, failed }
 
 /// One row from `public.messages` (spec §2.6).
 ///
@@ -34,6 +45,16 @@ class Message with _$Message {
     DateTime? deletedAt,
     String? transcript,
     TranscriptStatus? transcriptStatus,
+    // --- Transient, client-only optimistic-send fields ---
+    // Never populated by [Message.fromRow]; carried only by locally-created
+    // optimistic bubbles so they can render before the server row exists and
+    // reconcile against it afterwards.
+    /// Non-null while the bubble is a local optimistic placeholder.
+    MessageSendStatus? sendStatus,
+
+    /// Locally-picked image bytes shown under an upload overlay until the
+    /// real (signed-URL) image is available. Optimistic image bubbles only.
+    @Default(null) Uint8List? localImageBytes,
   }) = _Message;
 
   factory Message.fromRow(Map<String, dynamic> row) {
@@ -78,6 +99,78 @@ class Message with _$Message {
   /// at any time, as long as it isn't already a tombstone.
   bool canDeleteBy({required String userId}) =>
       !isTombstone && senderId == userId;
+
+  /// `true` while this bubble is an unconfirmed local optimistic placeholder
+  /// (mid-flight to the server).
+  bool get isSending => sendStatus == MessageSendStatus.sending;
+
+  /// `true` when the optimistic send failed and the bubble should offer a
+  /// retry affordance.
+  bool get isFailed => sendStatus == MessageSendStatus.failed;
+
+  /// `true` for any locally-originated optimistic bubble (sending or failed)
+  /// that has not yet been replaced by its confirmed server row.
+  bool get isOptimistic =>
+      sendStatus != null && sendStatus != MessageSendStatus.sent;
+
+  /// Builds an optimistic TEXT bubble keyed by a client-generated [clientId]
+  /// (the server assigns the real id, so this is reconciled by replacement).
+  factory Message.optimisticText({
+    required String clientId,
+    required String conversationId,
+    required String senderId,
+    required String body,
+    required DateTime createdAt,
+  }) =>
+      Message(
+        id: clientId,
+        conversationId: conversationId,
+        senderId: senderId,
+        kind: MessageKind.text,
+        createdAt: createdAt,
+        body: body,
+        sendStatus: MessageSendStatus.sending,
+      );
+
+  /// Builds an optimistic IMAGE bubble. [messageId] is the client UUID that
+  /// also forms the storage path, so the server row reuses the SAME id and
+  /// reconciliation is a simple id match.
+  factory Message.optimisticImage({
+    required String messageId,
+    required String conversationId,
+    required String senderId,
+    required DateTime createdAt,
+    required Uint8List localBytes,
+  }) =>
+      Message(
+        id: messageId,
+        conversationId: conversationId,
+        senderId: senderId,
+        kind: MessageKind.image,
+        createdAt: createdAt,
+        localImageBytes: localBytes,
+        sendStatus: MessageSendStatus.sending,
+      );
+
+  /// Builds an optimistic VOICE bubble. As with images the [messageId] is
+  /// the client UUID embedded in the storage path, so the server row reuses
+  /// it and reconciliation is a plain id match.
+  factory Message.optimisticVoice({
+    required String messageId,
+    required String conversationId,
+    required String senderId,
+    required DateTime createdAt,
+    required int durationMs,
+  }) =>
+      Message(
+        id: messageId,
+        conversationId: conversationId,
+        senderId: senderId,
+        kind: MessageKind.voice,
+        createdAt: createdAt,
+        mediaDurationMs: durationMs,
+        sendStatus: MessageSendStatus.sending,
+      );
 }
 
 DateTime? _parseUtc(Object? raw) {

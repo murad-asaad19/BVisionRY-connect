@@ -5,6 +5,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/app_bottom_sheet.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_input.dart';
@@ -66,6 +67,8 @@ class _ExpressInterestSheetBodyState
           );
       ref.invalidate(opportunityProvider(widget.opportunityId));
       if (!mounted) return;
+      // Light tick to confirm interest was expressed.
+      Haptics.light();
       ref.read(toastServiceProvider.notifier).showToast(
             title: context.t('opportunities.interest.success'),
             intent: AppIntent.success,

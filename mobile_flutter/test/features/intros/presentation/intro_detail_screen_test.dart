@@ -58,7 +58,11 @@ void main() {
         introsServiceProvider.overrideWithValue(intros),
         peerProfileServiceProvider.overrideWithValue(peer),
         profileSignalsServiceProvider.overrideWithValue(_EmptySignalsService()),
-        currentUserIdProvider.overrideWithValue('me'),
+        // The buildIntro fixture defaults recipientId to 'recipient-1'; the
+        // viewer-role gate in IntroDetail hides Accept/Decline unless the
+        // signed-in viewer matches that, so we override the user id to the
+        // same string for tests that exercise the action surface.
+        currentUserIdProvider.overrideWithValue('recipient-1'),
       ];
 
   testWidgets('shows note text + delivered badge for a direct intro', (

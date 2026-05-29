@@ -101,10 +101,16 @@ class _Segment<T> extends StatelessWidget {
               color: active ? colors.navy : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Text(
-              option.label,
-              style: typography.displaySm.copyWith(
-                color: active ? colors.white : colors.muted,
+            // Shrink-to-fit so a wider set (e.g. 4 segments with count-bearing
+            // labels) never overflows the equal-flex segment width.
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                option.label,
+                maxLines: 1,
+                style: typography.displaySm.copyWith(
+                  color: active ? colors.white : colors.muted,
+                ),
               ),
             ),
           ),

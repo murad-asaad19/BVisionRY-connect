@@ -2,26 +2,29 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/i18n/i18n.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/haptics.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_input.dart';
 
-/// Modal bottom sheet that gates account deletion behind a literal "DELETE"
-/// confirmation typed into a text field.
+/// Body of the delete-account bottom sheet, gating deletion behind a literal
+/// "DELETE" confirmation typed into the field. Presented inside the design
+/// system [AppBottomSheet] chrome (see `AccountScreen`).
 ///
 /// The confirm button stays disabled until the input matches `DELETE`
-/// exactly (case-sensitive). The sheet is presented via
-/// `showModalBottomSheet` from `AccountScreen`; on confirm we call the
-/// caller-supplied [onConfirm] which is responsible for the actual
-/// `deleteMyAccount()` invocation, sign-out, and routing back to /sign-in.
+/// exactly (case-sensitive). On confirm we call the caller-supplied
+/// [onConfirm] which owns the actual `deleteMyAccount()` invocation, sign-out,
+/// and routing back to /sign-in.
 ///
-/// The sheet does NOT pop itself — let the caller decide whether to dismiss
-/// before navigating away (we don't want the sheet popping back into view
-/// during the post-delete navigation transition).
+/// The sheet does NOT pop itself — the caller decides whether to dismiss
+/// before navigating away (so the sheet doesn't pop back into view during the
+/// post-delete navigation transition).
 class DeleteAccountSheet extends StatefulWidget {
   const DeleteAccountSheet({super.key, required this.onConfirm});
 
-  /// Called when the user taps "Delete" after typing DELETE. Awaited so
-  /// the sheet can keep the confirm button in a busy state until the
-  /// caller's future resolves.
+  /// Called when the user taps "Delete" after typing DELETE. Awaited so the
+  /// sheet can keep the confirm button busy until the future resolves.
   final Future<void> Function() onConfirm;
 
   @override
@@ -29,86 +32,74 @@ class DeleteAccountSheet extends StatefulWidget {
 }
 
 class _DeleteAccountSheetState extends State<DeleteAccountSheet> {
-  final TextEditingController _ctrl = TextEditingController();
+  String _value = '';
   bool _busy = false;
 
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
+  bool get _matches => _value == 'DELETE';
+
+  Future<void> _confirm() async {
+    Haptics.heavy();
+    setState(() => _busy = true);
+    try {
+      await widget.onConfirm();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
+    final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
     final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
-    final bool matches = _ctrl.text == 'DELETE';
-    final bool enabled = matches && !_busy;
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 16,
-          bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
-        ),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        spacing.lg,
+        spacing.xs,
+        spacing.lg,
+        spacing.lg + MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
               context.t('settings.deleteConfirm.title'),
-              style: typo.displayLg,
+              style: typo.displayLg.copyWith(color: colors.navy),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: spacing.sm),
             Text(
               context.t('settings.deleteConfirm.body'),
               style: typo.bodyLg.copyWith(color: colors.muted),
             ),
-            const SizedBox(height: 16),
-            Text(
-              context.t('settings.deleteConfirm.typeWord'),
-              style: typo.bodyMd.copyWith(color: colors.muted),
-            ),
-            const SizedBox(height: 6),
-            TextField(
+            SizedBox(height: spacing.lg),
+            AppInput(
               key: const Key('deleteSheet.confirmInput'),
-              controller: _ctrl,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
-              onChanged: (_) => setState(() {}),
+              label: context.t('settings.deleteConfirm.typeWord'),
+              value: _value,
+              autocorrect: false,
+              enabled: !_busy,
+              onChanged: (String v) => setState(() => _value = v),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: spacing.lg),
             Row(
               children: <Widget>[
                 Expanded(
-                  child: OutlinedButton(
+                  child: AppButton(
+                    label: context.t('settings.deleteConfirm.cancel'),
+                    variant: AppButtonVariant.outline,
                     onPressed: _busy ? null : () => Navigator.of(context).pop(),
-                    child: Text(context.t('settings.deleteConfirm.cancel')),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: spacing.md),
                 Expanded(
-                  child: ElevatedButton(
+                  child: AppButton(
                     key: const Key('deleteSheet.confirmBtn'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: enabled
-                          ? colors.danger
-                          : colors.danger.withValues(alpha: 0.5),
-                    ),
-                    onPressed: enabled
-                        ? () async {
-                            setState(() => _busy = true);
-                            try {
-                              await widget.onConfirm();
-                            } finally {
-                              if (mounted) setState(() => _busy = false);
-                            }
-                          }
-                        : null,
-                    child: Text(
-                      context.t('settings.deleteConfirm.action'),
-                      style: TextStyle(color: colors.white),
-                    ),
+                    label: context.t('settings.deleteConfirm.action'),
+                    variant: AppButtonVariant.danger,
+                    loading: _busy,
+                    onPressed: (_matches && !_busy) ? _confirm : null,
                   ),
                 ),
               ],

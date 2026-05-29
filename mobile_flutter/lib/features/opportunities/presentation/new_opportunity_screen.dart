@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/toast.dart';
 import '../../../core/widgets/top_bar.dart';
 import '../../../core/widgets/variants.dart';
@@ -12,6 +13,7 @@ import '../data/opportunities_service.dart';
 import '../providers/my_opportunities_provider.dart';
 import '../providers/opportunities_feed_provider.dart';
 import 'opportunity_form.dart';
+import 'unsaved_changes_guard.dart';
 
 /// Composer screen for a brand-new opportunity.
 ///
@@ -31,9 +33,13 @@ class NewOpportunityScreen extends ConsumerStatefulWidget {
 
 class _NewOpportunityScreenState extends ConsumerState<NewOpportunityScreen> {
   bool _submitting = false;
+  bool _dirty = false;
 
   Future<void> _submit(OpportunityFormValue v) async {
     if (v.kind == null) return;
+    // Submitting commits the edits, so the unsaved-changes guard must stand
+    // down before we navigate away on success.
+    _dirty = false;
     setState(() => _submitting = true);
     try {
       final String id =
@@ -51,6 +57,8 @@ class _NewOpportunityScreenState extends ConsumerState<NewOpportunityScreen> {
       ref.invalidate(opportunitiesFeedProvider);
       ref.invalidate(myOpportunitiesProvider);
       if (!mounted) return;
+      // Light tick to confirm the opportunity was posted.
+      Haptics.light();
       ref.read(toastServiceProvider.notifier).showToast(
             title: context.t('opportunities.composer.submitSuccess'),
             intent: AppIntent.success,
@@ -70,25 +78,29 @@ class _NewOpportunityScreenState extends ConsumerState<NewOpportunityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: <Widget>[
-            TopBar(
-              title: context.t('opportunities.feed.newCta'),
-              back: true,
-            ),
-            Expanded(
-              child: OpportunityForm(
-                onSubmit: _submit,
-                submitLabel: _submitting
-                    ? context.t('opportunities.composer.submitting')
-                    : context.t('opportunities.composer.submit'),
-                submitting: _submitting,
+    return UnsavedChangesGuard(
+      isDirty: _dirty && !_submitting,
+      child: Scaffold(
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: <Widget>[
+              TopBar(
+                title: context.t('opportunities.feed.newCta'),
+                back: true,
               ),
-            ),
-          ],
+              Expanded(
+                child: OpportunityForm(
+                  onSubmit: _submit,
+                  onDirtyChanged: (bool v) => setState(() => _dirty = v),
+                  submitLabel: _submitting
+                      ? context.t('opportunities.composer.submitting')
+                      : context.t('opportunities.composer.submit'),
+                  submitting: _submitting,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

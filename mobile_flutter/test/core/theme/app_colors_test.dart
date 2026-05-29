@@ -8,13 +8,16 @@ void main() {
     expect(c.navy, const Color(0xFF0F3460));
     expect(c.navyLight, const Color(0xFF1A4A80));
     expect(c.navyDark, const Color(0xFF0A2340));
+    expect(c.navyFill, const Color(0xFF0F3460));
+    expect(c.onNavy, const Color(0xFFFFFFFF));
     expect(c.gold, const Color(0xFFFFC107));
     expect(c.goldLight, const Color(0xFFFFE187));
     expect(c.goldPale, const Color(0xFFFFF8E1));
     expect(c.surface, const Color(0xFFF8F8F8));
     expect(c.white, const Color(0xFFFFFFFF));
     expect(c.body, const Color(0xFF212529));
-    expect(c.muted, const Color(0xFF94A3B8));
+    // Darkened from #94A3B8 to clear WCAG AA contrast on white/slate troughs.
+    expect(c.muted, const Color(0xFF5B6675));
     expect(c.border, const Color(0xFFE5E7EB));
     expect(c.slate100, const Color(0xFFF1F5F9));
     expect(c.slate300, const Color(0xFFCBD5E1));

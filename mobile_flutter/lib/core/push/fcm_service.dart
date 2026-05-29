@@ -3,16 +3,34 @@ import 'dart:io' show Platform;
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../env.dart';
 import 'firebase_init.dart';
 import 'last_token_storage.dart';
 
+/// Coarse OS notification-permission state the UI cares about. Collapses the
+/// platform-specific [PermissionStatus] values into the three branches the
+/// permission banner switches on (spec section 10.5):
+///   * [granted]           — already authorized (incl. provisional/limited);
+///     never offer "Enable".
+///   * [prompt]            — not yet decided; the OS dialog can still be
+///     shown, so we run the priming step then [FcmService.registerToken].
+///   * [permanentlyDenied] — the OS will no longer show its dialog; the only
+///     recovery is the system settings app (`openAppSettings`).
+enum PushPermissionStatus { granted, prompt, permanentlyDenied }
+
 /// Thin testable seam around FirebaseMessaging. The real implementation
 /// is [DefaultMessagingFacade]; tests inject a mocktail Mock / Fake.
 abstract class FirebaseMessagingFacade {
   Future<bool> requestPermission();
+
+  /// Reads the CURRENT OS notification-permission status WITHOUT prompting,
+  /// so the UI can decide between offering "Enable", running the priming
+  /// flow, or surfacing the denied-recovery (open-settings) affordance.
+  Future<PushPermissionStatus> currentPermissionStatus();
+
   Future<String?> getToken();
   Stream<String> get onTokenRefresh;
   Stream<RemoteMessage> get onMessage;
@@ -46,6 +64,20 @@ class DefaultMessagingFacade implements FirebaseMessagingFacade {
         await FirebaseMessaging.instance.requestPermission();
     return settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional;
+  }
+
+  @override
+  Future<PushPermissionStatus> currentPermissionStatus() async {
+    final PermissionStatus status = await Permission.notification.status;
+    if (status.isGranted || status.isProvisional || status.isLimited) {
+      return PushPermissionStatus.granted;
+    }
+    // `restricted` (parental controls) and `permanentlyDenied` can no longer
+    // surface the OS dialog — the only path forward is system settings.
+    if (status.isPermanentlyDenied || status.isRestricted) {
+      return PushPermissionStatus.permanentlyDenied;
+    }
+    return PushPermissionStatus.prompt;
   }
 
   @override
@@ -114,6 +146,16 @@ class FcmService {
   /// [FirebaseMessagingFacade.requestPermission] returning `false`. Surfaces
   /// the one-shot permission-denied banner (Task 15).
   bool get permissionDenied => _permissionDenied;
+
+  /// Reads the current OS notification-permission status without prompting.
+  /// Returns [PushPermissionStatus.granted] when Firebase is gated off so the
+  /// permission banner stays hidden on dev rigs / Expo Go parity builds.
+  Future<PushPermissionStatus> permissionStatus() {
+    if (!Env.firebaseEnabled) {
+      return Future<PushPermissionStatus>.value(PushPermissionStatus.granted);
+    }
+    return _messaging.currentPermissionStatus();
+  }
 
   /// Returns true once Firebase is ready, false when gated off.
   Future<bool> initialize() => ensureFirebaseInitialized();

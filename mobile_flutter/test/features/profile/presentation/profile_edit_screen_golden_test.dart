@@ -6,6 +6,7 @@ import 'package:connect_mobile/features/auth/data/profile_repository.dart';
 import 'package:connect_mobile/features/auth/providers/auth_service_provider.dart';
 import 'package:connect_mobile/features/auth/providers/profile_provider.dart';
 import 'package:connect_mobile/features/profile/data/avatar_upload_service.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:connect_mobile/features/profile/domain/profile.dart';
 import 'package:connect_mobile/features/profile/presentation/profile_edit_screen.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,10 @@ class _FakeAvatarService extends AvatarUploadService {
 
 class _NullSource implements AvatarSource {
   @override
-  Future<Uint8List?> pickAndCropSquareAvatar() async => null;
+  Future<Uint8List?> pickAndCropSquareAvatar({
+    ImageSource source = ImageSource.gallery,
+  }) async =>
+      null;
 }
 
 class _NullStorage implements AvatarStorageGateway {
@@ -47,6 +51,8 @@ class _NullStorage implements AvatarStorageGateway {
     required String userId,
     required String url,
   }) async {}
+  @override
+  Future<void> clearPhotoUrl({required String userId}) async {}
 }
 
 Profile _base() => Profile.fromJson(<String, dynamic>{

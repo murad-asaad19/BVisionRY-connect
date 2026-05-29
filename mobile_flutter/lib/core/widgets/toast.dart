@@ -123,49 +123,61 @@ class _ToastRow extends ConsumerWidget {
     final radii = Theme.of(context).extension<AppRadii>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
     final icon = _iconFor(item.intent);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          key: ValueKey('toast-row-${item.id}'),
-          borderRadius: BorderRadius.circular(radii.button),
-          onTap: () {
-            item.onTap?.call();
-            ref.read(toastServiceProvider.notifier).dismiss(item.id);
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: c.bg,
-              borderRadius: BorderRadius.circular(radii.button),
-              border: Border.all(color: c.border, width: 1),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(icon, color: c.text, size: 18),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        item.title,
-                        style: typo.displaySm.copyWith(color: c.text),
-                      ),
-                      if (item.body != null) ...[
-                        const SizedBox(height: 2),
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      tween: Tween<double>(begin: 0, end: 1),
+      builder: (BuildContext context, double t, Widget? child) => Opacity(
+        opacity: t.clamp(0.0, 1.0),
+        child: Transform.translate(
+          offset: Offset(0, (1 - t) * -12),
+          child: child,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            key: ValueKey('toast-row-${item.id}'),
+            borderRadius: BorderRadius.circular(radii.button),
+            onTap: () {
+              item.onTap?.call();
+              ref.read(toastServiceProvider.notifier).dismiss(item.id);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: c.bg,
+                borderRadius: BorderRadius.circular(radii.button),
+                border: Border.all(color: c.border, width: 1),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(icon, color: c.text, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                         Text(
-                          item.body!,
-                          style: typo.bodyMd.copyWith(color: c.text),
+                          item.title,
+                          style: typo.displaySm.copyWith(color: c.text),
                         ),
+                        if (item.body != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            item.body!,
+                            style: typo.bodyMd.copyWith(color: c.text),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

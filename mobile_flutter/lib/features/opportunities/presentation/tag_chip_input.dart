@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radii.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_icon_button.dart';
 import '../domain/tag_input.dart';
 
 /// Tag chip input — Wrap of dismissible chips + trailing text field.
@@ -185,7 +187,7 @@ class _RemovableChip extends StatelessWidget {
     final AppRadii radii = Theme.of(context).extension<AppRadii>()!;
     final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     return Container(
-      padding: const EdgeInsets.fromLTRB(9, 3, 4, 3),
+      padding: const EdgeInsets.only(left: 9),
       decoration: BoxDecoration(
         color: colors.goldPale,
         borderRadius: BorderRadius.circular(radii.pill),
@@ -201,11 +203,16 @@ class _RemovableChip extends StatelessWidget {
               height: 1.1,
             ),
           ),
-          const SizedBox(width: 4),
-          InkResponse(
-            radius: 14,
-            onTap: onRemove,
-            child: Icon(LucideIcons.x, size: 12, color: colors.navy),
+          // ≥44dp tap target (WCAG 2.5.5) — the visual glyph stays compact
+          // (sm chip) while AppIconButton pads the hitTest area out to 44dp.
+          AppIconButton(
+            icon: LucideIcons.x,
+            label: context.t(
+              'opportunities.composer.removeTag',
+              vars: <String, Object>{'tag': label},
+            ),
+            size: AppIconButtonSize.sm,
+            onPressed: onRemove,
           ),
         ],
       ),

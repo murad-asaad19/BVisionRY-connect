@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/analytics_events.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
 import '../data/warm_intros_service.dart';
 import '../domain/warm_suggestion.dart';
@@ -18,6 +20,10 @@ Future<bool?> showSendWarmRequestSheet(
   BuildContext context, {
   required WarmSuggestion suggestion,
 }) {
+  Analytics.log(
+    AppEvent.introComposeOpened,
+    const <String, Object>{'via_warm': true},
+  );
   return showAppBottomSheet<bool>(
     context: context,
     child: SendWarmRequestSheet(suggestion: suggestion),
@@ -57,10 +63,16 @@ class _SendWarmRequestSheetState extends ConsumerState<SendWarmRequestSheet> {
             targetId: widget.suggestion.targetId,
             note: _note,
           );
+      Analytics.log(
+        AppEvent.introSent,
+        const <String, Object>{'via_warm': true},
+      );
       ref
         ..invalidate(sentIntrosProvider)
         ..invalidate(warmSuggestionsProvider);
       if (!mounted) return;
+      // Medium impact — confirms the warm request was sent.
+      Haptics.medium();
       ref.read(toastServiceProvider.notifier).showToast(
             title: context.t(
               'intros.warm.composeSuccess',
@@ -70,8 +82,16 @@ class _SendWarmRequestSheetState extends ConsumerState<SendWarmRequestSheet> {
             ),
             intent: AppIntent.success,
           );
-      Navigator.of(context).pop(true);
+      // Defer the pop one frame so the toast lands before the sheet tears
+      // down — see T-INTRO-SEND-TOAST-RACE.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).pop(true);
+      });
     } on AppException catch (e) {
+      Analytics.log(
+        AppEvent.introSendFailed,
+        const <String, Object>{'via_warm': true},
+      );
       if (!mounted) return;
       setState(() => _errorKey = _resolveErrorKey(e));
     } finally {

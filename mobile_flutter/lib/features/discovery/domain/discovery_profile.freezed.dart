@@ -35,7 +35,15 @@ mixin _$DiscoveryProfile {
   @JsonKey(name: 'goal_type')
   String? get goalType => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at')
-  DateTime? get createdAt => throw _privateConstructorUsedError;
+  DateTime? get createdAt =>
+      throw _privateConstructorUsedError; // Discovery-card affordances (gallery C1/C3). Both default off so a
+// profile renders cleanly when the RPC hasn't yet been extended to
+// SELECT these columns; once it does, the card surfaces the verified
+// role pill + the "★ Active this week" status pill automatically.
+  @JsonKey(name: 'verified')
+  bool get verified => throw _privateConstructorUsedError;
+  @JsonKey(name: 'last_active_at')
+  DateTime? get lastActiveAt => throw _privateConstructorUsedError;
 
   /// Serializes this DiscoveryProfile to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -65,7 +73,9 @@ abstract class $DiscoveryProfileCopyWith<$Res> {
       @JsonKey(name: 'primary_role') String? primaryRole,
       List<String> roles,
       @JsonKey(name: 'goal_type') String? goalType,
-      @JsonKey(name: 'created_at') DateTime? createdAt});
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'verified') bool verified,
+      @JsonKey(name: 'last_active_at') DateTime? lastActiveAt});
 }
 
 /// @nodoc
@@ -95,6 +105,8 @@ class _$DiscoveryProfileCopyWithImpl<$Res, $Val extends DiscoveryProfile>
     Object? roles = null,
     Object? goalType = freezed,
     Object? createdAt = freezed,
+    Object? verified = null,
+    Object? lastActiveAt = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -145,6 +157,14 @@ class _$DiscoveryProfileCopyWithImpl<$Res, $Val extends DiscoveryProfile>
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      verified: null == verified
+          ? _value.verified
+          : verified // ignore: cast_nullable_to_non_nullable
+              as bool,
+      lastActiveAt: freezed == lastActiveAt
+          ? _value.lastActiveAt
+          : lastActiveAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ) as $Val);
   }
 }
@@ -169,7 +189,9 @@ abstract class _$$DiscoveryProfileImplCopyWith<$Res>
       @JsonKey(name: 'primary_role') String? primaryRole,
       List<String> roles,
       @JsonKey(name: 'goal_type') String? goalType,
-      @JsonKey(name: 'created_at') DateTime? createdAt});
+      @JsonKey(name: 'created_at') DateTime? createdAt,
+      @JsonKey(name: 'verified') bool verified,
+      @JsonKey(name: 'last_active_at') DateTime? lastActiveAt});
 }
 
 /// @nodoc
@@ -197,6 +219,8 @@ class __$$DiscoveryProfileImplCopyWithImpl<$Res>
     Object? roles = null,
     Object? goalType = freezed,
     Object? createdAt = freezed,
+    Object? verified = null,
+    Object? lastActiveAt = freezed,
   }) {
     return _then(_$DiscoveryProfileImpl(
       id: null == id
@@ -247,13 +271,21 @@ class __$$DiscoveryProfileImplCopyWithImpl<$Res>
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      verified: null == verified
+          ? _value.verified
+          : verified // ignore: cast_nullable_to_non_nullable
+              as bool,
+      lastActiveAt: freezed == lastActiveAt
+          ? _value.lastActiveAt
+          : lastActiveAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ));
   }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$DiscoveryProfileImpl implements _DiscoveryProfile {
+class _$DiscoveryProfileImpl extends _DiscoveryProfile {
   const _$DiscoveryProfileImpl(
       {required this.id,
       required this.handle,
@@ -266,8 +298,11 @@ class _$DiscoveryProfileImpl implements _DiscoveryProfile {
       @JsonKey(name: 'primary_role') this.primaryRole,
       final List<String> roles = const <String>[],
       @JsonKey(name: 'goal_type') this.goalType,
-      @JsonKey(name: 'created_at') this.createdAt})
-      : _roles = roles;
+      @JsonKey(name: 'created_at') this.createdAt,
+      @JsonKey(name: 'verified') this.verified = false,
+      @JsonKey(name: 'last_active_at') this.lastActiveAt})
+      : _roles = roles,
+        super._();
 
   factory _$DiscoveryProfileImpl.fromJson(Map<String, dynamic> json) =>
       _$$DiscoveryProfileImplFromJson(json);
@@ -307,10 +342,20 @@ class _$DiscoveryProfileImpl implements _DiscoveryProfile {
   @override
   @JsonKey(name: 'created_at')
   final DateTime? createdAt;
+// Discovery-card affordances (gallery C1/C3). Both default off so a
+// profile renders cleanly when the RPC hasn't yet been extended to
+// SELECT these columns; once it does, the card surfaces the verified
+// role pill + the "★ Active this week" status pill automatically.
+  @override
+  @JsonKey(name: 'verified')
+  final bool verified;
+  @override
+  @JsonKey(name: 'last_active_at')
+  final DateTime? lastActiveAt;
 
   @override
   String toString() {
-    return 'DiscoveryProfile(id: $id, handle: $handle, name: $name, photoUrl: $photoUrl, headline: $headline, bio: $bio, city: $city, country: $country, primaryRole: $primaryRole, roles: $roles, goalType: $goalType, createdAt: $createdAt)';
+    return 'DiscoveryProfile(id: $id, handle: $handle, name: $name, photoUrl: $photoUrl, headline: $headline, bio: $bio, city: $city, country: $country, primaryRole: $primaryRole, roles: $roles, goalType: $goalType, createdAt: $createdAt, verified: $verified, lastActiveAt: $lastActiveAt)';
   }
 
   @override
@@ -334,7 +379,11 @@ class _$DiscoveryProfileImpl implements _DiscoveryProfile {
             (identical(other.goalType, goalType) ||
                 other.goalType == goalType) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
+                other.createdAt == createdAt) &&
+            (identical(other.verified, verified) ||
+                other.verified == verified) &&
+            (identical(other.lastActiveAt, lastActiveAt) ||
+                other.lastActiveAt == lastActiveAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -352,7 +401,9 @@ class _$DiscoveryProfileImpl implements _DiscoveryProfile {
       primaryRole,
       const DeepCollectionEquality().hash(_roles),
       goalType,
-      createdAt);
+      createdAt,
+      verified,
+      lastActiveAt);
 
   /// Create a copy of DiscoveryProfile
   /// with the given fields replaced by the non-null parameter values.
@@ -371,7 +422,7 @@ class _$DiscoveryProfileImpl implements _DiscoveryProfile {
   }
 }
 
-abstract class _DiscoveryProfile implements DiscoveryProfile {
+abstract class _DiscoveryProfile extends DiscoveryProfile {
   const factory _DiscoveryProfile(
           {required final String id,
           required final String handle,
@@ -384,8 +435,11 @@ abstract class _DiscoveryProfile implements DiscoveryProfile {
           @JsonKey(name: 'primary_role') final String? primaryRole,
           final List<String> roles,
           @JsonKey(name: 'goal_type') final String? goalType,
-          @JsonKey(name: 'created_at') final DateTime? createdAt}) =
+          @JsonKey(name: 'created_at') final DateTime? createdAt,
+          @JsonKey(name: 'verified') final bool verified,
+          @JsonKey(name: 'last_active_at') final DateTime? lastActiveAt}) =
       _$DiscoveryProfileImpl;
+  const _DiscoveryProfile._() : super._();
 
   factory _DiscoveryProfile.fromJson(Map<String, dynamic> json) =
       _$DiscoveryProfileImpl.fromJson;
@@ -417,7 +471,17 @@ abstract class _DiscoveryProfile implements DiscoveryProfile {
   String? get goalType;
   @override
   @JsonKey(name: 'created_at')
-  DateTime? get createdAt;
+  DateTime?
+      get createdAt; // Discovery-card affordances (gallery C1/C3). Both default off so a
+// profile renders cleanly when the RPC hasn't yet been extended to
+// SELECT these columns; once it does, the card surfaces the verified
+// role pill + the "★ Active this week" status pill automatically.
+  @override
+  @JsonKey(name: 'verified')
+  bool get verified;
+  @override
+  @JsonKey(name: 'last_active_at')
+  DateTime? get lastActiveAt;
 
   /// Create a copy of DiscoveryProfile
   /// with the given fields replaced by the non-null parameter values.

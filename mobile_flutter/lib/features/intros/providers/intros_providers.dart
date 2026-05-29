@@ -74,13 +74,29 @@ final FutureProvider<List<Intro>> sentIntrosProvider =
   return ref.watch(introsServiceProvider).listSentIntros(viewerId: me);
 });
 
-/// Caller's intros-sent-today count (sender-side daily cap helper).
+/// Caller's intros-*received*-today count. Drives the inbox banner only — NOT
+/// the send cap (the underlying `intros_today_count()` RPC filters
+/// `recipient_id = auth.uid()`). Use [sentTodayProvider] for the compose
+/// sheet's outbound "Today's intros: used / cap" heads-up.
 final FutureProvider<int> todayCountProvider = FutureProvider<int>((
   ref,
 ) async {
   final String? me = ref.watch(currentUserIdProvider);
   if (me == null) return 0;
   return ref.watch(introsServiceProvider).introsTodayCount();
+});
+
+/// Caller's sender-side daily counter for the compose sheet: how many intros
+/// they have sent today (`used`) against the server-authoritative `cap`.
+///
+/// Signed-out callers get `used: 0` and the client cap fallback
+/// ([dailyIntroCapProvider]) so the sheet can render a sensible placeholder
+/// without a round-trip.
+final FutureProvider<({int used, int cap})> sentTodayProvider =
+    FutureProvider<({int used, int cap})>((ref) async {
+  final String? me = ref.watch(currentUserIdProvider);
+  if (me == null) return (used: 0, cap: ref.watch(dailyIntroCapProvider));
+  return ref.watch(introsServiceProvider).introsSentTodayCount();
 });
 
 /// Count of received intros in the `delivered` state — drives the Inbox

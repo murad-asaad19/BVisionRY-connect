@@ -5,6 +5,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../profile/domain/profile.dart';
 import '../../profile/providers/peer_profile_provider.dart';
@@ -68,6 +69,8 @@ class _WarmIntroForwardSheetState extends ConsumerState<WarmIntroForwardSheet> {
         ..invalidate(receivedIntrosProvider)
         ..invalidate(sentIntrosProvider);
       if (!mounted) return;
+      // Medium impact — confirms the forward was sent.
+      Haptics.medium();
       final targetName = _resolveTargetName();
       ref.read(toastServiceProvider.notifier).showToast(
             title: context.t(
@@ -76,7 +79,11 @@ class _WarmIntroForwardSheetState extends ConsumerState<WarmIntroForwardSheet> {
             ),
             intent: AppIntent.success,
           );
-      Navigator.of(context).pop(true);
+      // Defer the pop one frame so the toast lands before teardown — see
+      // T-INTRO-SEND-TOAST-RACE.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).pop(true);
+      });
     } on AppException catch (e) {
       if (!mounted) return;
       setState(() => _errorKey = _resolveErrorKey(e));
@@ -207,10 +214,17 @@ class _PeerHeader extends ConsumerWidget {
     final typo = Theme.of(context).extension<AppTypography>()!;
     final AsyncValue<Profile?> async = ref.watch(peerProfileProvider(userId));
     final Profile? profile = async.asData?.value;
+    // While the profile resolves we render the user id as the caption text
+    // but the Avatar gets a neutral placeholder — passing a UUID to Avatar
+    // would render the first two hex chars as fake "initials".
     final String name = profile?.name ?? userId;
     return Row(
       children: <Widget>[
-        Avatar(name: name, photoUrl: profile?.photoUrl, size: 32),
+        Avatar(
+          name: profile?.name ?? '··',
+          photoUrl: profile?.photoUrl,
+          size: 32,
+        ),
         const SizedBox(width: 10),
         Expanded(
           child: Column(

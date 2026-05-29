@@ -138,6 +138,17 @@ class FakeAuthGateway implements AuthGateway {
     autoRefreshStopped++;
   }
 
+  /// Hook the test can override to drive RPC responses. Returns `null` by
+  /// default — a sensible, void-like fake for the RPCs our auth code calls.
+  Future<Object?> Function(String name, {Map<String, dynamic>? params})? onRpc;
+
+  @override
+  Future<Object?> rpc(String name, {Map<String, dynamic>? params}) {
+    final h = onRpc;
+    if (h == null) return Future<Object?>.value();
+    return h(name, params: params);
+  }
+
   Future<void> close() => _ctrl.close();
 }
 

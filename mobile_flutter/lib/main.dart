@@ -2,6 +2,8 @@ import 'package:app_links/app_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 
 import 'app.dart';
 import 'core/analytics/firebase_telemetry.dart';
@@ -15,6 +17,7 @@ import 'core/supabase/supabase_client.dart';
 import 'features/auth/providers/auth_lifecycle.dart';
 import 'features/auth/providers/auth_service_provider.dart';
 import 'features/auth/providers/session_provider.dart';
+import 'features/settings/providers/appearance_provider.dart';
 import 'features/settings/settings_providers.dart';
 
 /// Top-level FCM background message handler.
@@ -69,14 +72,17 @@ Future<void> main() async {
   await container.read(telemetryReadyProvider.future);
   final TelemetryPrefs prefs = container.read(telemetryProvider).requireValue;
 
-  // Subscribe synchronously to session updates - wins the race vs
-  // cold-start deep links.
-  // ignore: deprecated_member_use, unused_local_variable
-  final Stream<dynamic> _ = container.read(sessionProvider.stream);
-
   // 5. Boot Supabase. After this completes the supabase singleton is usable
   //    and `currentSession` is restored from secure storage.
   await container.read(supabaseInitProvider.future);
+
+  // Subscribe to session updates AFTER Supabase init (supabaseClientProvider
+  // accesses Supabase.instance.client synchronously, so it must not be read
+  // before initialize completes) but BEFORE the deep-link dispatch below,
+  // so onAuthStateChange events fired by cold-start createSessionFromUrl
+  // aren't dropped on the floor.
+  // ignore: deprecated_member_use, unused_local_variable
+  final Stream<dynamic> _ = container.read(sessionProvider.stream);
 
   // 6. Firebase init (gated by Env flag) + telemetry collection toggles.
   if (Env.firebaseEnabled) {
@@ -100,6 +106,14 @@ Future<void> main() async {
   final Locale savedLocale =
       await container.read(languageServiceProvider).load();
   container.read(localeProvider.notifier).state = savedLocale;
+  // Wire intl before the first frame so dates/numbers render in the saved
+  // language immediately (localeReadyProvider keeps it in sync afterwards).
+  Intl.defaultLocale = savedLocale.languageCode;
+  await initializeDateFormatting(savedLocale.languageCode);
+
+  // Restore the persisted appearance (light / dark / system) before the first
+  // frame so a returning user's theme paints immediately.
+  await container.read(appearanceReadyProvider.future);
 
   // Install the lifecycle observer (toggles auth auto-refresh on
   // resume/pause). Reading the provider materialises the AuthLifecycle.
@@ -145,6 +159,15 @@ Future<void> main() async {
 /// other  -> router.go(uri.path) for universal links (e.g. /p/handle)
 ///           and `connect-mobile://` custom-scheme variants.
 Future<void> _dispatchUri(ProviderContainer container, Uri uri) async {
+  // Universal link (https://APP_LINKS_HOST/...) or custom scheme
+  // (connect-mobile://...). Only dispatch when the host / scheme matches
+  // our configured domain — including for /auth, so a rogue app launching
+  // connect-mobile://auth?code=… cannot replay the PKCE exchange.
+  final bool matchesUniversal = uri.scheme == 'https' &&
+      (uri.host == Env.appLinksHost || uri.host == 'www.${Env.appLinksHost}');
+  final bool matchesCustomScheme = uri.scheme == Env.appScheme;
+  if (!matchesUniversal && !matchesCustomScheme) return;
+
   if (uri.path == '/auth') {
     try {
       await container.read(authServiceProvider).createSessionFromUrl(uri);
@@ -153,14 +176,6 @@ Future<void> _dispatchUri(ProviderContainer container, Uri uri) async {
     }
     return;
   }
-
-  // Universal link (https://APP_LINKS_HOST/...) or custom scheme
-  // (connect-mobile://...). Only dispatch when the host / scheme matches
-  // our configured domain to avoid acting on unrelated deep links.
-  final bool matchesUniversal = uri.scheme == 'https' &&
-      (uri.host == Env.appLinksHost || uri.host == 'www.${Env.appLinksHost}');
-  final bool matchesCustomScheme = uri.scheme == Env.appScheme;
-  if (!matchesUniversal && !matchesCustomScheme) return;
 
   final String path = uri.path.isEmpty ? '/home' : uri.path;
   final String query = uri.query.isEmpty ? '' : '?${uri.query}';

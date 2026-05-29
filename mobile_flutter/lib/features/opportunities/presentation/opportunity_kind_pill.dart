@@ -32,19 +32,23 @@ class OpportunityKindPill extends StatelessWidget {
   /// Stable mapping from [OpportunityKind] to [PillVariant]. Exposed as a
   /// static so tests and adjacent widgets (e.g. card status row) can re-use
   /// the same palette without duplicating the switch.
+  ///
+  /// Kinds are *taxonomy*, not state — they read as categories, so they only
+  /// use the brand-neutral variants (`solid` / `navy` / `outline` /
+  /// `defaultVariant`). The semantic intents (`danger`/`warning`/`success`/
+  /// `info`) are reserved for actual error/caution/ok states and are
+  /// deliberately NOT used here: a red "seeking advisor" pill reads as an
+  /// error, an orange "fundraising" pill reads as a warning.
   static PillVariant variantFor(OpportunityKind k) {
     return switch (k) {
-      OpportunityKind.hiring ||
-      OpportunityKind.seekingRole =>
-        PillVariant.solid,
+      OpportunityKind.hiring => PillVariant.solid,
+      OpportunityKind.seekingRole => PillVariant.outline,
       OpportunityKind.cofounder => PillVariant.navy,
-      OpportunityKind.collaboration => PillVariant.info,
-      OpportunityKind.fundraising ||
-      OpportunityKind.investing =>
-        PillVariant.defaultVariant,
-      OpportunityKind.advising ||
-      OpportunityKind.seekingAdvisor =>
-        PillVariant.muted,
+      OpportunityKind.collaboration => PillVariant.defaultVariant,
+      OpportunityKind.fundraising => PillVariant.solid,
+      OpportunityKind.investing => PillVariant.navy,
+      OpportunityKind.advising => PillVariant.outline,
+      OpportunityKind.seekingAdvisor => PillVariant.defaultVariant,
     };
   }
 }

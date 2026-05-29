@@ -25,6 +25,10 @@ _$DiscoveryProfileImpl _$$DiscoveryProfileImplFromJson(
       createdAt: json['created_at'] == null
           ? null
           : DateTime.parse(json['created_at'] as String),
+      verified: json['verified'] as bool? ?? false,
+      lastActiveAt: json['last_active_at'] == null
+          ? null
+          : DateTime.parse(json['last_active_at'] as String),
     );
 
 Map<String, dynamic> _$$DiscoveryProfileImplToJson(
@@ -42,4 +46,6 @@ Map<String, dynamic> _$$DiscoveryProfileImplToJson(
       'roles': instance.roles,
       'goal_type': instance.goalType,
       'created_at': instance.createdAt?.toIso8601String(),
+      'verified': instance.verified,
+      'last_active_at': instance.lastActiveAt?.toIso8601String(),
     };

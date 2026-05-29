@@ -12,6 +12,7 @@ import '../../../core/widgets/settings_row.dart';
 import '../../../core/widgets/top_bar.dart';
 import '../../auth/providers/auth_service_provider.dart';
 import '../../privacy/providers/blocks_provider.dart';
+import 'widgets/appearance_section.dart';
 
 /// `/settings` — root settings list.
 ///
@@ -102,6 +103,13 @@ class SettingsHomeScreen extends ConsumerWidget {
                 onTap: () => context.push(Routes.profileEdit),
               ),
               SettingsRow(
+                key: const Key('settings.row.invite'),
+                icon: LucideIcons.ticket,
+                label: context.t('invite.title'),
+                description: context.t('invite.settingsRowDesc'),
+                onTap: () => context.push(Routes.inviteFriends),
+              ),
+              SettingsRow(
                 key: const Key('settings.row.officeHours'),
                 icon: LucideIcons.calendarClock,
                 label: context.t('officeHours.settings.title'),
@@ -121,6 +129,8 @@ class SettingsHomeScreen extends ConsumerWidget {
               ),
             ],
           ),
+          const SizedBox(height: 16),
+          const AppearanceSection(),
           const SizedBox(height: 24),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),

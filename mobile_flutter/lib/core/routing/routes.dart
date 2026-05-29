@@ -11,10 +11,18 @@ abstract final class Routes {
   static const String signUp = '/sign-up';
   static const String authCallback = '/auth';
   static const String suspended = '/suspended';
+  // Age-gate + legal-consent interstitial. Any authed user whose profile has
+  // no recorded consent (e.g. OAuth / magic-link sign-ups that bypass the
+  // sign-up form's inline gate) is routed here before onboarding.
+  static const String consent = '/consent';
+  // Join-waitlist screen, reachable pre-auth from the sign-in screen.
+  static const String waitlist = '/waitlist';
+
+  // Invite friends (share-my-codes), reachable from Settings / Profile.
+  static const String inviteFriends = '/invite';
 
   // Onboarding flow
   static const String onboardingGoal = '/onboarding/goal';
-  static const String onboardingIdentity = '/onboarding/identity';
   static const String onboardingRoles = '/onboarding/roles';
   static const String onboardingBio = '/onboarding/bio';
   static const String onboardingAbout = '/onboarding/about';
@@ -24,10 +32,6 @@ abstract final class Routes {
   static const String inbox = '/inbox';
   static const String network = '/network';
   static const String opportunities = '/opportunities';
-  static const String chats = '/chats';
-
-  // Connections list (full-screen, dedicated route)
-  static const String connections = '/connections';
 
   // Discovery
   static const String search = '/search';

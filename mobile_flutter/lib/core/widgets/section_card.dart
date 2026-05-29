@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_radii.dart';
+import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
 
 /// Standard section panel used by profile-style surfaces.
@@ -26,14 +28,16 @@ class SectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Theme.of(context).extension<AppColors>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
+    final radii = Theme.of(context).extension<AppRadii>()!;
+    final spacing = Theme.of(context).extension<AppSpacing>()!;
     return Container(
       key: const ValueKey('section-card-frame'),
       decoration: BoxDecoration(
         color: c.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(radii.card),
         border: Border.all(color: c.border),
       ),
-      padding: padding ?? const EdgeInsets.all(14),
+      padding: padding ?? EdgeInsets.all(spacing.cardLg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -46,7 +50,7 @@ class SectionCard extends StatelessWidget {
                 letterSpacing: 0.6,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: spacing.sm),
           ],
           child,
         ],

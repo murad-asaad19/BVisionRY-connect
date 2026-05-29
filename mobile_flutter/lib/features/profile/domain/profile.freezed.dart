@@ -59,6 +59,13 @@ mixin _$Profile {
   DateTime? get updatedAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'last_active_at')
   DateTime? get lastActiveAt =>
+      throw _privateConstructorUsedError; // Age-gate + legal consent (set by record_signup_consent). Both are
+// stamped together; the [consentRecorded] getter reads them to drive the
+// post-auth consent interstitial gate.
+  @JsonKey(name: 'tos_accepted_at')
+  DateTime? get tosAcceptedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'privacy_accepted_at')
+  DateTime? get privacyAcceptedAt =>
       throw _privateConstructorUsedError; // Role-specific structured details (spec §3a). All optional; the profile
 // screen renders only the rows that resolve to a non-null value.
 // Builder details
@@ -130,6 +137,8 @@ abstract class $ProfileCopyWith<$Res> {
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt,
       @JsonKey(name: 'last_active_at') DateTime? lastActiveAt,
+      @JsonKey(name: 'tos_accepted_at') DateTime? tosAcceptedAt,
+      @JsonKey(name: 'privacy_accepted_at') DateTime? privacyAcceptedAt,
       @JsonKey(name: 'builder_discipline') String? builderDiscipline,
       @JsonKey(name: 'builder_seniority') String? builderSeniority,
       @JsonKey(name: 'builder_skills') List<String> builderSkills,
@@ -184,6 +193,8 @@ class _$ProfileCopyWithImpl<$Res, $Val extends Profile>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
     Object? lastActiveAt = freezed,
+    Object? tosAcceptedAt = freezed,
+    Object? privacyAcceptedAt = freezed,
     Object? builderDiscipline = freezed,
     Object? builderSeniority = freezed,
     Object? builderSkills = null,
@@ -295,6 +306,14 @@ class _$ProfileCopyWithImpl<$Res, $Val extends Profile>
           ? _value.lastActiveAt
           : lastActiveAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      tosAcceptedAt: freezed == tosAcceptedAt
+          ? _value.tosAcceptedAt
+          : tosAcceptedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      privacyAcceptedAt: freezed == privacyAcceptedAt
+          ? _value.privacyAcceptedAt
+          : privacyAcceptedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       builderDiscipline: freezed == builderDiscipline
           ? _value.builderDiscipline
           : builderDiscipline // ignore: cast_nullable_to_non_nullable
@@ -383,6 +402,8 @@ abstract class _$$ProfileImplCopyWith<$Res> implements $ProfileCopyWith<$Res> {
       @JsonKey(name: 'created_at') DateTime? createdAt,
       @JsonKey(name: 'updated_at') DateTime? updatedAt,
       @JsonKey(name: 'last_active_at') DateTime? lastActiveAt,
+      @JsonKey(name: 'tos_accepted_at') DateTime? tosAcceptedAt,
+      @JsonKey(name: 'privacy_accepted_at') DateTime? privacyAcceptedAt,
       @JsonKey(name: 'builder_discipline') String? builderDiscipline,
       @JsonKey(name: 'builder_seniority') String? builderSeniority,
       @JsonKey(name: 'builder_skills') List<String> builderSkills,
@@ -435,6 +456,8 @@ class __$$ProfileImplCopyWithImpl<$Res>
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
     Object? lastActiveAt = freezed,
+    Object? tosAcceptedAt = freezed,
+    Object? privacyAcceptedAt = freezed,
     Object? builderDiscipline = freezed,
     Object? builderSeniority = freezed,
     Object? builderSkills = null,
@@ -546,6 +569,14 @@ class __$$ProfileImplCopyWithImpl<$Res>
           ? _value.lastActiveAt
           : lastActiveAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      tosAcceptedAt: freezed == tosAcceptedAt
+          ? _value.tosAcceptedAt
+          : tosAcceptedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      privacyAcceptedAt: freezed == privacyAcceptedAt
+          ? _value.privacyAcceptedAt
+          : privacyAcceptedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       builderDiscipline: freezed == builderDiscipline
           ? _value.builderDiscipline
           : builderDiscipline // ignore: cast_nullable_to_non_nullable
@@ -630,6 +661,8 @@ class _$ProfileImpl extends _Profile {
       @JsonKey(name: 'created_at') this.createdAt,
       @JsonKey(name: 'updated_at') this.updatedAt,
       @JsonKey(name: 'last_active_at') this.lastActiveAt,
+      @JsonKey(name: 'tos_accepted_at') this.tosAcceptedAt,
+      @JsonKey(name: 'privacy_accepted_at') this.privacyAcceptedAt,
       @JsonKey(name: 'builder_discipline') this.builderDiscipline,
       @JsonKey(name: 'builder_seniority') this.builderSeniority,
       @JsonKey(name: 'builder_skills')
@@ -726,6 +759,15 @@ class _$ProfileImpl extends _Profile {
   @override
   @JsonKey(name: 'last_active_at')
   final DateTime? lastActiveAt;
+// Age-gate + legal consent (set by record_signup_consent). Both are
+// stamped together; the [consentRecorded] getter reads them to drive the
+// post-auth consent interstitial gate.
+  @override
+  @JsonKey(name: 'tos_accepted_at')
+  final DateTime? tosAcceptedAt;
+  @override
+  @JsonKey(name: 'privacy_accepted_at')
+  final DateTime? privacyAcceptedAt;
 // Role-specific structured details (spec §3a). All optional; the profile
 // screen renders only the rows that resolve to a non-null value.
 // Builder details
@@ -791,7 +833,7 @@ class _$ProfileImpl extends _Profile {
 
   @override
   String toString() {
-    return 'Profile(id: $id, handle: $handle, name: $name, headline: $headline, bio: $bio, roles: $roles, primaryRole: $primaryRole, city: $city, country: $country, goalType: $goalType, goalText: $goalText, goalUpdatedAt: $goalUpdatedAt, photoUrl: $photoUrl, onboarded: $onboarded, verifiedGithubUsername: $verifiedGithubUsername, verifiedGithubId: $verifiedGithubId, verifiedAt: $verifiedAt, suspendedAt: $suspendedAt, privateMode: $privateMode, readReceiptsEnabled: $readReceiptsEnabled, publicInvestorPage: $publicInvestorPage, createdAt: $createdAt, updatedAt: $updatedAt, lastActiveAt: $lastActiveAt, builderDiscipline: $builderDiscipline, builderSeniority: $builderSeniority, builderSkills: $builderSkills, builderOpenTo: $builderOpenTo, builderRateBand: $builderRateBand, founderStage: $founderStage, founderSector: $founderSector, founderFunding: $founderFunding, founderHiring: $founderHiring, investorType: $investorType, investorCheckSize: $investorCheckSize, investorSectors: $investorSectors, investorStage: $investorStage)';
+    return 'Profile(id: $id, handle: $handle, name: $name, headline: $headline, bio: $bio, roles: $roles, primaryRole: $primaryRole, city: $city, country: $country, goalType: $goalType, goalText: $goalText, goalUpdatedAt: $goalUpdatedAt, photoUrl: $photoUrl, onboarded: $onboarded, verifiedGithubUsername: $verifiedGithubUsername, verifiedGithubId: $verifiedGithubId, verifiedAt: $verifiedAt, suspendedAt: $suspendedAt, privateMode: $privateMode, readReceiptsEnabled: $readReceiptsEnabled, publicInvestorPage: $publicInvestorPage, createdAt: $createdAt, updatedAt: $updatedAt, lastActiveAt: $lastActiveAt, tosAcceptedAt: $tosAcceptedAt, privacyAcceptedAt: $privacyAcceptedAt, builderDiscipline: $builderDiscipline, builderSeniority: $builderSeniority, builderSkills: $builderSkills, builderOpenTo: $builderOpenTo, builderRateBand: $builderRateBand, founderStage: $founderStage, founderSector: $founderSector, founderFunding: $founderFunding, founderHiring: $founderHiring, investorType: $investorType, investorCheckSize: $investorCheckSize, investorSectors: $investorSectors, investorStage: $investorStage)';
   }
 
   @override
@@ -840,6 +882,10 @@ class _$ProfileImpl extends _Profile {
                 other.updatedAt == updatedAt) &&
             (identical(other.lastActiveAt, lastActiveAt) ||
                 other.lastActiveAt == lastActiveAt) &&
+            (identical(other.tosAcceptedAt, tosAcceptedAt) ||
+                other.tosAcceptedAt == tosAcceptedAt) &&
+            (identical(other.privacyAcceptedAt, privacyAcceptedAt) ||
+                other.privacyAcceptedAt == privacyAcceptedAt) &&
             (identical(other.builderDiscipline, builderDiscipline) ||
                 other.builderDiscipline == builderDiscipline) &&
             (identical(other.builderSeniority, builderSeniority) ||
@@ -896,6 +942,8 @@ class _$ProfileImpl extends _Profile {
         createdAt,
         updatedAt,
         lastActiveAt,
+        tosAcceptedAt,
+        privacyAcceptedAt,
         builderDiscipline,
         builderSeniority,
         const DeepCollectionEquality().hash(_builderSkills),
@@ -954,6 +1002,8 @@ abstract class _Profile extends Profile {
       @JsonKey(name: 'created_at') final DateTime? createdAt,
       @JsonKey(name: 'updated_at') final DateTime? updatedAt,
       @JsonKey(name: 'last_active_at') final DateTime? lastActiveAt,
+      @JsonKey(name: 'tos_accepted_at') final DateTime? tosAcceptedAt,
+      @JsonKey(name: 'privacy_accepted_at') final DateTime? privacyAcceptedAt,
       @JsonKey(name: 'builder_discipline') final String? builderDiscipline,
       @JsonKey(name: 'builder_seniority') final String? builderSeniority,
       @JsonKey(name: 'builder_skills') final List<String> builderSkills,
@@ -1035,7 +1085,16 @@ abstract class _Profile extends Profile {
   @override
   @JsonKey(name: 'last_active_at')
   DateTime?
-      get lastActiveAt; // Role-specific structured details (spec §3a). All optional; the profile
+      get lastActiveAt; // Age-gate + legal consent (set by record_signup_consent). Both are
+// stamped together; the [consentRecorded] getter reads them to drive the
+// post-auth consent interstitial gate.
+  @override
+  @JsonKey(name: 'tos_accepted_at')
+  DateTime? get tosAcceptedAt;
+  @override
+  @JsonKey(name: 'privacy_accepted_at')
+  DateTime?
+      get privacyAcceptedAt; // Role-specific structured details (spec §3a). All optional; the profile
 // screen renders only the rows that resolve to a non-null value.
 // Builder details
   @override

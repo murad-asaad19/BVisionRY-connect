@@ -8,7 +8,12 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_filter_chip.dart';
+import '../../../core/widgets/app_icon_button.dart';
+import '../../../core/widgets/app_input.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/query_state.dart';
 import '../../../core/widgets/skeleton.dart';
@@ -81,6 +86,19 @@ class _OpportunitiesFeedScreenState
         );
   }
 
+  void _setSearch(String raw) {
+    final state = ref.read(opportunitiesFeedProvider).valueOrNull;
+    if (state == null) return;
+    final String trimmed = raw.trim();
+    final String? next = trimmed.isEmpty ? null : trimmed;
+    if (next == state.search) return;
+    ref.read(opportunitiesFeedProvider.notifier).setFilters(
+          kinds: state.kinds,
+          remoteOnly: state.remoteOnly,
+          search: next,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
@@ -103,10 +121,14 @@ class _OpportunitiesFeedScreenState
                 ),
                 TopBarAction(
                   icon: LucideIcons.ellipsisVertical,
-                  label: 'Menu',
+                  label: context.t('common.more'),
                   onPressed: () => _showKebab(context),
                 ),
               ],
+            ),
+            _SearchBar(
+              initial: async.valueOrNull?.search,
+              onSubmit: _setSearch,
             ),
             _FilterRow(
               kinds: async.valueOrNull?.kinds ?? const <OpportunityKind>[],
@@ -121,19 +143,35 @@ class _OpportunitiesFeedScreenState
                 child: QueryState<OpportunitiesFeedState>(
                   value: async,
                   loading: const _FeedSkeleton(),
+                  onRetry: () =>
+                      ref.read(opportunitiesFeedProvider.notifier).refresh(),
                   data: (OpportunitiesFeedState state) {
                     if (state.items.isEmpty) {
-                      return _EmptyFeed();
+                      final bool filtering = state.search != null ||
+                          state.kinds.isNotEmpty ||
+                          state.remoteOnly;
+                      return _EmptyFeed(filtering: filtering);
                     }
+                    // Footer slot when a page is loading OR the last loadMore
+                    // failed (non-destructive: the loaded feed stays intact
+                    // and the user gets a retry affordance).
+                    final bool hasFooter =
+                        state.isLoadingMore || state.loadMoreError;
                     return ListView.separated(
                       controller: _scrollController,
                       padding: const EdgeInsets.fromLTRB(12, 12, 12, 32),
                       physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount:
-                          state.items.length + (state.isLoadingMore ? 1 : 0),
+                      itemCount: state.items.length + (hasFooter ? 1 : 0),
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (BuildContext c, int i) {
                         if (i == state.items.length) {
+                          if (state.loadMoreError) {
+                            return _LoadMoreError(
+                              onRetry: () => ref
+                                  .read(opportunitiesFeedProvider.notifier)
+                                  .loadMore(force: true),
+                            );
+                          }
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 12),
                             child: Center(
@@ -167,16 +205,15 @@ class _OpportunitiesFeedScreenState
   }
 
   Future<void> _showKebab(BuildContext context) async {
-    final RenderBox? box = context.findRenderObject() as RenderBox?;
-    final Offset offset = box?.localToGlobal(Offset.zero) ?? Offset.zero;
+    // Anchor to the top-right corner (where the kebab action sits in the
+    // TopBar) rather than off a stale ancestor render box — the previous
+    // anchoring used the whole-screen context box and mis-positioned the
+    // popup.
+    final Size screen = MediaQuery.of(context).size;
+    final double top = MediaQuery.of(context).padding.top + 52;
     final int? selected = await showMenu<int>(
       context: context,
-      position: RelativeRect.fromLTRB(
-        offset.dx + (box?.size.width ?? 0) - 200,
-        offset.dy + 56,
-        12,
-        offset.dy + 200,
-      ),
+      position: RelativeRect.fromLTRB(screen.width - 12, top, 12, 0),
       items: <PopupMenuEntry<int>>[
         PopupMenuItem<int>(
           value: 0,
@@ -238,8 +275,26 @@ class _FilterRow extends StatelessWidget {
 }
 
 class _EmptyFeed extends StatelessWidget {
+  const _EmptyFeed({this.filtering = false});
+
+  /// When the empty result is the product of an active search / filter, we
+  /// show "no matches" copy instead of the first-run "post one" CTA.
+  final bool filtering;
+
   @override
   Widget build(BuildContext context) {
+    if (filtering) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: <Widget>[
+          EmptyState(
+            icon: LucideIcons.searchX,
+            title: context.t('opportunities.feed.noResultsTitle'),
+            body: context.t('opportunities.feed.noResults'),
+          ),
+        ],
+      );
+    }
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       children: <Widget>[
@@ -271,6 +326,114 @@ class _FeedSkeleton extends StatelessWidget {
           const SizedBox(height: 12),
         ],
       ],
+    );
+  }
+}
+
+/// Free-text search affordance for the feed. Debounces input so each
+/// keystroke doesn't fire a round-trip, and exposes a clear button.
+class _SearchBar extends StatefulWidget {
+  const _SearchBar({required this.initial, required this.onSubmit});
+
+  final String? initial;
+  final ValueChanged<String> onSubmit;
+
+  @override
+  State<_SearchBar> createState() => _SearchBarState();
+}
+
+class _SearchBarState extends State<_SearchBar> {
+  late String _text;
+  Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _text = widget.initial ?? '';
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  void _onChanged(String v) {
+    setState(() => _text = v);
+    _debounce?.cancel();
+    _debounce = Timer(
+      const Duration(milliseconds: 400),
+      () => widget.onSubmit(v),
+    );
+  }
+
+  void _clear() {
+    _debounce?.cancel();
+    setState(() => _text = '');
+    widget.onSubmit('');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors colors = Theme.of(context).extension<AppColors>()!;
+    final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
+    return Container(
+      color: colors.white,
+      padding: EdgeInsets.fromLTRB(spacing.md, spacing.sm, spacing.md, 0),
+      child: AppInput(
+        value: _text,
+        placeholder: context.t('opportunities.feed.searchPlaceholder'),
+        keyboardType: TextInputType.text,
+        textInputAction: TextInputAction.search,
+        onChanged: _onChanged,
+        onSubmitted: (String v) {
+          _debounce?.cancel();
+          widget.onSubmit(v);
+        },
+        trailing: _text.isEmpty
+            ? Icon(LucideIcons.search, size: 18, color: colors.muted)
+            : AppIconButton(
+                icon: LucideIcons.x,
+                label: context.t('common.clear'),
+                size: AppIconButtonSize.sm,
+                onPressed: _clear,
+              ),
+      ),
+    );
+  }
+}
+
+/// Footer row shown when `loadMore` failed — keeps the loaded feed intact
+/// and offers an explicit retry instead of nuking the whole list.
+class _LoadMoreError extends StatelessWidget {
+  const _LoadMoreError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppColors colors = Theme.of(context).extension<AppColors>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
+    final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: spacing.md),
+      child: Column(
+        children: <Widget>[
+          Text(
+            context.t('opportunities.feed.loadMoreError'),
+            textAlign: TextAlign.center,
+            style: typo.bodySm.copyWith(color: colors.muted),
+          ),
+          SizedBox(height: spacing.sm),
+          AppButton(
+            label: context.t('common.retry'),
+            variant: AppButtonVariant.outline,
+            fullWidth: false,
+            size: AppButtonSize.small,
+            onPressed: onRetry,
+          ),
+        ],
+      ),
     );
   }
 }

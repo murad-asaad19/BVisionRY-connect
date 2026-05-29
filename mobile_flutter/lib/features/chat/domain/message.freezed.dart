@@ -29,7 +29,17 @@ mixin _$Message {
   DateTime? get editedAt => throw _privateConstructorUsedError;
   DateTime? get deletedAt => throw _privateConstructorUsedError;
   String? get transcript => throw _privateConstructorUsedError;
-  TranscriptStatus? get transcriptStatus => throw _privateConstructorUsedError;
+  TranscriptStatus? get transcriptStatus =>
+      throw _privateConstructorUsedError; // --- Transient, client-only optimistic-send fields ---
+// Never populated by [Message.fromRow]; carried only by locally-created
+// optimistic bubbles so they can render before the server row exists and
+// reconcile against it afterwards.
+  /// Non-null while the bubble is a local optimistic placeholder.
+  MessageSendStatus? get sendStatus => throw _privateConstructorUsedError;
+
+  /// Locally-picked image bytes shown under an upload overlay until the
+  /// real (signed-URL) image is available. Optimistic image bubbles only.
+  Uint8List? get localImageBytes => throw _privateConstructorUsedError;
 
   /// Create a copy of Message
   /// with the given fields replaced by the non-null parameter values.
@@ -56,7 +66,9 @@ abstract class $MessageCopyWith<$Res> {
       DateTime? editedAt,
       DateTime? deletedAt,
       String? transcript,
-      TranscriptStatus? transcriptStatus});
+      TranscriptStatus? transcriptStatus,
+      MessageSendStatus? sendStatus,
+      Uint8List? localImageBytes});
 }
 
 /// @nodoc
@@ -88,6 +100,8 @@ class _$MessageCopyWithImpl<$Res, $Val extends Message>
     Object? deletedAt = freezed,
     Object? transcript = freezed,
     Object? transcriptStatus = freezed,
+    Object? sendStatus = freezed,
+    Object? localImageBytes = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -146,6 +160,14 @@ class _$MessageCopyWithImpl<$Res, $Val extends Message>
           ? _value.transcriptStatus
           : transcriptStatus // ignore: cast_nullable_to_non_nullable
               as TranscriptStatus?,
+      sendStatus: freezed == sendStatus
+          ? _value.sendStatus
+          : sendStatus // ignore: cast_nullable_to_non_nullable
+              as MessageSendStatus?,
+      localImageBytes: freezed == localImageBytes
+          ? _value.localImageBytes
+          : localImageBytes // ignore: cast_nullable_to_non_nullable
+              as Uint8List?,
     ) as $Val);
   }
 }
@@ -171,7 +193,9 @@ abstract class _$$MessageImplCopyWith<$Res> implements $MessageCopyWith<$Res> {
       DateTime? editedAt,
       DateTime? deletedAt,
       String? transcript,
-      TranscriptStatus? transcriptStatus});
+      TranscriptStatus? transcriptStatus,
+      MessageSendStatus? sendStatus,
+      Uint8List? localImageBytes});
 }
 
 /// @nodoc
@@ -201,6 +225,8 @@ class __$$MessageImplCopyWithImpl<$Res>
     Object? deletedAt = freezed,
     Object? transcript = freezed,
     Object? transcriptStatus = freezed,
+    Object? sendStatus = freezed,
+    Object? localImageBytes = freezed,
   }) {
     return _then(_$MessageImpl(
       id: null == id
@@ -259,6 +285,14 @@ class __$$MessageImplCopyWithImpl<$Res>
           ? _value.transcriptStatus
           : transcriptStatus // ignore: cast_nullable_to_non_nullable
               as TranscriptStatus?,
+      sendStatus: freezed == sendStatus
+          ? _value.sendStatus
+          : sendStatus // ignore: cast_nullable_to_non_nullable
+              as MessageSendStatus?,
+      localImageBytes: freezed == localImageBytes
+          ? _value.localImageBytes
+          : localImageBytes // ignore: cast_nullable_to_non_nullable
+              as Uint8List?,
     ));
   }
 }
@@ -280,7 +314,9 @@ class _$MessageImpl extends _Message {
       this.editedAt,
       this.deletedAt,
       this.transcript,
-      this.transcriptStatus})
+      this.transcriptStatus,
+      this.sendStatus,
+      this.localImageBytes = null})
       : super._();
 
   @override
@@ -311,10 +347,23 @@ class _$MessageImpl extends _Message {
   final String? transcript;
   @override
   final TranscriptStatus? transcriptStatus;
+// --- Transient, client-only optimistic-send fields ---
+// Never populated by [Message.fromRow]; carried only by locally-created
+// optimistic bubbles so they can render before the server row exists and
+// reconcile against it afterwards.
+  /// Non-null while the bubble is a local optimistic placeholder.
+  @override
+  final MessageSendStatus? sendStatus;
+
+  /// Locally-picked image bytes shown under an upload overlay until the
+  /// real (signed-URL) image is available. Optimistic image bubbles only.
+  @override
+  @JsonKey()
+  final Uint8List? localImageBytes;
 
   @override
   String toString() {
-    return 'Message(id: $id, conversationId: $conversationId, senderId: $senderId, kind: $kind, createdAt: $createdAt, body: $body, meetingProposalId: $meetingProposalId, mediaPath: $mediaPath, mediaDurationMs: $mediaDurationMs, mediaSizeBytes: $mediaSizeBytes, editedAt: $editedAt, deletedAt: $deletedAt, transcript: $transcript, transcriptStatus: $transcriptStatus)';
+    return 'Message(id: $id, conversationId: $conversationId, senderId: $senderId, kind: $kind, createdAt: $createdAt, body: $body, meetingProposalId: $meetingProposalId, mediaPath: $mediaPath, mediaDurationMs: $mediaDurationMs, mediaSizeBytes: $mediaSizeBytes, editedAt: $editedAt, deletedAt: $deletedAt, transcript: $transcript, transcriptStatus: $transcriptStatus, sendStatus: $sendStatus, localImageBytes: $localImageBytes)';
   }
 
   @override
@@ -346,7 +395,11 @@ class _$MessageImpl extends _Message {
             (identical(other.transcript, transcript) ||
                 other.transcript == transcript) &&
             (identical(other.transcriptStatus, transcriptStatus) ||
-                other.transcriptStatus == transcriptStatus));
+                other.transcriptStatus == transcriptStatus) &&
+            (identical(other.sendStatus, sendStatus) ||
+                other.sendStatus == sendStatus) &&
+            const DeepCollectionEquality()
+                .equals(other.localImageBytes, localImageBytes));
   }
 
   @override
@@ -365,7 +418,9 @@ class _$MessageImpl extends _Message {
       editedAt,
       deletedAt,
       transcript,
-      transcriptStatus);
+      transcriptStatus,
+      sendStatus,
+      const DeepCollectionEquality().hash(localImageBytes));
 
   /// Create a copy of Message
   /// with the given fields replaced by the non-null parameter values.
@@ -391,7 +446,9 @@ abstract class _Message extends Message {
       final DateTime? editedAt,
       final DateTime? deletedAt,
       final String? transcript,
-      final TranscriptStatus? transcriptStatus}) = _$MessageImpl;
+      final TranscriptStatus? transcriptStatus,
+      final MessageSendStatus? sendStatus,
+      final Uint8List? localImageBytes}) = _$MessageImpl;
   const _Message._() : super._();
 
   @override
@@ -421,7 +478,19 @@ abstract class _Message extends Message {
   @override
   String? get transcript;
   @override
-  TranscriptStatus? get transcriptStatus;
+  TranscriptStatus?
+      get transcriptStatus; // --- Transient, client-only optimistic-send fields ---
+// Never populated by [Message.fromRow]; carried only by locally-created
+// optimistic bubbles so they can render before the server row exists and
+// reconcile against it afterwards.
+  /// Non-null while the bubble is a local optimistic placeholder.
+  @override
+  MessageSendStatus? get sendStatus;
+
+  /// Locally-picked image bytes shown under an upload overlay until the
+  /// real (signed-URL) image is available. Optimistic image bubbles only.
+  @override
+  Uint8List? get localImageBytes;
 
   /// Create a copy of Message
   /// with the given fields replaced by the non-null parameter values.

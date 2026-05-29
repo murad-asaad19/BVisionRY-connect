@@ -21,15 +21,20 @@ import '../providers/session_provider.dart';
 class SuspendedScreen extends ConsumerWidget {
   const SuspendedScreen({super.key});
 
-  Future<void> _openAppealMail() async {
+  Future<void> _openAppealMail(BuildContext context, WidgetRef ref) async {
     final Uri uri = Uri(
       scheme: 'mailto',
       path: 'support@bvisionry.com',
       query: 'subject=${Uri.encodeComponent('Account appeal')}',
     );
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
+    final bool launched = await canLaunchUrl(uri) && await launchUrl(uri);
+    if (launched || !context.mounted) return;
+    // No mail client available — fall back to a toast carrying the support
+    // address so the user can still reach us.
+    ref.read(toastServiceProvider.notifier).showToast(
+          title: context.t('suspended.noMailClient'),
+          intent: AppIntent.warning,
+        );
   }
 
   @override
@@ -37,8 +42,7 @@ class SuspendedScreen extends ConsumerWidget {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
     final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
     final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
-    final String? email =
-        ref.watch(currentSessionProvider)?.user.email;
+    final String? email = ref.watch(currentSessionProvider)?.user.email;
     return Scaffold(
       backgroundColor: colors.surface,
       body: SafeArea(
@@ -100,12 +104,12 @@ class SuspendedScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        context.t(
-                          'suspended.emailNotice',
-                          vars: <String, Object>{
-                            'email': email ?? '',
-                          },
-                        ),
+                        (email == null || email.isEmpty)
+                            ? context.t('suspended.emailNoticeNoEmail')
+                            : context.t(
+                                'suspended.emailNotice',
+                                vars: <String, Object>{'email': email},
+                              ),
                         style: typo.bodySm.copyWith(color: colors.muted),
                       ),
                     ],
@@ -115,7 +119,15 @@ class SuspendedScreen extends ConsumerWidget {
                 AppButton(
                   key: const Key('appeal'),
                   label: context.t('suspended.submitAppeal'),
-                  onPressed: _openAppealMail,
+                  onPressed: () => _openAppealMail(context, ref),
+                ),
+                const SizedBox(height: 10),
+                // Mockup I5: small footer note under the appeal CTA spelling
+                // out the hard-tier consequence of repeat offenses.
+                Text(
+                  context.t('suspended.repeatOffenses'),
+                  style: typo.bodySm.copyWith(color: colors.muted),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 10),
                 AppButton(

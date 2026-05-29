@@ -134,6 +134,8 @@ void main() {
     when(() => fake.listSentIntros(viewerId: any(named: 'viewerId')))
         .thenAnswer((_) async => sent);
     when(() => fake.introsTodayCount()).thenAnswer((_) async => 0);
+    when(() => fake.introsSentTodayCount())
+        .thenAnswer((_) async => (used: 0, cap: 5));
     if (acceptResult != null) {
       when(() => fake.acceptIntro(any())).thenAnswer((_) async => acceptResult);
     }

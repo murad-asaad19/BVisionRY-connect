@@ -27,6 +27,8 @@ mixin _$MeetingProposal {
   MeetingState get state => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime get updatedAt => throw _privateConstructorUsedError;
+  int? get preferredSlotIndex => throw _privateConstructorUsedError;
+  String? get note => throw _privateConstructorUsedError;
 
   /// Create a copy of MeetingProposal
   /// with the given fields replaced by the non-null parameter values.
@@ -52,7 +54,9 @@ abstract class $MeetingProposalCopyWith<$Res> {
       String timezone,
       MeetingState state,
       DateTime createdAt,
-      DateTime updatedAt});
+      DateTime updatedAt,
+      int? preferredSlotIndex,
+      String? note});
 }
 
 /// @nodoc
@@ -81,6 +85,8 @@ class _$MeetingProposalCopyWithImpl<$Res, $Val extends MeetingProposal>
     Object? state = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? preferredSlotIndex = freezed,
+    Object? note = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -127,6 +133,14 @@ class _$MeetingProposalCopyWithImpl<$Res, $Val extends MeetingProposal>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      preferredSlotIndex: freezed == preferredSlotIndex
+          ? _value.preferredSlotIndex
+          : preferredSlotIndex // ignore: cast_nullable_to_non_nullable
+              as int?,
+      note: freezed == note
+          ? _value.note
+          : note // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -150,7 +164,9 @@ abstract class _$$MeetingProposalImplCopyWith<$Res>
       String timezone,
       MeetingState state,
       DateTime createdAt,
-      DateTime updatedAt});
+      DateTime updatedAt,
+      int? preferredSlotIndex,
+      String? note});
 }
 
 /// @nodoc
@@ -177,6 +193,8 @@ class __$$MeetingProposalImplCopyWithImpl<$Res>
     Object? state = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? preferredSlotIndex = freezed,
+    Object? note = freezed,
   }) {
     return _then(_$MeetingProposalImpl(
       id: null == id
@@ -223,6 +241,14 @@ class __$$MeetingProposalImplCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      preferredSlotIndex: freezed == preferredSlotIndex
+          ? _value.preferredSlotIndex
+          : preferredSlotIndex // ignore: cast_nullable_to_non_nullable
+              as int?,
+      note: freezed == note
+          ? _value.note
+          : note // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -241,7 +267,9 @@ class _$MeetingProposalImpl extends _MeetingProposal {
       required this.timezone,
       required this.state,
       required this.createdAt,
-      required this.updatedAt})
+      required this.updatedAt,
+      this.preferredSlotIndex,
+      this.note})
       : _slots = slots,
         super._();
 
@@ -273,10 +301,14 @@ class _$MeetingProposalImpl extends _MeetingProposal {
   final DateTime createdAt;
   @override
   final DateTime updatedAt;
+  @override
+  final int? preferredSlotIndex;
+  @override
+  final String? note;
 
   @override
   String toString() {
-    return 'MeetingProposal(id: $id, conversationId: $conversationId, proposedById: $proposedById, slots: $slots, confirmedSlot: $confirmedSlot, durationMinutes: $durationMinutes, meetingUrl: $meetingUrl, timezone: $timezone, state: $state, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'MeetingProposal(id: $id, conversationId: $conversationId, proposedById: $proposedById, slots: $slots, confirmedSlot: $confirmedSlot, durationMinutes: $durationMinutes, meetingUrl: $meetingUrl, timezone: $timezone, state: $state, createdAt: $createdAt, updatedAt: $updatedAt, preferredSlotIndex: $preferredSlotIndex, note: $note)';
   }
 
   @override
@@ -302,7 +334,10 @@ class _$MeetingProposalImpl extends _MeetingProposal {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.preferredSlotIndex, preferredSlotIndex) ||
+                other.preferredSlotIndex == preferredSlotIndex) &&
+            (identical(other.note, note) || other.note == note));
   }
 
   @override
@@ -318,7 +353,9 @@ class _$MeetingProposalImpl extends _MeetingProposal {
       timezone,
       state,
       createdAt,
-      updatedAt);
+      updatedAt,
+      preferredSlotIndex,
+      note);
 
   /// Create a copy of MeetingProposal
   /// with the given fields replaced by the non-null parameter values.
@@ -342,7 +379,9 @@ abstract class _MeetingProposal extends MeetingProposal {
       required final String timezone,
       required final MeetingState state,
       required final DateTime createdAt,
-      required final DateTime updatedAt}) = _$MeetingProposalImpl;
+      required final DateTime updatedAt,
+      final int? preferredSlotIndex,
+      final String? note}) = _$MeetingProposalImpl;
   const _MeetingProposal._() : super._();
 
   @override
@@ -367,6 +406,10 @@ abstract class _MeetingProposal extends MeetingProposal {
   DateTime get createdAt;
   @override
   DateTime get updatedAt;
+  @override
+  int? get preferredSlotIndex;
+  @override
+  String? get note;
 
   /// Create a copy of MeetingProposal
   /// with the given fields replaced by the non-null parameter values.

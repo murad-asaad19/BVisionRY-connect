@@ -45,6 +45,8 @@ class DailyMatch with _$DailyMatch {
           'primary_role': json['primary_role'],
           'roles': (json['roles'] as List?)?.cast<String>() ?? const <String>[],
           'goal_type': json['goal_type'],
+          'verified': json['verified'] ?? false,
+          'last_active_at': json['last_active_at'],
         }),
       );
 }

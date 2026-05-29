@@ -9,6 +9,7 @@ import '../../settings/providers/telemetry_provider.dart';
 import '../data/auth_service.dart';
 import '../data/profile_repository.dart';
 import '../data/social_auth_service.dart';
+import 'authed_providers_registry.dart';
 
 /// Production [AuthGateway] adapter — delegates every call straight to the
 /// live `GoTrueClient` on the supplied Supabase client.
@@ -82,6 +83,10 @@ class SupabaseAuthGateway implements AuthGateway {
   Future<void> stopAutoRefresh() async {
     _client.auth.stopAutoRefresh();
   }
+
+  @override
+  Future<Object?> rpc(String name, {Map<String, dynamic>? params}) =>
+      _client.rpc(name, params: params);
 }
 
 /// Production [FunctionsGateway] adapter — wraps `FunctionsClient.invoke`.
@@ -154,6 +159,10 @@ final Provider<AuthService> authServiceProvider = Provider<AuthService>((
     // store reset so any subscribed UI reflects the opt-out immediately
     // without waiting for the next rebuild.
     resetTelemetry: () => ref.read(telemetryProvider.notifier).signOutReset(),
+    // Drop every authed Riverpod cache so the next sign-in doesn't see
+    // the previous session's data (conversations, blocks, intros, etc.).
+    // The registry lives in authed_providers_registry.dart.
+    invalidateAuthedProviders: () => invalidateAuthedProviders(ref),
   );
 });
 

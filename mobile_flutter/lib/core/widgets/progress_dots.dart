@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../i18n/i18n.dart';
 import '../theme/app_colors.dart';
 
 /// Onboarding / wizard progress indicator.
@@ -33,8 +34,14 @@ class ProgressDots extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Theme.of(context).extension<AppColors>()!;
     return Semantics(
-      label: 'Progress',
-      value: '${(current + 1).clamp(1, total)} of $total',
+      label: context.t('common.progress'),
+      value: context.t(
+        'common.progressValue',
+        vars: <String, Object>{
+          'current': (current + 1).clamp(1, total),
+          'total': total,
+        },
+      ),
       child: Row(
         key: const ValueKey('progress-dots-frame'),
         mainAxisAlignment: MainAxisAlignment.center,

@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../auth/providers/session_provider.dart';
+import '../../chat/providers/conversation_overview_provider.dart';
 import '../../intros/presentation/send_intro_sheet.dart';
 import '../../office_hours/presentation/office_hours_section_on_profile.dart';
+import '../../privacy/privacy.dart';
 import '../data/public_profile_service.dart';
 import '../providers/intro_cooldown_provider.dart';
 import '../providers/public_profile_provider.dart';
@@ -59,8 +64,8 @@ class PublicProfileScreen extends ConsumerWidget {
             // the caller a softer signal when the handle looks valid (i.e.
             // is non-empty), so we treat that case as "private" per spec
             // §17.2's hide-rather-than-leak guidance.
-            final bool looksLikeHandle = handle.trim().isNotEmpty &&
-                handle.trim().length >= 2;
+            final bool looksLikeHandle =
+                handle.trim().isNotEmpty && handle.trim().length >= 2;
             return Padding(
               key: looksLikeHandle
                   ? const Key('publicProfile.private')
@@ -84,9 +89,7 @@ class PublicProfileScreen extends ConsumerWidget {
             );
           }
           final IntroCooldownState cooldown = isAuthed
-              ? ref
-                      .watch(introCooldownProvider(profile.id))
-                      .valueOrNull ??
+              ? ref.watch(introCooldownProvider(profile.id)).valueOrNull ??
                   const IntroCooldownState()
               : const IntroCooldownState();
           final String? cooldownDate = cooldown.availableAt == null
@@ -125,49 +128,115 @@ class PublicProfileScreen extends ConsumerWidget {
                   child: OfficeHoursSectionOnProfile(hostId: profile.id),
                 ),
               const SizedBox(height: 24),
+              // Navy footer block (mockup D1 lines 1660-1662): full-width gold
+              // CTA on a navy padded band. The added cooldown / sign-in states
+              // are kept; only the container chrome matches the mockup now.
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: AppButton(
-                  key: const Key('publicProfile.cta'),
-                  label: !isAuthed
-                      ? context.t('profile.signInToConnect')
-                      : cooldown.active
-                          ? context.t(
-                              cooldownDate != null
-                                  ? 'profile.cooldown.buttonAvailableDate'
-                                  : 'profile.cooldown.buttonAvailableSoon',
-                              vars: cooldownDate != null
-                                  ? <String, Object>{'date': cooldownDate}
-                                  : null,
+                child: Container(
+                  key: const ValueKey<String>('publicProfile.ctaFooter'),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: colors.navyDark,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  // A Consumer scopes the existing-conversation watch to this
+                  // CTA (correct ref binding) and lets it take priority over
+                  // the cooldown / sign-in branches: if you already chat with
+                  // this person, "Open chat" is the only sensible action.
+                  child: Consumer(
+                    builder: (BuildContext context, WidgetRef ref, _) {
+                      final String? existingConvId = isAuthed
+                          ? ref.watch(
+                              conversationIdForPeerProvider(profile.id),
                             )
-                          : context.t('profile.sendIntro'),
-                  variant: AppButtonVariant.primary,
-                  disabled: isAuthed && cooldown.active,
-                  onPressed: cooldown.active && isAuthed
-                      ? null
-                      : () {
-                          if (!isAuthed) {
-                            context.go(Routes.signIn);
-                            return;
-                          }
-                          showSendIntroSheet(
-                            context,
-                            recipient: SendIntroRecipient(
-                              id: profile.id,
-                              name: profile.name ?? profile.handle,
-                              handle: profile.handle,
-                              photoUrl: profile.photoUrl,
-                              // Per spec §17.2 we don't render the verified
-                              // badge anonymously — but the sheet only opens
-                              // for an authed caller, so it's safe to honour
-                              // the server-provided flag here.
-                              verified:
-                                  profile.verifiedGithubUsername != null,
-                            ),
-                          );
-                        },
+                          : null;
+                      if (existingConvId != null) {
+                        return AppButton(
+                          key: const Key('publicProfile.openChat'),
+                          label: context.t('chat.openChat'),
+                          variant: AppButtonVariant.gold,
+                          icon: LucideIcons.messageSquare,
+                          onPressed: () {
+                            Haptics.light();
+                            context.push(Routes.chat(existingConvId));
+                          },
+                        );
+                      }
+                      return AppButton(
+                        key: const Key('publicProfile.cta'),
+                        label: !isAuthed
+                            ? context.t('profile.signInToConnect')
+                            : cooldown.active
+                                ? context.t(
+                                    cooldownDate != null
+                                        ? 'profile.cooldown.buttonAvailableDate'
+                                        : 'profile.cooldown.buttonAvailableSoon',
+                                    vars: cooldownDate != null
+                                        ? <String, Object>{'date': cooldownDate}
+                                        : null,
+                                  )
+                                : context.t('profile.sendIntro'),
+                        // Gold fill on the navy band per the mockup.
+                        variant: AppButtonVariant.gold,
+                        disabled: isAuthed && cooldown.active,
+                        onPressed: cooldown.active && isAuthed
+                            ? null
+                            : () {
+                                if (!isAuthed) {
+                                  context.go(Routes.signIn);
+                                  return;
+                                }
+                                showSendIntroSheet(
+                                  context,
+                                  recipient: SendIntroRecipient(
+                                    id: profile.id,
+                                    name: profile.name ?? profile.handle,
+                                    handle: profile.handle,
+                                    photoUrl: profile.photoUrl,
+                                    role: profile.primaryRole,
+                                    headline: profile.headline,
+                                    // Per spec §17.2 we don't render the
+                                    // verified badge anonymously — but the
+                                    // sheet only opens for an authed caller, so
+                                    // it's safe to honour the server flag here.
+                                    verified:
+                                        profile.verifiedGithubUsername != null,
+                                  ),
+                                );
+                              },
+                      );
+                    },
+                  ),
                 ),
               ),
+              // Safety actions — only rendered to authed viewers. Anon
+              // visitors don't get a Block CTA because they have no
+              // identity to bind the block to.
+              if (isAuthed) ...<Widget>[
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: BlockButton(
+                    userId: profile.id,
+                    name: profile.name ?? profile.handle,
+                    handle: profile.handle,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: AppButton(
+                    label: context.t('chat.actions.report'),
+                    variant: AppButtonVariant.outline,
+                    onPressed: () => showReportSheet(
+                      context,
+                      targetType: ReportTargetType.profile,
+                      targetId: profile.id,
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 32),
             ],
           );
@@ -177,26 +246,16 @@ class PublicProfileScreen extends ConsumerWidget {
   }
 }
 
-/// Compact short-form date for the cooldown CTA ("May 28"). Pulling in
-/// `package:intl` for one helper isn't worth the binary cost; the abbrev
-/// month spelling is acceptable for both English and Spanish gallery
-/// renderings of section I4.
-const List<String> _monthAbbreviations = <String>[
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-];
-
-String _formatDate(DateTime dt) {
-  final DateTime local = dt.toLocal();
-  final String month = _monthAbbreviations[local.month - 1];
-  return '$month ${local.day}';
-}
+/// Compact short-form date for the cooldown CTA ("May 28"). [DateFormat.MMMd]
+/// follows the active locale's month names + day/month ordering, so the EN
+/// and ES renderings of section I4 stay correct without a hand-rolled table.
+String _formatDate(DateTime dt) => DateFormat.MMMd().format(dt.toLocal());
 
 /// Centered public-profile header — gallery section D2 (lines 1714-1724).
 ///
 /// Layout: 96px avatar (centered), name (navy heading, centered), headline
 /// (body, centered), single role pill (gold solid, centered), location
-/// (muted, centered), `connect.bvisionry.com/u/<handle>` URL line below.
+/// (muted, centered), `connect.bvisionry.com/p/<handle>` URL line below.
 ///
 /// Per spec §17.2 the verified badge is NEVER surfaced here — the badge
 /// stays inside the authed app. The standard [ProfileHero] is not reused
@@ -219,7 +278,7 @@ class _PublicProfileHeader extends StatelessWidget {
     final String? roleLabel =
         (profile.primaryRole == null || profile.primaryRole!.isEmpty)
             ? null
-            : _capitalize(profile.primaryRole!);
+            : _roleLabel(context, profile.primaryRole!);
 
     return Padding(
       key: const ValueKey<String>('public-profile-header'),
@@ -253,14 +312,18 @@ class _PublicProfileHeader extends StatelessWidget {
           if (location.isNotEmpty) ...<Widget>[
             const SizedBox(height: 10),
             Text(
-              location,
+              // 📍 pin prefix to match mockup D2 line 1721.
+              '📍 $location',
               textAlign: TextAlign.center,
               style: typo.bodySm.copyWith(color: colors.muted),
             ),
           ],
           const SizedBox(height: 4),
           Text(
-            '$host/u/${profile.handle}',
+            // Must match the routable deep link (`/p/:handle`, registered as
+            // the App Links path on [host]) — previously `/u/<handle>`, which
+            // does not resolve.
+            '$host/p/${profile.handle}',
             textAlign: TextAlign.center,
             style: typo.bodyXs.copyWith(color: colors.muted),
           ),
@@ -269,6 +332,14 @@ class _PublicProfileHeader extends StatelessWidget {
     );
   }
 
-  static String _capitalize(String s) =>
-      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+  /// Localized role label via `onboarding.roles.<role>`, falling back to a
+  /// capitalized raw value for any unknown role kind.
+  static String _roleLabel(BuildContext context, String role) {
+    final String key = 'onboarding.roles.$role';
+    final String label = context.t(key);
+    if (label == key) {
+      return role.isEmpty ? role : role[0].toUpperCase() + role.substring(1);
+    }
+    return label;
+  }
 }

@@ -58,8 +58,39 @@ class VoicePlayerNotifier extends StateNotifier<VoicePlayerState> {
     state = const VoicePlayerState();
   }
 
+  /// Seeks the currently-loaded source to [position] and mirrors it onto
+  /// state so the waveform jumps immediately (the position stream confirms
+  /// shortly after).
   Future<void> seek(Duration position) async {
+    await _backend.seek(position);
     state = state.copyWith(positionMs: position.inMilliseconds);
+  }
+
+  /// Scrubs the message [messageId] to [fraction] (0..1) of its duration.
+  /// Loads + starts the source first if it isn't the active one, so the
+  /// user can scrub a not-yet-played note directly. [url]/[totalMs] are the
+  /// resolved signed URL and known clip length.
+  Future<void> seekToFraction({
+    required String messageId,
+    required String url,
+    required int totalMs,
+    required double fraction,
+  }) async {
+    final clamped = fraction.clamp(0.0, 1.0);
+    if (state.activeId != messageId) {
+      await _backend.stop();
+      await _backend.setUrl(url);
+      final total = _backend.duration?.inMilliseconds ?? totalMs;
+      state = VoicePlayerState(
+        activeId: messageId,
+        isPlaying: true,
+        positionMs: 0,
+        totalMs: total,
+      );
+      await _backend.play();
+    }
+    final effectiveTotal = state.totalMs > 0 ? state.totalMs : totalMs;
+    await seek(Duration(milliseconds: (effectiveTotal * clamped).round()));
   }
 
   @override

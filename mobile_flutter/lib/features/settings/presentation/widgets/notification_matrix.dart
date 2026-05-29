@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/i18n/i18n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/haptics.dart';
 import '../../../push/domain/notification_channel.dart';
 import '../../../push/domain/notification_kind.dart';
 
@@ -29,7 +30,13 @@ typedef NotificationPrefChanged = void Function(
 /// Switch values resolve through [prefs] — a `kind:channel` keyed map.
 /// Absent entries default to enabled=true to mirror the `should_notify`
 /// SQL default-open semantics (spec §17.13).
-class NotificationMatrix extends StatelessWidget {
+///
+/// Each cell holds a short-lived optimistic override so a single toggle
+/// flips that switch instantly (and disables it while the write is in
+/// flight) without reloading the whole matrix. The override is dropped once
+/// the parent's invalidation reseeds [prefs] with the persisted value, or
+/// reverts to the persisted value if the write surfaced an error.
+class NotificationMatrix extends StatefulWidget {
   const NotificationMatrix({
     super.key,
     required this.prefs,
@@ -41,11 +48,50 @@ class NotificationMatrix extends StatelessWidget {
   final Map<String, bool> prefs;
 
   /// Fired when the user toggles any cell. Provider invalidation +
-  /// optimistic update happen in the caller.
+  /// optimistic update happen in the caller; this widget separately tracks a
+  /// per-cell pending state so the toggled switch responds immediately.
   final NotificationPrefChanged onChanged;
 
-  bool _value(NotificationKind k, NotificationChannel c) =>
-      prefs['${k.dbValue}:${c.dbValue}'] ?? true;
+  @override
+  State<NotificationMatrix> createState() => _NotificationMatrixState();
+}
+
+class _NotificationMatrixState extends State<NotificationMatrix> {
+  /// `kind:channel` keys with an in-flight optimistic value. The bool is the
+  /// value the user just selected; the cell renders it (and stays disabled)
+  /// until the parent reseeds [NotificationMatrix.prefs].
+  final Map<String, bool> _pending = <String, bool>{};
+
+  static String _cellKey(NotificationKind k, NotificationChannel c) =>
+      '${k.dbValue}:${c.dbValue}';
+
+  @override
+  void didUpdateWidget(covariant NotificationMatrix oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The parent reseeds `prefs` after a write resolves (success → new value,
+    // failure → reverted value). Clear any pending override whose persisted
+    // value now matches what the user selected, so the switch re-enables.
+    if (!identical(oldWidget.prefs, widget.prefs)) {
+      _pending.removeWhere((String key, bool optimistic) {
+        final bool persisted = widget.prefs[key] ?? true;
+        return persisted == optimistic;
+      });
+    }
+  }
+
+  bool _value(NotificationKind k, NotificationChannel c) {
+    final String key = _cellKey(k, c);
+    return _pending[key] ?? widget.prefs[key] ?? true;
+  }
+
+  bool _isPending(NotificationKind k, NotificationChannel c) =>
+      _pending.containsKey(_cellKey(k, c));
+
+  void _onCellChanged(NotificationKind k, NotificationChannel c, bool v) {
+    Haptics.selection();
+    setState(() => _pending[_cellKey(k, c)] = v);
+    widget.onChanged(k, c, v);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,13 +104,10 @@ class NotificationMatrix extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Row(
             children: <Widget>[
-              Expanded(
-                flex: 4,
-                child: Text(
-                  context.t('settings.notif.header'),
-                  style: typo.displayXs.copyWith(color: colors.muted),
-                ),
-              ),
+              // Gallery H3 leaves the kind-column header blank; the channel
+              // labels alone convey the matrix. Kept as a spacer so the
+              // channel columns stay aligned with the rows below.
+              const Expanded(flex: 4, child: SizedBox.shrink()),
               for (final NotificationChannel ch in NotificationChannel.values)
                 Expanded(
                   flex: 2,
@@ -84,7 +127,10 @@ class NotificationMatrix extends StatelessWidget {
             push: _value(k, NotificationChannel.push),
             email: _value(k, NotificationChannel.email),
             inApp: _value(k, NotificationChannel.inApp),
-            onChanged: onChanged,
+            pushPending: _isPending(k, NotificationChannel.push),
+            emailPending: _isPending(k, NotificationChannel.email),
+            inAppPending: _isPending(k, NotificationChannel.inApp),
+            onChanged: _onCellChanged,
           ),
         Padding(
           key: const Key('matrix.emailUnavailableNote'),
@@ -105,6 +151,9 @@ class _MatrixRow extends StatelessWidget {
     required this.push,
     required this.email,
     required this.inApp,
+    required this.pushPending,
+    required this.emailPending,
+    required this.inAppPending,
     required this.onChanged,
   });
 
@@ -112,12 +161,16 @@ class _MatrixRow extends StatelessWidget {
   final bool push;
   final bool email;
   final bool inApp;
+  final bool pushPending;
+  final bool emailPending;
+  final bool inAppPending;
   final NotificationPrefChanged onChanged;
 
   @override
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
     final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
+    final String kindLabel = context.t(kind.i18nLabelKey);
     return Container(
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: colors.border)),
@@ -131,7 +184,7 @@ class _MatrixRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text(context.t(kind.i18nLabelKey), style: typo.displaySm),
+                Text(kindLabel, style: typo.displaySm),
                 if (!kind.hasEmitter)
                   Padding(
                     key: Key('matrix.noEmitterChip.${kind.dbValue}'),
@@ -146,7 +199,7 @@ class _MatrixRow extends StatelessWidget {
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
-                        'coming soon',
+                        context.t('common.comingSoon'),
                         style: typo.bodyXs.copyWith(color: colors.muted),
                       ),
                     ),
@@ -156,18 +209,27 @@ class _MatrixRow extends StatelessWidget {
           ),
           _Cell(
             key: Key('matrix.switch.${kind.dbValue}.push'),
+            kindLabel: kindLabel,
+            channel: NotificationChannel.push,
             value: push,
+            pending: pushPending,
             onChanged: (bool v) => onChanged(kind, NotificationChannel.push, v),
           ),
           _Cell(
             key: Key('matrix.switch.${kind.dbValue}.email'),
+            kindLabel: kindLabel,
+            channel: NotificationChannel.email,
             value: email,
+            pending: emailPending,
             onChanged: (bool v) =>
                 onChanged(kind, NotificationChannel.email, v),
           ),
           _Cell(
             key: Key('matrix.switch.${kind.dbValue}.in_app'),
+            kindLabel: kindLabel,
+            channel: NotificationChannel.inApp,
             value: inApp,
+            pending: inAppPending,
             onChanged: (bool v) =>
                 onChanged(kind, NotificationChannel.inApp, v),
           ),
@@ -178,16 +240,39 @@ class _MatrixRow extends StatelessWidget {
 }
 
 class _Cell extends StatelessWidget {
-  const _Cell({super.key, required this.value, required this.onChanged});
+  const _Cell({
+    super.key,
+    required this.kindLabel,
+    required this.channel,
+    required this.value,
+    required this.pending,
+    required this.onChanged,
+  });
 
+  /// Localized kind name (e.g. "Intro received") used to build the SR label.
+  final String kindLabel;
+  final NotificationChannel channel;
   final bool value;
+
+  /// While `true` a write for this cell is in flight: the switch shows the
+  /// optimistic value but is disabled so a rapid re-tap can't race the write.
+  final bool pending;
   final ValueChanged<bool> onChanged;
 
   @override
-  Widget build(BuildContext context) => Expanded(
-        flex: 2,
-        child: Center(
-          child: Switch(value: value, onChanged: onChanged),
+  Widget build(BuildContext context) {
+    final String channelLabel = context.t(channel.i18nLabelKey);
+    return Expanded(
+      flex: 2,
+      child: Center(
+        child: Semantics(
+          label: '$kindLabel – $channelLabel',
+          child: Switch(
+            value: value,
+            onChanged: pending ? null : onChanged,
+          ),
         ),
-      );
+      ),
+    );
+  }
 }

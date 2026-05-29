@@ -28,7 +28,18 @@ final FutureProvider<void> fcmLifecycleProvider =
 
   ref.onDispose(() => service.dispose());
 
-  if (session == null) return;
+  if (session == null) {
+    // Session was cleared by any path (explicit signOut, server-side
+    // revoke, refresh-token expiry). AuthService.signOut already runs
+    // its own pre-signOut unregister with the live JWT; this branch
+    // covers the OTHER paths where no signOut() ran — without it the
+    // device_tokens row stays live on the server and the device keeps
+    // receiving pushes addressed to the prior user. unregisterToken is
+    // a best-effort RPC + LastTokenStorage clear; FcmService swallows
+    // its own errors so a failure here can't crash the boot path.
+    await service.unregisterToken();
+    return;
+  }
 
   final bool ready = await service.initialize();
   if (!ready) return;

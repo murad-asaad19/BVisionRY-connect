@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'
+          flutter-version: '3.38.0'
           channel: stable
       - run: flutter --version
       - run: flutter pub get
@@ -48,7 +48,7 @@ jobs:
       - name: Verify i18n key parity
         run: flutter test test/core/i18n/locale_parity_test.dart --dart-define-from-file=env/ci.json
       - name: Coverage threshold
-        run: flutter test test/coverage_threshold_test.dart || true
+        run: flutter test test/coverage_threshold_test.dart
       - uses: codecov/codecov-action@v4
         if: always()
         with:
@@ -66,7 +66,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'
+          flutter-version: '3.38.0'
           channel: stable
       - run: flutter pub get
       - name: Run golden tests

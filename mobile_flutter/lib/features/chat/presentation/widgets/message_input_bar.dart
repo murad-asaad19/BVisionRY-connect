@@ -9,9 +9,9 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../providers/typing_provider.dart';
 
-/// Bottom composer toolbar (gallery F1/F3).
+/// Bottom composer toolbar.
 ///
-/// Layout (matches gallery F1): mic icon (left), multiline text field
+/// Layout: mic icon, paperclip (attach image), multiline text field
 /// (center), optional calendar icon (between input and send), send button
 /// rendered as a filled navy 44px circle with a white arrow icon (right).
 /// The text field grows up to 5 lines as the user types. Typing emits a
@@ -19,9 +19,7 @@ import '../../providers/typing_provider.dart';
 /// the peer sees the typing indicator without spamming the channel.
 ///
 /// The parent owns the actual send / image-pick / voice-record flows —
-/// this widget only exposes callbacks and a busy state. Note: per the
-/// gallery there is no attach-image affordance in the composer; image
-/// sending is reached through the message-actions sheet instead.
+/// this widget only exposes callbacks and a busy state.
 class MessageInputBar extends ConsumerStatefulWidget {
   const MessageInputBar({
     super.key,
@@ -35,9 +33,8 @@ class MessageInputBar extends ConsumerStatefulWidget {
   final String conversationId;
   final Future<void> Function(String body) onSendText;
 
-  /// Retained for backward compatibility — the composer no longer renders
-  /// an attach button per the gallery, but the parent screen still wires
-  /// an image-pick path through the message-actions sheet.
+  /// Triggered when the user taps the attach (paperclip) icon. The parent
+  /// owns the image-pick flow (permission request, picker UI, upload).
   final Future<void> Function() onPickImage;
   final Future<void> Function() onRecordVoice;
 
@@ -76,14 +73,15 @@ class _MessageInputBarState extends ConsumerState<MessageInputBar> {
   Future<void> _send() async {
     final body = _controller.text.trim();
     if (body.isEmpty || _sending) return;
+    // Optimistic send: clear the field right away so the composer is
+    // immediately ready for the next message. The bubble carries its own
+    // sending/failed state + retry, so no toast and no composer lockout.
+    _controller.clear();
     setState(() => _sending = true);
-    final toast = ref.read(toastServiceProvider.notifier);
-    final failedTitle = context.t('chat.send.failed');
     try {
       await widget.onSendText(body);
-      if (mounted) _controller.clear();
     } catch (_) {
-      toast.showToast(title: failedTitle, intent: AppIntent.danger);
+      // Failure is surfaced on the optimistic bubble (FAILED + retry).
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -107,12 +105,25 @@ class _MessageInputBarState extends ConsumerState<MessageInputBar> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
+              // Attach / record / propose stay enabled during a text send —
+              // a text round-trip must not lock out other compose actions.
+              // The mockup renders these leading actions as gold-pale chips
+              // with navy glyphs (`.chat-input .ico`) — the `subtle` variant
+              // at `sm` (32px chip, 44dp hit) is the closest token match.
               AppIconButton(
                 icon: LucideIcons.mic,
-                label: 'Record voice',
-                size: AppIconButtonSize.md,
-                onPressed: _sending ? null : () => widget.onRecordVoice(),
-                disabled: _sending,
+                label: context.t('media.recordVoice'),
+                size: AppIconButtonSize.sm,
+                variant: AppIconButtonVariant.subtle,
+                onPressed: () => widget.onRecordVoice(),
+              ),
+              AppIconButton(
+                key: const ValueKey('chat-attach-image'),
+                icon: LucideIcons.paperclip,
+                label: context.t('media.sendPhoto'),
+                size: AppIconButtonSize.sm,
+                variant: AppIconButtonVariant.subtle,
+                onPressed: () => widget.onPickImage(),
               ),
               Expanded(
                 child: Container(
@@ -129,7 +140,6 @@ class _MessageInputBarState extends ConsumerState<MessageInputBar> {
                   child: TextField(
                     key: const ValueKey('chat-input-field'),
                     controller: _controller,
-                    enabled: !_sending,
                     minLines: 1,
                     maxLines: 5,
                     keyboardType: TextInputType.multiline,
@@ -153,14 +163,15 @@ class _MessageInputBarState extends ConsumerState<MessageInputBar> {
                 AppIconButton(
                   key: const ValueKey('chat-propose-meeting'),
                   icon: LucideIcons.calendar,
-                  label: 'Propose meeting',
-                  size: AppIconButtonSize.md,
-                  onPressed: _sending ? null : () => widget.onProposeMeeting!(),
-                  disabled: _sending,
+                  label: context.t('chat.actions.proposeMeeting'),
+                  size: AppIconButtonSize.sm,
+                  variant: AppIconButtonVariant.subtle,
+                  onPressed: () => widget.onProposeMeeting!(),
                 ),
               _SendCircleButton(
                 canSend: canSend,
                 sending: _sending,
+                label: context.t('chat.actions.send'),
                 onTap: _send,
               ),
             ],
@@ -181,26 +192,28 @@ class _SendCircleButton extends StatelessWidget {
   const _SendCircleButton({
     required this.canSend,
     required this.sending,
+    required this.label,
     required this.onTap,
   });
 
   final bool canSend;
   final bool sending;
+  final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final bool active = canSend || sending;
-    final Color bg = active ? colors.navy : colors.slate100;
-    final Color fg = active ? colors.white : colors.muted;
+    final Color bg = active ? colors.navyFill : colors.slate100;
+    final Color fg = active ? colors.onNavy : colors.muted;
     final Widget child = sending
-        ? const SizedBox(
+        ? SizedBox(
             width: 16,
             height: 16,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              valueColor: AlwaysStoppedAnimation<Color>(fg),
             ),
           )
         : Icon(LucideIcons.arrowUp, size: 20, color: fg);
@@ -209,21 +222,34 @@ class _SendCircleButton extends StatelessWidget {
       child: Semantics(
         button: true,
         enabled: canSend,
-        label: 'Send',
+        label: label,
         // Solid navy when active, light-slate when waiting for text —
         // gives a clearer "available vs disabled" cue than fading the
-        // navy fill (which read as gray over a white bg).
-        child: Material(
-          color: bg,
-          shape: const CircleBorder(),
-          child: InkWell(
-            key: const ValueKey('chat-send-button'),
-            customBorder: const CircleBorder(),
-            onTap: canSend ? onTap : null,
-            child: SizedBox(
-              width: 44,
-              height: 44,
-              child: Center(child: child),
+        // navy fill (which read as gray over a white bg). The fill colour
+        // and a subtle scale ease between states so the button "wakes up"
+        // when the composer becomes sendable — short, standard-curve, no
+        // layout shift (the 44px hit box is constant).
+        child: AnimatedScale(
+          scale: active ? 1.0 : 0.92,
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+            child: Material(
+              color: Colors.transparent,
+              shape: const CircleBorder(),
+              child: InkWell(
+                key: const ValueKey('chat-send-button'),
+                customBorder: const CircleBorder(),
+                onTap: canSend ? onTap : null,
+                child: SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: Center(child: child),
+                ),
+              ),
             ),
           ),
         ),

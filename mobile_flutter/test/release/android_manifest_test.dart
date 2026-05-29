@@ -17,6 +17,8 @@ void main() {
     expect(manifest, contains('android:scheme="connect-mobile"'));
     expect(manifest, contains('android:host="connect.bvisionry.com"'));
     expect(manifest, contains('android:pathPrefix="/p/"'));
+    // Invite deep links (/sign-up?invite=CODE) must launch the app too.
+    expect(manifest, contains('android:pathPrefix="/sign-up"'));
     expect(manifest, contains('android:autoVerify="true"'));
     expect(
       manifest,

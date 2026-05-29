@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/analytics/firebase_telemetry.dart';
+import '../../../core/analytics/sentry.dart';
+import '../../../core/env.dart';
 import '../data/telemetry_store.dart';
 
 /// Singleton telemetry store — shared by the [TelemetryNotifier] and any
@@ -26,17 +29,44 @@ class TelemetryNotifier extends AsyncNotifier<TelemetryPrefs> {
 
   Future<void> setAnalyticsEnabled(bool value) async {
     await _store.setAnalyticsEnabled(value);
+    // Apply to the live Firebase Analytics autocollect flag so the toggle
+    // takes effect this session rather than on next cold boot (GDPR: the
+    // moment a user opts out, collection must stop).
+    await applyAnalyticsCollectionLive(
+      value,
+      firebaseEnabled: Env.firebaseEnabled,
+    );
     state = AsyncData<TelemetryPrefs>(_store.snapshot);
   }
 
   Future<void> setCrashReportsEnabled(bool value) async {
     await _store.setCrashReportsEnabled(value);
+    // Sentry: live runtime gate on captureException so already-shipping
+    // events stop the moment the switch flips. Firebase Crashlytics has a
+    // first-class setter that we call in parallel.
+    setSentryRuntimeEnabled(value);
+    await applyCrashlyticsCollectionLive(
+      value,
+      firebaseEnabled: Env.firebaseEnabled,
+    );
     state = AsyncData<TelemetryPrefs>(_store.snapshot);
   }
 
   /// Called from `AuthService.signOut`. Forces both flags to `false`.
   Future<void> signOutReset() async {
     await _store.signOutReset();
+    // Sign-out is treated like an explicit opt-out for the new (anonymous)
+    // session — apply both live toggles so no events ship between sign-out
+    // and the next sign-in.
+    setSentryRuntimeEnabled(false);
+    await applyAnalyticsCollectionLive(
+      false,
+      firebaseEnabled: Env.firebaseEnabled,
+    );
+    await applyCrashlyticsCollectionLive(
+      false,
+      firebaseEnabled: Env.firebaseEnabled,
+    );
     state = AsyncData<TelemetryPrefs>(_store.snapshot);
   }
 }

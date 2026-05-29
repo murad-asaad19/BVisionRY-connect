@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../core/i18n/i18n.dart';
+import '../../../core/i18n/relative_time.dart';
 import '../../../core/widgets/widgets.dart';
 import '../domain/intro_enums.dart';
 
@@ -56,10 +57,18 @@ class IntroStateBadge extends StatelessWidget {
         variant = PillVariant.success;
         label = context.t('intros.state.accepted');
       case IntroState.declined:
-        // Sender never sees a declined badge in production surfaces (decline
-        // is silent), but tests pump it; keep the existing label.
-        variant = PillVariant.danger;
-        label = context.t('intros.state.declined');
+        if (fromSender) {
+          // Spec §12: decline is silent. The sender's Sent tab fetches its
+          // own rows via RLS and would otherwise leak the recipient's
+          // decline through a 'Declined' danger pill — keep the row
+          // visually identical to "delivered, awaiting response" so the
+          // sender can't infer the decline from the badge alone.
+          variant = PillVariant.muted;
+          label = context.t('intros.badge.awaitingResponse');
+        } else {
+          variant = PillVariant.danger;
+          label = context.t('intros.state.declined');
+        }
       case IntroState.expired:
         variant = PillVariant.muted;
         label = fromSender
@@ -71,7 +80,7 @@ class IntroStateBadge extends StatelessWidget {
           final ts = connectedAt ?? DateTime.now().toUtc();
           label = context.t(
             'intros.badge.connectedAgo',
-            vars: <String, Object>{'ago': _formatAgo(ts)},
+            vars: <String, Object>{'ago': relativeTimeAgo(context, ts)},
           );
         } else {
           label = context.t('intros.state.connected');
@@ -83,16 +92,4 @@ class IntroStateBadge extends StatelessWidget {
       variant: variant,
     );
   }
-}
-
-/// Compact "ago" suffix used by the sender-side Connected badge. Returns
-/// `Xm`, `Xh`, `Xd ago`, or `Xw ago` mirroring the gallery's `2d ago`
-/// style. Deterministic for golden stability.
-String _formatAgo(DateTime utc) {
-  final Duration diff = DateTime.now().toUtc().difference(utc.toUtc());
-  if (diff.inMinutes < 1) return 'just now';
-  if (diff.inHours < 1) return '${diff.inMinutes}m ago';
-  if (diff.inDays < 1) return '${diff.inHours}h ago';
-  if (diff.inDays < 7) return '${diff.inDays}d ago';
-  return '${(diff.inDays / 7).floor()}w ago';
 }

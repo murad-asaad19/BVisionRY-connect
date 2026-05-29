@@ -81,6 +81,13 @@ class InferGoalNotifier extends Notifier<InferGoalState> {
       state = const InferIdle();
       return;
     }
+    // Clear any stale Inferred/InferFailed result the moment the user edits
+    // again, so the "we couldn't infer your goal" warning never lingers over
+    // a field the user is still typing into. The next debounce tick will
+    // surface Inferring → Inferred/InferFailed once a real attempt resolves.
+    if (state is Inferred || state is InferFailed) {
+      state = const InferIdle();
+    }
     final int ticket = ++_seq;
     _timer = Timer(debounce, () async {
       state = const Inferring();

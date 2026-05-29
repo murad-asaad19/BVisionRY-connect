@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
+import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/query_state.dart';
 import '../../../core/widgets/toast.dart';
 import '../../../core/widgets/top_bar.dart';
@@ -14,6 +15,7 @@ import '../providers/my_opportunities_provider.dart';
 import '../providers/opportunities_feed_provider.dart';
 import '../providers/opportunity_provider.dart';
 import 'opportunity_form.dart';
+import 'unsaved_changes_guard.dart';
 
 /// Author-only edit screen for an existing opportunity.
 ///
@@ -32,9 +34,13 @@ class EditOpportunityScreen extends ConsumerStatefulWidget {
 
 class _EditOpportunityScreenState extends ConsumerState<EditOpportunityScreen> {
   bool _submitting = false;
+  bool _dirty = false;
 
   Future<void> _submit(OpportunityFormValue v) async {
     if (v.kind == null) return;
+    // Submitting commits the edits, so the unsaved-changes guard must stand
+    // down before we pop on success.
+    _dirty = false;
     setState(() => _submitting = true);
     try {
       await ref.read(opportunitiesServiceProvider).updateOpportunity(
@@ -53,6 +59,8 @@ class _EditOpportunityScreenState extends ConsumerState<EditOpportunityScreen> {
       ref.invalidate(myOpportunitiesProvider);
       ref.invalidate(opportunitiesFeedProvider);
       if (!mounted) return;
+      // Light tick to confirm the edits were saved.
+      Haptics.light();
       ref.read(toastServiceProvider.notifier).showToast(
             title: context.t('opportunities.edit.submitSuccess'),
             intent: AppIntent.success,
@@ -74,33 +82,39 @@ class _EditOpportunityScreenState extends ConsumerState<EditOpportunityScreen> {
   Widget build(BuildContext context) {
     final AsyncValue<OpportunityWithCounts> async =
         ref.watch(opportunityProvider(widget.opportunityId));
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: <Widget>[
-            TopBar(
-              title: context.t('opportunities.edit.title'),
-              back: true,
-            ),
-            Expanded(
-              child: QueryState<OpportunityWithCounts>(
-                value: async,
-                data: (OpportunityWithCounts d) {
-                  return OpportunityForm(
-                    initial: OpportunityFormValue.fromOpportunity(
-                      d.withAuthor.opportunity,
-                    ),
-                    onSubmit: _submit,
-                    submitLabel: _submitting
-                        ? context.t('opportunities.edit.submitting')
-                        : context.t('opportunities.edit.submit'),
-                    submitting: _submitting,
-                  );
-                },
+    return UnsavedChangesGuard(
+      isDirty: _dirty && !_submitting,
+      child: Scaffold(
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: <Widget>[
+              TopBar(
+                title: context.t('opportunities.edit.title'),
+                back: true,
               ),
-            ),
-          ],
+              Expanded(
+                child: QueryState<OpportunityWithCounts>(
+                  value: async,
+                  onRetry: () =>
+                      ref.invalidate(opportunityProvider(widget.opportunityId)),
+                  data: (OpportunityWithCounts d) {
+                    return OpportunityForm(
+                      initial: OpportunityFormValue.fromOpportunity(
+                        d.withAuthor.opportunity,
+                      ),
+                      onSubmit: _submit,
+                      onDirtyChanged: (bool v) => setState(() => _dirty = v),
+                      submitLabel: _submitting
+                          ? context.t('opportunities.edit.submitting')
+                          : context.t('opportunities.edit.submit'),
+                      submitting: _submitting,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

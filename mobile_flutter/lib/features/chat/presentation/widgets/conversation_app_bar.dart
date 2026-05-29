@@ -7,6 +7,7 @@ import '../../../../core/routing/routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/widgets.dart';
+import '../../../discovery/domain/role_label.dart';
 
 /// Custom in-thread top bar (gallery F3).
 ///
@@ -33,6 +34,7 @@ class ConversationAppBar extends StatelessWidget
     required this.onTapProfile,
     required this.onToggleMute,
     required this.onReport,
+    this.onBlock,
     this.peerRole,
   });
 
@@ -46,6 +48,11 @@ class ConversationAppBar extends StatelessWidget
   final VoidCallback onTapProfile;
   final VoidCallback onToggleMute;
   final VoidCallback onReport;
+
+  /// When non-null, renders a "Block @handle" row between Mute and Report
+  /// in the overflow menu. The chat screen wires this to the privacy
+  /// service via the [BlockButton]'s confirm-and-block flow.
+  final VoidCallback? onBlock;
 
   /// Peer's primary role (e.g. "builder", "founder") — used to label the
   /// inline verified pill next to their name. When null, the verified
@@ -78,16 +85,17 @@ class ConversationAppBar extends StatelessWidget
         children: <Widget>[
           AppIconButton(
             icon: Icons.chevron_left,
-            label: 'Back',
+            label: context.t('common.back'),
             size: AppIconButtonSize.md,
             onPressed: () {
               // The conversation screen can be reached via context.push (back
               // stack present) OR context.go after accept_intro / deep-link
-              // (stack empty). Try pop first; fall back to the chats tab.
+              // (stack empty). Try pop first; fall back to the Inbox hub
+              // (which now hosts the chats list as a segment).
               if (context.canPop()) {
                 context.pop();
               } else {
-                context.go(Routes.chats);
+                context.go(Routes.inbox);
               }
             },
           ),
@@ -121,7 +129,7 @@ class ConversationAppBar extends StatelessWidget
                         const SizedBox(width: 6),
                         if (peerRole != null && peerRole!.isNotEmpty)
                           Pill(
-                            label: context.t('onboarding.roles.$peerRole'),
+                            label: roleLabel(context, peerRole!),
                             variant: PillVariant.success,
                             icon: Icons.check,
                           )
@@ -157,7 +165,7 @@ class ConversationAppBar extends StatelessWidget
           ),
           PopupMenuButton<String>(
             icon: Icon(LucideIcons.ellipsisVertical, color: colors.navy),
-            tooltip: 'More',
+            tooltip: context.t('common.more'),
             itemBuilder: (ctx) => <PopupMenuEntry<String>>[
               PopupMenuItem<String>(
                 value: 'profile',
@@ -171,6 +179,16 @@ class ConversationAppBar extends StatelessWidget
                       : ctx.t('chat.mute.menuMute'),
                 ),
               ),
+              if (onBlock != null)
+                PopupMenuItem<String>(
+                  value: 'block',
+                  child: Text(
+                    ctx.t(
+                      'chat.menu.blockHandle',
+                      vars: <String, Object>{'handle': peerHandle},
+                    ),
+                  ),
+                ),
               PopupMenuItem<String>(
                 value: 'report',
                 child: Text(ctx.t('chat.actions.report')),
@@ -182,6 +200,8 @@ class ConversationAppBar extends StatelessWidget
                   onTapProfile();
                 case 'mute':
                   onToggleMute();
+                case 'block':
+                  onBlock?.call();
                 case 'report':
                   onReport();
               }

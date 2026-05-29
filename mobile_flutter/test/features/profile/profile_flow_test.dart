@@ -10,6 +10,7 @@ import 'package:connect_mobile/features/office_hours/domain/office_hours_setting
 import 'package:connect_mobile/features/office_hours/domain/office_hours_slot.dart';
 import 'package:connect_mobile/features/office_hours/domain/office_hours_window.dart';
 import 'package:connect_mobile/features/profile/data/avatar_upload_service.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:connect_mobile/features/profile/data/profile_service.dart';
 import 'package:connect_mobile/features/profile/data/profile_signals_service.dart';
 import 'package:connect_mobile/features/profile/domain/profile.dart';
@@ -115,7 +116,10 @@ class _FakeAvatarService extends AvatarUploadService {
 
 class _NullSource implements AvatarSource {
   @override
-  Future<Uint8List?> pickAndCropSquareAvatar() async => null;
+  Future<Uint8List?> pickAndCropSquareAvatar({
+    ImageSource source = ImageSource.gallery,
+  }) async =>
+      null;
 }
 
 class _NullStorage implements AvatarStorageGateway {
@@ -133,6 +137,8 @@ class _NullStorage implements AvatarStorageGateway {
     required String userId,
     required String url,
   }) async {}
+  @override
+  Future<void> clearPhotoUrl({required String userId}) async {}
 }
 
 Profile _initial() => Profile.fromJson(<String, dynamic>{

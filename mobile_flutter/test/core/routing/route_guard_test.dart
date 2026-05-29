@@ -40,13 +40,42 @@ void main() {
     );
   });
 
-  test('not onboarded -> /onboarding/goal', () {
+  test('consent not recorded -> /consent (before onboarding)', () {
     expect(
       resolveNextRoute(
         sessionLoading: false,
         hasSession: true,
         profileLoading: false,
         suspended: false,
+        consentRecorded: false,
+        onboarded: false,
+      ),
+      Routes.consent,
+    );
+  });
+
+  test('suspended takes precedence over the consent gate', () {
+    expect(
+      resolveNextRoute(
+        sessionLoading: false,
+        hasSession: true,
+        profileLoading: false,
+        suspended: true,
+        consentRecorded: false,
+        onboarded: false,
+      ),
+      Routes.suspended,
+    );
+  });
+
+  test('not onboarded (consent recorded) -> /onboarding/goal', () {
+    expect(
+      resolveNextRoute(
+        sessionLoading: false,
+        hasSession: true,
+        profileLoading: false,
+        suspended: false,
+        consentRecorded: true,
         onboarded: false,
       ),
       Routes.onboardingGoal,
@@ -77,6 +106,11 @@ void main() {
       expect(isAnonAllowed('/p/some-other-handle'), isTrue);
       expect(isAnonAllowed('/profile'), isFalse);
       expect(isAnonAllowed('/home'), isFalse);
+    });
+
+    test('isAnonAllowed matches /legal/ (public terms + privacy)', () {
+      expect(isAnonAllowed('/legal/terms'), isTrue);
+      expect(isAnonAllowed('/legal/privacy'), isTrue);
     });
 
     test(

@@ -5,20 +5,15 @@ import 'package:connect_mobile/features/onboarding/domain/onboarding_draft.dart'
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class _FakeRunner implements ProfileUpdateRunner {
+class _FakeRunner implements FinishOnboardingRunner {
   _FakeRunner({this.willThrow});
   final Object? willThrow;
 
-  Map<String, dynamic>? capturedPatch;
-  String? capturedUserId;
+  Map<String, dynamic>? capturedParams;
 
   @override
-  Future<void> update({
-    required String userId,
-    required Map<String, dynamic> patch,
-  }) async {
-    capturedUserId = userId;
-    capturedPatch = patch;
+  Future<void> finish(Map<String, dynamic> params) async {
+    capturedParams = params;
     if (willThrow != null) {
       // ignore: only_throw_errors
       throw willThrow!;
@@ -27,7 +22,7 @@ class _FakeRunner implements ProfileUpdateRunner {
 }
 
 void main() {
-  test('submitOnboarding patches profile with all fields and onboarded=true',
+  test('submitOnboarding forwards every wizard field to finish_onboarding',
       () async {
     final _FakeRunner runner = _FakeRunner();
     final OnboardingService service = OnboardingService(runner);
@@ -44,21 +39,19 @@ void main() {
       bio: 'A short but valid bio entry.',
     );
 
-    await service.submitOnboarding(userId: 'user-1', draft: draft);
+    await service.submitOnboarding(draft: draft);
 
-    expect(runner.capturedUserId, 'user-1');
-    final Map<String, dynamic> patch = runner.capturedPatch!;
-    expect(patch['name'], 'Ada');
-    expect(patch['handle'], 'ada');
-    expect(patch['goal_text'], contains('designer'));
-    expect(patch['goal_type'], 'hire');
-    expect(patch['roles'], <String>['founder']);
-    expect(patch['primary_role'], 'founder');
-    expect(patch['city'], 'Berlin');
-    expect(patch['country'], 'Germany');
-    expect(patch['headline'], 'Founder');
-    expect(patch['bio'], 'A short but valid bio entry.');
-    expect(patch['onboarded'], isTrue);
+    final Map<String, dynamic> params = runner.capturedParams!;
+    expect(params['p_name'], 'Ada');
+    expect(params['p_handle'], 'ada');
+    expect(params['p_goal_text'], contains('designer'));
+    expect(params['p_goal_type'], 'hire');
+    expect(params['p_roles'], <String>['founder']);
+    expect(params['p_primary_role'], 'founder');
+    expect(params['p_city'], 'Berlin');
+    expect(params['p_country'], 'Germany');
+    expect(params['p_headline'], 'Founder');
+    expect(params['p_bio'], 'A short but valid bio entry.');
   });
 
   test('null headline/bio is sent as null (clears prior value)', () async {
@@ -74,12 +67,12 @@ void main() {
       city: 'X',
       country: 'Y',
     );
-    await service.submitOnboarding(userId: 'u', draft: draft);
-    expect(runner.capturedPatch!['headline'], isNull);
-    expect(runner.capturedPatch!['bio'], isNull);
+    await service.submitOnboarding(draft: draft);
+    expect(runner.capturedParams!['p_headline'], isNull);
+    expect(runner.capturedParams!['p_bio'], isNull);
   });
 
-  test('empty-string headline/bio is normalised to null in the patch',
+  test('empty-string headline/bio is normalised to null in params',
       () async {
     final _FakeRunner runner = _FakeRunner();
     final OnboardingService service = OnboardingService(runner);
@@ -95,9 +88,9 @@ void main() {
       headline: '',
       bio: '',
     );
-    await service.submitOnboarding(userId: 'u', draft: draft);
-    expect(runner.capturedPatch!['headline'], isNull);
-    expect(runner.capturedPatch!['bio'], isNull);
+    await service.submitOnboarding(draft: draft);
+    expect(runner.capturedParams!['p_headline'], isNull);
+    expect(runner.capturedParams!['p_bio'], isNull);
   });
 
   test('throws StateError when submitting without a goal_type', () async {
@@ -113,10 +106,10 @@ void main() {
       country: 'Y',
     );
     expect(
-      () => service.submitOnboarding(userId: 'u', draft: draft),
+      () => service.submitOnboarding(draft: draft),
       throwsA(isA<StateError>()),
     );
-    expect(runner.capturedPatch, isNull);
+    expect(runner.capturedParams, isNull);
   });
 
   test('PostgrestException is mapped via mapPostgrestError', () async {
@@ -138,7 +131,7 @@ void main() {
       country: 'D',
     );
     expect(
-      () => service.submitOnboarding(userId: 'u', draft: draft),
+      () => service.submitOnboarding(draft: draft),
       throwsA(isA<DuplicateException>()),
     );
   });

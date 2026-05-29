@@ -187,6 +187,44 @@ void main() {
     });
   });
 
+  group('IntrosService.introsSentTodayCount', () {
+    test('returns (used, cap) from a bare-map RPC row', () async {
+      final gateway = _FakeIntrosGateway();
+      final service = IntrosService(gateway);
+      when(
+        () => gateway.rpc('intros_sent_today_count'),
+      ).thenAnswer((_) async => <String, dynamic>{'used': 3, 'cap': 5});
+      final result = await service.introsSentTodayCount();
+      expect(result.used, 3);
+      expect(result.cap, 5);
+    });
+
+    test('normalises a one-element list RPC row', () async {
+      final gateway = _FakeIntrosGateway();
+      final service = IntrosService(gateway);
+      when(() => gateway.rpc('intros_sent_today_count')).thenAnswer(
+        (_) async => <Map<String, dynamic>>[
+          <String, dynamic>{'used': 12, 'cap': 15},
+        ],
+      );
+      final result = await service.introsSentTodayCount();
+      expect(result.used, 12);
+      expect(result.cap, 15);
+    });
+
+    test('maps PostgrestException through error_map', () async {
+      final gateway = _FakeIntrosGateway();
+      final service = IntrosService(gateway);
+      when(
+        () => gateway.rpc('intros_sent_today_count'),
+      ).thenThrow(const PostgrestException(message: '', code: '28000'));
+      expect(
+        () => service.introsSentTodayCount(),
+        throwsA(isA<UnauthenticatedException>()),
+      );
+    });
+  });
+
   group('IntrosService.listReceivedIntros', () {
     test('parses rows from the gateway', () async {
       final gateway = _FakeIntrosGateway();
