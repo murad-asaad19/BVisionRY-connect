@@ -19,9 +19,16 @@ supabase/.branches/
 # Audit artefacts (the audit doc itself is kept; the raw screenshots are large)
 .audit-screenshots/
 
-# Ad-hoc screenshots from debugging / smoke checks
+# Ad-hoc screenshots from debugging / smoke checks stay out of the repo…
 *.png
-!mobile/assets/**/*.png
+# …but the Flutter app's shipped artwork IS source-controlled (launcher icons,
+# adaptive/splash assets, iOS asset catalog, web PWA icons, and the brand
+# source art used to regenerate them). Without these, a clean checkout / CI /
+# release build ships with no app icon.
+!mobile_flutter/assets/**/*.png
+!mobile_flutter/android/app/src/main/res/**/*.png
+!mobile_flutter/ios/Runner/Assets.xcassets/**/*.png
+!mobile_flutter/web/**/*.png
 # Allow Flutter golden snapshots — they ARE source-controlled artifacts.
 !mobile_flutter/**/goldens/**/*.png
 

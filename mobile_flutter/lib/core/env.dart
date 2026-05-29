@@ -17,10 +17,6 @@ abstract final class Env {
     'APP_SCHEME',
     defaultValue: 'connect-mobile',
   );
-  static const easProjectId = String.fromEnvironment(
-    'EAS_PROJECT_ID',
-    defaultValue: 'PROJECT_ID_PLACEHOLDER',
-  );
 
   /// Invite-gated launch flag. When TRUE, sign-up requires a valid invite
   /// code (the submit button blocks without one) and the waitlist link is
@@ -36,7 +32,6 @@ abstract final class Env {
       supabaseUrl: supabaseUrl,
       supabaseAnonKey: supabaseAnonKey,
       appLinksHost: appLinksHost,
-      easProjectId: easProjectId,
     );
   }
 }
@@ -50,14 +45,10 @@ void validateProdConfig({
   required String supabaseUrl,
   required String supabaseAnonKey,
   required String appLinksHost,
-  required String easProjectId,
 }) {
   if (sentryEnv != 'prod') return;
   if (appLinksHost == 'DOMAIN_PLACEHOLDER') {
     throw StateError('APP_LINKS_HOST must be set in production builds');
-  }
-  if (easProjectId == 'PROJECT_ID_PLACEHOLDER') {
-    throw StateError('EAS_PROJECT_ID must be set in production builds');
   }
   if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
     throw StateError('SUPABASE_URL and SUPABASE_ANON_KEY must be set');

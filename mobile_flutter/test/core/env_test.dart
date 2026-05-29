@@ -10,7 +10,6 @@ void main() {
         supabaseUrl: '',
         supabaseAnonKey: '',
         appLinksHost: 'DOMAIN_PLACEHOLDER',
-        easProjectId: 'PROJECT_ID_PLACEHOLDER',
       );
     });
 
@@ -21,20 +20,6 @@ void main() {
           supabaseUrl: 'https://x.supabase.co',
           supabaseAnonKey: 'anon',
           appLinksHost: 'DOMAIN_PLACEHOLDER',
-          easProjectId: 'eas123',
-        ),
-        throwsA(isA<StateError>()),
-      );
-    });
-
-    test('throws when easProjectId is placeholder in prod', () {
-      expect(
-        () => validateProdConfig(
-          sentryEnv: 'prod',
-          supabaseUrl: 'https://x.supabase.co',
-          supabaseAnonKey: 'anon',
-          appLinksHost: 'connect.bvisionry.com',
-          easProjectId: 'PROJECT_ID_PLACEHOLDER',
         ),
         throwsA(isA<StateError>()),
       );
@@ -47,7 +32,6 @@ void main() {
           supabaseUrl: '',
           supabaseAnonKey: 'anon',
           appLinksHost: 'connect.bvisionry.com',
-          easProjectId: 'eas123',
         ),
         throwsA(isA<StateError>()),
       );
@@ -60,7 +44,6 @@ void main() {
           supabaseUrl: 'https://x.supabase.co',
           supabaseAnonKey: '',
           appLinksHost: 'connect.bvisionry.com',
-          easProjectId: 'eas123',
         ),
         throwsA(isA<StateError>()),
       );
@@ -72,7 +55,6 @@ void main() {
         supabaseUrl: 'https://x.supabase.co',
         supabaseAnonKey: 'anon-key',
         appLinksHost: 'connect.bvisionry.com',
-        easProjectId: 'eas123',
       );
     });
   });

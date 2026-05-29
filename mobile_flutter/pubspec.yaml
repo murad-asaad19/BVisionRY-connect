@@ -1,7 +1,7 @@
 name: connect_mobile
-description: "BVisionry Connect (Flutter rebuild)"
+description: "BVisionry Connect — curated professional networking: discover people, request warm introductions, and chat."
 publish_to: 'none'
-version: 0.1.0+1
+version: 1.0.0+1
 
 environment:
   sdk: ^3.6.0
