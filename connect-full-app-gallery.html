@@ -1,0 +1,2587 @@
+/<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BVisionRY Connect — End-to-end mockup gallery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Dosis:wght@400;500;600;700;800&family=Overlock:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy: #0f3460;
+    --navy-light: #1a4a80;
+    --navy-dark: #0a2340;
+    --gold: #ffc107;
+    --gold-light: #ffe187;
+    --gold-pale: #fff8e1;
+    --surface: #f8f8f8;
+    --white: #ffffff;
+    --body: #212529;
+    --muted: #94a3b8;
+    --border: #e5e7eb;
+    --success-bg: #dcfce7;
+    --success-text: #15803d;
+    --warning-bg: #fef3c7;
+    --warning-text: #b45309;
+    --danger-bg: #fee2e2;
+    --danger-text: #b91c1c;
+    --info-bg: #dbeafe;
+    --info-text: #1d4ed8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Overlock', sans-serif;
+    color: var(--body);
+    background: var(--surface);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+  h1, h2, h3, h4, h5, h6 { font-family: 'Dosis', sans-serif; margin: 0; font-weight: 700; }
+
+  /* Hero */
+  .hero {
+    background: var(--navy);
+    color: white;
+    position: relative;
+    padding: 64px 24px 48px;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 30%, var(--gold) 0%, transparent 60%);
+    opacity: 0.18;
+  }
+  .hero .inner { position: relative; max-width: 1100px; margin: 0 auto; }
+  .hero h1 { font-size: 40px; margin-bottom: 8px; }
+  .hero h1 .b { color: var(--gold); }
+  .hero .tag { color: var(--gold-light); font-size: 16px; margin-bottom: 12px; }
+  .hero .desc { color: rgba(255,255,255,0.85); max-width: 720px; font-size: 15px; }
+  .hero .pill {
+    display: inline-block;
+    margin-top: 18px;
+    background: rgba(255,193,7,0.15);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-family: 'Dosis', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+  }
+
+  /* Layout: TOC + content */
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    max-width: 1500px;
+    margin: 0 auto;
+    gap: 0;
+    padding: 0 24px;
+  }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+  .toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 32px 16px 32px 0;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+  }
+  @media (max-width: 900px) { .toc { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); padding: 16px 0; } }
+  .toc h4 {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    padding: 0 12px;
+  }
+  .toc a {
+    display: block;
+    padding: 6px 12px;
+    color: var(--navy);
+    text-decoration: none;
+    font-family: 'Dosis', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    border-left: 3px solid transparent;
+    border-radius: 0 6px 6px 0;
+  }
+  .toc a:hover { background: var(--gold-pale); }
+  .toc a.active { background: var(--gold-pale); border-left-color: var(--gold); color: var(--navy-dark); }
+
+  /* Content */
+  main { padding: 32px 0 96px 24px; }
+  @media (max-width: 900px) { main { padding: 24px 0 48px; } }
+
+  section.section {
+    margin-bottom: 48px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    scroll-margin-top: 8px;
+  }
+  section.section:last-child { border-bottom: none; }
+  section.section > .section-head {
+    margin-bottom: 16px;
+  }
+  section.section > .section-head h2 {
+    font-size: 24px;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  section.section > .section-head p {
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 740px;
+  }
+  section.section > .section-head .ref {
+    display: inline-block;
+    background: var(--info-bg);
+    color: var(--info-text);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-family: 'Dosis', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    margin-left: 6px;
+  }
+
+  /* Phone grid */
+  .phone-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    gap: 28px 20px;
+    margin-top: 8px;
+  }
+  .phone-grid.wide { grid-template-columns: 1fr; }
+  .phone-grid.web { grid-template-columns: 1fr; }
+
+  .phone-card { display: flex; flex-direction: column; align-items: center; }
+  .phone-card .caption {
+    margin-top: 12px;
+    font-family: 'Dosis', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--navy);
+    text-align: center;
+  }
+  .phone-card .annot {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    max-width: 320px;
+    line-height: 1.4;
+  }
+  .phone-card .annot code {
+    background: var(--gold-pale);
+    color: var(--navy);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+
+  /* Phone frame */
+  .phone {
+    width: 320px;
+    height: 640px;
+    background: var(--white);
+    border-radius: 32px;
+    border: 8px solid var(--navy-dark);
+    box-shadow: 0 20px 40px rgba(15, 52, 96, 0.20);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone .notch {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 110px;
+    height: 18px;
+    background: var(--navy-dark);
+    border-radius: 0 0 14px 14px;
+    z-index: 5;
+  }
+  .phone .statusbar {
+    background: var(--white);
+    height: 22px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    font-family: 'Dosis', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--navy);
+    padding-top: 4px;
+  }
+  .phone .statusbar .icons { letter-spacing: 1px; }
+  .phone .screen {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--surface);
+    padding: 0;
+  }
+
+  /* Web frame (desktop browser) */
+  .web-frame {
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: white;
+    box-shadow: 0 14px 30px rgba(15, 52, 96, 0.12);
+    overflow: hidden;
+  }
+  .web-frame .browser-bar {
+    background: #f1f5f9;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .web-frame .dot { width: 11px; height: 11px; border-radius: 50%; background: #cbd5e1; }
+  .web-frame .dot.r { background: #ef4444; }
+  .web-frame .dot.y { background: #f59e0b; }
+  .web-frame .dot.g { background: #22c55e; }
+  .web-frame .url {
+    flex: 1;
+    background: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'Dosis', sans-serif;
+    border: 1px solid var(--border);
+  }
+  .web-frame .body { padding: 0; }
+
+  /* App bits — generic UI atoms */
+  .app-topbar {
+    background: white;
+    padding: 14px 16px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .app-topbar .title { font-family: 'Dosis', sans-serif; font-weight: 700; color: var(--navy); font-size: 16px; }
+  .app-topbar .actions { display: flex; gap: 12px; color: var(--navy); }
+  .app-topbar .actions span { font-size: 16px; cursor: pointer; }
+
+  .app-tabbar {
+    background: white;
+    padding: 8px 0 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .app-tabbar .tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--muted);
+    font-family: 'Dosis', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    gap: 2px;
+  }
+  .app-tabbar .tab .icon { font-size: 18px; }
+  .app-tabbar .tab.active { color: var(--navy); }
+
+  /* Pills, chips, badges */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    background: var(--gold-pale);
+    color: var(--navy);
+    border-radius: 999px;
+    font-family: 'Dosis', sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+    line-height: 1;
+  }
+  .pill.solid { background: var(--gold); }
+  .pill.navy { background: var(--navy); color: white; }
+  .pill.outline { background: transparent; border: 1px solid var(--navy); color: var(--navy); }
+  .pill.success { background: var(--success-bg); color: var(--success-text); }
+  .pill.warning { background: var(--warning-bg); color: var(--warning-text); }
+  .pill.danger { background: var(--danger-bg); color: var(--danger-text); }
+  .pill.muted { background: #f1f5f9; color: var(--muted); }
+
+  .verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: var(--success-bg);
+    color: var(--success-text);
+    border-radius: 999px;
+    padding: 2px 7px;
+    font-family: 'Dosis', sans-serif;
+    font-weight: 700;
+    font-size: 9px;
+  }
+  .verified-badge::before { content: '✓'; font-weight: 800; }
+
+  /* Cards */
+  .ucard {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+    margin: 0 12px 8px;
+    align-items: flex-start;
+  }
+  .ucard.featured {
+    background: linear-gradient(180deg, var(--gold-pale), white);
+    border: 1.5px solid var(--gold);
+  }
+  .ucard .av {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--navy-light), var(--navy));
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px white, 0 0 0 3px var(--gold-pale);
+  }
+  .ucard.featured .av { box-shadow: 0 0 0 2px white, 0 0 0 3px var(--gold); }
+  .ucard .info { flex: 1; min-width: 0; }
+  .ucard .info .name {
+    font-family: 'Dosis', sans-serif;
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .ucard .info .role {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .ucard .info .head {
+    font-size: 11px;
+    color: var(--body);
+    margin-top: 4px;
+    line-height: 1.35;
+  }
+  .ucard .info .reason {
+    margin-top: 6px;
+    font-family: 'Dosis', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--navy);
+    background: var(--gold-pale);
+    border-radius: 6px;
+    padding: 4px 7px;
+    display: inline-block;
+  }
+  .ucard.featured .info .reason { background: var(--gold); }
+
+  /* Filters row */
+  .filters {
+    background: white;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  /* Buttons */
+  .btn {
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-family: 'Dosis', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    width: 100%;
+  }
+  .btn:hover { background: var(--navy-light); }
+  .btn.gold { background: var(--gold); color: var(--navy); }
+  .btn.outline { background: white; color: var(--navy); border: 1.5px solid var(--navy); }
+  .btn.danger { background: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger-text); }
+  .btn.disabled { background: #cbd5e1; color: white; cursor: not-allowed; }
+  .btn.small { padding: 7px 11px; font-size: 11px; width: auto; }
+
+  /* Banners */
+  .banner {
+    margin: 10px 12px;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 11px;
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .banner.warning { background: var(--warning-bg); color: var(--warning-text); border: 1px solid #fbbf24; }
+  .banner.info { background: var(--info-bg); color: var(--info-text); border: 1px solid #93c5fd; }
+  .banner.success { background: var(--success-bg); color: var(--success-text); border: 1px solid #4ade80; }
+  .banner.muted { background: #f1f5f9; color: var(--body); border: 1px solid var(--border); }
+  .banner .b-title { font-family: 'Dosis', sans-serif; font-weight: 700; }
+
+  /* Section headings inside phone */
+  .ph-section {
+    padding: 12px 16px 6px;
+    font-family: 'Dosis', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ph-section .star { color: var(--gold); }
+
+  /* Onboarding hero */
+  .onboard {
+    padding: 40px 22px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .onboard h2 { font-size: 22px; color: var(--navy); line-height: 1.2; }
+  .onboard p { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .onboard .field {
+    margin-top: 20px;
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    min-height: 60px;
+    color: var(--muted);
+    font-size: 13px;
+    font-style: italic;
+  }
+  .onboard .field.filled { color: var(--body); font-style: normal; line-height: 1.4; }
+  .onboard .progress-dots {
+    display: flex; gap: 5px; margin-bottom: 18px;
+  }
+  .onboard .progress-dots span {
+    flex: 1; height: 4px; background: var(--border); border-radius: 2px;
+  }
+  .onboard .progress-dots span.done { background: var(--gold); }
+  .onboard .progress-dots span.active { background: var(--navy); }
+  .onboard .footer { margin-top: auto; padding-top: 16px; }
+
+  /* Auth screen */
+  .auth-screen {
+    background: var(--navy);
+    height: 100%;
+    color: white;
+    padding: 32px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .auth-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 28%, var(--gold) 0%, transparent 55%);
+    opacity: 0.18;
+  }
+  .auth-screen .inner { position: relative; height: 100%; display: flex; flex-direction: column; }
+  .auth-screen .logo {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .auth-screen .logo h2 {
+    font-size: 28px;
+    color: white;
+    letter-spacing: 0.5px;
+  }
+  .auth-screen .logo h2 .b { color: var(--gold); }
+  .auth-screen .logo p { color: var(--gold-light); font-size: 11px; margin-top: 2px; }
+  .auth-screen .card {
+    background: white;
+    border-radius: 16px;
+    padding: 18px;
+    color: var(--body);
+    flex: 1;
+  }
+  .auth-screen .card h3 { color: var(--navy); font-size: 18px; margin-bottom: 12px; }
+  .sso {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    font-family: 'Dosis', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: var(--body);
+  }
+  .sso.google { color: var(--body); }
+  .sso.apple { background: black; color: white; border-color: black; }
+  .sso .ico { font-weight: 800; }
+  .divider {
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    margin: 12px 0 10px;
+    position: relative;
+  }
+  .divider::before, .divider::after {
+    content: ''; position: absolute; top: 50%; width: 38%; height: 1px; background: var(--border);
+  }
+  .divider::before { left: 0; }
+  .divider::after { right: 0; }
+  .input {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 12px;
+    width: 100%;
+    font-size: 12px;
+    margin-bottom: 8px;
+    color: var(--body);
+  }
+  .input::placeholder { color: var(--muted); }
+  .label { font-size: 10px; color: var(--muted); font-family: 'Dosis', sans-serif; font-weight: 600; margin-bottom: 4px; display: block; }
+
+  /* Profile detail */
+  .profile-hero {
+    background: linear-gradient(135deg, var(--navy), var(--navy-light));
+    padding: 22px 16px 20px;
+    color: white;
+    position: relative;
+  }
+  .profile-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, var(--gold) 0%, transparent 60%);
+    opacity: 0.16;
+  }
+  .profile-hero .inner { position: relative; }
+  .profile-hero .avatar-big {
+    width: 76px; height: 76px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    margin: 0 auto 8px;
+    box-shadow: 0 0 0 3px white, 0 0 0 5px var(--gold);
+  }
+  .profile-hero .name {
+    text-align: center;
+    font-family: 'Dosis', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .profile-hero .head {
+    text-align: center;
+    font-size: 12px;
+    color: var(--gold-light);
+    margin-top: 3px;
+    padding: 0 12px;
+  }
+  .profile-hero .meta {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.8);
+    margin-top: 6px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .profile-hero .roles {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .profile-section {
+    background: white;
+    margin: 10px 12px;
+    border-radius: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+  }
+  .profile-section h4 {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+  }
+  .profile-section p { font-size: 12px; color: var(--body); line-height: 1.5; }
+  .profile-section.gold { background: linear-gradient(180deg, var(--gold-pale), white); border-color: var(--gold-light); }
+
+  .struct-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 12px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .struct-row:last-child { border-bottom: none; }
+  .struct-row .k { color: var(--muted); }
+  .struct-row .v { color: var(--navy); font-family: 'Dosis', sans-serif; font-weight: 600; }
+
+  .mutuals-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .mutuals-row .stack {
+    display: flex;
+  }
+  .mutuals-row .stack .av-mini {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--navy-light), var(--navy));
+    border: 2px solid white;
+    margin-left: -7px;
+  }
+  .mutuals-row .stack .av-mini:first-child { margin-left: 0; }
+
+  /* Public preview (web) */
+  .public-preview {
+    background: var(--navy);
+    color: white;
+    padding: 60px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .public-preview::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 30%, var(--gold) 0%, transparent 55%);
+    opacity: 0.18;
+  }
+  .public-preview .inner {
+    position: relative;
+    max-width: 540px;
+    margin: 0 auto;
+    background: white;
+    color: var(--body);
+    border-radius: 18px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .public-preview .av-xl {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    margin: 0 auto 14px;
+    box-shadow: 0 0 0 4px white, 0 0 0 6px var(--gold);
+  }
+  .public-preview h3 { font-size: 24px; color: var(--navy); }
+  .public-preview .head { color: var(--body); font-size: 14px; margin-top: 8px; }
+  .public-preview .role-pill {
+    display: inline-block;
+    background: var(--gold-pale);
+    color: var(--navy);
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-family: 'Dosis', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    margin-top: 12px;
+  }
+  .public-preview .loc { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  .public-preview .handle { color: var(--muted); font-size: 11px; font-family: 'Dosis', sans-serif; margin-top: 4px; }
+  .public-preview .cta { margin-top: 24px; }
+
+  /* Send intro modal */
+  .modal-screen {
+    background: rgba(15, 52, 96, 0.5);
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+  }
+  .modal-sheet {
+    background: white;
+    width: 100%;
+    border-radius: 24px 24px 0 0;
+    padding: 18px 16px 16px;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.2);
+  }
+  .modal-sheet .handle { width: 38px; height: 4px; background: var(--border); border-radius: 4px; margin: 0 auto 12px; }
+
+  /* Chat */
+  .chat-hdr {
+    background: white;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 9px;
+    align-items: center;
+  }
+  .chat-hdr .av {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--navy-light), var(--navy));
+    flex-shrink: 0;
+  }
+  .chat-hdr .name { font-family: 'Dosis', sans-serif; font-weight: 700; color: var(--navy); font-size: 13px; }
+  .chat-hdr .head { font-size: 10px; color: var(--muted); }
+  .chat-body {
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .bubble {
+    max-width: 75%;
+    padding: 8px 11px;
+    border-radius: 14px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .bubble.them { background: white; border: 1px solid var(--border); color: var(--body); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .bubble.me { background: var(--navy); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .bubble.voice { display: flex; align-items: center; gap: 8px; min-width: 200px; }
+  .bubble.voice .play { width: 28px; height: 28px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--navy); font-weight: 800; }
+  .bubble.voice .wave { flex: 1; height: 18px; background: linear-gradient(90deg, var(--navy-light) 0%, var(--navy-light) 60%, #cbd5e1 60%, #cbd5e1 100%); border-radius: 4px; }
+  .bubble.voice .dur { font-size: 10px; color: var(--muted); }
+  .bubble.voice.them .play { background: var(--navy); color: var(--gold); }
+  .meeting-card {
+    background: white;
+    border: 1.5px solid var(--gold);
+    border-radius: 12px;
+    padding: 10px;
+    margin: 4px 0;
+    align-self: flex-start;
+    max-width: 80%;
+  }
+  .meeting-card .ttl { font-family: 'Dosis', sans-serif; font-weight: 700; color: var(--navy); font-size: 12px; }
+  .meeting-card .when { font-size: 11px; color: var(--body); margin-top: 3px; }
+  .meeting-card .actions { margin-top: 7px; display: flex; gap: 6px; }
+  .chat-input {
+    background: white;
+    border-top: 1px solid var(--border);
+    padding: 10px 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .chat-input .ico {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--gold-pale);
+    color: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .chat-input input {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  /* Tabbar / inbox */
+  .ib-tabs {
+    background: white;
+    display: flex;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ib-tabs .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    font-family: 'Dosis', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+  }
+  .ib-tabs .tab.active { color: var(--navy); border-bottom-color: var(--gold); }
+  .ib-row {
+    background: white;
+    margin: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .ib-row .av { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--navy-light), var(--navy)); flex-shrink: 0; }
+  .ib-row .body { flex: 1; }
+  .ib-row .body .nm { font-family: 'Dosis', sans-serif; font-weight: 700; color: var(--navy); font-size: 12px; }
+  .ib-row .body .pv { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.3; max-width: 195px; }
+  .ib-row .body .status { margin-top: 6px; }
+
+  /* Settings */
+  .settings-row {
+    background: white;
+    padding: 12px 14px;
+    margin: 0 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .settings-row:first-child { border-radius: 10px 10px 0 0; }
+  .settings-row:last-child { border-radius: 0 0 10px 10px; border-bottom: none; }
+  .settings-group { margin: 8px 0; }
+  .settings-group .gh {
+    padding: 10px 16px 4px;
+    font-size: 10px;
+    font-family: 'Dosis', sans-serif;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .settings-row .label-pair .l { font-size: 12px; color: var(--body); font-family: 'Dosis', sans-serif; font-weight: 600; }
+  .settings-row .label-pair .d { font-size: 10px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+  .toggle {
+    width: 38px; height: 22px; border-radius: 11px; background: #cbd5e1; position: relative; flex-shrink: 0;
+  }
+  .toggle::after {
+    content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: white;
+  }
+  .toggle.on { background: var(--gold); }
+  .toggle.on::after { left: 18px; }
+  .chev { color: var(--muted); font-size: 14px; }
+
+  /* Architecture map */
+  .arch-map {
+    background: var(--navy);
+    color: white;
+    padding: 30px;
+    border-radius: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .arch-map::before {
+    content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 30%, var(--gold) 0%, transparent 55%); opacity: 0.12;
+  }
+  .arch-map .inner { position: relative; }
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px;
+    margin-top: 18px;
+  }
+  @media (max-width: 800px) { .arch-grid { grid-template-columns: repeat(2, 1fr); } }
+  .arch-node {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 12px;
+    padding: 12px 12px;
+    font-family: 'Dosis', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    text-align: center;
+    color: white;
+    position: relative;
+  }
+  .arch-node .sub { display: block; font-weight: 400; font-size: 10px; color: var(--gold-light); margin-top: 3px; }
+  .arch-node.core { border-color: var(--gold); background: rgba(255,193,7,0.12); }
+  .arch-node.web { border-color: #93c5fd; background: rgba(147,197,253,0.12); }
+  .arch-node.side { border-color: #fbbf24; background: rgba(251,191,36,0.08); }
+  .arch-flow {
+    text-align: center;
+    color: var(--gold);
+    font-size: 18px;
+    margin: 6px 0;
+  }
+  .arch-legend {
+    margin-top: 22px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    color: var(--gold-light);
+    font-size: 12px;
+  }
+  .arch-legend .sw {
+    width: 14px; height: 14px; border-radius: 4px;
+    display: inline-block; vertical-align: middle; margin-right: 6px;
+  }
+
+  /* Push notif (lock screen) */
+  .lockscreen {
+    background: linear-gradient(180deg, #1e293b, #0f172a);
+    height: 100%;
+    color: white;
+    padding: 32px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+  }
+  .lockscreen .clock { text-align: center; font-family: 'Dosis', sans-serif; font-size: 48px; font-weight: 200; margin-bottom: 18px; }
+  .lockscreen .date { text-align: center; font-size: 11px; color: rgba(255,255,255,0.7); margin-top: -10px; margin-bottom: 28px; }
+  .push {
+    background: rgba(255,255,255,0.95);
+    color: var(--body);
+    border-radius: 16px;
+    padding: 12px;
+    backdrop-filter: blur(10px);
+  }
+  .push .app-name {
+    font-family: 'Dosis', sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .push .ttl { font-family: 'Dosis', sans-serif; font-weight: 700; font-size: 13px; color: var(--navy); }
+  .push .msg { font-size: 12px; color: var(--body); margin-top: 2px; }
+  .push .time { font-size: 10px; color: var(--muted); }
+
+  /* Marketing landing */
+  .marketing {
+    background: var(--navy);
+    color: white;
+    padding: 80px 40px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .marketing::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 25%, var(--gold) 0%, transparent 55%);
+    opacity: 0.18;
+  }
+  .marketing .inner {
+    position: relative;
+    max-width: 880px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .marketing h2 { font-size: 44px; line-height: 1.1; }
+  .marketing h2 .b { color: var(--gold); }
+  .marketing h2 .accent { color: var(--gold-light); font-weight: 500; }
+  .marketing .sub { color: var(--gold-light); font-size: 16px; margin-top: 14px; max-width: 580px; margin-left: auto; margin-right: auto; }
+  .marketing .cta-row { margin-top: 28px; display: flex; gap: 12px; justify-content: center; }
+  .marketing .cta-row .btn { width: auto; padding: 12px 22px; }
+  .marketing .feats {
+    margin-top: 50px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+  }
+  @media (max-width: 700px) { .marketing .feats { grid-template-columns: 1fr; } }
+  .marketing .feat {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,193,7,0.3);
+    border-radius: 14px;
+    padding: 24px;
+    text-align: left;
+  }
+  .marketing .feat .ico {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--gold);
+    color: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800;
+    margin-bottom: 12px;
+  }
+  .marketing .feat h4 { font-size: 16px; margin-bottom: 6px; }
+  .marketing .feat p { font-size: 13px; color: rgba(255,255,255,0.8); }
+
+  /* Voice recording */
+  .recorder {
+    background: white;
+    border-radius: 20px 20px 0 0;
+    padding: 22px 16px 22px;
+    box-shadow: 0 -10px 24px rgba(0,0,0,0.18);
+    text-align: center;
+  }
+  .recorder .pulse {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: var(--danger-bg);
+    border: 3px solid var(--danger-text);
+    margin: 0 auto 14px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--danger-text);
+    font-size: 24px;
+    box-shadow: 0 0 0 6px rgba(185,28,28,0.15);
+  }
+  .recorder .timer { font-family: 'Dosis', sans-serif; font-size: 22px; font-weight: 700; color: var(--navy); }
+  .recorder .max { color: var(--muted); font-size: 11px; margin-top: 2px; }
+  .recorder .wave-strip {
+    display: flex; gap: 2px; justify-content: center;
+    margin: 14px 0;
+    height: 30px;
+    align-items: center;
+  }
+  .recorder .wave-strip span {
+    width: 3px; background: var(--navy-light); border-radius: 2px;
+  }
+
+  /* Misc */
+  .small-note { font-size: 10px; color: var(--muted); }
+  .annotation-callout {
+    margin-top: 18px;
+    padding: 12px 14px;
+    background: var(--info-bg);
+    color: var(--info-text);
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .key { font-family: 'Dosis', sans-serif; font-weight: 700; }
+
+  /* Spec ref tag inline */
+  .spec-ref { font-size: 10px; color: var(--muted); font-family: 'Dosis', sans-serif; font-weight: 600; }
+
+  /* Footer */
+  footer {
+    background: var(--navy);
+    color: var(--gold-light);
+    text-align: center;
+    padding: 32px 24px;
+    font-size: 12px;
+    margin-top: 32px;
+  }
+  footer .b { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="inner">
+    <h1><span class="b">B</span>VisionRY <span style="color:var(--gold-light); font-weight:500;">Connect</span></h1>
+    <div class="tag">End-to-end application mockup</div>
+    <p class="desc">Visualizes every product decision from the design spec at <code style="color:var(--gold-light)">docs/superpowers/specs/2026-04-28-bvisionry-connect-design.md</code> — onboarding, discovery, intro flow, chat, meetings, settings, edge cases, and the public web surface. Phones are scaled at ~320×640.</p>
+    <span class="pill">Design comp · not a working prototype</span>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="toc" id="toc">
+    <h4>Sections</h4>
+    <a href="#a">A · Marketing &amp; Auth</a>
+    <a href="#b">B · Onboarding flow</a>
+    <a href="#c">C · Discovery surfaces</a>
+    <a href="#d">D · Profile views</a>
+    <a href="#e">E · Intro request flow</a>
+    <a href="#f">F · Chat &amp; voice</a>
+    <a href="#g">G · Meeting flow</a>
+    <a href="#h">H · Settings &amp; privacy</a>
+    <a href="#i">I · Edge cases &amp; states</a>
+    <a href="#j">J · System map</a>
+  </nav>
+
+  <main>
+
+  <!-- ============ SECTION A ============ -->
+  <section class="section" id="a">
+    <div class="section-head">
+      <h2>A · Marketing &amp; Auth <span class="ref">§7 §8 §13</span></h2>
+      <p>The web entry surface (landing) and the mobile auth screens. Per §13 auth methods: email+password, Google SSO, Apple SSO. No LinkedIn. No phone.</p>
+    </div>
+
+    <!-- A1: Marketing landing (web) -->
+    <div class="phone-grid web">
+      <div class="phone-card">
+        <div class="web-frame">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">connect.bvisionry.com</span></div>
+          <div class="body">
+            <div class="marketing">
+              <div class="inner">
+                <h2><span class="b">B</span>VisionRY <span class="accent">Connect</span></h2>
+                <h2 style="font-size:34px; margin-top:12px;">Find the people who move your work forward.</h2>
+                <p class="sub">A discovery network for founders, leaders, builders, and investors. Tell us what you're looking for — we surface daily matches from a verified community.</p>
+                <div class="cta-row">
+                  <button class="btn gold" style="width:auto;">Get started</button>
+                  <button class="btn outline" style="width:auto; background:transparent; color:white; border-color:rgba(255,255,255,0.5);">Sign in</button>
+                </div>
+                <div class="feats">
+                  <div class="feat">
+                    <div class="ico">★</div>
+                    <h4>Discover</h4>
+                    <p>Daily matches picked for your active goal. Browse by role, sector, region.</p>
+                  </div>
+                  <div class="feat">
+                    <div class="ico">→</div>
+                    <h4>Send intro</h4>
+                    <p>Request connections with a short note. Recipient accepts or declines — no spam.</p>
+                  </div>
+                  <div class="feat">
+                    <div class="ico">✓</div>
+                    <h4>Connect</h4>
+                    <p>Chat, share voice notes, schedule meetings. Verified profiles, real intent.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">A1 · Marketing landing (web only)</div>
+        <div class="annot">Web is marketing + view-only per <code>§8</code>. The CTAs route into the mobile app stores or the web auth flow.</div>
+      </div>
+    </div>
+
+    <!-- A2/A3: Sign up + Sign in -->
+    <div class="phone-grid">
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="auth-screen">
+              <div class="inner">
+                <div class="logo"><h2><span class="b">B</span>VisionRY <span style="color:var(--gold-light); font-weight:500;">Connect</span></h2><p>Discovery for founders &amp; builders</p></div>
+                <div class="card">
+                  <h3>Create your account</h3>
+                  <div class="sso google"><span class="ico">G</span><span>Continue with Google</span></div>
+                  <div class="sso apple"><span class="ico"></span><span>Continue with Apple</span></div>
+                  <div class="divider">or</div>
+                  <span class="label">Email</span>
+                  <input class="input" placeholder="you@company.com" />
+                  <span class="label">Password</span>
+                  <input class="input" placeholder="At least 8 characters" type="password" />
+                  <button class="btn" style="margin-top:8px;">Sign up</button>
+                  <p class="small-note" style="text-align:center; margin-top:10px;">Already have an account? <span style="color:var(--navy); font-weight:700;">Sign in</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">A2 · Sign up (mobile)</div>
+        <div class="annot">SSO options: Google + Apple only. No LinkedIn (brand conflation, weak data). No phone field.</div>
+      </div>
+
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="auth-screen">
+              <div class="inner">
+                <div class="logo"><h2><span class="b">B</span>VisionRY <span style="color:var(--gold-light); font-weight:500;">Connect</span></h2><p>Welcome back</p></div>
+                <div class="card">
+                  <h3>Sign in</h3>
+                  <div class="sso google"><span class="ico">G</span><span>Continue with Google</span></div>
+                  <div class="sso apple"><span class="ico"></span><span>Continue with Apple</span></div>
+                  <div class="divider">or</div>
+                  <span class="label">Email</span>
+                  <input class="input" placeholder="you@company.com" />
+                  <span class="label">Password</span>
+                  <input class="input" placeholder="••••••••" type="password" />
+                  <p class="small-note" style="text-align:right; margin:-3px 0 8px;"><span style="color:var(--navy); font-weight:700;">Forgot password?</span></p>
+                  <button class="btn">Sign in</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">A3 · Sign in (mobile)</div>
+        <div class="annot">Same SSO + email/password.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION B ============ -->
+  <section class="section" id="b">
+    <div class="section-head">
+      <h2>B · Onboarding flow <span class="ref">§13</span></h2>
+      <p>Intent-first hook. The Goal field is asked first because the entire ranker depends on it. AI-assisted bio drafting follows. Email verification is required at first publish, not at signup — the user can browse before verifying but cannot send intros until verified.</p>
+    </div>
+
+    <div class="phone-grid">
+      <!-- B1: Goal hook -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:white;">
+            <div class="onboard">
+              <div class="progress-dots"><span class="active"></span><span></span><span></span><span></span><span></span></div>
+              <h2>What are you looking for right now?</h2>
+              <p>One sentence — we'll help you sharpen it.</p>
+              <div class="field filled" style="min-height:90px;">Looking for a senior backend engineer to join as CTO of my pre-seed B2B fintech.</div>
+              <p class="small-note" style="margin-top:10px;">Examples: "Hiring a fractional designer", "Raising pre-seed for a healthtech idea", "Open to advisor roles in fintech"</p>
+              <div class="footer">
+                <button class="btn">Continue</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">B1 · Goal hook (step 2)</div>
+        <div class="annot">First screen post-auth. The Goal is the highest-leverage field; the entire ranker depends on it.</div>
+      </div>
+
+      <!-- B2: Roles -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:white;">
+            <div class="onboard">
+              <div class="progress-dots"><span class="done"></span><span class="active"></span><span></span><span></span><span></span></div>
+              <h2>What roles do you hold?</h2>
+              <p>Pick all that apply. You can wear multiple hats.</p>
+              <div class="banner info" style="margin:14px 0; font-size:11px;">
+                <div><span class="b-title">Based on your goal,</span> you might be a Founder. Confirm or change.</div>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;">
+                <span class="pill solid" style="font-size:13px; padding:8px 16px;">Founder ✓</span>
+                <span class="pill outline" style="font-size:13px; padding:8px 16px; background:white;">Leader</span>
+                <span class="pill outline" style="font-size:13px; padding:8px 16px; background:white;">Builder</span>
+                <span class="pill solid" style="font-size:13px; padding:8px 16px;">Investor ✓</span>
+              </div>
+              <p class="small-note" style="margin-top:14px;">A founder who also angels at $25K is a real combination — pick both.</p>
+              <div class="footer">
+                <button class="btn">Continue</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">B2 · Roles selection (step 3)</div>
+        <div class="annot">Multi-select. AI suggests Roles inferred from the Goal, user confirms.</div>
+      </div>
+
+      <!-- B3: AI-assisted bio drafting -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:white;">
+            <div class="onboard" style="padding:30px 16px;">
+              <div class="progress-dots"><span class="done"></span><span class="done"></span><span class="active"></span><span></span><span></span></div>
+              <h2 style="font-size:18px;">Let's sharpen your profile</h2>
+              <p style="font-size:11px;">A few quick questions — we'll draft the rest.</p>
+
+              <div style="background:var(--surface); border-radius:12px; padding:10px; margin-top:14px;">
+                <div style="background:white; border:1px solid var(--border); border-radius:10px; padding:9px 11px; font-size:11px; color:var(--body); margin-bottom:7px;"><strong style="color:var(--navy);">AI:</strong> What stage is the company, and what's the sector?</div>
+                <div style="background:var(--gold-pale); border-radius:10px; padding:9px 11px; font-size:11px; color:var(--body); margin-bottom:7px;">Pre-seed, B2B fintech for SMEs in EMEA.</div>
+                <div style="background:white; border:1px solid var(--border); border-radius:10px; padding:9px 11px; font-size:11px; color:var(--body); margin-bottom:7px;"><strong style="color:var(--navy);">AI:</strong> Got it. What experience matters most for your CTO?</div>
+                <div style="background:var(--gold-pale); border-radius:10px; padding:9px 11px; font-size:11px; color:var(--body);">Payments infra, MENA scale, comfortable with regulators.</div>
+              </div>
+
+              <div style="margin-top:14px;">
+                <span class="label">Headline (≤80 chars) <span style="color:var(--gold-text); float:right;">62/80</span></span>
+                <div style="background:var(--gold-pale); border:1.5px solid var(--gold); border-radius:10px; padding:9px 11px; font-size:12px; color:var(--navy); font-family:'Dosis',sans-serif; font-weight:700;">Building B2B fintech for SMEs in EMEA · Pre-seed</div>
+
+                <span class="label" style="margin-top:10px;">I am</span>
+                <div style="background:var(--gold-pale); border:1.5px solid var(--gold); border-radius:10px; padding:9px 11px; font-size:11px; color:var(--body); line-height:1.4;">Pre-seed founder building B2B fintech for SMEs in EMEA. Looking for a CTO with payments-infra experience and comfort with regional regulators.</div>
+              </div>
+
+              <div class="footer" style="display:flex; gap:8px;">
+                <button class="btn outline" style="flex:1;">Edit</button>
+                <button class="btn" style="flex:1;">Looks good →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">B3 · AI-assisted bio drafting (step 4)</div>
+        <div class="annot">LLM mini-conversation drafts Headline + "I am" bio. User can edit — never auto-publish per <code>§10</code>.</div>
+      </div>
+
+      <!-- B4: Profile basics -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:white;">
+            <div class="onboard">
+              <div class="progress-dots"><span class="done"></span><span class="done"></span><span class="done"></span><span class="active"></span><span></span></div>
+              <h2 style="font-size:20px;">A few last details</h2>
+              <p>So people can find you.</p>
+
+              <div style="margin-top:16px;">
+                <span class="label">Photo</span>
+                <div style="display:flex; gap:10px; align-items:center;">
+                  <div style="width:64px; height:64px; border-radius:50%; background:var(--gold-pale); border:2px dashed var(--gold); display:flex; align-items:center; justify-content:center; color:var(--navy); font-size:22px;">+</div>
+                  <span class="small-note" style="flex:1;">Tap to upload. JPG or PNG, ≥400px square.</span>
+                </div>
+
+                <span class="label" style="margin-top:14px;">Full name</span>
+                <input class="input" value="Sara Khalil" />
+
+                <span class="label">Location</span>
+                <input class="input" value="London, United Kingdom" />
+
+                <span class="label">Handle</span>
+                <input class="input" value="sara-k" />
+                <p class="small-note" style="margin-top:-4px;">Your public profile URL: <span style="color:var(--navy); font-weight:700;">connect.bvisionry.com/u/sara-k</span></p>
+                <p class="small-note">Changing your handle later creates a redirect for 90 days, then 410 Gone.</p>
+              </div>
+
+              <div class="footer"><button class="btn">Finish</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">B4 · Profile basics (step 5)</div>
+        <div class="annot">Handle policy per <code>§8</code>: unique, lowercased, alphanumeric+dash, 3–30 chars.</div>
+      </div>
+
+      <!-- B5: First-action with email banner -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Today's matches</span><span class="actions"><span>🔍</span><span>≡</span></span></div>
+            <div class="banner warning" style="margin:10px 12px;">
+              <div><span class="b-title">Verify your email to send your first intro.</span><br/>We sent a link to sara@example.com. Tap to resend.</div>
+            </div>
+            <div class="ph-section"><span>3 PICKS FOR YOU TODAY</span><span class="star">★</span></div>
+            <div class="ucard featured">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Omar Daher <span class="verified-badge">Builder</span></div>
+                <div class="role">Builder · Senior backend</div>
+                <div class="head">Senior backend, ex-Stripe · Open to fractional CTO</div>
+                <div class="reason">Match: needs builder</div>
+              </div>
+            </div>
+            <div class="ucard featured">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Lina Maatouk <span class="verified-badge">Investor</span></div>
+                <div class="role">Investor · Angel</div>
+                <div class="head">Angel · $25–100k · MENA fintech focus</div>
+                <div class="reason">Match: angels in your sector</div>
+              </div>
+            </div>
+            <div class="ucard featured">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Karim Adel</div>
+                <div class="role">Builder · Fullstack</div>
+                <div class="head">10y fullstack · ex-PayMob · ready for next chapter</div>
+                <div class="reason">Match: payments-infra background</div>
+              </div>
+            </div>
+            <div class="banner info" style="margin:12px 12px 8px;">
+              <div><span class="b-title">First step:</span> Send your first intro to one of today's matches. <span style="color:var(--muted);">(Verify email first)</span></div>
+            </div>
+            <div class="app-tabbar">
+              <div class="tab active"><span class="icon">⌂</span><span>Home</span></div>
+              <div class="tab"><span class="icon">✉</span><span>Inbox</span></div>
+              <div class="tab"><span class="icon">◎</span><span>Profile</span></div>
+              <div class="tab"><span class="icon">⚙</span><span>Settings</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">B5 · First action + email gate</div>
+        <div class="annot">User can browse, but the "Send intro" CTA is locked until email verification per <code>§13</code>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION C ============ -->
+  <section class="section" id="c">
+    <div class="section-head">
+      <h2>C · Discovery surfaces <span class="ref">§4 §9</span></h2>
+      <p>Hybrid layout: top-of-screen Daily matches (3 by default, tunable 1–5) + a scrollable filter-driven feed below. Match-reason chips follow the tiered specificity ladder.</p>
+    </div>
+
+    <div class="phone-grid">
+      <!-- C1: Home -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Today's matches</span><span class="actions"><span>🔍</span><span>≡</span></span></div>
+            <div class="ph-section"><span>3 PICKS FOR YOU · MON, APR 28</span><span class="star">★</span></div>
+            <div class="ucard featured">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Omar Daher <span class="verified-badge">Builder</span></div>
+                <div class="role">Builder · Senior backend · London</div>
+                <div class="head">Senior backend, ex-Stripe · Open to fractional CTO</div>
+                <div class="reason">Match: open to fractional CTO; you're hiring one</div>
+              </div>
+            </div>
+            <div class="ucard featured">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Lina Maatouk <span class="verified-badge">Investor</span></div>
+                <div class="role">Investor · Angel · Dubai</div>
+                <div class="head">Angel · $25–100k · MENA fintech focus</div>
+                <div class="reason">Match: angels in MENA fintech</div>
+              </div>
+            </div>
+            <div class="ucard featured">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Karim Adel</div>
+                <div class="role">Builder · Fullstack · Cairo</div>
+                <div class="head">10y fullstack · ex-PayMob · ready for next chapter</div>
+                <div class="reason">Match: payments-infra background</div>
+              </div>
+            </div>
+            <div class="ph-section" style="margin-top:6px;"><span>BROWSE ALL</span><span></span></div>
+            <div class="filters">
+              <span class="pill solid">All roles</span>
+              <span class="pill outline">London</span>
+              <span class="pill outline">Verified ✓</span>
+              <span class="pill outline">Active</span>
+            </div>
+            <div class="ucard">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Noor Hadi</div>
+                <div class="role">Founder · Pre-seed · Riyadh</div>
+                <div class="head">Building edtech for KSA private schools</div>
+              </div>
+            </div>
+            <div class="ucard">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Tomas Lindqvist <span class="verified-badge">Leader</span></div>
+                <div class="role">Leader · VP Eng · NYC</div>
+                <div class="head">VP Eng · scaled 2 startups · open to advisor roles</div>
+              </div>
+            </div>
+            <div class="app-tabbar">
+              <div class="tab active"><span class="icon">⌂</span><span>Home</span></div>
+              <div class="tab"><span class="icon">✉</span><span>Inbox</span></div>
+              <div class="tab"><span class="icon">◎</span><span>Profile</span></div>
+              <div class="tab"><span class="icon">⚙</span><span>Settings</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">C1 · Home (Daily matches + feed)</div>
+        <div class="annot">Match-reason chips show highest-specificity heuristic per <code>§9</code>; never repeats within the daily set.</div>
+      </div>
+
+      <!-- C2: Thin pool -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Today's matches</span><span class="actions"><span>🔍</span><span>≡</span></span></div>
+            <div class="banner muted" style="margin:10px 12px;">
+              <div><span class="b-title">We're being picky for you.</span><br/>Only 1 strong match today — your goal is specific. We'll keep watching.</div>
+            </div>
+            <div class="ph-section"><span>1 PICK FOR YOU</span><span class="star">★</span></div>
+            <div class="ucard featured">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Reema Saleh <span class="verified-badge">Investor</span></div>
+                <div class="role">Investor · Angel · Manama</div>
+                <div class="head">Angel · $50–250k · MENA agritech</div>
+                <div class="reason">Match: agritech-MENA · rare overlap</div>
+              </div>
+            </div>
+            <div class="ph-section" style="margin-top:14px;"><span>BROWSE ALL</span><span></span></div>
+            <div class="filters">
+              <span class="pill solid">Investors</span>
+              <span class="pill outline">MENA</span>
+            </div>
+            <div class="ucard">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Yara A.</div>
+                <div class="role">Investor · Family office</div>
+                <div class="head">Family office · MENA · multi-stage</div>
+              </div>
+            </div>
+            <div class="ucard">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Hassan T.</div>
+                <div class="role">Investor · Scout</div>
+                <div class="head">Scout for B2B SaaS · GCC</div>
+              </div>
+            </div>
+            <div class="app-tabbar">
+              <div class="tab active"><span class="icon">⌂</span><span>Home</span></div>
+              <div class="tab"><span class="icon">✉</span><span>Inbox</span></div>
+              <div class="tab"><span class="icon">◎</span><span>Profile</span></div>
+              <div class="tab"><span class="icon">⚙</span><span>Settings</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">C2 · Thin-pool empty state</div>
+        <div class="annot">Niche-pool treatment per <code>§4</code>: "we're being picky" rather than padding with weak picks.</div>
+      </div>
+
+      <!-- C3: Filtered feed -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Browse</span><span class="actions"><span>🔍</span><span>≡</span></span></div>
+            <div class="filters">
+              <span class="pill solid">Founder ×</span>
+              <span class="pill solid">London ×</span>
+              <span class="pill solid">Verified ×</span>
+              <span class="pill outline">+ Sector</span>
+              <span class="pill outline">+ Stage</span>
+            </div>
+            <div style="padding:8px 14px; font-size:11px; color:var(--muted); font-family:'Dosis',sans-serif; font-weight:700;">5 RESULTS · SORTED BY RELEVANCE</div>
+            <div class="ucard">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Sara Khalil <span class="verified-badge">Founder</span></div>
+                <div class="role">Founder · Pre-seed · London</div>
+                <div class="head">Building B2B fintech for SMEs in EMEA</div>
+                <div style="margin-top:5px;"><span class="pill success" style="font-size:9px;">★ Active this week</span></div>
+              </div>
+            </div>
+            <div class="ucard">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Daniel Vance <span class="verified-badge">Founder</span></div>
+                <div class="role">Founder · Seed · London</div>
+                <div class="head">Healthtech · series A in 6 months · raising</div>
+              </div>
+            </div>
+            <div class="ucard">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Amal Riad <span class="verified-badge">Founder</span></div>
+                <div class="role">Founder · Pre-seed · London</div>
+                <div class="head">B2C subscription · post-launch · pre-MMR</div>
+              </div>
+            </div>
+            <div class="ucard">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Felix Reiter</div>
+                <div class="role">Founder · Idea · London</div>
+                <div class="head">Ex-trader exploring DeFi infra</div>
+                <div style="margin-top:5px;"><span class="pill muted" style="font-size:9px;">No badge yet</span></div>
+              </div>
+            </div>
+            <div class="ucard">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Priya Devan <span class="verified-badge">Founder</span></div>
+                <div class="role">Founder · Seed · London</div>
+                <div class="head">B2B logistics · MENA expansion</div>
+              </div>
+            </div>
+            <div class="app-tabbar">
+              <div class="tab"><span class="icon">⌂</span><span>Home</span></div>
+              <div class="tab"><span class="icon">✉</span><span>Inbox</span></div>
+              <div class="tab active"><span class="icon">◎</span><span>Browse</span></div>
+              <div class="tab"><span class="icon">⚙</span><span>Settings</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">C3 · Filtered feed</div>
+        <div class="annot">Filters are structured (Roles, region, sector, Verified, Activity). Free-text search is out of scope per <code>§19</code>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION D ============ -->
+  <section class="section" id="d">
+    <div class="section-head">
+      <h2>D · Profile views <span class="ref">§3 §3a §8 §11</span></h2>
+      <p>Logged-in profile shows the full picture; the public web preview shows a tight subset. Verified badges are visible in-app but hidden on the public preview to prevent scraping.</p>
+    </div>
+
+    <div class="phone-grid">
+      <!-- D1: Logged-in profile detail -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="padding:0; background:var(--surface);">
+            <div class="profile-hero">
+              <div class="inner">
+                <div class="avatar-big"></div>
+                <div class="name">Omar Daher</div>
+                <div class="head">Senior backend, ex-Stripe · Open to fractional CTO</div>
+                <div class="meta">
+                  <span>📍 London, UK</span>
+                  <span>·</span>
+                  <span class="verified-badge" style="background:rgba(220,252,231,0.95);">Builder</span>
+                  <span class="pill success" style="font-size:9px;">★ Active this week</span>
+                </div>
+                <div class="roles">
+                  <span class="pill solid">Builder</span>
+                  <span class="pill outline" style="background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.5); color:white;">Advisor</span>
+                </div>
+              </div>
+            </div>
+            <div class="profile-section gold">
+              <h4>I'm looking to…</h4>
+              <p style="font-family:'Dosis',sans-serif; font-weight:700; color:var(--navy); font-size:13px;">Co-found or join a pre-seed B2B SaaS as fractional CTO.</p>
+            </div>
+            <div class="profile-section">
+              <h4>I am</h4>
+              <p>Senior backend engineer with 8 years across fintech and payments. Built and scaled high-throughput APIs at Stripe. Comfortable owning architecture, hiring, and regulator conversations. Open to equity-heavy fractional CTO arrangements.</p>
+            </div>
+            <div class="profile-section">
+              <h4>Builder details</h4>
+              <div class="struct-row"><span class="k">Discipline</span><span class="v">Backend / Infra</span></div>
+              <div class="struct-row"><span class="k">Seniority</span><span class="v">Senior · 8y</span></div>
+              <div class="struct-row"><span class="k">Skills</span><span class="v">Go, Rust, AWS</span></div>
+              <div class="struct-row"><span class="k">Open to</span><span class="v">Fractional, Equity</span></div>
+              <div class="struct-row"><span class="k">Rate band</span><span class="v">$150–250 / hr</span></div>
+            </div>
+            <div class="profile-section">
+              <h4>Mutual connections</h4>
+              <div class="mutuals-row">
+                <div class="stack"><div class="av-mini"></div><div class="av-mini"></div><div class="av-mini"></div></div>
+                <span style="font-size:12px; color:var(--body);">3 people you both know</span>
+              </div>
+            </div>
+            <div class="profile-section" style="background:var(--navy); border:none; padding:14px;">
+              <button class="btn gold" style="font-size:14px;">Send intro</button>
+            </div>
+          </div>
+        </div>
+        <div class="caption">D1 · Profile detail (logged-in)</div>
+        <div class="annot">Verified badges visible. Goal section is highlighted in gold. Mutuals shown per <code>§5</code>.</div>
+      </div>
+
+      <!-- D3: Profile edit -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Edit profile</span><span class="actions"><span style="color:var(--gold); font-weight:700; font-family:'Dosis',sans-serif; font-size:13px;">Save</span></span></div>
+            <div class="banner warning" style="margin:10px 12px;">
+              <div><span class="b-title">Refresh your goal?</span><br/>Last updated 7 weeks ago. <span style="color:var(--navy); font-weight:700;">Yes, still accurate</span> · <span style="color:var(--navy); font-weight:700;">Update</span></div>
+            </div>
+            <div style="padding:0 14px;">
+              <span class="label">Headline · 47/80</span>
+              <input class="input" value="Building B2B fintech for SMEs · Pre-seed" />
+              <span class="label">I am</span>
+              <textarea class="input" rows="3" style="font-family:inherit; resize:none;">Pre-seed founder building B2B fintech for SMEs in EMEA. Looking for a CTO with payments-infra experience.</textarea>
+              <span class="label">I'm looking to…</span>
+              <input class="input" value="Hire a senior backend engineer as CTO" />
+              <span class="label">Roles</span>
+              <div style="display:flex; gap:6px; margin-bottom:10px;">
+                <span class="pill solid">Founder ✓</span>
+                <span class="pill outline" style="background:white;">Leader</span>
+                <span class="pill outline" style="background:white;">Builder</span>
+                <span class="pill solid">Investor ✓</span>
+              </div>
+              <span class="label">Photo</span>
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                <div style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg, var(--gold-light), var(--gold));"></div>
+                <button class="btn outline small">Change</button>
+              </div>
+              <span class="label">Handle</span>
+              <input class="input" value="sara-k" />
+              <p class="small-note" style="margin-top:-3px;">Changing creates a redirect for 90 days.</p>
+            </div>
+          </div>
+        </div>
+        <div class="caption">D3 · Profile edit</div>
+        <div class="annot">Headline char counter; goal-staleness banner per <code>§3</code> at week 7 (between week 4 nudge and week 8 email).</div>
+      </div>
+    </div>
+
+    <!-- D2: Public profile (web view) -->
+    <div class="phone-grid web">
+      <div class="phone-card">
+        <div class="web-frame">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">connect.bvisionry.com/u/omar-d</span></div>
+          <div class="body">
+            <div class="public-preview">
+              <div class="inner">
+                <div class="av-xl"></div>
+                <h3>Omar Daher</h3>
+                <p class="head">Senior backend, ex-Stripe · Open to fractional CTO</p>
+                <span class="role-pill">Builder</span>
+                <p class="loc">📍 London, United Kingdom</p>
+                <p class="handle">connect.bvisionry.com/u/omar-d</p>
+                <div class="cta"><button class="btn" style="width:auto; padding:11px 28px;">Sign in to connect</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">D2 · Public profile preview (logged-out web)</div>
+        <div class="annot">Per <code>§8</code>: only name, photo, headline, primary Role label, city+country, handle, CTA. <strong>No verified badge</strong> (hidden to prevent scraping per <code>§11</code>). Verified-Investor profiles default to public-page <strong>OFF</strong>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION E ============ -->
+  <section class="section" id="e">
+    <div class="section-head">
+      <h2>E · Intro request flow <span class="ref">§1 §12</span></h2>
+      <p>Sender writes a short intro note (80–400 chars), recipient accepts or declines silently. Decline visibility is silent. Daily caps: free 5 / verified 15 / Pro 40. Inbound cap 20/day.</p>
+    </div>
+
+    <div class="phone-grid">
+      <!-- E1: Send intro modal -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:var(--surface);">
+            <div class="modal-screen" style="background:rgba(15, 52, 96, 0.45); height:100%;">
+              <div class="modal-sheet">
+                <div class="handle"></div>
+                <h3 style="color:var(--navy); font-size:17px;">Send intro to Omar</h3>
+                <div style="background:var(--gold-pale); border-radius:10px; padding:9px 11px; margin-top:10px; display:flex; gap:8px; align-items:center;">
+                  <div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg, var(--navy-light), var(--navy));"></div>
+                  <div>
+                    <div style="font-family:'Dosis',sans-serif; font-weight:700; color:var(--navy); font-size:12px;">Omar Daher · <span class="verified-badge" style="font-size:9px;">Builder</span></div>
+                    <div style="font-size:10px; color:var(--muted);">Senior backend · Open to fractional CTO</div>
+                  </div>
+                </div>
+                <div style="margin-top:14px;">
+                  <span class="label">Your note · <span style="color:var(--gold-text); float:right;">160 / 400</span></span>
+                  <textarea class="input" rows="5" style="font-family:inherit; resize:none;">Hi Omar — I'm building B2B fintech for SMEs in EMEA, raising pre-seed. Your payments-infra background at Stripe is exactly what we need. Open to a 20-min call this week?</textarea>
+                  <p class="small-note">Min 80 characters. Your message goes through a quick safety check before delivery.</p>
+                </div>
+                <button class="btn" style="margin-top:14px;">Send intro</button>
+                <p class="small-note" style="text-align:center; margin-top:8px;">Today's intros: 3 / 5</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">E1 · Send intro modal</div>
+        <div class="annot">80–400 char window per <code>§12</code>. Pre-accept moderation pass on every note.</div>
+      </div>
+
+      <!-- E2: Sent intros -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Inbox</span><span class="actions"><span>≡</span></span></div>
+            <div class="ib-tabs">
+              <div class="tab">Received (2)</div>
+              <div class="tab active">Sent (4)</div>
+              <div class="tab">Connections</div>
+            </div>
+            <div class="ib-row">
+              <div class="av"></div>
+              <div class="body">
+                <div class="nm">Omar Daher</div>
+                <div class="pv">"Hi Omar — I'm building B2B fintech…"</div>
+                <div class="status"><span class="pill muted">Delivered, awaiting response</span></div>
+              </div>
+            </div>
+            <div class="ib-row">
+              <div class="av"></div>
+              <div class="body">
+                <div class="nm">Lina Maatouk</div>
+                <div class="pv">"Hi Lina — your fintech-MENA thesis lines up…"</div>
+                <div class="status"><span class="pill success">✓ Connected · 2d ago</span></div>
+              </div>
+            </div>
+            <div class="ib-row">
+              <div class="av"></div>
+              <div class="body">
+                <div class="nm">Felix Reiter</div>
+                <div class="pv">"Hi Felix — DeFi infra is interesting…"</div>
+                <div class="status"><span class="pill muted">Expired · 14 days, no response</span></div>
+              </div>
+            </div>
+            <div class="ib-row">
+              <div class="av"></div>
+              <div class="body">
+                <div class="nm">Karim Adel</div>
+                <div class="pv">"Hi Karim — saw your PayMob background…"</div>
+                <div class="status"><span class="pill success">✓ Connected · 1w ago</span></div>
+              </div>
+            </div>
+            <div class="app-tabbar">
+              <div class="tab"><span class="icon">⌂</span><span>Home</span></div>
+              <div class="tab active"><span class="icon">✉</span><span>Inbox</span></div>
+              <div class="tab"><span class="icon">◎</span><span>Profile</span></div>
+              <div class="tab"><span class="icon">⚙</span><span>Settings</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">E2 · Sent intros</div>
+        <div class="annot">Sender sees only "Delivered" or "Expired" — never "Declined" per <code>§12</code>.</div>
+      </div>
+
+      <!-- E3: Incoming intro -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:white;">
+            <div class="app-topbar"><span class="title">Intro request</span><span class="actions" style="color:var(--muted); font-size:12px; font-family:'Dosis',sans-serif; font-weight:700;">Report</span></div>
+            <div style="padding:18px 16px;">
+              <div style="display:flex; gap:12px; align-items:center;">
+                <div style="width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg, var(--gold-light), var(--gold)); box-shadow:0 0 0 3px white, 0 0 0 5px var(--gold);"></div>
+                <div>
+                  <div style="font-family:'Dosis',sans-serif; font-weight:700; color:var(--navy); font-size:16px; display:flex; align-items:center; gap:6px;">Sara Khalil <span class="verified-badge">Founder</span></div>
+                  <div style="font-size:11px; color:var(--muted);">Founder · Pre-seed · London</div>
+                  <div style="font-size:11px; color:var(--body); margin-top:3px;">Building B2B fintech for SMEs in EMEA</div>
+                </div>
+              </div>
+              <div class="banner muted" style="margin:16px 0; flex-direction:column; gap:6px;">
+                <div style="font-family:'Dosis',sans-serif; font-weight:700; color:var(--navy); font-size:11px;">SARA SAYS</div>
+                <div style="font-size:13px; line-height:1.5; color:var(--body);">Hi Omar — I'm building B2B fintech for SMEs in EMEA, raising pre-seed. Your payments-infra background at Stripe is exactly what we need. Open to a 20-min call this week?</div>
+              </div>
+              <div style="display:flex; gap:8px; margin-top:18px;">
+                <button class="btn outline" style="flex:1;">Decline</button>
+                <button class="btn" style="flex:1;">Accept</button>
+              </div>
+              <p class="small-note" style="text-align:center; margin-top:14px;">Decline is silent — Sara only sees "awaiting response."</p>
+              <div style="margin-top:18px; padding-top:14px; border-top:1px solid var(--border);">
+                <div class="mutuals-row">
+                  <div class="stack"><div class="av-mini"></div><div class="av-mini"></div></div>
+                  <span style="font-size:11px; color:var(--muted);">2 mutual connections</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">E3 · Incoming intro</div>
+        <div class="annot">Recipient sees full sender profile preview + the note. Decline is silent per <code>§12</code>.</div>
+      </div>
+
+      <!-- E4: Inbox empty state -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Inbox</span><span class="actions"><span>≡</span></span></div>
+            <div class="ib-tabs">
+              <div class="tab active">Received (0)</div>
+              <div class="tab">Sent (0)</div>
+              <div class="tab">Connections</div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 22px; text-align:center;">
+              <div style="width:80px; height:80px; border-radius:50%; background:var(--gold-pale); display:flex; align-items:center; justify-content:center; font-size:32px; color:var(--navy); margin-bottom:14px;">✉</div>
+              <h3 style="color:var(--navy); font-size:17px;">No intros yet</h3>
+              <p style="font-size:12px; color:var(--muted); margin-top:6px; line-height:1.5;">Tap "Send intro" on any profile to start a conversation. We'll keep your daily matches fresh — check back tomorrow at 4 AM your time.</p>
+              <button class="btn" style="margin-top:18px; width:auto; padding:10px 20px;">Browse Today's matches</button>
+            </div>
+            <div class="app-tabbar">
+              <div class="tab"><span class="icon">⌂</span><span>Home</span></div>
+              <div class="tab active"><span class="icon">✉</span><span>Inbox</span></div>
+              <div class="tab"><span class="icon">◎</span><span>Profile</span></div>
+              <div class="tab"><span class="icon">⚙</span><span>Settings</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">E4 · Inbox empty state</div>
+        <div class="annot">Daily refresh time mentioned ("4 AM your time" per <code>§4</code>).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION F ============ -->
+  <section class="section" id="f">
+    <div class="section-head">
+      <h2>F · Chat &amp; voice <span class="ref">§6 §17</span></h2>
+      <p>Chat between two connected users. Voice notes max 120s with auto-transcription for accessibility and moderation. Read receipts default <strong>OFF</strong> per <code>§11</code> (B2B norm).</p>
+    </div>
+
+    <div class="phone-grid">
+      <!-- F1: Chat thread -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:var(--surface);">
+            <div class="chat-hdr">
+              <div class="av"></div>
+              <div style="flex:1;">
+                <div class="name" style="display:flex; align-items:center; gap:6px;">Omar Daher <span class="verified-badge" style="font-size:9px;">Builder</span></div>
+                <div class="head">Senior backend · Open to fractional CTO</div>
+              </div>
+              <span style="font-size:14px; color:var(--navy);">⋯</span>
+            </div>
+            <div class="chat-body">
+              <div class="bubble them">Hi Sara — happy to chat. Tell me about the team and runway.</div>
+              <div class="bubble me">2 of us so far. Pre-seed close to wrap, ~$400k. We have signed LOIs from 3 mid-market SMEs.</div>
+              <div class="bubble me">Open to a fractional arrangement first → full-time once we close seed.</div>
+              <div class="bubble voice them">
+                <div class="play">▶</div>
+                <div class="wave"></div>
+                <span class="dur">1:12</span>
+              </div>
+              <div style="font-size:10px; color:var(--muted); padding-left:8px; margin-top:-3px;"><span style="color:var(--navy); font-family:'Dosis',sans-serif; font-weight:700;">Show transcript</span></div>
+              <div class="bubble them">Makes sense. Let's pick a slot to dig in.</div>
+              <div class="meeting-card">
+                <div class="ttl">📅 Meeting proposed</div>
+                <div class="when">Tuesday, Apr 30 · 14:00 GMT · 30 min</div>
+                <div style="font-size:10px; color:var(--muted); margin-top:3px;">Add to calendar via .ics</div>
+                <div class="actions">
+                  <button class="btn small" style="flex:1;">Accept</button>
+                  <button class="btn outline small" style="flex:1;">Suggest other</button>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input">
+              <span class="ico">🎤</span>
+              <input placeholder="Message…" />
+              <span class="ico">📅</span>
+              <span class="ico" style="background:var(--navy); color:white;">→</span>
+            </div>
+          </div>
+        </div>
+        <div class="caption">F1 · Chat thread</div>
+        <div class="annot">Voice note bubble + "Show transcript" link + inline meeting proposal card. No read-receipts shown.</div>
+      </div>
+
+      <!-- F2: Voice recording -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:var(--surface); position:relative;">
+            <div class="chat-hdr">
+              <div class="av"></div>
+              <div style="flex:1;"><div class="name">Omar Daher</div><div class="head">Senior backend</div></div>
+              <span style="font-size:14px; color:var(--navy);">⋯</span>
+            </div>
+            <div class="chat-body" style="filter:blur(1.4px); opacity:0.55;">
+              <div class="bubble them">Hi Sara — happy to chat.</div>
+              <div class="bubble me">Pre-seed close to wrap.</div>
+            </div>
+            <div class="recorder">
+              <div class="pulse">●</div>
+              <div class="timer">0:32 / 2:00</div>
+              <div class="max">Max 2 minutes — voice notes are transcribed for accessibility &amp; safety</div>
+              <div class="wave-strip">
+                <span style="height:8px;"></span><span style="height:14px;"></span><span style="height:22px;"></span><span style="height:18px;"></span><span style="height:26px;"></span><span style="height:12px;"></span><span style="height:20px;"></span><span style="height:16px;"></span><span style="height:24px;"></span><span style="height:10px;"></span><span style="height:18px;"></span><span style="height:22px;"></span><span style="height:14px;"></span>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn outline" style="flex:1;">Cancel</button>
+                <button class="btn" style="flex:1;">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">F2 · Recording a voice note</div>
+        <div class="annot">120-second cap per <code>§17</code>. Sender disclosure shown inline.</div>
+      </div>
+
+      <!-- F3: Transcript expanded -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:var(--surface);">
+            <div class="chat-hdr">
+              <div class="av"></div>
+              <div style="flex:1;"><div class="name">Omar Daher</div><div class="head">Senior backend</div></div>
+            </div>
+            <div class="chat-body">
+              <div class="bubble them">Hi Sara — happy to chat.</div>
+              <div class="bubble voice them">
+                <div class="play">▶</div>
+                <div class="wave"></div>
+                <span class="dur">1:12</span>
+              </div>
+              <div style="background:white; border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin:0 4px; font-size:11px; color:var(--body); align-self:flex-start; max-width:80%; line-height:1.5;">
+                <div style="font-family:'Dosis',sans-serif; font-weight:700; color:var(--muted); font-size:9px; margin-bottom:4px; letter-spacing:0.5px;">TRANSCRIPT</div>
+                "Yeah, look — payments infra at Stripe taught me one thing, you have to design for the regulator first. If you're going EMEA mid-market, that's the wedge. Happy to dig into your stack and tell you what I'd build first. Send me your proposed times."
+              </div>
+              <div style="font-size:10px; color:var(--muted); padding:0 6px; line-height:1.4;">Voice notes are transcribed for accessibility and safety. Transcripts are not used as a third-party search index.</div>
+            </div>
+            <div class="chat-input">
+              <span class="ico">🎤</span>
+              <input placeholder="Message…" />
+              <span class="ico">📅</span>
+              <span class="ico" style="background:var(--navy); color:white;">→</span>
+            </div>
+          </div>
+        </div>
+        <div class="caption">F3 · Voice transcript expanded</div>
+        <div class="annot">Recipient fallback per <code>§17</code>: collapsed by default, expandable.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION G ============ -->
+  <section class="section" id="g">
+    <div class="section-head">
+      <h2>G · Meeting flow <span class="ref">§16 §18</span></h2>
+      <p>Launch scope is .ics handoff (no calendar OAuth at launch). Post-meeting prompt asks both parties whether the meeting happened; aggregate review feeds T&amp;S, never shown verbatim to other users.</p>
+    </div>
+
+    <div class="phone-grid">
+      <!-- G1: Propose slot -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:var(--surface);">
+            <div class="chat-hdr">
+              <div class="av"></div>
+              <div style="flex:1;"><div class="name">Omar Daher</div><div class="head">Senior backend</div></div>
+            </div>
+            <div style="padding:18px 14px;">
+              <h3 style="color:var(--navy); font-size:17px;">Schedule a meeting</h3>
+              <p style="font-size:11px; color:var(--muted); margin-top:4px;">Pick up to three slots. Omar will accept one.</p>
+              <div style="margin-top:14px;">
+                <div class="settings-row" style="margin:0; border-radius:10px 10px 0 0; border:1px solid var(--border);">
+                  <div class="label-pair"><div class="l">Tue Apr 30 · 14:00 GMT</div><div class="d">30 min</div></div>
+                  <span style="color:var(--gold); font-size:18px;">★</span>
+                </div>
+                <div class="settings-row" style="margin:0; border:1px solid var(--border); border-top:none;">
+                  <div class="label-pair"><div class="l">Wed May 1 · 10:00 GMT</div><div class="d">30 min</div></div>
+                  <span style="color:var(--gold); font-size:18px;">★</span>
+                </div>
+                <div class="settings-row" style="margin:0; border-radius:0 0 10px 10px; border:1px solid var(--border); border-top:none;">
+                  <div class="label-pair"><div class="l">Thu May 2 · 16:30 GMT</div><div class="d">30 min</div></div>
+                  <span style="color:var(--muted); font-size:18px;">☆</span>
+                </div>
+              </div>
+              <span class="label" style="margin-top:14px;">Meeting link</span>
+              <input class="input" value="https://meet.google.com/abc-defg-hij" />
+              <span class="label">Note (optional)</span>
+              <textarea class="input" rows="2" style="font-family:inherit; resize:none;" placeholder="Looking forward to the chat."></textarea>
+              <p class="small-note" style="margin-top:8px;">We'll generate an .ics file you both can add to your calendar.</p>
+              <button class="btn" style="margin-top:8px;">Send proposal</button>
+            </div>
+          </div>
+        </div>
+        <div class="caption">G1 · Propose a slot</div>
+        <div class="annot">.ics handoff at launch per <code>§16</code>. Deep OAuth (Google/Microsoft) is post-launch.</div>
+      </div>
+
+      <!-- G2: Post-meeting prompt -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:white;">
+            <div style="padding:50px 22px; height:100%; display:flex; flex-direction:column;">
+              <div style="display:flex; gap:10px; align-items:center; justify-content:center;">
+                <div style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg, var(--gold-light), var(--gold));"></div>
+                <div style="font-family:'Dosis',sans-serif; font-weight:700; color:var(--navy);">Omar Daher</div>
+              </div>
+              <h2 style="margin-top:18px; text-align:center; font-size:22px; color:var(--navy);">Did this meeting happen?</h2>
+              <p style="text-align:center; color:var(--muted); font-size:12px; margin-top:8px; padding:0 12px;">Tuesday at 14:00. Your honest answer helps us improve matches.</p>
+              <div style="margin-top:30px; display:flex; flex-direction:column; gap:10px;">
+                <button class="btn">Yes — it happened</button>
+                <button class="btn outline">Rescheduled to a new time</button>
+                <button class="btn outline" style="border-color:var(--danger-text); color:var(--danger-text);">No — they didn't show</button>
+              </div>
+              <p class="small-note" style="text-align:center; margin-top:16px; line-height:1.5;">If neither party answers within 48 hours, the meeting is treated as "unknown" — never as a no-show.</p>
+            </div>
+          </div>
+        </div>
+        <div class="caption">G2 · Post-meeting prompt</div>
+        <div class="annot">Triggered 30 min after scheduled end per <code>§16</code>.</div>
+      </div>
+
+      <!-- G3: Post-connection review -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:white;">
+            <div style="padding:40px 22px; height:100%; display:flex; flex-direction:column;">
+              <div style="text-align:center;">
+                <div style="width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg, var(--gold-light), var(--gold)); margin:0 auto;"></div>
+                <h2 style="margin-top:14px; font-size:22px; color:var(--navy);">How was your meeting<br/>with Omar?</h2>
+                <p style="color:var(--muted); font-size:12px; margin-top:8px;">Aggregate feedback only — your individual review stays private.</p>
+              </div>
+              <div style="margin-top:30px; display:flex; flex-direction:column; gap:10px;">
+                <button class="btn" style="background:var(--success-bg); color:var(--success-text); border:1.5px solid var(--success-text);">👍 Useful</button>
+                <button class="btn outline">😐 Not useful</button>
+                <button class="btn outline" style="border-color:var(--danger-text); color:var(--danger-text);">🚫 No-show</button>
+              </div>
+              <p class="small-note" style="text-align:center; margin-top:18px; line-height:1.5;">Reviews are aggregated for ranking once you have ≥5 distinct reviewers. Visible to BVisionRY trust &amp; safety only.</p>
+            </div>
+          </div>
+        </div>
+        <div class="caption">G3 · Post-connection review</div>
+        <div class="annot">Per <code>§18</code>: useful / not useful / no-show. Brigading mitigations apply server-side.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION H ============ -->
+  <section class="section" id="h">
+    <div class="section-head">
+      <h2>H · Settings &amp; privacy <span class="ref">§11 §14 §15 §20</span></h2>
+      <p>Privacy controls are surfaced as distinct toggles. Read receipts default OFF. Verified-Investor public pages default OFF. Private mode and "Disable public web page" are <em>two separate</em> toggles, never nested.</p>
+    </div>
+
+    <div class="phone-grid">
+      <!-- H1: Settings home -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Settings</span><span class="actions"></span></div>
+            <div class="settings-group">
+              <div class="settings-row" style="margin:8px 12px; border-radius:10px;"><div class="label-pair"><div class="l">Account</div><div class="d">Email, password, sessions</div></div><span class="chev">›</span></div>
+              <div class="settings-row" style="margin:8px 12px; border-radius:10px;"><div class="label-pair"><div class="l">Privacy &amp; visibility</div><div class="d">Private mode, public page, blocks</div></div><span class="chev">›</span></div>
+              <div class="settings-row" style="margin:8px 12px; border-radius:10px;"><div class="label-pair"><div class="l">Notifications</div><div class="d">Push, email, in-app</div></div><span class="chev">›</span></div>
+              <div class="settings-row" style="margin:8px 12px; border-radius:10px;"><div class="label-pair"><div class="l">Verification</div><div class="d">Add badges to your roles</div></div><span class="chev">›</span></div>
+              <div class="settings-row" style="margin:8px 12px; border-radius:10px;"><div class="label-pair"><div class="l">Blocked users</div><div class="d">2 blocked</div></div><span class="chev">›</span></div>
+              <div class="settings-row" style="margin:8px 12px; border-radius:10px;"><div class="label-pair"><div class="l">Help &amp; support</div><div class="d">Reach trust &amp; safety</div></div><span class="chev">›</span></div>
+            </div>
+            <div style="padding:14px 12px;">
+              <button class="btn outline" style="color:var(--danger-text); border-color:var(--danger-text);">Sign out</button>
+            </div>
+            <div class="app-tabbar">
+              <div class="tab"><span class="icon">⌂</span><span>Home</span></div>
+              <div class="tab"><span class="icon">✉</span><span>Inbox</span></div>
+              <div class="tab"><span class="icon">◎</span><span>Profile</span></div>
+              <div class="tab active"><span class="icon">⚙</span><span>Settings</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">H1 · Settings home</div>
+      </div>
+
+      <!-- H2: Privacy -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Privacy &amp; visibility</span><span class="actions"></span></div>
+            <div class="settings-group">
+              <div class="gh">DISCOVERY</div>
+              <div style="margin:0 12px; background:white; border-radius:10px; overflow:hidden;">
+                <div class="settings-row">
+                  <div class="label-pair" style="max-width:75%;"><div class="l">Private mode</div><div class="d">Hidden from feed, Daily matches, search. Direct profile links still work — your public web page won't be Google-indexed.</div></div>
+                  <div class="toggle"></div>
+                </div>
+                <div class="settings-row">
+                  <div class="label-pair" style="max-width:75%;"><div class="l">Public web page</div><div class="d">connect.bvisionry.com/u/sara-k. <strong>Verified Investor profiles default to OFF.</strong></div></div>
+                  <div class="toggle on"></div>
+                </div>
+              </div>
+              <div class="gh">CHAT</div>
+              <div style="margin:0 12px; background:white; border-radius:10px; overflow:hidden;">
+                <div class="settings-row">
+                  <div class="label-pair" style="max-width:75%;"><div class="l">Read receipts</div><div class="d">If you turn this on, others can see when you've read a message — and you'll see when they've read yours. Symmetric.</div></div>
+                  <div class="toggle"></div>
+                </div>
+              </div>
+              <div class="gh">SAFETY</div>
+              <div style="margin:0 12px; background:white; border-radius:10px; overflow:hidden;">
+                <div class="settings-row"><div class="label-pair"><div class="l">Blocked users</div><div class="d">2 blocked</div></div><span class="chev">›</span></div>
+                <div class="settings-row"><div class="label-pair"><div class="l">Reported by you</div><div class="d">View history</div></div><span class="chev">›</span></div>
+              </div>
+            </div>
+            <div class="app-tabbar">
+              <div class="tab"><span class="icon">⌂</span><span>Home</span></div>
+              <div class="tab"><span class="icon">✉</span><span>Inbox</span></div>
+              <div class="tab"><span class="icon">◎</span><span>Profile</span></div>
+              <div class="tab active"><span class="icon">⚙</span><span>Settings</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">H2 · Privacy &amp; visibility</div>
+        <div class="annot">Two distinct toggles for Private mode and public page. Read receipts default OFF.</div>
+      </div>
+
+      <!-- H3: Notifications -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Notifications</span><span class="actions"></span></div>
+            <div style="padding:10px 14px 4px; display:grid; grid-template-columns:1fr 50px 50px 50px; gap:8px; font-size:9px; color:var(--muted); font-family:'Dosis',sans-serif; font-weight:700; text-transform:uppercase;">
+              <span></span><span style="text-align:center;">Push</span><span style="text-align:center;">Email</span><span style="text-align:center;">In-app</span>
+            </div>
+            <div style="margin:0 12px; background:white; border-radius:10px; overflow:hidden;">
+              <div class="settings-row" style="display:grid; grid-template-columns:1fr 50px 50px 50px; gap:8px;"><div class="l" style="font-size:11px;">Incoming intro</div><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span></div>
+              <div class="settings-row" style="display:grid; grid-template-columns:1fr 50px 50px 50px; gap:8px;"><div class="l" style="font-size:11px;">Accepted intro</div><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span></div>
+              <div class="settings-row" style="display:grid; grid-template-columns:1fr 50px 50px 50px; gap:8px;"><div class="l" style="font-size:11px;">New chat message</div><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span><span style="text-align:center;"><div class="toggle" style="margin:auto; transform:scale(0.85);"></div></span><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span></div>
+              <div class="settings-row" style="display:grid; grid-template-columns:1fr 50px 50px 50px; gap:8px;"><div class="l" style="font-size:11px;">Voice note</div><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span><span style="text-align:center;"><div class="toggle" style="margin:auto; transform:scale(0.85);"></div></span><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span></div>
+              <div class="settings-row" style="display:grid; grid-template-columns:1fr 50px 50px 50px; gap:8px;"><div class="l" style="font-size:11px;">Meeting reminder</div><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span><span style="text-align:center;"><div class="toggle" style="margin:auto; transform:scale(0.85);"></div></span><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span></div>
+              <div class="settings-row" style="display:grid; grid-template-columns:1fr 50px 50px 50px; gap:8px;"><div class="l" style="font-size:11px;">Daily matches ready</div><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span></div>
+              <div class="settings-row" style="display:grid; grid-template-columns:1fr 50px 50px 50px; gap:8px;"><div class="l" style="font-size:11px;">Goal-staleness nudge</div><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span><span style="text-align:center;"><div class="toggle on" style="margin:auto; transform:scale(0.85);"></div></span></div>
+            </div>
+            <p class="small-note" style="margin:14px 14px 0;">Activity-decay guilt nudges are <strong>not</strong> available — by design. Per §14.</p>
+          </div>
+        </div>
+        <div class="caption">H3 · Notifications settings</div>
+        <div class="annot">Per-channel toggles per <code>§14</code>. Email digest if &gt;3 incoming intros/day.</div>
+      </div>
+
+      <!-- H4: Verification -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Verification</span><span class="actions"></span></div>
+            <p style="padding:10px 14px; color:var(--muted); font-size:11px; line-height:1.5;">Verified profiles get a +15% ranking boost (ramps over 14 days from grant date).</p>
+            <div class="settings-group">
+              <div style="margin:0 12px; background:white; border-radius:10px; overflow:hidden;">
+                <div class="settings-row"><div class="label-pair"><div class="l">Founder <span class="verified-badge" style="margin-left:6px; font-size:9px;">Verified</span></div><div class="d">Domain email + /team page confirmed</div></div><span class="chev">›</span></div>
+                <div class="settings-row"><div class="label-pair"><div class="l">Investor</div><div class="d">Not verified yet</div></div><button class="btn small" style="padding:5px 10px; font-size:10px;">Verify</button></div>
+              </div>
+            </div>
+            <p style="padding:14px 14px 8px; color:var(--muted); font-size:11px; font-family:'Dosis',sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Investor — pick one</p>
+            <div style="margin:0 12px; background:white; border-radius:10px; overflow:hidden;">
+              <div class="settings-row"><div class="label-pair"><div class="l">Domain-verified email</div><div class="d">@yourfund.com (auto)</div></div><span class="chev">›</span></div>
+              <div class="settings-row"><div class="label-pair"><div class="l">Crunchbase profile</div><div class="d">OAuth or manual review</div></div><span class="chev">›</span></div>
+              <div class="settings-row"><div class="label-pair"><div class="l">Portfolio companies</div><div class="d">2+ public listings naming you</div></div><span class="chev">›</span></div>
+            </div>
+            <p class="small-note" style="margin:14px;">Any one proof unlocks the badge. Manual review takes 1–2 business days.</p>
+          </div>
+        </div>
+        <div class="caption">H4 · Verification status</div>
+        <div class="annot">Per-Role proofs from <code>§15</code>. Boost ramps 14 days from grant date.</div>
+      </div>
+
+      <!-- H5: Blocked users -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Blocked users</span><span class="actions"></span></div>
+            <p style="padding:10px 14px; color:var(--muted); font-size:11px; line-height:1.5;">Blocked users can never re-request a connection — even if you unblock. Only you can re-initiate after unblocking.</p>
+            <div style="margin:8px 12px; background:white; border-radius:10px; overflow:hidden;">
+              <div class="settings-row"><div style="display:flex; gap:9px; align-items:center;"><div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg, var(--navy-light), var(--navy));"></div><div class="label-pair"><div class="l">Anonymous user 1</div><div class="d">Blocked Mar 14</div></div></div><button class="btn outline small" style="padding:5px 10px; font-size:10px;">Unblock</button></div>
+              <div class="settings-row"><div style="display:flex; gap:9px; align-items:center;"><div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg, var(--navy-light), var(--navy));"></div><div class="label-pair"><div class="l">Anonymous user 2</div><div class="d">Blocked Apr 02</div></div></div><button class="btn outline small" style="padding:5px 10px; font-size:10px;">Unblock</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">H5 · Blocked users</div>
+        <div class="annot">Block is <strong>both-directional and irrevocable from the target's side</strong> per <code>§11</code>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION I ============ -->
+  <section class="section" id="i">
+    <div class="section-head">
+      <h2>I · Edge cases &amp; states <span class="ref">§3 §11 §12 §14 §20</span></h2>
+      <p>States and modes the user encounters less often but which the spec defines explicitly.</p>
+    </div>
+
+    <div class="phone-grid">
+      <!-- I1: Goal staleness -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Today's matches</span><span class="actions"><span>🔍</span></span></div>
+            <div class="banner warning" style="margin:10px 12px;">
+              <div><span class="b-title">Still looking for the same thing?</span><br/>You set this 4 weeks ago: <em>"Hire a senior backend as CTO."</em>
+              <div style="margin-top:8px; display:flex; gap:6px;"><button class="btn small" style="padding:5px 10px; font-size:10px;">Yes, still accurate</button> <button class="btn outline small" style="padding:5px 10px; font-size:10px;">Update</button></div>
+              </div>
+            </div>
+            <div class="ph-section"><span>3 PICKS FOR YOU</span><span class="star">★</span></div>
+            <div class="ucard featured"><div class="av"></div><div class="info"><div class="name">Omar Daher <span class="verified-badge">Builder</span></div><div class="role">Builder · Senior backend</div><div class="head">Senior backend, ex-Stripe · Open to fractional CTO</div><div class="reason">Match: open to CTO role</div></div></div>
+            <div class="ucard featured"><div class="av"></div><div class="info"><div class="name">Karim Adel</div><div class="role">Builder · Fullstack</div><div class="head">10y · ex-PayMob</div><div class="reason">Match: payments-infra background</div></div></div>
+          </div>
+        </div>
+        <div class="caption">I1 · Goal staleness banner (week 4)</div>
+        <div class="annot">First nudge per <code>§3</code>. Decay starts at week 4, hits 50% at week 12.</div>
+      </div>
+
+      <!-- I2: Private mode -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Your profile</span><span class="actions"><span>✎</span></span></div>
+            <div class="banner muted" style="margin:10px 12px; background:#1e293b; color:white; border:1px solid var(--navy);">
+              <div><span class="b-title" style="color:var(--gold);">Private mode is on.</span><br/>You're hidden from feed, Daily matches, and search. Direct profile links still work; your public web page won't be Google-indexed.</div>
+            </div>
+            <div class="profile-hero" style="padding:18px 16px;">
+              <div class="inner">
+                <div class="avatar-big" style="width:60px; height:60px;"></div>
+                <div class="name">Sara Khalil</div>
+                <div class="head">Building B2B fintech for SMEs · Pre-seed</div>
+              </div>
+            </div>
+            <div class="profile-section gold" style="margin:10px 12px;">
+              <h4>I'm looking to…</h4>
+              <p style="font-family:'Dosis',sans-serif; font-weight:700; color:var(--navy); font-size:13px;">Hire a senior backend as CTO of my pre-seed B2B fintech.</p>
+            </div>
+            <div class="profile-section">
+              <h4>Profile completeness</h4>
+              <div style="background:var(--surface); border-radius:8px; height:8px; margin:6px 0;">
+                <div style="background:var(--gold); height:100%; border-radius:8px; width:80%;"></div>
+              </div>
+              <p style="font-size:11px; color:var(--muted);">80% — add structured fields to improve match quality.</p>
+            </div>
+            <div class="settings-row" style="margin:8px 12px; border-radius:10px;"><div class="label-pair"><div class="l">Disable private mode</div><div class="d">Become discoverable again</div></div><div class="toggle on"></div></div>
+          </div>
+        </div>
+        <div class="caption">I2 · Private mode active</div>
+        <div class="annot">Per <code>§11</code>: profile exists, direct links work, public page <code>noindex</code>.</div>
+      </div>
+
+      <!-- I3: Inbound cap reached -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="app-topbar"><span class="title">Inbox</span><span class="actions"><span>≡</span></span></div>
+            <div class="banner info" style="margin:10px 12px;">
+              <div><span class="b-title">You've received 20 intros today.</span><br/>New ones will appear tomorrow at 4 AM your time. Senders see "queued — will appear tomorrow."</div>
+            </div>
+            <div class="ib-tabs"><div class="tab active">Received (20)</div><div class="tab">Sent</div><div class="tab">Connections</div></div>
+            <div class="ib-row"><div class="av"></div><div class="body"><div class="nm">New today · 8 unread</div><div class="pv">Tap to review your queue.</div></div></div>
+            <div class="ib-row"><div class="av"></div><div class="body"><div class="nm">Sara Khalil</div><div class="pv">"Hi Omar — I'm building B2B fintech…"</div><div class="status"><span class="pill warning">New · 2h ago</span></div></div></div>
+            <div class="ib-row"><div class="av"></div><div class="body"><div class="nm">Daniel Vance</div><div class="pv">"Want to compare notes on healthtech…"</div><div class="status"><span class="pill warning">New · 4h ago</span></div></div></div>
+            <div class="ib-row"><div class="av"></div><div class="body"><div class="nm">Amal Riad</div><div class="pv">"Saw your portfolio of B2C…"</div><div class="status"><span class="pill warning">New · 6h ago</span></div></div></div>
+          </div>
+        </div>
+        <div class="caption">I3 · Inbound cap reached</div>
+        <div class="annot">20/day cap per <code>§12</code>. Overflow auto-queues; sender's daily quota is decremented.</div>
+      </div>
+
+      <!-- I4: Decline cooldown -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:var(--surface);">
+            <div class="profile-hero" style="padding:18px 14px;">
+              <div class="inner">
+                <div class="avatar-big" style="width:60px; height:60px;"></div>
+                <div class="name">Tomas Lindqvist</div>
+                <div class="head">VP Eng · scaled 2 startups</div>
+                <div class="meta"><span class="verified-badge" style="background:rgba(220,252,231,0.95);">Leader</span></div>
+              </div>
+            </div>
+            <div class="banner warning" style="margin:10px 12px;">
+              <div><span class="b-title">Cooldown active.</span><br/>Tomas declined an earlier intro. You can re-request once on May 28 (30-day cooldown). After that, no further intros are possible.</div>
+            </div>
+            <div class="profile-section">
+              <h4>I am</h4>
+              <p>Engineering leader with 2 successful exits in B2B SaaS. Open to advisor or board roles in seed / series A startups solving real problems.</p>
+            </div>
+            <div class="profile-section" style="background:transparent; border:none; padding:8px 14px 0;">
+              <button class="btn disabled" style="background:#cbd5e1; color:white; cursor:not-allowed;">Send intro · available May 28</button>
+            </div>
+          </div>
+        </div>
+        <div class="caption">I4 · Decline cooldown active</div>
+        <div class="annot">30-day window per <code>§12</code>. Only one re-request ever; second decline = permanent lock.</div>
+      </div>
+
+      <!-- I5: Account suspended -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen">
+            <div class="auth-screen">
+              <div class="inner">
+                <div class="logo"><h2><span class="b">B</span>VisionRY <span style="color:var(--gold-light); font-weight:500;">Connect</span></h2></div>
+                <div class="card">
+                  <div style="text-align:center; margin-bottom:14px;">
+                    <div style="width:64px; height:64px; border-radius:50%; background:var(--danger-bg); color:var(--danger-text); display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto;">!</div>
+                    <h3 style="color:var(--danger-text); margin-top:10px;">Account suspended</h3>
+                  </div>
+                  <p style="font-size:12px; line-height:1.6; color:var(--body);">Your account is suspended pending review by our trust &amp; safety team. We received a report concerning a recent message that may violate our policies.</p>
+                  <div style="background:var(--surface); border-radius:10px; padding:12px; margin-top:14px; font-size:11px; color:var(--muted); line-height:1.5;">
+                    <strong style="color:var(--navy);">What happens next</strong><br/>Our team reviews within 48 business hours. You'll get an email at sara@example.com with the outcome.
+                  </div>
+                  <button class="btn" style="margin-top:14px;">Submit appeal</button>
+                  <p class="small-note" style="text-align:center; margin-top:10px;">Repeat offenses lead to permanent removal per our community standards.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">I5 · Account suspended</div>
+        <div class="annot">Hard-tier ladder per <code>§20</code>. Mechanical, appealable, not negotiable.</div>
+      </div>
+
+      <!-- I6: Push stack -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span style="color:white;">9:41</span><span class="icons" style="color:white;">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:#0f172a; padding:0;">
+            <div class="lockscreen">
+              <div class="clock">9:41</div>
+              <div class="date">Tuesday, April 28</div>
+              <div class="push">
+                <div class="app-name">Connect · just now</div>
+                <div class="ttl">Sara K. sent you an intro</div>
+                <div class="msg">"Hi Omar — I'm building B2B fintech for SMEs in EMEA, raising pre-seed…"</div>
+              </div>
+              <div class="push">
+                <div class="app-name">Connect · 5m ago</div>
+                <div class="ttl">You and Lina M. are now connected</div>
+                <div class="msg">Tap to send your first message.</div>
+              </div>
+              <div class="push">
+                <div class="app-name">Connect · 6:00 AM</div>
+                <div class="ttl">Today's matches are ready</div>
+                <div class="msg">3 picks selected for your goal.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">I6 · Push notifications (lock screen)</div>
+        <div class="annot">P50 ≤ 5s, P95 ≤ 30s SLA on intro-request push per <code>§14</code>.</div>
+      </div>
+
+      <!-- I7: Report dialog -->
+      <div class="phone-card">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="statusbar"><span>9:41</span><span class="icons">●●● ▮ 95%</span></div>
+          <div class="screen" style="background:rgba(15, 52, 96, 0.45);">
+            <div class="modal-screen" style="background:transparent; height:100%;">
+              <div class="modal-sheet">
+                <div class="handle"></div>
+                <h3 style="color:var(--navy); font-size:17px;">Report this message</h3>
+                <div style="background:var(--surface); border-radius:10px; padding:10px 12px; margin-top:10px; font-size:11px; color:var(--body); border-left:3px solid var(--danger-text);">
+                  <div style="font-family:'Dosis',sans-serif; font-weight:700; color:var(--muted); font-size:9px; margin-bottom:3px;">QUOTED MESSAGE</div>
+                  "[message content quoted here for context]"
+                </div>
+                <span class="label" style="margin-top:14px;">Reason</span>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                  <button class="btn outline" style="text-align:left; padding:9px 12px;">Harassment / abuse</button>
+                  <button class="btn outline" style="text-align:left; padding:9px 12px;">Spam / unsolicited</button>
+                  <button class="btn outline" style="text-align:left; padding:9px 12px;">Inappropriate content</button>
+                  <button class="btn outline" style="text-align:left; padding:9px 12px;">Impersonation</button>
+                  <button class="btn outline" style="text-align:left; padding:9px 12px;">Other</button>
+                </div>
+                <span class="label" style="margin-top:10px;">Add detail (optional)</span>
+                <textarea class="input" rows="2" style="font-family:inherit; resize:none;" placeholder="Tell us what happened…"></textarea>
+                <button class="btn" style="margin-top:12px; background:var(--danger-text); color:white;">Submit report</button>
+                <p class="small-note" style="text-align:center; margin-top:8px;">Reviewed by trust &amp; safety. Sender is throttled if confirmed.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">I7 · Report dialog</div>
+        <div class="annot">Quote-back included per <code>§20</code> — receiver doesn't have to re-read the message.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION J ============ -->
+  <section class="section" id="j">
+    <div class="section-head">
+      <h2>J · System map <span class="ref">§ all</span></h2>
+      <p>One-page architecture of the user journey across mobile and the public web.</p>
+    </div>
+
+    <div class="arch-map">
+      <div class="inner">
+        <h2 style="color:white; font-size:22px;">User journey · core surfaces and side flows</h2>
+        <p style="color:var(--gold-light); font-size:13px; margin-top:6px;">Solid: mobile-only · Outline: web-also · Yellow: side flow</p>
+
+        <div class="arch-grid">
+          <div class="arch-node web">Landing<span class="sub">web only</span></div>
+          <div class="arch-flow">→</div>
+          <div class="arch-node">Auth<span class="sub">mobile + web entry</span></div>
+          <div class="arch-flow">→</div>
+          <div class="arch-node">Onboarding<span class="sub">5 steps</span></div>
+        </div>
+        <div class="arch-flow">↓</div>
+        <div class="arch-grid">
+          <div class="arch-node core">Daily matches<span class="sub">home</span></div>
+          <div class="arch-flow">→</div>
+          <div class="arch-node">Profile detail<span class="sub">logged-in</span></div>
+          <div class="arch-flow">→</div>
+          <div class="arch-node core">Send intro<span class="sub">80–400 char gate</span></div>
+        </div>
+        <div class="arch-flow">↓</div>
+        <div class="arch-grid">
+          <div class="arch-node">Inbox<span class="sub">sent · received</span></div>
+          <div class="arch-flow">→</div>
+          <div class="arch-node core">Chat<span class="sub">DM + voice + meeting</span></div>
+          <div class="arch-flow">→</div>
+          <div class="arch-node">Schedule<span class="sub">.ics handoff</span></div>
+        </div>
+        <div class="arch-flow">↓</div>
+        <div class="arch-grid">
+          <div class="arch-node">Post-meeting prompt<span class="sub">"did it happen?"</span></div>
+          <div class="arch-flow">→</div>
+          <div class="arch-node">Review<span class="sub">useful / not / no-show</span></div>
+          <div class="arch-flow">→</div>
+          <div class="arch-node">Aggregate signal<span class="sub">→ ranking + T&amp;S</span></div>
+        </div>
+
+        <h3 style="color:white; font-size:18px; margin-top:30px;">Side flows</h3>
+        <div class="arch-grid" style="grid-template-columns:repeat(4,1fr);">
+          <div class="arch-node side">Settings<span class="sub">privacy · notifs</span></div>
+          <div class="arch-node side">Verification<span class="sub">per Role</span></div>
+          <div class="arch-node side">Reports<span class="sub">→ T&amp;S queue</span></div>
+          <div class="arch-node web">Public profile<span class="sub">/u/&lt;handle&gt;</span></div>
+        </div>
+
+        <div class="arch-legend">
+          <span><span class="sw" style="background:rgba(255,193,7,0.2); border:1px solid var(--gold);"></span>Core loop (mobile)</span>
+          <span><span class="sw" style="background:rgba(147,197,253,0.2); border:1px solid #93c5fd;"></span>Web-also</span>
+          <span><span class="sw" style="background:rgba(251,191,36,0.1); border:1px solid #fbbf24;"></span>Side flow</span>
+        </div>
+
+        <div class="annotation-callout" style="background:rgba(255,255,255,0.06); color:var(--gold-light); border:1px solid var(--gold); margin-top:24px;">
+          <div class="key" style="color:var(--gold);">Key invariants:</div>
+          • Every intro request gates on a moderation pass before delivery.<br/>
+          • Daily matches refresh at user-local 04:00; eligibility uses the 6-week activity filter.<br/>
+          • LLM unavailability degrades to heuristics-only ranker + plain-form onboarding — never blocks the user.<br/>
+          • Public profile pages reveal a strict subset; verified badges hidden, verified-Investor pages default OFF.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<footer>
+  <p><span class="b">B</span>VisionRY Connect — Design comp · 2026-04-28</p>
+  <p style="margin-top:6px;">Reflecting v2 of the requirements spec. For the source spec see <code>docs/superpowers/specs/2026-04-28-bvisionry-connect-design.md</code>.</p>
+</footer>
+
+<script>
+  // Sticky TOC active-section highlighting
+  (function() {
+    var sections = document.querySelectorAll('section.section');
+    var links = document.querySelectorAll('#toc a');
+    function onScroll() {
+      var y = window.scrollY + 80;
+      var current = null;
+      sections.forEach(function(s) { if (s.offsetTop <= y) current = s.id; });
+      links.forEach(function(a) {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+      });
+    }
+    document.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
+
+</body>
+</html>

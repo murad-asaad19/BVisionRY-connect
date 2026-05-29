@@ -9,10 +9,7 @@
     "supabase": "supabase",
     "supabase:lint": "supabase db lint",
     "supabase:test": "supabase test db",
-    "functions:test": "deno test --allow-net --allow-env --allow-read supabase/functions/",
-    "mobile:lint": "pnpm --filter mobile run lint",
-    "mobile:typecheck": "pnpm --filter mobile run typecheck",
-    "mobile:test": "pnpm --filter mobile run test"
+    "functions:test": "deno test --allow-net --allow-env --allow-read supabase/functions/"
   },
   "devDependencies": {
     "supabase": "^2.98.2"

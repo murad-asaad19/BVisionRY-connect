@@ -1,2 +1,4 @@
-packages:
-  - 'mobile'
+# The React Native experiment (mobile/) was removed. No pnpm workspace packages
+# remain — the Flutter app lives in mobile_flutter/ (Dart, not pnpm) and the
+# Supabase tooling uses the root package.json directly.
+packages: []
