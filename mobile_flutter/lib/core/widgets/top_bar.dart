@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../i18n/i18n.dart';
 import '../routing/routes.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_typography.dart';
 import 'app_icon_button.dart';
 
@@ -75,6 +76,7 @@ class TopBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: c.white,
         border: Border(bottom: BorderSide(color: c.border)),
+        boxShadow: Theme.of(context).extension<AppShadows>()!.topBar,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,

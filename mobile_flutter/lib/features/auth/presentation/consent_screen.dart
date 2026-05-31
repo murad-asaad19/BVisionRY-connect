@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/error_map.dart';
 import '../../../core/i18n/i18n.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
 import '../providers/auth_service_provider.dart';
@@ -105,6 +107,8 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   @override
   Widget build(BuildContext context) {
     final AppSpacing spacing = Theme.of(context).extension<AppSpacing>()!;
+    final AppColors colors = Theme.of(context).extension<AppColors>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     return AuthShell(
       tagline: context.t('auth.consent.tagline'),
       child: Column(
@@ -158,11 +162,18 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
             loading: _busy,
           ),
           SizedBox(height: spacing.gutter),
-          AppButton(
-            key: const Key('consent-sign-out'),
-            label: context.t('settings.signOut'),
-            variant: AppButtonVariant.outline,
-            onPressed: _busy ? null : _signOut,
+          Center(
+            child: TextButton(
+              key: const Key('consent-sign-out'),
+              onPressed: _busy ? null : _signOut,
+              child: Text(
+                context.t('settings.signOut'),
+                style: typo.bodySm.copyWith(
+                  color: colors.muted,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ),
         ],
       ),

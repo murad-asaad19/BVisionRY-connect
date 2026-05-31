@@ -8,6 +8,7 @@ import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_row.dart';
 import '../../../core/widgets/top_bar.dart';
 
@@ -51,36 +52,43 @@ class HelpScreen extends StatelessWidget {
         child: TopBar(title: context.t('settings.help'), back: true),
       ),
       body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 12),
         children: <Widget>[
-          SettingsRow(
-            key: const Key('help.email'),
-            icon: LucideIcons.mail,
-            label: context.t('settings.contactTitle'),
-            description: context.t('settings.supportEmail'),
-            onTap: () => launchUrl(
-              Uri(
-                scheme: 'mailto',
-                path: context.t('settings.supportEmail'),
+          SettingsGroupEyebrow(label: context.t('settings.groups.support')),
+          SettingsGroupCard(
+            children: <Widget>[
+              SettingsRow(
+                key: const Key('help.email'),
+                icon: LucideIcons.mail,
+                label: context.t('settings.contactTitle'),
+                description: context.t('settings.supportEmail'),
+                onTap: () => launchUrl(
+                  Uri(
+                    scheme: 'mailto',
+                    path: context.t('settings.supportEmail'),
+                  ),
+                ),
               ),
-            ),
-          ),
-          SettingsRow(
-            key: const Key('help.privacy'),
-            icon: LucideIcons.shield,
-            label: context.t('settings.privacyPolicy'),
-            onTap: () => context.push(Routes.legalPrivacy),
-          ),
-          SettingsRow(
-            key: const Key('help.terms'),
-            icon: LucideIcons.scale,
-            label: context.t('settings.termsOfService'),
-            onTap: () => context.push(Routes.legalTerms),
+              SettingsRow(
+                key: const Key('help.privacy'),
+                icon: LucideIcons.shield,
+                label: context.t('settings.privacyPolicy'),
+                onTap: () => context.push(Routes.legalPrivacy),
+              ),
+              SettingsRow(
+                key: const Key('help.terms'),
+                icon: LucideIcons.scale,
+                label: context.t('settings.termsOfService'),
+                onTap: () => context.push(Routes.legalTerms),
+              ),
+            ],
           ),
           if (packageVersion != null)
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
                 '${context.t('settings.version')} $packageVersion',
+                textAlign: TextAlign.center,
                 style: typo.bodySm.copyWith(color: colors.muted),
               ),
             )
@@ -97,6 +105,7 @@ class HelpScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     '${context.t('settings.version')} ${info.version}+${info.buildNumber}',
+                    textAlign: TextAlign.center,
                     style: typo.bodySm.copyWith(color: colors.muted),
                   ),
                 );

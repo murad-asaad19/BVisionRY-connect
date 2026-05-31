@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_radii.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/widgets.dart';
 import '../data/meetings_service.dart';
@@ -104,13 +103,13 @@ class _MeetingReviewScreenState extends ConsumerState<MeetingReviewScreen> {
                 style: typo.bodyMd.copyWith(color: colors.muted),
               ),
               const SizedBox(height: 30),
-              // "Useful" uses success styling (mockup G3): success-bg fill,
-              // success-text label + 1.5px success-text border. AppButton has
-              // no success variant and lives outside this feature, so this is
-              // a one-off styled button matching AppButton's shape/sizing.
-              _SuccessButton(
+              // "Useful" is the recommended action — rendered with the
+              // success-tinted outline variant (mockup G3) so it reads as a
+              // positive choice without competing with the gold primary.
+              AppButton(
                 key: const Key('review-screen-useful'),
                 label: context.t('meetings.review.useful'),
+                variant: AppButtonVariant.outlineSuccess,
                 onPressed:
                     _busy ? null : () => _submit(MeetingReviewOutcome.useful),
               ),
@@ -138,61 +137,6 @@ class _MeetingReviewScreenState extends ConsumerState<MeetingReviewScreen> {
                 style: typo.bodyXs.copyWith(color: colors.muted, height: 1.5),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Full-width "Useful" button styled with the success palette (mockup G3:
-/// success-bg fill, success-text label, 1.5px success-text border). Mirrors
-/// [AppButton]'s 10-radius shape, min-height, padding, and label sizing so it
-/// sits flush with the outline buttons beneath it.
-class _SuccessButton extends StatelessWidget {
-  const _SuccessButton({super.key, required this.label, this.onPressed});
-
-  final String label;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColors>()!;
-    final radii = Theme.of(context).extension<AppRadii>()!;
-    final typo = Theme.of(context).extension<AppTypography>()!;
-    final disabled = onPressed == null;
-    final bg = disabled ? colors.slate300 : colors.successBg;
-    final fg = disabled ? colors.white : colors.success;
-    return Semantics(
-      button: true,
-      enabled: !disabled,
-      label: label,
-      child: ExcludeSemantics(
-        child: SizedBox(
-          width: double.infinity,
-          child: Material(
-            color: bg,
-            borderRadius: BorderRadius.circular(radii.button),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(radii.button),
-              onTap: onPressed,
-              child: Container(
-                constraints: const BoxConstraints(minHeight: 48),
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(radii.button),
-                  border: Border.all(color: fg, width: 1.5),
-                ),
-                child: Text(
-                  label,
-                  style: typo.displaySm.copyWith(color: fg, fontSize: 13),
-                ),
-              ),
-            ),
           ),
         ),
       ),

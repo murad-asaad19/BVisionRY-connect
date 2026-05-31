@@ -24,6 +24,7 @@ export 'progress_dots.dart';
 export 'query_state.dart';
 export 'section_card.dart';
 export 'segmented_control.dart';
+export 'settings_group.dart';
 export 'settings_row.dart';
 export 'skeleton.dart';
 export 'toast.dart';

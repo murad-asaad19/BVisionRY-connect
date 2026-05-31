@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_spacing.dart';
 
 /// Visual variants for [AppCard].
@@ -37,6 +38,7 @@ class AppCard extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColors>()!;
     final radii = Theme.of(context).extension<AppRadii>()!;
     final spacing = Theme.of(context).extension<AppSpacing>()!;
+    final shadows = Theme.of(context).extension<AppShadows>()!;
 
     final isFeatured = variant == AppCardVariant.featured;
     final borderRadius = BorderRadius.circular(radii.card);
@@ -54,6 +56,7 @@ class AppCard extends StatelessWidget {
         color: isFeatured ? colors.gold : colors.border,
         width: isFeatured ? 1.5 : 1,
       ),
+      boxShadow: isFeatured ? shadows.cardFeatured : shadows.card,
     );
 
     final body = Padding(

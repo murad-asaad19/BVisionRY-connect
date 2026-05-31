@@ -8,6 +8,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/confirm_dialog.dart';
 import '../../../core/widgets/empty_state.dart';
@@ -33,6 +34,7 @@ class MyBookingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(myBookingsProvider);
     final colors = Theme.of(context).extension<AppColors>()!;
+    final typo = Theme.of(context).extension<AppTypography>()!;
     return Scaffold(
       backgroundColor: colors.surface,
       appBar: PreferredSize(
@@ -53,11 +55,32 @@ class MyBookingsScreen extends ConsumerWidget {
               body: context.t('officeHours.bookings.emptyBody'),
             );
           }
-          return ListView.separated(
-            padding: const EdgeInsets.all(12),
-            itemCount: rows.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (_, i) => _Row(booking: rows[i]),
+          // Time is shown in the viewer's local zone — surface it once as a
+          // list header (derived from the first row) so each card no longer
+          // has to repeat the ambiguity-resolving timezone note.
+          final String timezone = rows.first.startsAt.toLocal().timeZoneName;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+                child: Text(
+                  context.t(
+                    'officeHours.bookings.allTimesInTz',
+                    vars: <String, Object>{'timezone': timezone},
+                  ),
+                  style: typo.bodySm.copyWith(color: colors.muted),
+                ),
+              ),
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(12),
+                  itemCount: rows.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (_, i) => _Row(booking: rows[i]),
+                ),
+              ),
+            ],
           );
         },
       ),

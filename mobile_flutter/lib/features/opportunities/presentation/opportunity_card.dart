@@ -118,7 +118,7 @@ class OpportunityCard extends StatelessWidget {
                     (String t) => Pill(
                       label: t,
                       size: PillSize.sm,
-                      variant: PillVariant.muted,
+                      variant: PillVariant.tag,
                     ),
                   )
                   .toList(growable: false),

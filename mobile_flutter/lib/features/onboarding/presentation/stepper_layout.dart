@@ -120,11 +120,16 @@ class StepperLayout extends StatelessWidget {
                       child: Text(context.t('onboarding.skip')),
                     )
                   else if (onSignOut != null)
-                    AppIconButton(
+                    TextButton(
                       key: const ValueKey<String>('stepper-sign-out'),
-                      icon: Icons.logout,
-                      label: context.t('onboarding.exit'),
                       onPressed: onSignOut,
+                      child: Text(
+                        context.t('onboarding.exit'),
+                        style: typo.bodySm.copyWith(
+                          color: colors.muted,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     )
                   else
                     const SizedBox(width: 44),

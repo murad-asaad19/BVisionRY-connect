@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/i18n/i18n.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/pill.dart';
 import '../domain/opportunity_kind.dart';
 
 /// Pill rendering for an [OpportunityKind].
 ///
-/// Each kind carries a fixed [PillVariant] mapping so the feed / detail /
-/// my-opportunities surfaces all match. The label resolves to
-/// `context.t(kind.i18nKey)` so localised strings come from
-/// `opportunities.kind.*` in `en.json` / `es.json`.
+/// Each kind has a UNIQUE, category-stable colour so the eight taxonomy values
+/// are instantly distinguishable across the feed / detail / my-opportunities
+/// surfaces. The palette is a DEDICATED CATEGORICAL set — brand gold/navy plus
+/// violet/rose/teal/indigo accents — kept deliberately separate from the
+/// success/warning/info/danger STATUS palette so a kind chip never reads as a
+/// state (e.g. "Fundraising" is teal, not success-green). Label resolves to
+/// `context.t(kind.i18nKey)` (`opportunities.kind.*`).
 class OpportunityKindPill extends StatelessWidget {
   const OpportunityKindPill({
     super.key,
@@ -22,33 +26,45 @@ class OpportunityKindPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Pill(
-      label: context.t(kind.i18nKey),
-      variant: variantFor(kind),
-      size: size,
-    );
+    final label = context.t(kind.i18nKey);
+    // Four kinds use a dedicated accent hue (violet/rose/teal/indigo) rendered
+    // via Pill's explicit-colour overrides; the rest are brand-native variants.
+    final accent = _accent(context, kind);
+    if (accent != null) {
+      return Pill(
+        label: label,
+        size: size,
+        backgroundColor: accent.$1,
+        foregroundColor: accent.$2,
+      );
+    }
+    return Pill(label: label, variant: variantFor(kind), size: size);
   }
 
-  /// Stable mapping from [OpportunityKind] to [PillVariant]. Exposed as a
-  /// static so tests and adjacent widgets (e.g. card status row) can re-use
-  /// the same palette without duplicating the switch.
-  ///
-  /// Kinds are *taxonomy*, not state — they read as categories, so they only
-  /// use the brand-neutral variants (`solid` / `navy` / `outline` /
-  /// `defaultVariant`). The semantic intents (`danger`/`warning`/`success`/
-  /// `info`) are reserved for actual error/caution/ok states and are
-  /// deliberately NOT used here: a red "seeking advisor" pill reads as an
-  /// error, an orange "fundraising" pill reads as a warning.
+  /// Accent (bg, fg) for the four kinds that carry a dedicated categorical hue
+  /// decoupled from the status palette. Returns null for the brand-native
+  /// kinds (which use [variantFor]).
+  static (Color, Color)? _accent(BuildContext context, OpportunityKind k) {
+    final c = Theme.of(context).extension<AppColors>()!;
+    return switch (k) {
+      OpportunityKind.cofounder => (c.violetBg, c.violet),
+      OpportunityKind.advising => (c.roseBg, c.rose),
+      OpportunityKind.fundraising => (c.tealBg, c.teal),
+      OpportunityKind.seekingAdvisor => (c.indigoBg, c.indigo),
+      _ => null,
+    };
+  }
+
+  /// Brand-native [PillVariant] for the four kinds that don't use an accent
+  /// hue. (The accent kinds render via [_accent] and fall through to a neutral
+  /// default here.) Exposed static so adjacent widgets/tests can reuse it.
   static PillVariant variantFor(OpportunityKind k) {
     return switch (k) {
-      OpportunityKind.hiring => PillVariant.solid,
-      OpportunityKind.seekingRole => PillVariant.outline,
-      OpportunityKind.cofounder => PillVariant.navy,
-      OpportunityKind.collaboration => PillVariant.defaultVariant,
-      OpportunityKind.fundraising => PillVariant.solid,
-      OpportunityKind.investing => PillVariant.navy,
-      OpportunityKind.advising => PillVariant.outline,
-      OpportunityKind.seekingAdvisor => PillVariant.defaultVariant,
+      OpportunityKind.hiring => PillVariant.solid, // gold (flagship)
+      OpportunityKind.collaboration => PillVariant.navy, // navy fill
+      OpportunityKind.investing => PillVariant.outline, // navy outline
+      OpportunityKind.seekingRole => PillVariant.muted, // gold soft
+      _ => PillVariant.muted,
     };
   }
 }

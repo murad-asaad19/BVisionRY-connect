@@ -64,6 +64,7 @@ class WindowListTile extends StatelessWidget {
             key: const ValueKey<String>('window-delete'),
             icon: LucideIcons.trash2,
             label: context.t('officeHours.settings.removeWindow'),
+            variant: AppIconButtonVariant.danger,
             onPressed: onDelete,
           ),
         ],

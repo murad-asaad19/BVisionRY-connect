@@ -100,7 +100,13 @@ class _NotificationMatrixState extends State<NotificationMatrix> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Padding(
+        Container(
+          decoration: BoxDecoration(
+            // Thicker rule under the header to anchor the column labels.
+            border: Border(
+              bottom: BorderSide(color: colors.border, width: 1.5),
+            ),
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Row(
             children: <Widget>[
@@ -121,8 +127,10 @@ class _NotificationMatrixState extends State<NotificationMatrix> {
             ],
           ),
         ),
-        for (final NotificationKind k in NotificationKind.uiMatrixOrder)
+        for (final (int i, NotificationKind k)
+            in NotificationKind.uiMatrixOrder.indexed)
           _MatrixRow(
+            index: i,
             kind: k,
             push: _value(k, NotificationChannel.push),
             email: _value(k, NotificationChannel.email),
@@ -147,6 +155,7 @@ class _NotificationMatrixState extends State<NotificationMatrix> {
 
 class _MatrixRow extends StatelessWidget {
   const _MatrixRow({
+    required this.index,
     required this.kind,
     required this.push,
     required this.email,
@@ -157,6 +166,8 @@ class _MatrixRow extends StatelessWidget {
     required this.onChanged,
   });
 
+  /// Zero-based row index — odd rows get a subtle `surface` zebra fill.
+  final int index;
   final NotificationKind kind;
   final bool push;
   final bool email;
@@ -173,6 +184,9 @@ class _MatrixRow extends StatelessWidget {
     final String kindLabel = context.t(kind.i18nLabelKey);
     return Container(
       decoration: BoxDecoration(
+        // Zebra striping: odd rows pick up the surface tint, even rows stay
+        // transparent so the card's white background shows through.
+        color: index.isOdd ? colors.surface : Colors.transparent,
         border: Border(bottom: BorderSide(color: colors.border)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -261,15 +275,23 @@ class _Cell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppColors colors = Theme.of(context).extension<AppColors>()!;
     final String channelLabel = context.t(channel.i18nLabelKey);
     return Expanded(
       flex: 2,
-      child: Center(
-        child: Semantics(
-          label: '$kindLabel – $channelLabel',
-          child: Switch(
-            value: value,
-            onChanged: pending ? null : onChanged,
+      child: Container(
+        // Vertical column rule on the leading edge so the three channel
+        // columns read as a grid rather than a free-floating switch cluster.
+        decoration: BoxDecoration(
+          border: Border(left: BorderSide(color: colors.border)),
+        ),
+        child: Center(
+          child: Semantics(
+            label: '$kindLabel – $channelLabel',
+            child: Switch(
+              value: value,
+              onChanged: pending ? null : onChanged,
+            ),
           ),
         ),
       ),

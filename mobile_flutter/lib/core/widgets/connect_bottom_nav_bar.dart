@@ -6,6 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../features/settings/presentation/widgets/tab_badge.dart';
 import '../i18n/i18n.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_typography.dart';
 
 /// Bottom navigation bar — 5 destinations. Carries the brand visual treatment
@@ -82,7 +83,13 @@ class ConnectBottomNavBar extends StatelessWidget {
     ];
 
     return Container(
-      color: colors.white,
+      decoration: BoxDecoration(
+        color: colors.white,
+        boxShadow: Theme.of(context).extension<AppShadows>()!.bottomNav,
+        border: Border(
+          top: BorderSide(color: colors.navy.withValues(alpha: 0.06)),
+        ),
+      ),
       padding: EdgeInsets.only(bottom: bottomInset),
       child: SizedBox(
         height: tabBarContentHeight,

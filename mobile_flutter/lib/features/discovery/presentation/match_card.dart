@@ -69,19 +69,27 @@ class _MatchCardState extends ConsumerState<MatchCard> {
         ? null
         : composeSpecificMatchReason(viewer: viewer, match: profile);
     final role = profile.primaryRole;
-    // Featured daily picks carry the match-reason chip (gallery C1 .reason).
-    // Plain browse rows (picks 4–5) drop the reason entirely and instead
-    // surface the activity / badge status pill (gallery C1 lines 1454-1468),
-    // collapsing the slot when neither status applies.
+    // The featured #1 pick carries the gold match-reason chip (gallery C1
+    // .reason). Non-featured browse rows keep their reason too — but as the
+    // muted goldPale chip — whenever a profile-specific reason was derivable,
+    // so a pick never silently loses its "why". When no specific reason is
+    // available they fall back to the activity / badge status pill (gallery
+    // C1 lines 1454-1468), collapsing the slot when neither applies.
     final Widget? reasonSlot = widget.featured
         ? MatchReasonChip(
             reason: reason,
             specificText: specific,
-            featured: widget.featured,
+            featured: true,
           )
-        : (DiscoveryStatusPill.hasStatus(profile)
-            ? DiscoveryStatusPill(profile: profile)
-            : null);
+        : (specific != null
+            ? MatchReasonChip(
+                reason: reason,
+                specificText: specific,
+                featured: false,
+              )
+            : (DiscoveryStatusPill.hasStatus(profile)
+                ? DiscoveryStatusPill(profile: profile)
+                : null));
     final card = UserCard(
       name: profile.name ?? '@${profile.handle}',
       primaryRole:

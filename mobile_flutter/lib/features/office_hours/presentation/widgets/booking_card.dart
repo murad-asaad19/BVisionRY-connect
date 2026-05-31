@@ -59,17 +59,6 @@ class BookingCard extends StatelessWidget {
                       dateLabel,
                       style: typo.bodyMd.copyWith(color: colors.muted),
                     ),
-                    // Time is shown in the viewer's local zone — label it so
-                    // the booking isn't ambiguous across DST / travel.
-                    Text(
-                      context.t(
-                        'officeHours.book.timezoneNote',
-                        vars: <String, Object>{
-                          'timezone': local.timeZoneName,
-                        },
-                      ),
-                      style: typo.bodyXs.copyWith(color: colors.muted),
-                    ),
                   ],
                 ),
               ),
@@ -81,7 +70,7 @@ class BookingCard extends StatelessWidget {
           ],
           Gap(spacing.sm),
           Align(
-            alignment: Alignment.centerLeft,
+            alignment: Alignment.centerRight,
             child: AppButton(
               key: const ValueKey<String>('booking-cancel'),
               variant: AppButtonVariant.outlineDanger,

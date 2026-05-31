@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/i18n/i18n.dart';
 import '../../../../core/routing/routes.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../data/chat_service.dart';
 import '../../domain/conversation_overview.dart';
@@ -23,6 +24,7 @@ class ChatsListBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColors>()!;
     final AsyncValue<List<ConversationOverview>> async =
         ref.watch(conversationOverviewProvider);
     return QueryState<List<ConversationOverview>>(
@@ -53,7 +55,10 @@ class ChatsListBody extends ConsumerWidget {
                 itemCount: rows.length,
                 separatorBuilder: (_, __) => Divider(
                   height: 1,
-                  color: Theme.of(context).dividerColor,
+                  // Indent past the 44px avatar (16 pad + 44 avatar + 12 gap)
+                  // so the rule starts under the name/preview column.
+                  indent: 72,
+                  color: colors.border,
                 ),
                 itemBuilder: (_, int i) => ConversationOverviewTile(
                   overview: rows[i],

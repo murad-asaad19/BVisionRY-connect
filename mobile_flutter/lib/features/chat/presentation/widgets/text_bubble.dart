@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/i18n/i18n.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/message.dart';
 import 'send_status_footer.dart';
@@ -54,6 +55,7 @@ class TextBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
+    final shadows = Theme.of(context).extension<AppShadows>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
     final isMe = variant == BubbleVariant.me;
     final bubble = Align(
@@ -70,14 +72,22 @@ class TextBubble extends StatelessWidget {
               margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
               padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
               decoration: BoxDecoration(
-                color: isMe ? colors.navyFill : colors.white,
+                color: isMe ? null : colors.white,
+                gradient: isMe
+                    ? LinearGradient(
+                        begin: const Alignment(-0.5, -1),
+                        end: const Alignment(0.3, 1),
+                        colors: [colors.navyGradientTop, colors.navyFill],
+                      )
+                    : null,
                 borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(14),
-                  topRight: const Radius.circular(14),
-                  bottomLeft: Radius.circular(isMe ? 14 : 4),
-                  bottomRight: Radius.circular(isMe ? 4 : 14),
+                  topLeft: const Radius.circular(16),
+                  topRight: const Radius.circular(16),
+                  bottomLeft: Radius.circular(isMe ? 16 : 5),
+                  bottomRight: Radius.circular(isMe ? 5 : 16),
                 ),
                 border: isMe ? null : Border.all(color: colors.border),
+                boxShadow: isMe ? shadows.bubbleMe : shadows.bubbleThem,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

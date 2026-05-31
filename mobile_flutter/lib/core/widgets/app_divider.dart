@@ -14,10 +14,16 @@ class AppDivider extends StatelessWidget {
     super.key,
     this.label,
     this.orientation = Axis.horizontal,
+    this.indent = 0,
   });
 
   final String? label;
   final Axis orientation;
+
+  /// Leading inset (logical pixels) for the horizontal no-label line, so a
+  /// divider can start past a leading avatar/icon. Default 0 keeps the line
+  /// edge-to-edge.
+  final double indent;
 
   @override
   Widget build(BuildContext context) {
@@ -63,10 +69,13 @@ class AppDivider extends StatelessWidget {
       );
     }
 
-    return Container(
-      key: const ValueKey('divider-line'),
-      constraints: const BoxConstraints.tightFor(height: 1),
-      color: colors.border,
+    return Padding(
+      padding: EdgeInsetsDirectional.only(start: indent),
+      child: Container(
+        key: const ValueKey('divider-line'),
+        constraints: const BoxConstraints.tightFor(height: 1),
+        color: colors.border,
+      ),
     );
   }
 }

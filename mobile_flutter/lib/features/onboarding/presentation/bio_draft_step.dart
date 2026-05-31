@@ -105,7 +105,6 @@ class _BioDraftStepState extends ConsumerState<BioDraftStep> {
       footer: AppButton(
         key: const ValueKey<String>('bio-looks-good'),
         label: context.t('onboarding.bio.looksGood'),
-        variant: AppButtonVariant.gold,
         onPressed: valid ? save : null,
       ),
       child: Column(

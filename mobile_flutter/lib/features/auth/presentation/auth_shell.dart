@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radii.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_spacing.dart';
 
 /// Navy/gold gradient wrapper for every auth screen.
@@ -39,69 +40,103 @@ class AuthShell extends StatelessWidget {
             colors: <Color>[colors.navy, colors.navyLight],
           ),
         ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              spacing.gutter,
-              spacing.section,
-              spacing.gutter,
-              spacing.section,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Text(
-                  'BVisionRY',
-                  style: GoogleFonts.dosis(
-                    fontSize: 32,
-                    height: 36 / 32,
-                    color: colors.white,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Connect',
-                  style: GoogleFonts.dosis(
-                    fontSize: 22,
-                    height: 26 / 22,
-                    color: colors.gold,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                if (tagline != null) ...<Widget>[
-                  const SizedBox(height: 10),
-                  Text(
-                    tagline!,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      height: 20 / 14,
-                      color: colors.white.withValues(alpha: 0.85),
+        child: Stack(
+          children: <Widget>[
+            // Gold radial glows layered over the navy gradient. Kept BELOW
+            // the SafeArea/child so the card + wordmark stay crisp.
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      center: const Alignment(0, -0.9),
+                      radius: 1.1,
+                      colors: <Color>[
+                        colors.gold.withValues(alpha: 0.18),
+                        Colors.transparent,
+                      ],
+                      stops: const <double>[0, 0.55],
                     ),
                   ),
-                ],
-                SizedBox(height: spacing.section),
-                Container(
-                  key: const Key('auth-shell-card'),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: colors.white,
-                    borderRadius: BorderRadius.circular(radii.card),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
-                        blurRadius: 24,
-                        offset: const Offset(0, 8),
+                    gradient: RadialGradient(
+                      center: const Alignment(0.6, 1.0),
+                      radius: 1.0,
+                      colors: <Color>[
+                        colors.gold.withValues(alpha: 0.08),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SafeArea(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  spacing.gutter,
+                  spacing.section,
+                  spacing.gutter,
+                  spacing.section,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Text(
+                      'BVisionRY',
+                      style: GoogleFonts.dosis(
+                        fontSize: 32,
+                        height: 36 / 32,
+                        color: colors.white,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Connect',
+                      style: GoogleFonts.dosis(
+                        fontSize: 22,
+                        height: 26 / 22,
+                        color: colors.gold,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    if (tagline != null) ...<Widget>[
+                      const SizedBox(height: 10),
+                      Text(
+                        tagline!,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          height: 20 / 14,
+                          color: colors.white.withValues(alpha: 0.85),
+                        ),
                       ),
                     ],
-                  ),
-                  padding: EdgeInsets.all(spacing.gutter),
-                  child: child,
+                    SizedBox(height: spacing.section),
+                    Container(
+                      key: const Key('auth-shell-card'),
+                      decoration: BoxDecoration(
+                        color: colors.white,
+                        borderRadius: BorderRadius.circular(radii.card),
+                        boxShadow:
+                            Theme.of(context).extension<AppShadows>()!.authCard,
+                      ),
+                      padding: EdgeInsets.all(spacing.gutter),
+                      child: child,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

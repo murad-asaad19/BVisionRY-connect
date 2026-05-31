@@ -5,10 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/query_state.dart';
+import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_row.dart';
 import '../../../core/widgets/toast.dart';
 import '../../../core/widgets/top_bar.dart';
@@ -71,8 +70,10 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
           return ListView(
             padding: const EdgeInsets.only(top: 8, bottom: 24),
             children: <Widget>[
-              _GroupEyebrow(label: context.t('settings.groups.discovery')),
-              _GroupCard(
+              SettingsGroupEyebrow(
+                label: context.t('settings.groups.discovery'),
+              ),
+              SettingsGroupCard(
                 children: <Widget>[
                   SwitchListTile(
                     key: const Key('privacy.privateMode'),
@@ -102,8 +103,8 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                   title: context.t('settings.publicInvestorPage.title'),
                   body: context.t('settings.publicInvestorPage.comingSoon'),
                 ),
-              _GroupEyebrow(label: context.t('settings.groups.chat')),
-              _GroupCard(
+              SettingsGroupEyebrow(label: context.t('settings.groups.chat')),
+              SettingsGroupCard(
                 children: <Widget>[
                   SwitchListTile(
                     key: const Key('privacy.readReceipts'),
@@ -114,8 +115,8 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                   ),
                 ],
               ),
-              _GroupEyebrow(label: context.t('settings.groups.safety')),
-              _GroupCard(
+              SettingsGroupEyebrow(label: context.t('settings.groups.safety')),
+              SettingsGroupCard(
                 children: <Widget>[
                   SettingsRow(
                     key: const Key('privacy.row.blockedUsers'),
@@ -196,56 +197,5 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
             );
       }
     }
-  }
-}
-
-/// Uppercase eyebrow above a group of rows. Matches the gallery's `.gh`:
-/// 11px navy uppercase, letter-spacing 0.5, 16px horizontal padding.
-class _GroupEyebrow extends StatelessWidget {
-  const _GroupEyebrow({required this.label});
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final AppColors colors = Theme.of(context).extension<AppColors>()!;
-    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Text(
-        label.toUpperCase(),
-        style: typo.displayXs.copyWith(
-          color: colors.navy,
-          fontSize: 11,
-          letterSpacing: 0.5,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
-/// Rounded white card that wraps a group of rows. 10px radius mirrors the
-/// gallery's per-group container (`background:white; border-radius:10px;`).
-class _GroupCard extends StatelessWidget {
-  const _GroupCard({required this.children});
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final AppColors colors = Theme.of(context).extension<AppColors>()!;
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: colors.border),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: children,
-      ),
-    );
   }
 }

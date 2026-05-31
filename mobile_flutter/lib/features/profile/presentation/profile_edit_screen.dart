@@ -560,10 +560,10 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
               spacing.gutter,
               spacing.section,
             ),
-            // Field order follows mockup D3 (lines 1679-1700): content-first —
-            // Headline → I am → I'm looking to → Roles → Photo → Handle. The
-            // extra fields Flutter captures (goal type, primary role, name,
-            // city, country) are grouped with their nearest mockup peer.
+            // Field order follows mockup D3 (lines 1679-1700): identity-first —
+            // Name → Handle → Headline → I am → I'm looking to → Roles → Photo.
+            // The extra fields Flutter captures (goal type, primary role, city,
+            // country) are grouped with their nearest mockup peer.
             children: <Widget>[
               if (profile.isGoalStale) ...<Widget>[
                 GoalRefreshCard(
@@ -592,9 +592,47 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 ),
                 Gap(spacing.card),
               ],
-              // 1) Headline — leads the form per the mockup. The label carries
-              //    the live char counter via AppInput's built-in maxLength
-              //    counter (mockup "Headline · 47/80"), capped at 80.
+              // 1) Name — identity leads the form.
+              KeyedSubtree(
+                key: _fieldKeys[_Field.name],
+                child: AppInput(
+                  key: const Key('profileEdit.name'),
+                  label: context.t('profile.fields.name'),
+                  value: _name,
+                  maxLength: NameInput.maxLength,
+                  errorText: _fieldErrors[_Field.name],
+                  onChanged: (String v) => setState(() {
+                    _name = v;
+                    _fieldErrors.remove(_Field.name);
+                  }),
+                ),
+              ),
+              Gap(spacing.card),
+              // 2) Handle + 90-day-then-410 redirect note
+              KeyedSubtree(
+                key: _fieldKeys[_Field.handle],
+                child: AppInput(
+                  key: const Key('profileEdit.handle'),
+                  label: context.t('profile.fields.handle'),
+                  value: _handle,
+                  errorText: _fieldErrors[_Field.handle],
+                  onChanged: (String v) => setState(() {
+                    _handle = v;
+                    _fieldErrors.remove(_Field.handle);
+                  }),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: spacing.xs),
+                child: Text(
+                  context.t('profile.handleRedirectNote'),
+                  style: typo.bodyXs.copyWith(color: colors.muted),
+                ),
+              ),
+              Gap(spacing.card),
+              // 3) Headline — the label carries the live char counter via
+              //    AppInput's built-in maxLength counter (mockup
+              //    "Headline · 47/80"), capped at 80.
               KeyedSubtree(
                 key: _fieldKeys[_Field.headline],
                 child: AppInput(
@@ -750,44 +788,6 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                     _photoUrl = null;
                     _photoRemoved = true;
                   }),
-                ),
-              ),
-              Gap(spacing.card),
-              // 6) Name (kept near the identity fields)
-              KeyedSubtree(
-                key: _fieldKeys[_Field.name],
-                child: AppInput(
-                  key: const Key('profileEdit.name'),
-                  label: context.t('profile.fields.name'),
-                  value: _name,
-                  maxLength: NameInput.maxLength,
-                  errorText: _fieldErrors[_Field.name],
-                  onChanged: (String v) => setState(() {
-                    _name = v;
-                    _fieldErrors.remove(_Field.name);
-                  }),
-                ),
-              ),
-              Gap(spacing.card),
-              // 7) Handle + 90-day-then-410 redirect note
-              KeyedSubtree(
-                key: _fieldKeys[_Field.handle],
-                child: AppInput(
-                  key: const Key('profileEdit.handle'),
-                  label: context.t('profile.fields.handle'),
-                  value: _handle,
-                  errorText: _fieldErrors[_Field.handle],
-                  onChanged: (String v) => setState(() {
-                    _handle = v;
-                    _fieldErrors.remove(_Field.handle);
-                  }),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: spacing.xs),
-                child: Text(
-                  context.t('profile.handleRedirectNote'),
-                  style: typo.bodyXs.copyWith(color: colors.muted),
                 ),
               ),
               Gap(spacing.card),

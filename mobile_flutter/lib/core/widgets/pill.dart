@@ -16,6 +16,7 @@ enum PillVariant {
   navy,
   outline,
   muted,
+  tag,
   info,
   success,
   warning,
@@ -38,12 +39,23 @@ class Pill extends StatelessWidget {
     this.variant = PillVariant.defaultVariant,
     this.size = PillSize.sm,
     this.icon,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.borderColor,
   });
 
   final String label;
   final PillVariant variant;
   final PillSize size;
   final IconData? icon;
+
+  /// Optional explicit-color overrides. When [backgroundColor] is non-null
+  /// the resolved [variant] palette is ignored and these colours are used
+  /// instead — lets callers render an arbitrary palette (e.g. the violet
+  /// "advising" kind) without minting a dedicated variant.
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+  final Color? borderColor;
 
   static const _intentMap = <PillVariant, AppIntent>{
     PillVariant.info: AppIntent.info,
@@ -60,9 +72,9 @@ class Pill extends StatelessWidget {
     final typo = Theme.of(context).extension<AppTypography>()!;
 
     final intent = _intentMap[variant];
-    final Color bg;
-    final Color fg;
-    final Color? border;
+    Color bg;
+    Color fg;
+    Color? border;
     if (intent != null) {
       final c = intentColors(context, intent);
       bg = c.bg;
@@ -82,6 +94,10 @@ class Pill extends StatelessWidget {
           bg = palette.white;
           fg = palette.navy;
           border = palette.navy;
+        case PillVariant.tag:
+          bg = palette.slate100;
+          fg = palette.muted;
+          border = null;
         case PillVariant.defaultVariant:
         case PillVariant.info:
         case PillVariant.success:
@@ -92,6 +108,13 @@ class Pill extends StatelessWidget {
           fg = palette.navyDark;
           border = null;
       }
+    }
+
+    // Explicit overrides win over the resolved variant palette.
+    if (backgroundColor != null) {
+      bg = backgroundColor!;
+      fg = foregroundColor ?? fg;
+      border = borderColor;
     }
 
     final padding = size == PillSize.sm
