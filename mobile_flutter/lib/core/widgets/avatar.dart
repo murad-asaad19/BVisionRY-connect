@@ -47,25 +47,54 @@ class _AvatarState extends State<Avatar> {
     final colors = Theme.of(context).extension<AppColors>()!;
     final showImage =
         widget.photoUrl != null && widget.photoUrl!.isNotEmpty && !_failed;
-    // Mockup: large/featured avatars use a 135° gold gradient (navy
-    // initials); small list/chat avatars use a 135° navy gradient (white
-    // initials). Featured adds the double white+gold halo.
+    // Mockup: large/featured avatars use a gold gradient (navy initials);
+    // small list/chat avatars use a navy gradient (white initials); the
+    // `muted` tone uses its own slate gradient. Featured adds the layered
+    // white+gold halo. Every avatar carries a soft drop shadow tinted to
+    // match its disc.
+    final bool isMuted = widget.tone == AvatarTone.muted;
     final bool useGold =
         widget.tone == AvatarTone.featured || widget.size >= 60;
     final Gradient gradient = LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: useGold
-          ? <Color>[colors.goldLight, colors.gold]
-          : <Color>[colors.navyLight, colors.navy],
+      begin: isMuted ? Alignment.topLeft : const Alignment(-0.6, -1),
+      end: isMuted ? Alignment.bottomRight : const Alignment(0.6, 1),
+      colors: isMuted
+          ? const <Color>[
+              Color(0xFFD6DDE6),
+              Color(0xFFAAB4C4),
+              Color(0xFF909CAE),
+            ]
+          : useGold
+              ? <Color>[colors.goldLight, colors.gold, const Color(0xFFF0A800)]
+              : <Color>[const Color(0xFF2A5D96), colors.navy, colors.navyDark],
+      stops: isMuted
+          ? null
+          : useGold
+              ? const <double>[0, 0.6, 1]
+              : const <double>[0, 0.55, 1],
     );
     final Color initialsColor = useGold ? colors.navy : colors.white;
-    final List<BoxShadow>? halo = widget.tone == AvatarTone.featured
+    // Base drop shadow on every avatar — slate-tinted for the muted tone so
+    // it doesn't pick up navy.
+    final List<BoxShadow> baseShadow = <BoxShadow>[
+      BoxShadow(
+        color: (isMuted ? const Color(0xFF909CAE) : colors.navy)
+            .withValues(alpha: 0.18),
+        blurRadius: 6,
+        offset: const Offset(0, 2),
+      ),
+    ];
+    final List<BoxShadow> halo = widget.tone == AvatarTone.featured
         ? <BoxShadow>[
-            BoxShadow(color: colors.gold, spreadRadius: 4),
             BoxShadow(color: colors.white, spreadRadius: 2),
+            BoxShadow(color: colors.goldLight, spreadRadius: 5),
+            BoxShadow(
+              color: colors.gold.withValues(alpha: 0.30),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
           ]
-        : null;
+        : baseShadow;
     final initials = _initials(widget.name);
     final textSize = _textSizeFor(widget.size);
     // Cap the decoded bitmap to the displayed pixel size so list avatars

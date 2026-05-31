@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_typography.dart';
 
@@ -36,6 +37,7 @@ class SectionCard extends StatelessWidget {
         color: c.white,
         borderRadius: BorderRadius.circular(radii.card),
         border: Border.all(color: c.border),
+        boxShadow: Theme.of(context).extension<AppShadows>()!.card,
       ),
       padding: padding ?? EdgeInsets.all(spacing.cardLg),
       child: Column(

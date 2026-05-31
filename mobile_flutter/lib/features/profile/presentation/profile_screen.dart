@@ -476,6 +476,21 @@ class _RoleDetailsCard extends StatelessWidget {
                         ? 'profile.roleDetails.hiringYes'
                         : 'profile.roleDetails.hiringNo',
                   ),
+            // Surface the hiring state as a status pill (green when hiring,
+            // muted otherwise) rather than plain text — the value string is
+            // retained so the empty-collapse filter still works.
+            valueWidget: profile.founderHiring == null
+                ? null
+                : Pill(
+                    label: context.t(
+                      profile.founderHiring!
+                          ? 'profile.roleDetails.hiringYes'
+                          : 'profile.roleDetails.hiringNo',
+                    ),
+                    variant: profile.founderHiring!
+                        ? PillVariant.success
+                        : PillVariant.muted,
+                  ),
           ),
         ];
       case 'investor':
@@ -518,7 +533,11 @@ class _RoleDetailsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             for (final _RoleDetailRow r in visible)
-              _DetailRow(label: r.label, value: r.value!),
+              _DetailRow(
+                label: r.label,
+                value: r.value!,
+                valueWidget: r.valueWidget,
+              ),
           ],
         ),
       ),
@@ -528,15 +547,25 @@ class _RoleDetailsCard extends StatelessWidget {
 
 @immutable
 class _RoleDetailRow {
-  const _RoleDetailRow({required this.label, required this.value});
+  const _RoleDetailRow({
+    required this.label,
+    required this.value,
+    this.valueWidget,
+  });
   final String label;
   final String? value;
+
+  /// Optional rich value renderer (e.g. a [Pill]) used in place of the plain
+  /// text value. Only the founder "Hiring" row sets this; rows without it fall
+  /// back to the [value] string. The row still collapses on a null [value].
+  final Widget? valueWidget;
 }
 
 class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.label, required this.value});
+  const _DetailRow({required this.label, required this.value, this.valueWidget});
   final String label;
   final String value;
+  final Widget? valueWidget;
   @override
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
@@ -554,10 +583,15 @@ class _DetailRow extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Text(
-              value,
-              style: typo.bodyMd.copyWith(color: colors.body),
-            ),
+            child: valueWidget != null
+                ? Align(
+                    alignment: Alignment.centerLeft,
+                    child: valueWidget,
+                  )
+                : Text(
+                    value,
+                    style: typo.bodyMd.copyWith(color: colors.body),
+                  ),
           ),
         ],
       ),

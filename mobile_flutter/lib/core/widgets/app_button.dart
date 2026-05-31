@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
+import '../theme/app_shadows.dart';
 import '../theme/app_typography.dart';
 
 /// Visual variants supported by [AppButton].
@@ -13,6 +14,7 @@ enum AppButtonVariant {
   gold,
   outline,
   outlineDanger,
+  outlineSuccess,
   danger,
   apple,
   disabled,
@@ -53,6 +55,7 @@ class AppButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColors>()!;
     final radii = Theme.of(context).extension<AppRadii>()!;
+    final shadows = Theme.of(context).extension<AppShadows>()!;
     final typo = Theme.of(context).extension<AppTypography>()!;
     // A null onPressed always reads as disabled — matches Flutter idiom
     // (ElevatedButton, etc.) and removes the disabled/onPressed double-set
@@ -73,6 +76,11 @@ class AppButton extends StatelessWidget {
           colors.danger,
           colors.danger,
         ),
+      AppButtonVariant.outlineSuccess => (
+          colors.white,
+          colors.success,
+          colors.success,
+        ),
       AppButtonVariant.danger => (
           colors.dangerBg,
           colors.danger,
@@ -84,6 +92,15 @@ class AppButton extends StatelessWidget {
           colors.white,
           colors.slate300,
         ),
+    };
+
+    // Brand drop shadows only on the filled primary/gold actions. `v` has
+    // already collapsed to `disabled` for disabled/loading states, so those
+    // automatically fall through to no shadow.
+    final List<BoxShadow> shadow = switch (v) {
+      AppButtonVariant.primary => shadows.buttonPrimary,
+      AppButtonVariant.gold => shadows.buttonGold,
+      _ => const <BoxShadow>[],
     };
 
     final padding = size == AppButtonSize.small
@@ -130,6 +147,7 @@ class AppButton extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(radii.button),
             border: Border.all(color: borderColor, width: 1.5),
+            boxShadow: shadow,
           ),
           child: content,
         ),

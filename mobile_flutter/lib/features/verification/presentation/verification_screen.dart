@@ -469,7 +469,7 @@ class _ProofRowState extends ConsumerState<_ProofRow> {
         return AppButton(
           key: Key('$base.request'),
           label: context.t('verification.requestVerification'),
-          variant: AppButtonVariant.gold,
+          variant: AppButtonVariant.outline,
           size: AppButtonSize.small,
           fullWidth: false,
           loading: _submitting,

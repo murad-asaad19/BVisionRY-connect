@@ -131,12 +131,26 @@ class _InviteCodeCard extends StatelessWidget {
           Row(
             children: <Widget>[
               Expanded(
-                child: Text(
-                  code.code,
-                  style: typo.displayMd.copyWith(
-                    color: used ? colors.muted : colors.navy,
-                    letterSpacing: 2,
-                    decoration: used ? TextDecoration.lineThrough : null,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.slate100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: used ? colors.muted : colors.slate300,
+                    ),
+                  ),
+                  child: Text(
+                    code.code,
+                    style: typo.displayMd.copyWith(
+                      color: used ? colors.muted : colors.navy,
+                      letterSpacing: 3,
+                      fontWeight: FontWeight.w700,
+                      decoration: used ? TextDecoration.lineThrough : null,
+                    ),
                   ),
                 ),
               ),

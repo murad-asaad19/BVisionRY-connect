@@ -30,6 +30,15 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.infoBg,
     required this.info,
     required this.infoBorder,
+    required this.violetBg,
+    required this.violet,
+    required this.tealBg,
+    required this.teal,
+    required this.roseBg,
+    required this.rose,
+    required this.indigoBg,
+    required this.indigo,
+    required this.navyGradientTop,
   });
 
   static const AppColors light = AppColors(
@@ -64,6 +73,15 @@ class AppColors extends ThemeExtension<AppColors> {
     infoBg: Color(0xFFDBEAFE),
     info: Color(0xFF1D4ED8),
     infoBorder: Color(0xFF93C5FD),
+    violetBg: Color(0xFFEDE9FE),
+    violet: Color(0xFF6D28D9),
+    tealBg: Color(0xFFCCFBF1),
+    teal: Color(0xFF0F766E),
+    roseBg: Color(0xFFFCE7F3),
+    rose: Color(0xFFBE185D),
+    indigoBg: Color(0xFFE0E7FF),
+    indigo: Color(0xFF4338CA),
+    navyGradientTop: Color(0xFF16487F),
   );
 
   /// Dark theme palette. Brand navy is lightened into a readable blue for
@@ -98,6 +116,15 @@ class AppColors extends ThemeExtension<AppColors> {
     infoBg: Color(0xFF152A45),
     info: Color(0xFF93C5FD),
     infoBorder: Color(0xFF1E40AF),
+    violetBg: Color(0xFF2A2342),
+    violet: Color(0xFFC4B5FD),
+    tealBg: Color(0xFF0E2E2A),
+    teal: Color(0xFF5EEAD4),
+    roseBg: Color(0xFF3A1526),
+    rose: Color(0xFFFBCFE8),
+    indigoBg: Color(0xFF1E1B4B),
+    indigo: Color(0xFFA5B4FC),
+    navyGradientTop: Color(0xFF2E6BC0),
   );
 
   final Color navy;
@@ -133,6 +160,19 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color infoBg;
   final Color info;
   final Color infoBorder;
+  final Color violetBg;
+  final Color violet;
+
+  /// Categorical accent pairs (bg/fg) for opportunity-kind taxonomy. Kept
+  /// distinct from the success/warning/info/danger status palette on purpose
+  /// so a kind chip never reads as a state.
+  final Color tealBg;
+  final Color teal;
+  final Color roseBg;
+  final Color rose;
+  final Color indigoBg;
+  final Color indigo;
+  final Color navyGradientTop;
 
   @override
   AppColors copyWith({
@@ -163,6 +203,15 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? infoBg,
     Color? info,
     Color? infoBorder,
+    Color? violetBg,
+    Color? violet,
+    Color? tealBg,
+    Color? teal,
+    Color? roseBg,
+    Color? rose,
+    Color? indigoBg,
+    Color? indigo,
+    Color? navyGradientTop,
   }) {
     return AppColors(
       navy: navy ?? this.navy,
@@ -192,6 +241,15 @@ class AppColors extends ThemeExtension<AppColors> {
       infoBg: infoBg ?? this.infoBg,
       info: info ?? this.info,
       infoBorder: infoBorder ?? this.infoBorder,
+      violetBg: violetBg ?? this.violetBg,
+      violet: violet ?? this.violet,
+      tealBg: tealBg ?? this.tealBg,
+      teal: teal ?? this.teal,
+      roseBg: roseBg ?? this.roseBg,
+      rose: rose ?? this.rose,
+      indigoBg: indigoBg ?? this.indigoBg,
+      indigo: indigo ?? this.indigo,
+      navyGradientTop: navyGradientTop ?? this.navyGradientTop,
     );
   }
 
@@ -226,6 +284,15 @@ class AppColors extends ThemeExtension<AppColors> {
       infoBg: Color.lerp(infoBg, other.infoBg, t)!,
       info: Color.lerp(info, other.info, t)!,
       infoBorder: Color.lerp(infoBorder, other.infoBorder, t)!,
+      violetBg: Color.lerp(violetBg, other.violetBg, t)!,
+      violet: Color.lerp(violet, other.violet, t)!,
+      tealBg: Color.lerp(tealBg, other.tealBg, t)!,
+      teal: Color.lerp(teal, other.teal, t)!,
+      roseBg: Color.lerp(roseBg, other.roseBg, t)!,
+      rose: Color.lerp(rose, other.rose, t)!,
+      indigoBg: Color.lerp(indigoBg, other.indigoBg, t)!,
+      indigo: Color.lerp(indigo, other.indigo, t)!,
+      navyGradientTop: Color.lerp(navyGradientTop, other.navyGradientTop, t)!,
     );
   }
 }

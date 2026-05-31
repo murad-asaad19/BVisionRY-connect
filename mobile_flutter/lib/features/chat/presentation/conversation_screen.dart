@@ -10,9 +10,11 @@ import '../../../core/analytics/analytics_events.dart';
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/haptics.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../auth/providers/session_provider.dart';
+import '../../discovery/domain/role_label.dart';
 import '../../intros/providers/intros_providers.dart';
 import '../../media/data/media_service.dart';
 import '../../meetings/presentation/meeting_card_bubble.dart';
@@ -537,16 +539,33 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                       title: context.t('chat.noMessages'),
                     );
                   }
-                  // Reverse list → the older-history end is the TOP, so an
-                  // extra trailing index renders the pagination spinner above
-                  // the oldest message.
-                  final itemCount = rows.length + (_paginating ? 1 : 0);
+                  // Reverse list → the older-history end is the TOP, so the
+                  // extra trailing indices render above the oldest message:
+                  //   index rows.length      → pagination spinner (while a
+                  //                             fetch is in flight), then
+                  //   the next index up      → the connection-context header,
+                  //                             shown only once all history is
+                  //                             loaded (`!hasMore`) so it marks
+                  //                             the true start of the thread.
+                  final showContextHeader = !_messages.hasMore;
+                  final itemCount = rows.length +
+                      (_paginating ? 1 : 0) +
+                      (showContextHeader ? 1 : 0);
                   return ListView.builder(
                     controller: _scrollController,
                     reverse: true,
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     itemCount: itemCount,
                     itemBuilder: (ctx, i) {
+                      // Highest index = top of the reverse list = thread start.
+                      if (showContextHeader && i == itemCount - 1) {
+                        return _ConnectionContextHeader(
+                          peerName: overview?.peerName ?? peer?.name ?? '',
+                          peerPhotoUrl:
+                              overview?.peerPhotoUrl ?? peer?.photoUrl,
+                          peerRole: peer?.primaryRole,
+                        );
+                      }
                       if (i >= rows.length) {
                         return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 12),
@@ -590,6 +609,64 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Connection-context card pinned to the oldest end (top) of the thread once
+/// all history is loaded — frames the conversation with the peer's identity
+/// and the "connected via intro" provenance so the thread always opens with a
+/// reminder of how the two are connected. No date is shown (the relationship,
+/// not its start, is what matters here).
+class _ConnectionContextHeader extends StatelessWidget {
+  const _ConnectionContextHeader({
+    required this.peerName,
+    this.peerPhotoUrl,
+    this.peerRole,
+  });
+
+  final String peerName;
+  final String? peerPhotoUrl;
+  final String? peerRole;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final typo = Theme.of(context).extension<AppTypography>()!;
+    final hasRole = peerRole != null && peerRole!.isNotEmpty;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Avatar(
+            name: peerName,
+            photoUrl: peerPhotoUrl,
+            size: 56,
+            tone: AvatarTone.featured,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            peerName,
+            textAlign: TextAlign.center,
+            style: typo.displayMd.copyWith(color: colors.navy),
+          ),
+          if (hasRole) ...<Widget>[
+            const SizedBox(height: 2),
+            Text(
+              roleLabel(context, peerRole!),
+              textAlign: TextAlign.center,
+              style: typo.bodySm.copyWith(color: colors.muted),
+            ),
+          ],
+          const SizedBox(height: 10),
+          Pill(
+            label: context.t('chat.connectedViaIntro'),
+            variant: PillVariant.success,
+            icon: Icons.check,
+          ),
+        ],
       ),
     );
   }

@@ -72,17 +72,35 @@ class ConversationOverviewTile extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    _previewFor(context, overview),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: typo.bodyMd.copyWith(
-                      color:
-                          overview.unreadCount > 0 ? colors.body : colors.muted,
-                      fontWeight: overview.unreadCount > 0
-                          ? FontWeight.w600
-                          : FontWeight.w400,
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final bool unread = overview.unreadCount > 0;
+                      final Color previewColor =
+                          unread ? colors.body : colors.muted;
+                      final IconData? glyph =
+                          _previewIcon(overview.lastMessageKind);
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          if (glyph != null) ...[
+                            Icon(glyph, size: 14, color: previewColor),
+                            const SizedBox(width: 5),
+                          ],
+                          Expanded(
+                            child: Text(
+                              _previewFor(context, overview),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: typo.bodyMd.copyWith(
+                                color: previewColor,
+                                fontWeight:
+                                    unread ? FontWeight.w600 : FontWeight.w400,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -131,6 +149,23 @@ class ConversationOverviewTile extends StatelessWidget {
         );
       case MessageKind.meeting:
         return context.t('chat.lastMessage.meeting');
+    }
+  }
+
+  /// Leading glyph for a NON-text preview (image / voice / meeting). Text
+  /// previews carry no glyph (the body speaks for itself), so `null` collapses
+  /// the icon slot in [build].
+  IconData? _previewIcon(MessageKind? kind) {
+    switch (kind) {
+      case MessageKind.image:
+        return LucideIcons.image;
+      case MessageKind.voice:
+        return LucideIcons.mic;
+      case MessageKind.meeting:
+        return LucideIcons.calendar;
+      case MessageKind.text:
+      case null:
+        return null;
     }
   }
 }

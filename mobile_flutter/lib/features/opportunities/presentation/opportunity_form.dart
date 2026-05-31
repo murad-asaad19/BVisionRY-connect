@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/i18n/i18n.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_shadows.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_input.dart';
@@ -241,117 +242,139 @@ class _OpportunityFormState extends State<OpportunityForm> {
   Widget build(BuildContext context) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
     final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+    return Column(
       children: <Widget>[
-        SectionCard(
-          title: context.t('opportunities.composer.stepKind'),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
             children: <Widget>[
-              KindPicker(
-                value: _value.kind,
-                onChanged: (OpportunityKind k) =>
-                    _update(_value.copyWith(kind: k)),
-              ),
-              if (_errorForKind() != null) ...<Widget>[
-                const SizedBox(height: 6),
-                Text(
-                  _errorForKind()!,
-                  style: typo.bodyXs.copyWith(color: colors.danger),
+              SectionCard(
+                title: context.t('opportunities.composer.stepKind'),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    KindPicker(
+                      value: _value.kind,
+                      onChanged: (OpportunityKind k) =>
+                          _update(_value.copyWith(kind: k)),
+                    ),
+                    if (_errorForKind() != null) ...<Widget>[
+                      const SizedBox(height: 6),
+                      Text(
+                        _errorForKind()!,
+                        style: typo.bodyXs.copyWith(color: colors.danger),
+                      ),
+                    ],
+                  ],
                 ),
-              ],
+              ),
+              const SizedBox(height: 12),
+              SectionCard(
+                title: context.t('opportunities.composer.stepContent'),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    AppInput(
+                      label: context.t('opportunities.composer.titleLabel'),
+                      placeholder:
+                          context.t('opportunities.composer.titlePlaceholder'),
+                      value: _value.title,
+                      onChanged: (String v) =>
+                          _update(_value.copyWith(title: v)),
+                      maxLength: 120,
+                      errorText: _errorForTitle(),
+                    ),
+                    const SizedBox(height: 12),
+                    AppInput(
+                      label: context.t('opportunities.composer.bodyLabel'),
+                      placeholder:
+                          context.t('opportunities.composer.bodyPlaceholder'),
+                      value: _value.body,
+                      onChanged: (String v) => _update(_value.copyWith(body: v)),
+                      multiline: true,
+                      minLines: 4,
+                      maxLines: 8,
+                      maxLength: 2000,
+                      errorText: _errorForBody(),
+                    ),
+                    const SizedBox(height: 12),
+                    TagChipInput(
+                      label: context.t('opportunities.composer.tagsLabel'),
+                      placeholder:
+                          context.t('opportunities.composer.tagsPlaceholder'),
+                      value: _value.tags,
+                      onChanged: (TagInput v) =>
+                          _update(_value.copyWith(tags: v)),
+                      errorText: _errorForTags(),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              SectionCard(
+                title: context.t('opportunities.composer.stepMeta'),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    AppInput(
+                      label: context.t('opportunities.composer.cityLabel'),
+                      value: _value.locationCity,
+                      onChanged: (String v) =>
+                          _update(_value.copyWith(locationCity: v)),
+                      maxLength: 64,
+                    ),
+                    const SizedBox(height: 12),
+                    AppInput(
+                      label: context.t('opportunities.composer.countryLabel'),
+                      value: _value.locationCountry,
+                      onChanged: (String v) =>
+                          _update(_value.copyWith(locationCountry: v)),
+                      maxLength: 64,
+                    ),
+                    const SizedBox(height: 12),
+                    SettingsRow(
+                      label: context.t('opportunities.composer.remoteLabel'),
+                      trailing: Switch(
+                        value: _value.remoteOk,
+                        onChanged: (bool v) =>
+                            _update(_value.copyWith(remoteOk: v)),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    SettingsRow(
+                      label: context.t('opportunities.composer.expiresLabel'),
+                      description:
+                          context.t('opportunities.composer.expiresHint'),
+                      onTap: _pickExpiresAt,
+                      trailing: Text(
+                        _formatDate(_value.expiresAt),
+                        style: typo.displaySm.copyWith(color: colors.navy),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
-        SectionCard(
-          title: context.t('opportunities.composer.stepContent'),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              AppInput(
-                label: context.t('opportunities.composer.titleLabel'),
-                placeholder:
-                    context.t('opportunities.composer.titlePlaceholder'),
-                value: _value.title,
-                onChanged: (String v) => _update(_value.copyWith(title: v)),
-                maxLength: 120,
-                errorText: _errorForTitle(),
-              ),
-              const SizedBox(height: 12),
-              AppInput(
-                label: context.t('opportunities.composer.bodyLabel'),
-                placeholder:
-                    context.t('opportunities.composer.bodyPlaceholder'),
-                value: _value.body,
-                onChanged: (String v) => _update(_value.copyWith(body: v)),
-                multiline: true,
-                minLines: 4,
-                maxLines: 8,
-                maxLength: 2000,
-                errorText: _errorForBody(),
-              ),
-              const SizedBox(height: 12),
-              TagChipInput(
-                label: context.t('opportunities.composer.tagsLabel'),
-                placeholder:
-                    context.t('opportunities.composer.tagsPlaceholder'),
-                value: _value.tags,
-                onChanged: (TagInput v) => _update(_value.copyWith(tags: v)),
-                errorText: _errorForTags(),
-              ),
-            ],
+        Container(
+          padding: EdgeInsets.fromLTRB(
+            12,
+            10,
+            12,
+            10 + MediaQuery.of(context).viewPadding.bottom,
           ),
-        ),
-        const SizedBox(height: 12),
-        SectionCard(
-          title: context.t('opportunities.composer.stepMeta'),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              AppInput(
-                label: context.t('opportunities.composer.cityLabel'),
-                value: _value.locationCity,
-                onChanged: (String v) =>
-                    _update(_value.copyWith(locationCity: v)),
-                maxLength: 64,
-              ),
-              const SizedBox(height: 12),
-              AppInput(
-                label: context.t('opportunities.composer.countryLabel'),
-                value: _value.locationCountry,
-                onChanged: (String v) =>
-                    _update(_value.copyWith(locationCountry: v)),
-                maxLength: 64,
-              ),
-              const SizedBox(height: 12),
-              SettingsRow(
-                label: context.t('opportunities.composer.remoteLabel'),
-                trailing: Switch(
-                  value: _value.remoteOk,
-                  onChanged: (bool v) => _update(_value.copyWith(remoteOk: v)),
-                ),
-              ),
-              const SizedBox(height: 6),
-              SettingsRow(
-                label: context.t('opportunities.composer.expiresLabel'),
-                description: context.t('opportunities.composer.expiresHint'),
-                onTap: _pickExpiresAt,
-                trailing: Text(
-                  _formatDate(_value.expiresAt),
-                  style: typo.displaySm.copyWith(color: colors.navy),
-                ),
-              ),
-            ],
+          decoration: BoxDecoration(
+            color: colors.white,
+            border: Border(top: BorderSide(color: colors.border)),
+            boxShadow: Theme.of(context).extension<AppShadows>()!.bottomNav,
           ),
-        ),
-        const SizedBox(height: 20),
-        AppButton(
-          label: widget.submitLabel,
-          variant: AppButtonVariant.gold,
-          loading: widget.submitting,
-          onPressed: _value.isValid ? _handleSubmit : null,
+          child: AppButton(
+            label: widget.submitLabel,
+            variant: AppButtonVariant.gold,
+            loading: widget.submitting,
+            onPressed: _value.isValid ? _handleSubmit : null,
+          ),
         ),
       ],
     );

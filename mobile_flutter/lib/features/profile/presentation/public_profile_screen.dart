@@ -38,6 +38,7 @@ class PublicProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AppColors colors = Theme.of(context).extension<AppColors>()!;
+    final AppTypography typo = Theme.of(context).extension<AppTypography>()!;
     final AsyncValue<PublicProfile?> async =
         ref.watch(publicProfileProvider(handle));
     final bool isAuthed = ref.watch(sessionProvider).valueOrNull != null;
@@ -128,18 +129,13 @@ class PublicProfileScreen extends ConsumerWidget {
                   child: OfficeHoursSectionOnProfile(hostId: profile.id),
                 ),
               const SizedBox(height: 24),
-              // Navy footer block (mockup D1 lines 1660-1662): full-width gold
-              // CTA on a navy padded band. The added cooldown / sign-in states
-              // are kept; only the container chrome matches the mockup now.
+              // Centered primary (navy) CTA — the navy band wrapper was
+              // dropped so the action floats on the light surface. The added
+              // cooldown / sign-in / existing-conversation states are kept.
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Container(
+                child: Center(
                   key: const ValueKey<String>('publicProfile.ctaFooter'),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: colors.navyDark,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
                   // A Consumer scopes the existing-conversation watch to this
                   // CTA (correct ref binding) and lets it take priority over
                   // the cooldown / sign-in branches: if you already chat with
@@ -155,7 +151,8 @@ class PublicProfileScreen extends ConsumerWidget {
                         return AppButton(
                           key: const Key('publicProfile.openChat'),
                           label: context.t('chat.openChat'),
-                          variant: AppButtonVariant.gold,
+                          variant: AppButtonVariant.primary,
+                          fullWidth: false,
                           icon: LucideIcons.messageSquare,
                           onPressed: () {
                             Haptics.light();
@@ -177,8 +174,9 @@ class PublicProfileScreen extends ConsumerWidget {
                                         : null,
                                   )
                                 : context.t('profile.sendIntro'),
-                        // Gold fill on the navy band per the mockup.
-                        variant: AppButtonVariant.gold,
+                        // Primary (navy) fill on the light surface.
+                        variant: AppButtonVariant.primary,
+                        fullWidth: false,
                         disabled: isAuthed && cooldown.active,
                         onPressed: cooldown.active && isAuthed
                             ? null
@@ -212,28 +210,54 @@ class PublicProfileScreen extends ConsumerWidget {
               ),
               // Safety actions — only rendered to authed viewers. Anon
               // visitors don't get a Block CTA because they have no
-              // identity to bind the block to.
+              // identity to bind the block to. Demoted to a compact inline
+              // pairing: the existing [BlockButton] (kept intact so its
+              // confirm/unblock flow is untouched) beside a muted "Report"
+              // text link separated by a '·'.
               if (isAuthed) ...<Widget>[
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: BlockButton(
-                    userId: profile.id,
-                    name: profile.name ?? profile.handle,
-                    handle: profile.handle,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: AppButton(
-                    label: context.t('chat.actions.report'),
-                    variant: AppButtonVariant.outline,
-                    onPressed: () => showReportSheet(
-                      context,
-                      targetType: ReportTargetType.profile,
-                      targetId: profile.id,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      BlockButton(
+                        userId: profile.id,
+                        name: profile.name ?? profile.handle,
+                        handle: profile.handle,
+                        size: AppButtonSize.small,
+                        fullWidth: false,
+                      ),
+                      Text(
+                        ' · ',
+                        style: typo.bodySm.copyWith(
+                          color: colors.muted,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      InkWell(
+                        key: const Key('publicProfile.report'),
+                        onTap: () => showReportSheet(
+                          context,
+                          targetType: ReportTargetType.profile,
+                          targetId: profile.id,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 4,
+                          ),
+                          child: Text(
+                            context.t('chat.actions.report'),
+                            style: typo.bodySm.copyWith(
+                              color: colors.muted,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

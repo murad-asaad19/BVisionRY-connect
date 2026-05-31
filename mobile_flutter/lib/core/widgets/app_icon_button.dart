@@ -11,8 +11,9 @@ enum AppIconButtonSize { sm, md, lg }
 ///
 /// `plain` is transparent (toolbar icons); `subtle` paints a goldPale
 /// circle behind the glyph for emphasis (FAB-style row actions); `navy`
-/// inverts to a filled navy disc with a white icon.
-enum AppIconButtonVariant { plain, subtle, navy }
+/// inverts to a filled navy disc with a white icon; `danger` is a
+/// transparent chip with a danger-tinted glyph (destructive row actions).
+enum AppIconButtonVariant { plain, subtle, navy, danger }
 
 /// Compact icon-only button. Always renders a ≥44dp tap target; the chip
 /// itself can shrink while hitTest area stays accessible.
@@ -68,6 +69,9 @@ class AppIconButton extends StatelessWidget {
       case AppIconButtonVariant.navy:
         bg = colors.navy;
         iconColor = disabled ? colors.muted : colors.white;
+      case AppIconButtonVariant.danger:
+        bg = Colors.transparent;
+        iconColor = disabled ? colors.muted : colors.danger;
     }
 
     final chip = Container(

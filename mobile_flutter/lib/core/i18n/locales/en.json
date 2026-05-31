@@ -255,7 +255,15 @@
     "groups": {
       "discovery": "Discovery",
       "chat": "Chat",
-      "safety": "Safety"
+      "safety": "Safety",
+      "accountSafety": "Account & safety",
+      "yourProfile": "Your profile",
+      "appearance": "Appearance",
+      "account": "Account",
+      "telemetry": "Telemetry",
+      "data": "Data",
+      "appLanguage": "App language",
+      "support": "Support"
     },
     "reportedByYou": {
       "title": "Reported by you",
@@ -326,7 +334,7 @@
       "inferred": "We picked {{label}} based on your description — feel free to change.",
       "inferFailed": "We couldn't infer your goal — please choose one.",
       "welcomeTitle": "Welcome to BVisionRY Connect",
-      "welcomeBody": "Let's set up your profile in four quick steps. Start by telling us what you're looking for — we'll help you sharpen it.",
+      "welcomeBody": "Let's set up your profile in a few quick steps. Start by telling us what you're looking for — we'll help you sharpen it.",
       "continue": "Continue"
     },
     "identity": {
@@ -729,6 +737,7 @@
     "edited": "edited",
     "deletedPlaceholder": "Message deleted",
     "messageDeleted": "Message deleted",
+    "connectedViaIntro": "You connected via intro",
     "muteCta": "Mute",
     "unmuteCta": "Unmute",
     "muted": "Muted",
@@ -954,7 +963,7 @@
   },
   "notFound": {
     "title": "Not found",
-    "body": "Page not found",
+    "body": "That page moved or no longer exists.",
     "goHome": "Go home"
   },
   "profile": {
@@ -1463,7 +1472,8 @@
       "slotsLoading": "Loading slots…",
       "slotsEmptyTitle": "No upcoming slots",
       "slotsEmptyBody": "This host doesn't have any open windows in the next few weeks.",
-      "errorNotBooked": "This booking is no longer active."
+      "errorNotBooked": "This booking is no longer active.",
+      "allTimesInTz": "All times shown in {{timezone}}"
     },
     "badge": {
       "label": "Office hours"

@@ -8,6 +8,7 @@ import '../../../core/routing/routes.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/confirm_dialog.dart';
+import '../../../core/widgets/settings_group.dart';
 import '../../../core/widgets/settings_row.dart';
 import '../../../core/widgets/top_bar.dart';
 import '../../auth/providers/auth_service_provider.dart';
@@ -41,6 +42,7 @@ class SettingsHomeScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 12),
         children: <Widget>[
+          SettingsGroupEyebrow(label: context.t('settings.groups.accountSafety')),
           _GroupedCard(
             children: <Widget>[
               SettingsRow(
@@ -93,6 +95,7 @@ class SettingsHomeScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
+          SettingsGroupEyebrow(label: context.t('settings.groups.yourProfile')),
           _GroupedCard(
             children: <Widget>[
               SettingsRow(
@@ -130,6 +133,7 @@ class SettingsHomeScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
+          SettingsGroupEyebrow(label: context.t('settings.groups.appearance')),
           const AppearanceSection(),
           const SizedBox(height: 24),
           Padding(

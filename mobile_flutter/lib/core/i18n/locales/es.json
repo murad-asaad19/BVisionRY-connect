@@ -255,7 +255,15 @@
     "groups": {
       "discovery": "Descubrimiento",
       "chat": "Chat",
-      "safety": "Seguridad"
+      "safety": "Seguridad",
+      "accountSafety": "Cuenta y seguridad",
+      "yourProfile": "Tu perfil",
+      "appearance": "Apariencia",
+      "account": "Cuenta",
+      "telemetry": "Telemetría",
+      "data": "Datos",
+      "appLanguage": "Idioma de la app",
+      "support": "Soporte"
     },
     "reportedByYou": {
       "title": "Reportado por ti",
@@ -326,7 +334,7 @@
       "inferred": "Elegimos {{label}} según tu descripción — puedes cambiarlo.",
       "inferFailed": "No pudimos inferir tu objetivo — por favor elige uno.",
       "welcomeTitle": "Bienvenido a BVisionRY Connect",
-      "welcomeBody": "Configuremos tu perfil en cuatro pasos rápidos. Empieza contándonos qué buscas; te ayudaremos a afinarlo.",
+      "welcomeBody": "Configuremos tu perfil en unos pocos pasos rápidos. Empieza contándonos qué buscas; te ayudaremos a afinarlo.",
       "continue": "Continuar"
     },
     "identity": {
@@ -729,6 +737,7 @@
     "edited": "editado",
     "deletedPlaceholder": "Mensaje eliminado",
     "messageDeleted": "Mensaje eliminado",
+    "connectedViaIntro": "Te conectaste mediante una presentación",
     "muteCta": "Silenciar",
     "unmuteCta": "Reactivar",
     "muted": "Silenciado",
@@ -954,7 +963,7 @@
   },
   "notFound": {
     "title": "No encontrado",
-    "body": "Página no encontrada",
+    "body": "Esa página se movió o ya no existe.",
     "goHome": "Ir al inicio"
   },
   "profile": {
@@ -1463,7 +1472,8 @@
       "slotsLoading": "Cargando espacios…",
       "slotsEmptyTitle": "Sin espacios disponibles",
       "slotsEmptyBody": "Este anfitrión no tiene huecos libres en las próximas semanas.",
-      "errorNotBooked": "Esta reserva ya no está activa."
+      "errorNotBooked": "Esta reserva ya no está activa.",
+      "allTimesInTz": "Todas las horas en {{timezone}}"
     },
     "badge": {
       "label": "Horario disponible"

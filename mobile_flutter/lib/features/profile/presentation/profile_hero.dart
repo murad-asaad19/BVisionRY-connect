@@ -44,8 +44,8 @@ class ProfileHeroData {
 
 /// Profile hero band — gallery section D1.
 ///
-/// Visual: navy → navyLight linear gradient (top → bottom), gold radial glow
-/// at the top-center, large avatar (76dp), name (display 18px white),
+/// Visual: navyDark → navy → navyLight linear gradient (top → bottom), gold
+/// radial glow at the top-center, large avatar (84dp), name (display 18px white),
 /// headline (12px gold-light), `city · country` meta, then a wrapped row of
 /// role [Pill]s (one solid for the primary role, outlines for the rest).
 class ProfileHero extends StatelessWidget {
@@ -79,25 +79,27 @@ class ProfileHero extends StatelessWidget {
         key: const ValueKey<String>('profile-hero-frame'),
         width: double.infinity,
         decoration: BoxDecoration(
+          // 3-stop vertical band (navyDark → navy → navyLight) for a richer
+          // top-to-bottom fall-off behind the hero content.
           gradient: LinearGradient(
-            // 135deg ≈ topLeft → bottomRight in Flutter terms.
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[colors.navy, colors.navyLight],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: <Color>[colors.navyDark, colors.navy, colors.navyLight],
+            stops: const <double>[0, 0.55, 1],
           ),
         ),
         child: Stack(
           children: <Widget>[
-            // Gold radial glow at top-center, 18% opacity per spec.
+            // Gold radial glow tightened toward the top-center, 30% opacity.
             Positioned.fill(
               child: IgnorePointer(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: RadialGradient(
-                      center: const Alignment(0, -1.2),
-                      radius: 0.9,
+                      center: const Alignment(0, -0.9),
+                      radius: 0.7,
                       colors: <Color>[
-                        colors.gold.withValues(alpha: 0.18),
+                        colors.gold.withValues(alpha: 0.30),
                         Colors.transparent,
                       ],
                     ),
@@ -115,7 +117,7 @@ class ProfileHero extends StatelessWidget {
                   Avatar(
                     name: data.name ?? '',
                     photoUrl: data.photoUrl,
-                    size: 76,
+                    size: 84,
                     // Standalone hero avatar — name it for screen readers since
                     // the adjacent display name is decorative-styled text.
                     semanticLabel: (data.name ?? '').isEmpty ? null : data.name,

@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../core/i18n/i18n.dart';
 import '../../../core/routing/routes.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/widgets.dart';
 import '../../chat/presentation/widgets/chats_list_body.dart';
 import '../domain/intro.dart';
@@ -215,11 +216,14 @@ class _IntroListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColors>()!;
     return ListView.separated(
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: intros.length,
+      // Indent past the 36px intro avatar (16 pad + 36 avatar + 12 gap) so
+      // the rule starts under the name/preview column.
       separatorBuilder: (_, __) =>
-          Divider(height: 1, color: Theme.of(context).dividerColor),
+          Divider(height: 1, indent: 64, color: colors.border),
       itemBuilder: (_, i) {
         return IntroListRow(
           intro: intros[i],
